@@ -3,20 +3,16 @@
 #include <stdlib.h>
 #include <ncurses.h>
 
-static int startx = 0;
-static int starty = 0;
-char *choices[64] = {0};
+static char *choices[64] = {0};
 static int n_choices = 0;
  
 int city_search(FILE *ifp, char *search, char **choices)
 {
-	int c, i = 0;
+	int i = 0;
 	char s[256];
-	int line_num = 0;
 	
 	while (fgets(s, sizeof(s), ifp) != NULL)
 	{
-		++line_num;
 		if (strstr(s,search) != NULL)
 		{
 			int len = strlen(s);
@@ -58,15 +54,20 @@ void print_menu(WINDOW *menu_win, int highlight)
 int main(int argc, char *argv[])
 {
 	FILE *fp;
-	char *prog = argv[0];
-	char *path = "world_cities.csv";
+	const char *prog = argv[0];
+	const char *path = "world_cities.csv";
 	char *search = argv[1];
 	WINDOW *menu_win;
 	int highlight = 1;
 	int choice = 0;
 	int c;
 	
-
+	
+	if (argc > 2)
+	{	
+		fprintf(stderr, "too many arguments\n");
+		exit(-1);
+	}
 	fp = fopen(path, "r");
 	if (fp == NULL)
 	{
@@ -114,7 +115,6 @@ int main(int argc, char *argv[])
 				choice = highlight;
 				break;
 			default:
-				mvprintw(24, 0, "char presses is = %3d hopefully it can be printed as %c", c, c);
 				refresh();
 				break;
 		}
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 		if(choice != 0)
 			break;
 	}
-	mvprintw(23, 0, "your choice: %s\n", choices[choice - 1]);
+	mvprintw(23, 0, "your choice: %s", choices[choice - 1]);
 	clrtoeol();
 	refresh();
 	getch();
