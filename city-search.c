@@ -85,7 +85,7 @@ void print_menu(WINDOW *menu_win, int highlight, Location **choices)
 	wrefresh(menu_win); 
 } 
 
-int main_search(int argc, char *argv)
+void main_search(char *argv)
 {
 	FILE *fp;
 	const char *path = "cities15000.txt";
@@ -100,12 +100,6 @@ int main_search(int argc, char *argv)
 	int c;
 	
 	
-	if (argc != 2)
-	{	
-		fprintf(stderr, "incorrect argument count\n");
-		free(choices);
-		exit(1);
-	}
 	fp = fopen(path, "r");
 	if (fp == NULL)
 	{
@@ -197,6 +191,5 @@ int main_search(int argc, char *argv)
 		}
 	}
 	endwin();
-	exit(0);
 }
 

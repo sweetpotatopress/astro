@@ -8,11 +8,23 @@
 int ya_input(char s[])
 {
 	int i, c;
+	for (i = 0; i < AS_MAXCH; ++i)
+		s[i] = 0;
 	for (i = 0; i < AS_MAXCH && (c = getch()) != '\n'; ++i)
 		s[i] = c;
 	s[i] = '\0';
 	return atoi(s);
 }	
+
+void char_input(char s[])
+{
+	int i, c;
+	for (i = 0; i < AS_MAXCH; ++i)
+		s[i] = 0;
+	for (i = 0; i < AS_MAXCH && (c = getch()) != '\n'; ++i)
+		s[i] = c;
+	s[i] = '\0';
+}
 
 int main()
 {
@@ -28,7 +40,7 @@ int main()
 	char spname[AS_MAXCH];
 	
 	initscr();
-	raw();
+	cbreak();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
 	
 	printw("year?\n");
@@ -37,10 +49,12 @@ int main()
 	imon = ya_input(input_arr);
 	printw("day?\n");
 	iday = ya_input(input_arr);
-	int searching = main_search(2, "Paris");
+	printw("city? (begin search)\n");
+	char_input(input_arr);
+	main_search(input_arr);
 	
 	double jul_day_UT = swe_julday(iyar, imon, iday, dhour, SE_GREG_CAL);
-
+	
 	printw("\njulian day:%lf\n", jul_day_UT);
 	iflag = SEFLG_SWIEPH;
 	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
