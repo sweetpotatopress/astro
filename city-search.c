@@ -105,7 +105,9 @@ void main_search(char *argv)
 	{
 		fprintf(stderr, "can't open %s\n", path);
 		free(choices);
-		exit(1);
+		getch();
+		endwin();
+		goto exit_err;
 	}
 
 	n_choices = city_search(fp, search, choices, max_loc);
@@ -113,15 +115,18 @@ void main_search(char *argv)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
 		free(choices);
-		exit(1);
+		getch();
+		endwin();
+		goto exit_err;
 	}
 	fclose(fp);
 	if (n_choices == 0)
 	{
 		fprintf(stderr, "no search results\n");
 		free(choices);
+		getch();
 		endwin();
-		exit(1);
+		goto exit_err;
 	}
 	
 	if (ferror(stdout)) 
@@ -176,9 +181,10 @@ void main_search(char *argv)
 		if(choice != 0)
 			break;
 	}
-	clrtoeol();
+	
+	exit_err:
+	clear();
 	refresh();
-	getch();
 	for (int i = 0; i < n_choices; ++i)
 	{
 		if (choices[i] != NULL)

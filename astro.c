@@ -40,7 +40,7 @@ int main()
 	char spname[AS_MAXCH];
 	
 	initscr();
-	cbreak();
+	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
 	
 	printw("year?\n");
