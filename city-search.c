@@ -5,13 +5,11 @@
 typedef struct {
 	char *city;
 	char *country;
-	char *timezone;
 	char *latitude;
 	char *longitude;
 } Location;
 
 static int n_choices = 0;
-char *fields[19];
  
 int city_search(FILE *ifp, char *search, Location **choices)
 {
@@ -29,43 +27,65 @@ int city_search(FILE *ifp, char *search, Location **choices)
 		
 		char *token = strtok(copy, "\t");
 		int field_count = 0;
+		char *fields[19] = {0};
 				
 		while (token != NULL && field_count < 19)
 		{
-			fields[field_count++] = token;
+			fields[field_count] = malloc(strlen(token) + 1);
+			strcpy(fields[field_count], token);
+			field_count++;
 			token = strtok(NULL, "\t");
 		}
 		
 		if (field_count > 1 && strstr(fields[1], search) != NULL)
 		{
 			Location *location = malloc(sizeof(Location));
-			location->city = malloc(strlen(fields[1]) + 1);
-			strcpy(location->city, fields[1]);
-			location->latitude = malloc(strlen(fields[6]) + 1);
-			strcpy(location->latitude, fields[6]);
+			location->city = fields[1];
+			location->country = fields[8];
+			location->latitude = fields[4];
+			location->longitude = fields[5];
 			choices[i++] = location;
+		}
+		else
+		{
+			for(int j = 0; j < field_count; j++)
+				free(fields[j]);
 		}
 		free(copy);
 	}
 	return i;
 }
 
+void location_to_string(Location *loc, char *buffer, int buffer_size)
+{
+	snprintf(buffer, buffer_size, "%s\t%s\t%s\t%s",
+		loc->city,
+		loc->country,
+		loc->latitude,
+		loc->longitude);
+}
+
 void print_menu(WINDOW *menu_win, int highlight, Location **choices)
 { 
 	int x, y, i;  
-	x = 2;
-	y = 2;
+	x = y = 2;
+	char buffer[256];
+	
     box(menu_win, 0, 0); 
-    for(i = 0; i < n_choices; ++i)
+    for(i = 0; i < n_choices ; ++i)
     {
+    	location_to_string(choices[i], buffer, sizeof(buffer));
+    	
     	if (highlight == i + 1) 
    		{    
   			wattron(menu_win, A_REVERSE); 
- 			mvwprintw(menu_win, y, x, "%s", choices[i]->city);
+ 			mvwprintw(menu_win, y, x, "%s", buffer);
+			
+			
 			wattroff(menu_win, A_REVERSE);
 		}
 		else 
-			mvwprintw(menu_win, y, x, "%s", choices[i]->city); 
+			mvwprintw(menu_win, y, x, "%s", buffer); 
 		++y; 
 	} 
 	wrefresh(menu_win); 
@@ -156,7 +176,13 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < n_choices; ++i)
 	{
 		if (choices[i] != NULL)
+		{
+			free(choices[i]->city);
+			free(choices[i]->country);
+			free(choices[i]->latitude);
+			free(choices[i]->longitude);
 			free(choices[i]);
+		}
 	}
 	endwin();
 	
