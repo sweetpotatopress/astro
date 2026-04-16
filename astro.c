@@ -2,6 +2,8 @@
 #include <swephexp.h>
 #include <ncurses.h>
 #include <math.h>
+#include "astro.h"
+#include "city-search.c"
 
 int ya_input(char s[])
 {
@@ -35,6 +37,7 @@ int main()
 	imon = ya_input(input_arr);
 	printw("day?\n");
 	iday = ya_input(input_arr);
+	int searching = main_search(2, "Paris");
 	
 	double jul_day_UT = swe_julday(iyar, imon, iday, dhour, SE_GREG_CAL);
 

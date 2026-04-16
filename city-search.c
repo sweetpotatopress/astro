@@ -2,19 +2,12 @@
 #include <stdlib.h>
 #include <ncurses.h>
 
-typedef struct {
-	char *city;
-	char *country;
-	char *latitude;
-	char *longitude;
-} Location;
 
-static int n_choices = 0;
  
-int city_search(FILE *ifp, char *search, Location **choices)
+int city_search(FILE *ifp, char *search, Location **choices, int max_choices)
 {
 	int i = 0;
-	char line[1024];
+	char line[1024] = {0};
 	
 	while (fgets(line, sizeof(line), ifp) != NULL)
 	{
@@ -53,7 +46,10 @@ int city_search(FILE *ifp, char *search, Location **choices)
 		}
 		free(copy);
 	}
-	return i;
+	if (i >= max_choices)
+		return -1;
+	else
+		return i;
 }
 
 void location_to_string(Location *loc, char *buffer, int buffer_size)
@@ -80,8 +76,6 @@ void print_menu(WINDOW *menu_win, int highlight, Location **choices)
    		{    
   			wattron(menu_win, A_REVERSE); 
  			mvwprintw(menu_win, y, x, "%s", buffer);
-			
-			
 			wattroff(menu_win, A_REVERSE);
 		}
 		else 
@@ -91,33 +85,42 @@ void print_menu(WINDOW *menu_win, int highlight, Location **choices)
 	wrefresh(menu_win); 
 } 
 
-int main(int argc, char *argv[])
+int main_search(int argc, char *argv)
 {
 	FILE *fp;
-	const char *prog = argv[0];
 	const char *path = "cities15000.txt";
-	char *search = argv[1];
-	WINDOW *menu_win;
-	int highlight = 1;
+	char *search = argv;
 	int choice = 0;
-	int c;
 	int max_loc = 100;
 	Location **choices = malloc(sizeof(Location *) * max_loc);
+	//ncurses
+	int highlight = 1;
+	WINDOW *menu_win;
+	int startx, starty, width, height;
+	int c;
 	
-	if (argc > 2)
+	
+	if (argc != 2)
 	{	
-		fprintf(stderr, "too many arguments\n");
-		exit(-1);
+		fprintf(stderr, "incorrect argument count\n");
+		free(choices);
+		exit(1);
 	}
 	fp = fopen(path, "r");
 	if (fp == NULL)
 	{
-		fprintf(stderr, "%s: can't open %s\n",
-		prog, path);
+		fprintf(stderr, "can't open %s\n", path);
+		free(choices);
 		exit(1);
 	}
 
-	n_choices = city_search(fp, search, choices);
+	n_choices = city_search(fp, search, choices, max_loc);
+	if (n_choices == -1)
+	{
+		fprintf(stderr, "too many results, be more precise\n");
+		free(choices);
+		exit(1);
+	}
 	fclose(fp);
 	if (n_choices == 0)
 	{
@@ -129,7 +132,9 @@ int main(int argc, char *argv[])
 	
 	if (ferror(stdout)) 
 	{
-		fprintf(stderr, "%s: error writing stdout\n", prog);
+		fprintf(stderr, "error writing stdout\n");
+		free(choices);
+		endwin();
 		exit(2);
 	}
 	
@@ -138,7 +143,14 @@ int main(int argc, char *argv[])
 	noecho();
 	cbreak();
 	
-	menu_win = newwin(0, 0, 0, 0);
+	height = n_choices + 5;
+	width = (n_choices * 2)+ 5;
+	if (width < 50)
+		width = 50;
+	starty = (LINES - height) / 2;
+	startx = (COLS - width) / 2;
+	
+	menu_win = newwin(height, width, starty, startx);
 	keypad(menu_win, TRUE);
 	refresh();
 	print_menu(menu_win, highlight, choices);
@@ -185,7 +197,6 @@ int main(int argc, char *argv[])
 		}
 	}
 	endwin();
-	
 	exit(0);
 }
 
