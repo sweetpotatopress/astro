@@ -75,10 +75,12 @@ void location_to_string(Location *loc, char *buffer, int buffer_size)
 void print_menu(WINDOW *menu_win, int highlight, Location **choices)
 { 
 	int x, y, i;  
-	x = y = 2;
+	int menu = 1;
+	x = y = 3;
 	char buffer[256];
 	
     box(menu_win, 0, 0); 
+    mvwprintw(menu_win, menu, menu, "%s", " city\t\tcountry\tlatitude longitude");
     for(i = 0; i < n_choices ; ++i)
     {
     	location_to_string(choices[i], buffer, sizeof(buffer));
@@ -96,10 +98,10 @@ void print_menu(WINDOW *menu_win, int highlight, Location **choices)
 	wrefresh(menu_win); 
 } 
 
-void main_search(char *argv)
+int main_search(char *argv)
 {
 	FILE *fp;
-	const char *path = "cities15000.txt";
+	const char *path = "cities";
 	char *search = argv;
 	int choice = 0;
 	int max_loc = 100;
@@ -118,23 +120,22 @@ void main_search(char *argv)
 		free(choices);
 		getch();
 		endwin();
-		goto exit_err;
+		exit(1);
 	}
 
 	n_choices = city_search(fp, search, choices, max_loc);
-	if (n_choices == -1)
+	if (n_choices == -1 || n_choices >= 100)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
-		free(choices);
 		getch();
 		endwin();
 		goto exit_err;
 	}
+	
 	fclose(fp);
 	if (n_choices == 0)
 	{
 		fprintf(stderr, "no search results\n");
-		free(choices);
 		getch();
 		endwin();
 		goto exit_err;
@@ -143,9 +144,9 @@ void main_search(char *argv)
 	if (ferror(stdout)) 
 	{
 		fprintf(stderr, "error writing stdout\n");
-		free(choices);
+		getch();
 		endwin();
-		exit(2);
+		goto exit_err;
 	}
 	
 	initscr();
@@ -208,5 +209,6 @@ void main_search(char *argv)
 		}
 	}
 	endwin();
+	return 0;
 }
 

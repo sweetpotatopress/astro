@@ -18,55 +18,43 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "city-search.c"
 
-int ya_input(char s[])
+void ibirth_data()
 {
-	int i, c;
-	for (i = 0; i < AS_MAXCH; ++i)
-		s[i] = 0;
-	for (i = 0; i < AS_MAXCH && (c = getch()) != '\n'; ++i)
-		s[i] = c;
-	s[i] = '\0';
-	return atoi(s);
-}	
-
-void char_input(char s[])
-{
-	int i, c;
-	for (i = 0; i < AS_MAXCH; ++i)
-		s[i] = 0;
-	for (i = 0; i < AS_MAXCH && (c = getch()) != '\n'; ++i)
-		s[i] = c;
-	s[i] = '\0';
+	Bdata *bdata = malloc(sizeof(Bdata) * 4);
+	
+	char buff[256];
+	
+	printw("year?\n");
+	getnstr(buff, 4);
+	bdata->iyar = *buff;
+	printw("month?\n");
+	getnstr(buff, 2);
+	bdata->imon = *buff;
+	printw("day?\n");
+	getnstr(buff, 2);
+	bdata->iday = *buff;
+	printw("city? (begin search)\n");
+	getstr(buff);
+	main_search(buff);
+	free (bdata);
+	clear();
 }
 
 int main()
 {
 	int i, c;
-	char input_arr[AS_MAXCH];
-	int iyar;
-	int imon;
-	int iday;
-	double dhour = 23.122;
 	int iret, iflag, ipl;
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
+	Bdata bdata = {0};
 	
 	initscr();
 	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
+	ibirth_data();
 	
-	printw("year?\n");
-	iyar = ya_input(input_arr);
-	printw("month?\n");
-	imon = ya_input(input_arr);
-	printw("day?\n");
-	iday = ya_input(input_arr);
-	printw("city? (begin search)\n");
-	char_input(input_arr);
-	main_search(input_arr);
-	
-	double jul_day_UT = swe_julday(iyar, imon, iday, dhour, SE_GREG_CAL);
+	double jul_day_UT = swe_julday(bdata.iyar, bdata.imon, bdata.iday, bdata.dhour, SE_GREG_CAL);
 	
 	printw("\njulian day:%lf\n", jul_day_UT);
 	iflag = SEFLG_SWIEPH;
