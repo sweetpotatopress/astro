@@ -18,9 +18,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "city-search.c"
 
-void ibirth_data()
+void chart_data()
 {
-	WINDOW *bdata_win;
+	WINDOW *cdata_win;
 	static int startx, starty, width, height;
 	static int x, y;
 	x = y = 3;
@@ -32,35 +32,35 @@ void ibirth_data()
 	initscr();
 	cbreak();
 	
-	bdata_win = newwin(height, width, starty, startx);
+	cdata_win = newwin(height, width, starty, startx);
 	refresh();
-	box(bdata_win, 0, 0);
-	Bdata *bdata = malloc(sizeof(Bdata) * 4);
+	Cdata *cdata = malloc(sizeof(Cdata) * 4);
 	
 	char buff[256];
 	
-	mvwprintw(bdata_win, y, x, "year?");
-	wgetnstr(bdata_win,buff, 4);
-	bdata->iyar = *buff;
-	wrefresh(bdata_win);
+	mvwprintw(cdata_win, y, x, "year ");
+	wgetnstr(cdata_win,buff, 4);
+	cdata->iyar = *buff;
+	wclear(cdata_win);
 	
-	mvwprintw(bdata_win, y, x, "month");
-	wgetnstr(bdata_win, buff, 2);
-	bdata->imon = *buff;
-	wrefresh(bdata_win);
+	mvwprintw(cdata_win, y, x, "month ");
+	wgetnstr(cdata_win, buff, 2);
+	cdata->imon = *buff;
+	wclear(cdata_win);
 	
-	mvwprintw(bdata_win, y, x, "day");
-	wgetnstr(bdata_win, buff, 2);
-	bdata->iday = *buff;
+	mvwprintw(cdata_win, y, x, "day ");
+	wgetnstr(cdata_win, buff, 2);
+	cdata->iday = *buff;
+	wclear(cdata_win);
 	
-	mvwprintw(bdata_win, y, x, "city");
-	wgetnstr(bdata_win, buff, sizeof(buff) -1);
+	mvwprintw(cdata_win, y, x, "city ");
+	wgetnstr(cdata_win, buff, sizeof(buff) -1);
 	main_search(buff);
 	
-	wrefresh(bdata_win);
+	wrefresh(cdata_win);
+	wclear(cdata_win);
 	endwin();
-	free (bdata);
-	clear();
+	free (cdata);
 }
 
 int main()
@@ -69,14 +69,14 @@ int main()
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
-	Bdata bdata = {0};
+	Cdata cdata = {0};
 	
 	initscr();
 	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
-	ibirth_data();
+	chart_data();
 	
-	double jul_day_UT = swe_julday(bdata.iyar, bdata.imon, bdata.iday, bdata.dhour, SE_GREG_CAL);
+	double jul_day_UT = swe_julday(cdata.iyar, cdata.imon, cdata.iday, cdata.dhour, SE_GREG_CAL);
 	
 	printw("\njulian day:%lf\n", jul_day_UT);
 	iflag = SEFLG_SWIEPH;

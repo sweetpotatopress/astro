@@ -12,6 +12,16 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 #pragma once
 
+//chart data
+typedef struct {
+	int iyar;
+	int imon;
+	int iday;
+	double dhour;
+	double dlon;
+	double dlat;
+} Cdata;
+
 //city-search
 typedef struct {
 	char *city;
@@ -26,15 +36,3 @@ int main_search(char *argv);
 int city_search(FILE *ifp, char *search, Location **choices, int max_choices);
 void location_to_string(Location *loc, char *buffer, int buffer_size);
 void print_menu(WINDOW *menu_win, int highlight, Location **choices);
-
-//birth data
-
-typedef struct {
-	int iyar;
-	int imon;
-	int iday;
-	double dhour;
-	double dlon;
-	double dlat;
-} Bdata;
-
