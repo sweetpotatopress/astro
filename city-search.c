@@ -109,7 +109,7 @@ int main_search(char *argv)
 	//ncurses
 	int highlight = 1;
 	WINDOW *menu_win;
-	int startx, starty, width, height;
+	static int startx, starty, width, height;
 	int c;
 	
 	

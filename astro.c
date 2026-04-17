@@ -20,29 +20,51 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 void ibirth_data()
 {
+	WINDOW *bdata_win;
+	static int startx, starty, width, height;
+	static int x, y;
+	x = y = 3;
+	height = 10;
+	width = 30;
+	starty = (LINES - height) / 2;
+	startx = (COLS - width) / 2;
+	
+	initscr();
+	cbreak();
+	
+	bdata_win = newwin(height, width, starty, startx);
+	refresh();
+	box(bdata_win, 0, 0);
 	Bdata *bdata = malloc(sizeof(Bdata) * 4);
 	
 	char buff[256];
 	
-	printw("year?\n");
-	getnstr(buff, 4);
+	mvwprintw(bdata_win, y, x, "year?");
+	wgetnstr(bdata_win,buff, 4);
 	bdata->iyar = *buff;
-	printw("month?\n");
-	getnstr(buff, 2);
+	wrefresh(bdata_win);
+	
+	mvwprintw(bdata_win, y, x, "month");
+	wgetnstr(bdata_win, buff, 2);
 	bdata->imon = *buff;
-	printw("day?\n");
-	getnstr(buff, 2);
+	wrefresh(bdata_win);
+	
+	mvwprintw(bdata_win, y, x, "day");
+	wgetnstr(bdata_win, buff, 2);
 	bdata->iday = *buff;
-	printw("city? (begin search)\n");
-	getstr(buff);
+	
+	mvwprintw(bdata_win, y, x, "city");
+	wgetnstr(bdata_win, buff, sizeof(buff) -1);
 	main_search(buff);
+	
+	wrefresh(bdata_win);
+	endwin();
 	free (bdata);
 	clear();
 }
 
 int main()
 {
-	int i, c;
 	int iret, iflag, ipl;
 	double xx[6];
 	char serr[AS_MAXCH];
