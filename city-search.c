@@ -14,8 +14,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <string.h>
 #include <stdlib.h>
 #include <ncurses.h>
+#include <menu.h>
  
-int city_search(FILE *ifp, char *search, Location **choices, int max_choices)
+int location_search_parse(FILE *ifp, char *search, Location **choices, int max_choices)
 {
 	int i = 0;
 	char line[1024] = {0};
@@ -63,51 +64,79 @@ int city_search(FILE *ifp, char *search, Location **choices, int max_choices)
 		return i;
 }
 
-
-void print_menu(WINDOW *menu_win, int highlight, Location **choices)
-{ 
-	int x, y, i;  
-	int menu = 1;
-	x = y = 3;
+void print_menu(Location **choices)
+{
+	int c;
+	ITEM **cities;
+	MENU *city_menu;
 	char buffer[256];
+	cities = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
+
+	for (int i = 0; i < n_choices; ++i)
+	{
+		snprintf(buffer, sizeof(buffer), "%-30s %-20s %s %s",
+			choices[i]->city,
+			choices[i]->country,
+			choices[i]->latitude,
+			choices[i]->longitude);
+		
+		char *item_name = malloc(strlen(buffer) + 1);
+		strcpy(item_name, buffer);
+		cities[i] = new_item(item_name, NULL);
+	}
+	cities[n_choices] = NULL;
 	
-    box(menu_win, 0, 0); 
-    mvwprintw(menu_win, menu, menu, "%s", " city\t\tcountry\tlatitude longitude");
-    for(i = 0; i < n_choices ; ++i)
-    {
-    	
-		snprintf(buffer, sizeof(buffer), "%s\t%s\t%s\t%s",
-				choices[i]->city,
-				choices[i]->country,
-				choices[i]->latitude,
-				choices[i]->longitude);
-				
-    	if (highlight == i + 1) 
-   		{    
-  			wattron(menu_win, A_REVERSE); 
- 			mvwprintw(menu_win, y, x, "%s", buffer);
-			wattroff(menu_win, A_REVERSE);
+	city_menu = new_menu((ITEM **)cities);	
+	if (city_menu == NULL) 
+	{
+		mvprintw(LINES - 3, 0, "ERROR: new_menu failed!");
+		refresh();
+		getch();
+		return;
+	}
+	menu_opts_off(city_menu, O_ONEVALUE);
+	set_menu_format(city_menu, LINES - 5, 1);
+	
+	int post_result = post_menu(city_menu);
+	if (post_result != E_OK)
+	{
+		mvprintw(LINES - 3, 0, "ERROR: post_menu failed!, code %d", post_result);
+		refresh();
+		getch();
+		return;
+	}
+	
+	mvprintw(LINES - 2, 0, "hehe");
+	refresh();
+
+	while((c = getch()) != KEY_F(1))
+	{
+		switch(c)
+		{
+			case 'k':
+				menu_driver(city_menu, REQ_DOWN_ITEM);
+				break;
+			case 'j':
+				menu_driver(city_menu, REQ_UP_ITEM);
+				break;
 		}
-		else 
-			mvwprintw(menu_win, y, x, "%s", buffer); 
-		++y; 
-	} 
-	wrefresh(menu_win); 
-} 
+	}
+	
+	unpost_menu(city_menu);
+	for (int i = 0; i < n_choices; ++i)
+		free_item(cities[i]);
+	free_menu(city_menu);
+	free(cities);
+}
+		
 
 int main_search(char *argv)
 {
 	FILE *fp;
 	const char *path = "cities";
 	char *search = argv;
-	int choice = 0;
 	int max_loc = 100;
 	Location **choices = malloc(sizeof(Location *) * max_loc);
-	//ncurses
-	int highlight = 1;
-	WINDOW *menu_win;
-	static int startx, starty, width, height;
-	int c;
 	
 	
 	fp = fopen(path, "r");
@@ -119,8 +148,14 @@ int main_search(char *argv)
 		endwin();
 		exit(1);
 	}
+	
+	initscr();
+	noecho();
+	cbreak();
+	keypad(stdscr, TRUE);
 
-	n_choices = city_search(fp, search, choices, max_loc);
+	n_choices = location_search_parse(fp, search, choices, max_loc);
+	
 	if (n_choices == -1 || n_choices >= 100)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
@@ -146,50 +181,7 @@ int main_search(char *argv)
 		goto exit_err;
 	}
 	
-	initscr();
-	clear();
-	noecho();
-	cbreak();
-	
-	height = n_choices + 5;
-	width = (n_choices * 2)+ 5;
-	if (width < 50)
-		width = 50;
-	starty = (LINES - height) / 2;
-	startx = (COLS - width) / 2;
-	
-	menu_win = newwin(height, width, starty, startx);
-	keypad(menu_win, TRUE);
-	refresh();
-	print_menu(menu_win, highlight, choices);
-	while(1)
-	{
-		c = wgetch(menu_win);
-		switch(c)
-		{
-			case 'k':
-				if(highlight == 1)
-					highlight = n_choices;
-				else
-					--highlight;
-				break;
-			case 'j':
-				if(highlight == n_choices)
-					highlight = 1;
-				else
-					++highlight;
-				break;
-			case '\n':
-				choice = highlight;
-				break;
-			default:
-				refresh();
-				break;
-		}
-		print_menu(menu_win, highlight, choices);
-		if(choice != 0)
-			break;
-	}
+	print_menu(choices);
 	
 	exit_err:
 	clear();
@@ -208,4 +200,3 @@ int main_search(char *argv)
 	endwin();
 	return 0;
 }
-

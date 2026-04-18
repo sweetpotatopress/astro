@@ -23,6 +23,8 @@ typedef struct {
 } Cdata;
 
 //city-search
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+
 typedef struct {
 	char *city;
 	char *country;
@@ -33,5 +35,3 @@ typedef struct {
 int n_choices = 0;
 
 int main_search(char *argv);
-int location_search_parse(FILE *ifp, char *search, Location **choices, int max_choices);
-void print_menu(WINDOW *menu_win, int highlight, Location **choices);
