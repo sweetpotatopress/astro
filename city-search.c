@@ -41,7 +41,7 @@ int city_search(FILE *ifp, char *search, Location **choices, int max_choices)
 			token = strtok(NULL, "\t");
 		}
 		
-		if (field_count > 1 && strstr(fields[1], search) != NULL)
+		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
 		{
 			Location *location = malloc(sizeof(Location));
 			location->city = fields[1];
@@ -63,14 +63,6 @@ int city_search(FILE *ifp, char *search, Location **choices, int max_choices)
 		return i;
 }
 
-void location_to_string(Location *loc, char *buffer, int buffer_size)
-{
-	snprintf(buffer, buffer_size, "%s\t%s\t%s\t%s",
-		loc->city,
-		loc->country,
-		loc->latitude,
-		loc->longitude);
-}
 
 void print_menu(WINDOW *menu_win, int highlight, Location **choices)
 { 
@@ -83,8 +75,13 @@ void print_menu(WINDOW *menu_win, int highlight, Location **choices)
     mvwprintw(menu_win, menu, menu, "%s", " city\t\tcountry\tlatitude longitude");
     for(i = 0; i < n_choices ; ++i)
     {
-    	location_to_string(choices[i], buffer, sizeof(buffer));
     	
+		snprintf(buffer, sizeof(buffer), "%s\t%s\t%s\t%s",
+				choices[i]->city,
+				choices[i]->country,
+				choices[i]->latitude,
+				choices[i]->longitude);
+				
     	if (highlight == i + 1) 
    		{    
   			wattron(menu_win, A_REVERSE); 

@@ -33,6 +33,5 @@ typedef struct {
 int n_choices = 0;
 
 int main_search(char *argv);
-int city_search(FILE *ifp, char *search, Location **choices, int max_choices);
-void location_to_string(Location *loc, char *buffer, int buffer_size);
+int location_search_parse(FILE *ifp, char *search, Location **choices, int max_choices);
 void print_menu(WINDOW *menu_win, int highlight, Location **choices);
