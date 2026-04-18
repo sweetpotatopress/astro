@@ -45,7 +45,8 @@ int location_search_parse(FILE *ifp, char *search, Location **choices, int max_c
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
 		{
 			Location *location = malloc(sizeof(Location));
-			location->city = fields[1];
+			location->city = fields[2];
+			location->state = fields[9];
 			location->country = fields[8];
 			location->latitude = fields[4];
 			location->longitude = fields[5];
@@ -74,49 +75,47 @@ void print_menu(Location **choices)
 
 	for (int i = 0; i < n_choices; ++i)
 	{
-		snprintf(buffer, sizeof(buffer), "%-30s %-20s %s %s",
+		snprintf(buffer, sizeof(buffer), "%-25s %s %-10s %s %s",
 			choices[i]->city,
+			choices[i]->state,
 			choices[i]->country,
 			choices[i]->latitude,
 			choices[i]->longitude);
 		
-		char *item_name = malloc(strlen(buffer) + 1);
-		strcpy(item_name, buffer);
-		cities[i] = new_item(item_name, NULL);
+		char *combined_location = malloc(strlen(buffer) + 1);
+		strcpy(combined_location, buffer);
+		cities[i] = new_item(combined_location, NULL);
 	}
 	cities[n_choices] = NULL;
 	
 	city_menu = new_menu((ITEM **)cities);	
 	if (city_menu == NULL) 
 	{
-		mvprintw(LINES - 3, 0, "ERROR: new_menu failed!");
+		fprintf(stderr, "ERROR: new_menu failed!");
 		refresh();
 		getch();
 		return;
 	}
-	menu_opts_off(city_menu, O_ONEVALUE);
-	set_menu_format(city_menu, LINES - 5, 1);
 	
 	int post_result = post_menu(city_menu);
 	if (post_result != E_OK)
 	{
-		mvprintw(LINES - 3, 0, "ERROR: post_menu failed!, code %d", post_result);
+		fprintf(stderr, "ERROR: post_menu failed!, code %d", post_result);
 		refresh();
 		getch();
 		return;
 	}
 	
-	mvprintw(LINES - 2, 0, "hehe");
 	refresh();
 
 	while((c = getch()) != KEY_F(1))
 	{
 		switch(c)
 		{
-			case 'k':
+			case 'j':
 				menu_driver(city_menu, REQ_DOWN_ITEM);
 				break;
-			case 'j':
+			case 'k':
 				menu_driver(city_menu, REQ_UP_ITEM);
 				break;
 		}

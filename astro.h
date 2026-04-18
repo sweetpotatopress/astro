@@ -27,6 +27,7 @@ typedef struct {
 
 typedef struct {
 	char *city;
+	char *state;
 	char *country;
 	char *latitude;
 	char *longitude;
