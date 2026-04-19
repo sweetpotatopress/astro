@@ -19,31 +19,51 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "city-search.c"
 
+#define CMAX 7
+
 void chart_data()
 {
 
-	FIELD *cdata_field[7];
+	FIELD *cdata_field[CMAX];
 	FORM *cdata_form;
 	int ch;
 	int height, width, starty, startx;
 	
+	const char *c_labels[] = {
+		"city:",
+		"year:",
+		"month:",
+		"day:",
+		"hour:",
+		"lat.",
+		"long.",
+		NULL
+	};
+	
 	initscr();
 	cbreak();
+	noecho();
 	keypad(stdscr, TRUE);
 	
 	height = 10, width = 30;
 	starty = 4;
 	startx = 18;
 	
-	for (int i = 0; i < 7; ++i, starty += 2)
+	for (int i = 0; i < CMAX; ++i)
 	{
 		cdata_field[i] = new_field(1, 10, starty, startx, 0, 0);
-		cdata_field[7] = NULL;
 		set_field_back(cdata_field[i], A_UNDERLINE);
+		starty += 2;
 	}
+	cdata_field[CMAX] = NULL;
 	
 	cdata_form = new_form(cdata_field);
 	post_form(cdata_form);
+	refresh();
+	
+	starty = 4;
+	for (int i = 0; i < CMAX; ++i, starty+= 2)
+		mvprintw(starty, startx - 12, "%s", c_labels[i]);
 	refresh();
 	
 	while((ch = getch()) != KEY_F(1))
@@ -55,24 +75,24 @@ void chart_data()
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
 			case KEY_UP:
-				form_driver(cdata_form, REQ_NEXT_FIELD);
+				form_driver(cdata_form, REQ_PREV_FIELD);
 				form_driver(cdata_form, REQ_END_LINE);
+				break;
+			case KEY_BACKSPACE:
+				form_driver(cdata_form, REQ_DEL_PREV);
+				break;
 			default:
 				form_driver(cdata_form, ch);
 				break;
 		}
+		pos_form_cursor(cdata_form);
+		refresh();
 	}
 	unpost_form(cdata_form);
 	free_form(cdata_form);
 	for (int i = 0; i < 7; ++i)
 		free_field(cdata_field[i]);
-	
-	Cdata *cdata = malloc(sizeof(Cdata) * 4);
-	
-	char buff[256];
-	
 	endwin();
-	free (cdata);
 }
 
 int main()
