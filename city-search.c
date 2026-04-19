@@ -75,7 +75,7 @@ void print_menu(Location **choices)
 
 	for (int i = 0; i < n_choices; ++i)
 	{
-		snprintf(buffer, sizeof(buffer), "%-25s %s %-10s %s %s",
+		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %-10s %s %s",
 			choices[i]->city,
 			choices[i]->state,
 			choices[i]->country,
@@ -92,17 +92,18 @@ void print_menu(Location **choices)
 	if (city_menu == NULL) 
 	{
 		fprintf(stderr, "ERROR: new_menu failed!");
-		refresh();
 		getch();
+		endwin();
 		return;
 	}
+	menu_opts_off(city_menu, O_NONCYCLIC);
 	
 	int post_result = post_menu(city_menu);
 	if (post_result != E_OK)
 	{
 		fprintf(stderr, "ERROR: post_menu failed!, code %d", post_result);
-		refresh();
 		getch();
+		endwin();
 		return;
 	}
 	
@@ -190,6 +191,7 @@ int main_search(char *argv)
 		if (choices[i] != NULL)
 		{
 			free(choices[i]->city);
+			free(choices[i]->state);
 			free(choices[i]->country);
 			free(choices[i]->latitude);
 			free(choices[i]->longitude);

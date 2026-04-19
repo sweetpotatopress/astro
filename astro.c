@@ -15,50 +15,62 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <ncurses.h>
 #include <math.h>
+#include <form.h>
 #include "astro.h"
 #include "city-search.c"
 
 void chart_data()
 {
-	WINDOW *cdata_win;
-	static int startx, starty, width, height;
-	static int x, y;
-	x = y = 3;
-	height = 10;
-	width = 30;
-	starty = (LINES - height) / 2;
-	startx = (COLS - width) / 2;
+
+	FIELD *cdata_field[7];
+	FORM *cdata_form;
+	int ch;
+	int height, width, starty, startx;
 	
 	initscr();
 	cbreak();
+	keypad(stdscr, TRUE);
 	
-	cdata_win = newwin(height, width, starty, startx);
+	height = 10, width = 30;
+	starty = 4;
+	startx = 18;
+	
+	for (int i = 0; i < 7; ++i, starty += 2)
+	{
+		cdata_field[i] = new_field(1, 10, starty, startx, 0, 0);
+		cdata_field[7] = NULL;
+		set_field_back(cdata_field[i], A_UNDERLINE);
+	}
+	
+	cdata_form = new_form(cdata_field);
+	post_form(cdata_form);
 	refresh();
+	
+	while((ch = getch()) != KEY_F(1))
+	{
+		switch(ch)
+		{	
+			case KEY_DOWN:
+				form_driver(cdata_form, REQ_NEXT_FIELD);
+				form_driver(cdata_form, REQ_END_LINE);
+				break;
+			case KEY_UP:
+				form_driver(cdata_form, REQ_NEXT_FIELD);
+				form_driver(cdata_form, REQ_END_LINE);
+			default:
+				form_driver(cdata_form, ch);
+				break;
+		}
+	}
+	unpost_form(cdata_form);
+	free_form(cdata_form);
+	for (int i = 0; i < 7; ++i)
+		free_field(cdata_field[i]);
+	
 	Cdata *cdata = malloc(sizeof(Cdata) * 4);
 	
 	char buff[256];
 	
-	mvwprintw(cdata_win, y, x, "year ");
-	wgetnstr(cdata_win,buff, 4);
-	cdata->iyar = *buff;
-	wclear(cdata_win);
-	
-	mvwprintw(cdata_win, y, x, "month ");
-	wgetnstr(cdata_win, buff, 2);
-	cdata->imon = *buff;
-	wclear(cdata_win);
-	
-	mvwprintw(cdata_win, y, x, "day ");
-	wgetnstr(cdata_win, buff, 2);
-	cdata->iday = *buff;
-	wclear(cdata_win);
-	
-	mvwprintw(cdata_win, y, x, "city ");
-	wgetnstr(cdata_win, buff, sizeof(buff) -1);
-	main_search(buff);
-	
-	wrefresh(cdata_win);
-	wclear(cdata_win);
 	endwin();
 	free (cdata);
 }
