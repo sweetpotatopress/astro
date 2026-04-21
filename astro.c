@@ -21,13 +21,33 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define CMAX 7
 
-void chart_data()
+void f_to_dest(Cdata *cdata, FIELD **cdata_field)
+{
+	for (int i = 1; cdata_field[i] != NULL; i++)
+	{
+		char *buffer = field_buffer(cdata_field[i], 0);
+		
+		switch(i)
+		{
+			case 1:
+				cdata->iyar = atoi(buffer);
+				break;
+			case 2:
+				cdata->imon = atoi(buffer);
+				break;
+			case 3: 
+				cdata->iday = atoi(buffer);
+		}
+	}
+}
+
+void chart_data(Cdata *cdata)
 {
 
 	FIELD *cdata_field[CMAX];
 	FORM *cdata_form;
 	int ch;
-	int height, width, starty, startx;
+	int starty, startx;
 	
 	const char *c_labels[] = {
 		"city:",
@@ -45,7 +65,6 @@ void chart_data()
 	noecho();
 	keypad(stdscr, TRUE);
 	
-	height = 10, width = 30;
 	starty = 4;
 	startx = 18;
 	
@@ -57,6 +76,7 @@ void chart_data()
 	}
 	cdata_field[CMAX] = NULL;
 	
+
 	cdata_form = new_form(cdata_field);
 	post_form(cdata_form);
 	refresh();
@@ -70,7 +90,8 @@ void chart_data()
 	{
 		switch(ch)
 		{	
-			case KEY_DOWN:
+			case KEY_DOWN: case '\n':
+				f_to_dest(cdata, cdata_field);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
@@ -90,8 +111,11 @@ void chart_data()
 	}
 	unpost_form(cdata_form);
 	free_form(cdata_form);
+	printw("%d", cdata->iyar);
 	for (int i = 0; i < 7; ++i)
+	{
 		free_field(cdata_field[i]);
+	}
 	endwin();
 }
 
@@ -101,14 +125,21 @@ int main()
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
-	Cdata cdata = {0};
+	Cdata *cdata = calloc(1, sizeof(Cdata));
+	if (!cdata)
+	{
+		perror("Cdata calloc");
+		exit(EXIT_FAILURE);
+	}
+	
 	
 	initscr();
 	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
-	chart_data();
-	
-	double jul_day_UT = swe_julday(cdata.iyar, cdata.imon, cdata.iday, cdata.dhour, SE_GREG_CAL);
+	chart_data(cdata);
+	refresh();
+	double jul_day_UT = swe_julday(cdata->iyar, cdata->imon,
+	cdata->iday, cdata->dhour, SE_GREG_CAL);
 	
 	printw("\njulian day:%lf\n", jul_day_UT);
 	iflag = SEFLG_SWIEPH;
@@ -119,11 +150,13 @@ int main()
 		printw("\n%s\t", spname);
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n", xx[0], xx[1], xx[2], xx[3]);
+		printw("\n%d", iret);
 	}
 	refresh();
 	getch();
 	endwin();
 	swe_close();
+	free(cdata);
 	return 0;
 }
 
