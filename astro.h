@@ -11,6 +11,7 @@ See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 #pragma once
+#define ERR_EXIT endwin(); swe_close();
 
 //chart data
 typedef struct {
