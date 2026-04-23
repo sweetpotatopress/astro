@@ -173,7 +173,7 @@ int main()
 		ERR_EXIT;
 		exit(EXIT_FAILURE);
 	}
-	P_deg *p_deg = calloc(1, sizeof(P_deg) * 2);
+	P_deg *p_deg = calloc(1, sizeof(P_deg));
 	if (!p_deg)
 	{
 		perror("P_deg calloc");
@@ -194,9 +194,7 @@ int main()
 	getmaxyx(stdscr, maxy, maxx);
 	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
-	double jul_day_UT = swe_julday(cdata->iyar, cdata->imon, 
-	cdata->iday, cdata->dhour, SE_GREG_CAL);
-	
+
 	main = newwin(maxy, maxx, 0, 0);
 	box(main, 0, 0);
 	main_panel = new_panel(main);
@@ -204,7 +202,10 @@ int main()
 	doupdate();
 	getch();
 	
-	ichart_data(cdata);
+	ichart_data(cdata); //this has to go before swe_julday
+	double jul_day_UT = swe_julday(cdata->iyar, cdata->imon, 
+	cdata->iday, cdata->dhour, SE_GREG_CAL);
+	
 	printw("%d, %d, %d, %f, %f, %f", cdata->iyar, cdata->imon, cdata->iday,
 	cdata->dhour, cdata->dlon, cdata->dlat);
 	refresh();
@@ -217,7 +218,7 @@ int main()
 	{
 		swe_get_planet_name(ipl, spname);
 		spname[7] = '\0';
-		//printw("\n%s\t", spname);
+		printw("\n%s\t", spname);
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
 		{
@@ -226,7 +227,7 @@ int main()
 			exit(EXIT_FAILURE);
 		}
 		*p_deg_members[i] = xx[0];
-		//printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n", xx[0], xx[1], xx[2], xx[3]);
+		printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n", xx[0], xx[1], xx[2], xx[3]);
 		
 	}
 	//printw("%f p_deg", p_deg->dsun);
