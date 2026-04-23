@@ -22,6 +22,7 @@ typedef struct {
 	double dlon;
 	double dlat;
 } Cdata;
+
 typedef struct {
 	double dsun;
 	double dmoon;

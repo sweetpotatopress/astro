@@ -148,7 +148,7 @@ void planet_pos(int maxy, int maxx, int radius, char ch, double planet_deg)
 {	
 	int center_x = maxx /2;
 	int center_y = maxy / 2;
-	for ( int angle = 0; angle <360; ++angle)
+	for ( double angle = 0; angle <360; angle += 0.1)
 	{
 		double rad = angle * 3.14159 / 180.0;
 		int x = center_x + (int)(radius * cos(rad));
@@ -160,7 +160,7 @@ void planet_pos(int maxy, int maxx, int radius, char ch, double planet_deg)
 }
 int main()
 {
-	int iret, iflag, ipl;
+	int iret, iflag, ipl, i;
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
@@ -180,10 +180,12 @@ int main()
 		ERR_EXIT;
 		exit(EXIT_FAILURE);
 	}
-	//to fill each member of P_deg with its planets degree
+	//to fill each member of P_deg with its planets degree in later loops
 	double *p_deg_members[] = {&p_deg->dsun, &p_deg->dmoon,
-	&p_deg->dmerc, &p_deg->dven, &p_deg->dmars, &p_deg->djup,
+	&p_deg->dmerc, &p_deg->dven,
+	&p_deg->dmars, &p_deg->djup,
 	&p_deg->dsat};
+	
 	WINDOW *main;
 	PANEL *main_panel;
 	int maxy, maxx;
@@ -192,26 +194,26 @@ int main()
 	getmaxyx(stdscr, maxy, maxx);
 	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
+	double jul_day_UT = swe_julday(cdata->iyar, cdata->imon, 
+	cdata->iday, cdata->dhour, SE_GREG_CAL);
+	
 	main = newwin(maxy, maxx, 0, 0);
 	box(main, 0, 0);
 	main_panel = new_panel(main);
 	update_panels();
 	doupdate();
 	getch();
+	
 	ichart_data(cdata);
 	printw("%d, %d, %d, %f, %f, %f", cdata->iyar, cdata->imon, cdata->iday,
 	cdata->dhour, cdata->dlon, cdata->dlat);
 	refresh();
 	
-	double jul_day_UT = swe_julday(cdata->iyar, cdata->imon,
-	cdata->iday, cdata->dhour, SE_GREG_CAL);
-	
 	draw_circle(maxy, maxx, (maxy / 2) + 5, ACS_BULLET);
 	//printw("\njulian day:%lf\n", jul_day_UT);
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
-	int i = 0;
-	for (ipl = SE_SUN; ipl <= SE_SATURN; ipl++, i++)
+	for (ipl = SE_SUN, i = 0; ipl <= SE_SATURN; ipl++, i++)
 	{
 		swe_get_planet_name(ipl, spname);
 		spname[7] = '\0';
@@ -224,12 +226,13 @@ int main()
 			exit(EXIT_FAILURE);
 		}
 		*p_deg_members[i] = xx[0];
-		printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n", xx[0], xx[1], xx[2], xx[3]);
+		//printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n", xx[0], xx[1], xx[2], xx[3]);
 		
 	}
-	printw("%f p_deg", p_deg->dsun);
-	printw("%f sat", p_deg->dsat);
-	planet_pos(maxy, maxx, (maxy / 2), 'j', p_deg->dsun);
+	//printw("%f p_deg", p_deg->dsun);
+	//printw("%f sat", p_deg->dsat);
+	
+	planet_pos(maxy, maxx, (maxy / 2), 'j', 20.2);
 	
 	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,
 	ihsy, cusps, ascmc);
@@ -244,6 +247,7 @@ int main()
 	//{
 	//	printw("cusp %2d  %10.6lf", i, cusps[i]);
 	//}
+	
 	refresh();
 	getch();
 	endwin();
