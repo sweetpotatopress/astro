@@ -129,13 +129,43 @@ void ichart_data(Cdata *cdata)
 	}
 	endwin();
 }
+void draw_circle(int maxy, int maxx, int radius, char ch)
+{
+	int center_x = maxx /2;
+	int center_y = maxy / 2;
+	
+	for (int angle = 0; angle < 360; angle +=5)
+	{
+		double rad = angle * 3.14159 / 180.0;
+		int x = center_x + (int)(radius * cos(rad));
+		int y = center_y + (int)(radius * sin(rad) * 0.5);
+		
+		mvaddch(y, x, ch);
+	}
+}	
 
+void planet_pos(int maxy, int maxx, int radius, char ch, double planet_deg)
+{	
+	int center_x = maxx /2;
+	int center_y = maxy / 2;
+	for ( int angle = 0; angle <360; ++angle)
+	{
+		double rad = angle * 3.14159 / 180.0;
+		int x = center_x + (int)(radius * cos(rad));
+		int y = center_y + (int)(radius * sin(rad));
+		
+		if (angle == planet_deg)
+			mvaddch(y, x, ch);
+	}
+}
 int main()
 {
 	int iret, iflag, ipl;
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
+	double cusps[13], ascmc[10];
+	int ihsy = 'W';
 	Cdata *cdata = calloc(1, sizeof(Cdata));
 	if (!cdata)
 	{
@@ -143,43 +173,83 @@ int main()
 		ERR_EXIT;
 		exit(EXIT_FAILURE);
 	}
+	P_deg *p_deg = calloc(1, sizeof(P_deg) * 2);
+	if (!p_deg)
+	{
+		perror("P_deg calloc");
+		ERR_EXIT;
+		exit(EXIT_FAILURE);
+	}
+	//to fill each member of P_deg with its planets degree
+	double *p_deg_members[] = {&p_deg->dsun, &p_deg->dmoon,
+	&p_deg->dmerc, &p_deg->dven, &p_deg->dmars, &p_deg->djup,
+	&p_deg->dsat};
 	WINDOW *main;
 	PANEL *main_panel;
 	int maxy, maxx;
-	getmaxyx(stdscr, maxy, maxx);
 	
 	initscr();
+	getmaxyx(stdscr, maxy, maxx);
 	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
-	main = newwin(maxx, maxy, 0, 0);
+	main = newwin(maxy, maxx, 0, 0);
 	box(main, 0, 0);
 	main_panel = new_panel(main);
 	update_panels();
 	doupdate();
 	getch();
 	ichart_data(cdata);
-	printw("%d, %d, %d, %f, %f, %f", cdata->iyar, cdata->imon, cdata->iday, cdata->dhour, cdata->dlon, cdata->dlat);
+	printw("%d, %d, %d, %f, %f, %f", cdata->iyar, cdata->imon, cdata->iday,
+	cdata->dhour, cdata->dlon, cdata->dlat);
 	refresh();
 	
 	double jul_day_UT = swe_julday(cdata->iyar, cdata->imon,
 	cdata->iday, cdata->dhour, SE_GREG_CAL);
 	
-	printw("\njulian day:%lf\n", jul_day_UT);
-	iflag = SEFLG_SWIEPH;
-	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
+	draw_circle(maxy, maxx, (maxy / 2) + 5, ACS_BULLET);
+	//printw("\njulian day:%lf\n", jul_day_UT);
+	
+	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+	int i = 0;
+	for (ipl = SE_SUN; ipl <= SE_SATURN; ipl++, i++)
 	{
 		swe_get_planet_name(ipl, spname);
 		spname[7] = '\0';
-		printw("\n%s\t", spname);
+		//printw("\n%s\t", spname);
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
+		if (iret < 0) 
+		{
+			fprintf(stderr, "%s", serr);
+			ERR_EXIT;
+			exit(EXIT_FAILURE);
+		}
+		*p_deg_members[i] = xx[0];
 		printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n", xx[0], xx[1], xx[2], xx[3]);
+		
 	}
-	printw("\n%d", iret);
+	printw("%f p_deg", p_deg->dsun);
+	printw("%f sat", p_deg->dsat);
+	planet_pos(maxy, maxx, (maxy / 2), 'j', p_deg->dsun);
+	
+	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,
+	ihsy, cusps, ascmc);
+	if (iret < 0)
+	{
+		fprintf(stderr, "%s", serr);
+		ERR_EXIT;
+		exit(EXIT_FAILURE);
+	}
+	//printw("asc %10.6lf", ascmc[0]);
+	//for (int i = 1; i <= 12; i++)
+	//{
+	//	printw("cusp %2d  %10.6lf", i, cusps[i]);
+	//}
 	refresh();
 	getch();
 	endwin();
 	swe_close();
 	free(cdata);
+	free(p_deg);
 	return 0;
 }
 

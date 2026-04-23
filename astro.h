@@ -22,6 +22,15 @@ typedef struct {
 	double dlon;
 	double dlat;
 } Cdata;
+typedef struct {
+	double dsun;
+	double dmoon;
+	double dmerc;
+	double dven;
+	double dmars;
+	double djup;
+	double dsat;
+} P_deg;
 
 //city-search
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
