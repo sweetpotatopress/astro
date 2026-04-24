@@ -15,13 +15,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 //chart data
 typedef struct {
-	int iyar;
-	int imon;
-	int iday;
-	double dhour;
 	double dlon;
 	double dlat;
-} Cdata;
+} Cloc;
 
 typedef struct {
 	double dsun;

@@ -12,6 +12,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <stdio.h>
+#include <time.h>
 #include <swephexp.h>
 #include <ncurses.h>
 #include <math.h>
@@ -22,7 +23,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define CMAX 7
 
-void field_to_member(Cdata *cdata, FORM *cdata_form)
+void field_to_member(struct tm *cdata, Cloc *cloc, FORM *cdata_form)
 {
 	FIELD *current = current_field(cdata_form);
 	char *buffer = field_buffer(current, 0);
@@ -34,27 +35,27 @@ void field_to_member(Cdata *cdata, FORM *cdata_form)
 			printw("%s", buffer);
 			break;
 		case 1:
-			cdata->iyar = atoi(buffer);
+			cdata->tm_year = atoi(buffer);
 			break;
 		case 2:
-			cdata->imon = atoi(buffer);
+			cdata->tm_mon = atoi(buffer);
 			break;
 		case 3: 
-			cdata->iday = atoi(buffer);
+			cdata->tm_mday = atoi(buffer);
 			break;
 		case 4:
-			cdata->dhour = atof(buffer);
+			cdata->tm_hour = atof(buffer);
 			break;
 		case 5:
-			cdata->dlon = atof(buffer);
+			cloc->dlon = atof(buffer);
 			break;
 		case 6:
-			cdata->dlat = atof(buffer);
+			cloc->dlat = atof(buffer);
 			break;
 	}
 }
 
-void ichart_data(Cdata *cdata)
+void ichart_data(struct tm *cdata, Cloc *cloc)
 {
 
 	FIELD *cdata_field[CMAX];
@@ -103,7 +104,7 @@ void ichart_data(Cdata *cdata)
 		{	
 			case KEY_DOWN: case '\n':
 				form_driver(cdata_form, REQ_VALIDATION);
-				field_to_member(cdata, cdata_form);
+				field_to_member(cdata, cloc,  cdata_form);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
@@ -166,10 +167,17 @@ int main()
 	char spname[AS_MAXCH];
 	double cusps[13], ascmc[10];
 	int ihsy = 'W';
-	Cdata *cdata = calloc(1, sizeof(Cdata));
+	struct tm *cdata = calloc(1, sizeof(struct tm));
 	if (!cdata)
 	{
 		perror("Cdata calloc");
+		ERR_EXIT;
+		exit(EXIT_FAILURE);
+	}
+	Cloc *cloc = calloc(1, sizeof(Cloc));
+	if (!cloc)
+	{
+		perror("Cloc calloc");
 		ERR_EXIT;
 		exit(EXIT_FAILURE);
 	}
@@ -181,7 +189,8 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	//to fill each member of P_deg with its planets degree in later loops
-	double *p_deg_members[] = {&p_deg->dsun, &p_deg->dmoon,
+	double *p_deg_members[] = {
+	&p_deg->dsun, &p_deg->dmoon,
 	&p_deg->dmerc, &p_deg->dven,
 	&p_deg->dmars, &p_deg->djup,
 	&p_deg->dsat};
@@ -202,12 +211,13 @@ int main()
 	doupdate();
 	getch();
 	
-	ichart_data(cdata); //this has to go before swe_julday
-	double jul_day_UT = swe_julday(cdata->iyar, cdata->imon, 
-	cdata->iday, cdata->dhour, SE_GREG_CAL);
+	ichart_data(cdata, cloc); //this has to go before swe_julday
+	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
+	cdata->tm_mday, cdata->tm_hour, SE_GREG_CAL);
 	
-	printw("%d, %d, %d, %f, %f, %f", cdata->iyar, cdata->imon, cdata->iday,
-	cdata->dhour, cdata->dlon, cdata->dlat);
+	printw("%d, %d, %d, %d, %f, %f", 
+	cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
+	cdata->tm_hour, cloc->dlon, cloc->dlat);
 	refresh();
 	
 	draw_circle(maxy, maxx, (maxy / 2) + 5, ACS_BULLET);
@@ -235,7 +245,7 @@ int main()
 	
 	planet_pos(maxy, maxx, (maxy / 2), 'j', 20.2);
 	
-	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,
+	iret = swe_houses_ex(jul_day_UT, 0, cloc->dlat, cloc->dlon,
 	ihsy, cusps, ascmc);
 	if (iret < 0)
 	{
@@ -254,6 +264,7 @@ int main()
 	endwin();
 	swe_close();
 	free(cdata);
+	free(cloc);
 	free(p_deg);
 	return 0;
 }
