@@ -21,13 +21,14 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "city-search.c"
 
-#define CMAX 8
+#define CMAX 9
 
 void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 {
 	FIELD *current = current_field(cdata_form);
 	char *buffer = field_buffer(current, 0);
 	int index = field_index(current);
+	const char *tz_name;
 	
 	switch(index)
 	{
@@ -44,18 +45,56 @@ void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 			cdata->tm_mday = atoi(buffer);
 			break;
 		case 4:
-			cdata->tm_hour = atoi(buffer);
+			tz_name = buffer;
+			if (setenv("TZ", tz_name, 1) != 0)
+			{
+				perror("TZ setenv");
+				ERR_EXIT;
+			}
+			tzset();
 			break;
 		case 5:
-			cdata->tm_min = atoi(buffer);
+			cdata->tm_hour = atoi(buffer);
 			break;
 		case 6:
-			loc->dlat = atof(buffer);
+			cdata->tm_min = atoi(buffer);
 			break;
 		case 7:
+			loc->dlat = atof(buffer);
+			break;
+		case 8:
 			loc->dlon = atof(buffer);
 			break;
 	}
+}
+
+void chart_timeset(struct tm *cdata, Location *loc)
+{
+	time_t tret = mktime(cdata);
+	struct tm tmp;
+	localtime_r(&tret, &tmp);
+	cdata->tm_gmtoff = tmp.tm_gmtoff;
+	
+	long utc_sec = cdata->tm_gmtoff;
+	
+	long utc_off = utc_sec / 3600;
+	double min = cdata->tm_min / 60;
+	printw("cmin %f", min);
+	double dhour = (cdata->tm_hour + utc_off) + min;
+	if(dhour > 23.999999)
+	{
+		double offset = dhour - 23.999999;
+		dhour = offset;
+		++cdata->tm_mday;
+	}
+	if(dhour < 0)
+	{
+		double offset = dhour + 23.999999;
+		dhour = offset;
+		--cdata->tm_mday;
+	}
+	
+	loc->dhour = dhour; 
 }
 
 void ichart_data(struct tm *cdata, Location *loc)
@@ -71,6 +110,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 		"year:",
 		"month:",
 		"day:",
+		"timezone:",
 		"hour:",
 		"minute:",
 		"lat.",
@@ -88,7 +128,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	
 	for (int i = 0; i < CMAX; ++i)
 	{
-		cdata_field[i] = new_field(1, 10, starty, startx, 0, 0);
+		cdata_field[i] = new_field(1, 25, starty, startx, 0, 0);
 		set_field_back(cdata_field[i], A_UNDERLINE);
 		starty += 2;
 	}
@@ -213,12 +253,14 @@ int main()
 	getch();
 	
 	ichart_data(cdata, loc); //this has to go before swe_julday
+	chart_timeset(cdata, loc);
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
-	cdata->tm_mday, cdata->tm_hour, SE_GREG_CAL);
-	
-	printw("%d, %d, %d, %d, %d, %f, %f", 
+	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
+
+	printw("%s", cdata->tm_zone);
+	printw("%d, %d, %d, %d, %d, %f, %f, dhour:%f", 
 	cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
-	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat);
+	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
 	refresh();
 	
 	draw_circle(maxy, maxx, (maxy / 2) + 5, ACS_BULLET);
