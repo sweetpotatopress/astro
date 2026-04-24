@@ -21,9 +21,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "city-search.c"
 
-#define CMAX 7
+#define CMAX 8
 
-void field_to_member(struct tm *cdata, Cloc *cloc, FORM *cdata_form)
+void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 {
 	FIELD *current = current_field(cdata_form);
 	char *buffer = field_buffer(current, 0);
@@ -44,18 +44,21 @@ void field_to_member(struct tm *cdata, Cloc *cloc, FORM *cdata_form)
 			cdata->tm_mday = atoi(buffer);
 			break;
 		case 4:
-			cdata->tm_hour = atof(buffer);
+			cdata->tm_hour = atoi(buffer);
 			break;
 		case 5:
-			cloc->dlon = atof(buffer);
+			cdata->tm_min = atoi(buffer);
 			break;
 		case 6:
-			cloc->dlat = atof(buffer);
+			loc->dlat = atof(buffer);
+			break;
+		case 7:
+			loc->dlon = atof(buffer);
 			break;
 	}
 }
 
-void ichart_data(struct tm *cdata, Cloc *cloc)
+void ichart_data(struct tm *cdata, Location *loc)
 {
 
 	FIELD *cdata_field[CMAX];
@@ -69,8 +72,9 @@ void ichart_data(struct tm *cdata, Cloc *cloc)
 		"month:",
 		"day:",
 		"hour:",
-		"long.",
+		"minute:",
 		"lat.",
+		"long.",
 		NULL
 	};
 	
@@ -104,7 +108,7 @@ void ichart_data(struct tm *cdata, Cloc *cloc)
 		{	
 			case KEY_DOWN: case '\n':
 				form_driver(cdata_form, REQ_VALIDATION);
-				field_to_member(cdata, cloc,  cdata_form);
+				field_to_member(cdata, loc,  cdata_form);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
@@ -172,21 +176,18 @@ int main()
 	{
 		perror("Cdata calloc");
 		ERR_EXIT;
-		exit(EXIT_FAILURE);
 	}
-	Cloc *cloc = calloc(1, sizeof(Cloc));
-	if (!cloc)
+	Location *loc = calloc(1, sizeof(Location));
+	if (!loc)
 	{
-		perror("Cloc calloc");
+		perror("main Location calloc");
 		ERR_EXIT;
-		exit(EXIT_FAILURE);
 	}
 	P_deg *p_deg = calloc(1, sizeof(P_deg));
 	if (!p_deg)
 	{
 		perror("P_deg calloc");
 		ERR_EXIT;
-		exit(EXIT_FAILURE);
 	}
 	//to fill each member of P_deg with its planets degree in later loops
 	double *p_deg_members[] = {
@@ -211,13 +212,13 @@ int main()
 	doupdate();
 	getch();
 	
-	ichart_data(cdata, cloc); //this has to go before swe_julday
+	ichart_data(cdata, loc); //this has to go before swe_julday
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, cdata->tm_hour, SE_GREG_CAL);
 	
-	printw("%d, %d, %d, %d, %f, %f", 
+	printw("%d, %d, %d, %d, %d, %f, %f", 
 	cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
-	cdata->tm_hour, cloc->dlon, cloc->dlat);
+	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat);
 	refresh();
 	
 	draw_circle(maxy, maxx, (maxy / 2) + 5, ACS_BULLET);
@@ -245,7 +246,7 @@ int main()
 	
 	planet_pos(maxy, maxx, (maxy / 2), 'j', 20.2);
 	
-	iret = swe_houses_ex(jul_day_UT, 0, cloc->dlat, cloc->dlon,
+	iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
 	ihsy, cusps, ascmc);
 	if (iret < 0)
 	{
@@ -264,7 +265,7 @@ int main()
 	endwin();
 	swe_close();
 	free(cdata);
-	free(cloc);
+	free(loc);
 	free(p_deg);
 	return 0;
 }

@@ -11,13 +11,9 @@ See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 #pragma once
-#define ERR_EXIT endwin(); swe_close();
+#define ERR_EXIT endwin(); swe_close(); exit(EXIT_FAILURE);
 
 //chart data
-typedef struct {
-	double dlon;
-	double dlat;
-} Cloc;
 
 typedef struct {
 	double dsun;
@@ -38,6 +34,9 @@ typedef struct {
 	char *country;
 	char *latitude;
 	char *longitude;
+	double dlat;
+	double dlon;
+	double dhour; //0.0 .. 23.999999;
 } Location;
 
 int n_choices = 0;
