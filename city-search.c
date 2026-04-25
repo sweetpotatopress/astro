@@ -28,6 +28,11 @@ int location_search_parse(FILE *ifp, char *search, Location **choices, int max_c
 			line[len - 1] = '\0';
 		
 		char *copy = malloc(strlen(line) + 1);
+		if (!copy)
+		{
+			perror("copy malloc");
+			ERR_EXIT;
+		}
 		strcpy(copy, line);
 		
 		char *token = strtok(copy, "\t");
@@ -136,7 +141,7 @@ int main_search(char *argv)
 	const char *path = "cities";
 	char *search = argv;
 	int max_loc = 100;
-	Location **choices = malloc(sizeof(Location *) * max_loc);
+	Location **choices = calloc(1, sizeof(Location *) * max_loc);
 	
 	
 	fp = fopen(path, "r");
@@ -186,18 +191,7 @@ int main_search(char *argv)
 	exit_err:
 	clear();
 	refresh();
-	for (int i = 0; i < n_choices; ++i)
-	{
-		if (choices[i] != NULL)
-		{
-			free(choices[i]->city);
-			free(choices[i]->state);
-			free(choices[i]->country);
-			free(choices[i]->latitude);
-			free(choices[i]->longitude);
-			free(choices[i]);
-		}
-	}
+	free(choices);
 	endwin();
 	return 0;
 }

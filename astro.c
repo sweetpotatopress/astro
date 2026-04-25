@@ -21,7 +21,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "city-search.c"
 
-#define CMAX 9
+#define CMAX 10
 
 void fieldbuffer_trim(FIELD *current, char *buffer)
 {
@@ -165,7 +165,6 @@ void ichart_data(struct tm *cdata, Location *loc)
 	cdata_field[2] = new_field(1, 2, starty, startx, 0, 0);
 	set_field_back(cdata_field[2], A_UNDERLINE);
 	field_opts_off(cdata_field[2], O_AUTOSKIP);
-	field_opts_on(cdata_field[2], O_EDGE_INSERT_STAY);
 	starty += 2;
 	// day
 	cdata_field[3] = new_field(1, 2, starty, startx, 0, 0);
@@ -198,13 +197,13 @@ void ichart_data(struct tm *cdata, Location *loc)
 	set_field_back(cdata_field[8], A_UNDERLINE);
 	field_opts_off(cdata_field[8], O_AUTOSKIP);
 	
-	cdata_field[CMAX] = NULL;
+	cdata_field[9] = NULL;
 	
 	cdata_form = new_form(cdata_field);
 	post_form(cdata_form);
 	refresh();
 	
-	for (int i = 0, starty = 4; i < CMAX; ++i, starty+= 2)
+	for (int i = 0, starty = 4; i < 9; ++i, starty+= 2)
 		mvprintw(starty, startx - 12, "%s", c_labels[i]);
 	refresh();
 	
