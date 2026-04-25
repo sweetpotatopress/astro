@@ -103,7 +103,7 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	long utc_off = utc_sec / 3600;
 	double min = orig.tm_min / 60;
 	printw(" cmin %f ", min);
-	double dhour = (orig.tm_hour + utc_off) + min;
+	double dhour = (double)(orig.tm_hour + utc_off) + min;
 	if(dhour > 23.999999)
 	{
 		double offset = dhour - 23.999999;
@@ -128,6 +128,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	FORM *cdata_form;
 	int ch;
 	int starty, startx;
+	size_t i;
 	
 	const char *c_labels[] = {
 		"city search:",
@@ -203,7 +204,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	post_form(cdata_form);
 	refresh();
 	
-	for (int i = 0, starty = 4; i < 9; ++i, starty+= 2)
+	for (i = 0, starty = 4; i < 9; ++i, starty+= 2)
 		mvprintw(starty, startx - 12, "%s", c_labels[i]);
 	refresh();
 	
@@ -233,13 +234,13 @@ void ichart_data(struct tm *cdata, Location *loc)
 	}
 	unpost_form(cdata_form);
 	free_form(cdata_form);
-	for (int i = 0; i < 7; ++i)
+	for (i = 0; i < 7; ++i)
 	{
 		free_field(cdata_field[i]);
 	}
 	endwin();
 }
-void draw_circle(int maxy, int maxx, int radius, char ch)
+void draw_circle(int maxy, int maxx, int radius, chtype ch)
 {
 	int center_x = maxx /2;
 	int center_y = maxy / 2;
@@ -254,20 +255,6 @@ void draw_circle(int maxy, int maxx, int radius, char ch)
 	}
 }	
 
-void planet_pos(int maxy, int maxx, int radius, char ch, double planet_deg)
-{	
-	int center_x = maxx /2;
-	int center_y = maxy / 2;
-	for ( double angle = 0; angle <360; angle += 0.1)
-	{
-		double rad = angle * 3.14159 / 180.0;
-		int x = center_x + (int)(radius * cos(rad));
-		int y = center_y + (int)(radius * sin(rad));
-		
-		if (angle == planet_deg)
-			mvaddch(y, x, ch);
-	}
-}
 int main()
 {
 	int iret, iflag, ipl, i;
@@ -302,7 +289,7 @@ int main()
 	&p_deg->dsat};
 	
 	WINDOW *main;
-	PANEL *main_panel;
+	//PANEL *main_panel;
 	int maxy, maxx;
 	
 	initscr();
@@ -312,8 +299,8 @@ int main()
 
 	main = newwin(maxy, maxx, 0, 0);
 	box(main, 0, 0);
-	main_panel = new_panel(main);
-	update_panels();
+	//main_panel = new_panel(main);
+	//update_panels();
 	doupdate();
 	getch();
 	
@@ -328,7 +315,7 @@ int main()
 	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
 	refresh();
 	
-	draw_circle(maxy, maxx, (maxy / 2) + 5, ACS_BULLET);
+	draw_circle(maxy, maxx, (maxy / 2) + 5, '*');
 	//printw("\njulian day:%lf\n", jul_day_UT);
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
@@ -350,8 +337,6 @@ int main()
 	}
 	//printw("%f p_deg", p_deg->dsun);
 	//printw("%f sat", p_deg->dsat);
-	
-	planet_pos(maxy, maxx, (maxy / 2), 'j', 20.2);
 	
 	iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
 	ihsy, cusps, ascmc);

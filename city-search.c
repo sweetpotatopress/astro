@@ -16,14 +16,14 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <menu.h>
  
-int location_search_parse(FILE *ifp, char *search, Location **choices, int max_choices)
+size_t location_search_parse(FILE *ifp, char *search, Location **choices, long unsigned int max_choices)
 {
-	int i = 0;
+	size_t i = 0;
 	char line[1024] = {0};
 	
 	while (fgets(line, sizeof(line), ifp) != NULL)
 	{
-		int len = strlen(line);
+		size_t len = strlen(line);
 		if (line[len - 1] == '\n')
 			line[len - 1] = '\0';
 		
@@ -65,7 +65,10 @@ int location_search_parse(FILE *ifp, char *search, Location **choices, int max_c
 		free(copy);
 	}
 	if (i >= max_choices)
-		return -1;
+	{
+		perror("invalid search");
+		ERR_EXIT;
+	}
 	else
 		return i;
 }
@@ -78,7 +81,7 @@ void print_menu(Location **choices)
 	char buffer[256];
 	cities = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
 
-	for (int i = 0; i < n_choices; ++i)
+	for (size_t i = 0; i < n_choices; ++i)
 	{
 		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %-10s %s %s",
 			choices[i]->city,
@@ -128,7 +131,7 @@ void print_menu(Location **choices)
 	}
 	
 	unpost_menu(city_menu);
-	for (int i = 0; i < n_choices; ++i)
+	for (size_t i = 0; i < n_choices; ++i)
 		free_item(cities[i]);
 	free_menu(city_menu);
 	free(cities);
@@ -140,7 +143,7 @@ int main_search(char *argv)
 	FILE *fp;
 	const char *path = "cities";
 	char *search = argv;
-	int max_loc = 100;
+	long unsigned int max_loc = 100;
 	Location **choices = calloc(1, sizeof(Location *) * max_loc);
 	
 	
@@ -161,7 +164,7 @@ int main_search(char *argv)
 
 	n_choices = location_search_parse(fp, search, choices, max_loc);
 	
-	if (n_choices == -1 || n_choices >= 100)
+	if (n_choices >= 100)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
 		getch();

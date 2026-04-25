@@ -10,6 +10,11 @@ See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
+#include <ncurses.h>
+#include <form.h>
+#include <panel.h>
+#include <menu.h>
+
 #pragma once
 #define ERR_EXIT endwin(); swe_close(); exit(EXIT_FAILURE);
 
@@ -25,6 +30,7 @@ typedef struct {
 	double dsat;
 } P_deg;
 
+
 //city-search
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
@@ -39,6 +45,6 @@ typedef struct {
 	double dhour; //0.0 .. 23.999999;
 } Location;
 
-int n_choices = 0;
+size_t n_choices = 0;
 
 int main_search(char *argv);
