@@ -93,6 +93,9 @@ void chart_timeset(struct tm *cdata, Location *loc)
 		fprintf(stderr, "mktime fail");
 		ERR_EXIT;
 	}
+	if (cdata->tm_isdst == 1)
+		--cdata->tm_hour;
+		
 	printw(" tret: %ld ", tret);
 	struct tm tmp = {0};
 	struct tm orig = *cdata;
@@ -101,7 +104,7 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	long utc_sec = tmp.tm_gmtoff;
 	
 	long utc_off = utc_sec / 3600;
-	double min = orig.tm_min / 60;
+	double min = (double)cdata->tm_min / 60;
 	printw(" cmin %f ", min);
 	double dhour = (double)(orig.tm_hour + utc_off) + min;
 	if(dhour > 23.999999)
@@ -288,7 +291,7 @@ int main()
 	&p_deg->dmars, &p_deg->djup,
 	&p_deg->dsat};
 	
-	WINDOW *main;
+	//WINDOW *main;
 	//PANEL *main_panel;
 	int maxy, maxx;
 	
@@ -297,12 +300,10 @@ int main()
 	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
 
-	main = newwin(maxy, maxx, 0, 0);
-	box(main, 0, 0);
+	//main = newwin(maxy, maxx, 0, 0);
 	//main_panel = new_panel(main);
 	//update_panels();
 	doupdate();
-	getch();
 	
 	ichart_data(cdata, loc); //this has to go before swe_julday
 	chart_timeset(cdata, loc);
