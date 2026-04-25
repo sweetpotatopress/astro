@@ -93,7 +93,7 @@ void chart_timeset(struct tm *cdata, Location *loc)
 		fprintf(stderr, "mktime fail");
 		ERR_EXIT;
 	}
-	printw("tret: %ld", tret);
+	printw(" tret: %ld ", tret);
 	struct tm tmp = {0};
 	struct tm orig = *cdata;
 	localtime_r(&tret, &tmp);
@@ -102,7 +102,7 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	
 	long utc_off = utc_sec / 3600;
 	double min = orig.tm_min / 60;
-	printw("cmin %f", min);
+	printw(" cmin %f ", min);
 	double dhour = (orig.tm_hour + utc_off) + min;
 	if(dhour > 23.999999)
 	{
@@ -154,39 +154,49 @@ void ichart_data(struct tm *cdata, Location *loc)
 	cdata_field[0] = new_field(1, 25, starty, startx, 0, 0);
 	set_field_back(cdata_field[0], A_UNDERLINE);
 	field_opts_off(cdata_field[0], O_STATIC);
+	field_opts_off(cdata_field[0], O_AUTOSKIP);
 	starty += 2;
 	// year
 	cdata_field[1] = new_field(1, 6, starty, startx, 0, 0);
 	set_field_back(cdata_field[1], A_UNDERLINE);
+	field_opts_off(cdata_field[1], O_AUTOSKIP);
 	starty += 2;
 	// month
 	cdata_field[2] = new_field(1, 2, starty, startx, 0, 0);
 	set_field_back(cdata_field[2], A_UNDERLINE);
+	field_opts_off(cdata_field[2], O_AUTOSKIP);
+	field_opts_on(cdata_field[2], O_EDGE_INSERT_STAY);
 	starty += 2;
 	// day
 	cdata_field[3] = new_field(1, 2, starty, startx, 0, 0);
 	set_field_back(cdata_field[3], A_UNDERLINE);
+	field_opts_off(cdata_field[3], O_AUTOSKIP);
 	starty += 2;
 	// timezone
 	cdata_field[4] = new_field(1, 25, starty, startx, 0, 0);
 	set_field_back(cdata_field[4], A_UNDERLINE);
 	field_opts_off(cdata_field[4], O_STATIC);
+	field_opts_off(cdata_field[4], O_AUTOSKIP);
 	starty += 2;
 	// hour
 	cdata_field[5] = new_field(1, 2, starty, startx, 0, 0);
 	set_field_back(cdata_field[5], A_UNDERLINE);
+	field_opts_off(cdata_field[5], O_AUTOSKIP);
 	starty+= 2;
 	// minute
 	cdata_field[6] = new_field(1, 2, starty, startx, 0, 0);
 	set_field_back(cdata_field[6], A_UNDERLINE);
+	field_opts_off(cdata_field[6], O_AUTOSKIP);
 	starty+= 2;
 	// lat. 
 	cdata_field[7] = new_field(1, 8, starty, startx, 0, 0);
 	set_field_back(cdata_field[7], A_UNDERLINE);
+	field_opts_off(cdata_field[7], O_AUTOSKIP);
 	starty+= 2;
 	// long.
 	cdata_field[8] = new_field(1, 8, starty, startx, 0, 0);
 	set_field_back(cdata_field[8], A_UNDERLINE);
+	field_opts_off(cdata_field[8], O_AUTOSKIP);
 	
 	cdata_field[CMAX] = NULL;
 	
@@ -313,7 +323,7 @@ int main()
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
 
-	printw("%s", cdata->tm_zone);
+	printw(" %s ", cdata->tm_zone);
 	printw("%d, %d, %d, %d, %d, %f, %f, dhour:%f", 
 	cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
 	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
