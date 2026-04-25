@@ -23,17 +23,32 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define CMAX 9
 
+void fieldbuffer_trim(FIELD *current, char *buffer)
+{
+	int i = 0;
+	
+	field_info(current, NULL, NULL, NULL, &i, NULL, NULL);
+	
+	while(i >= 0 && (buffer[i] == ' '))
+		--i;
+	if (i >= 0)
+	{
+		++i;
+		buffer[i] = '\0';
+	}
+}
+
 void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 {
 	FIELD *current = current_field(cdata_form);
 	char *buffer = field_buffer(current, 0);
 	int index = field_index(current);
-	const char *tz_name;
 	
 	switch(index)
 	{
 		case 0:
-			printw("%s", buffer);
+			fieldbuffer_trim(current, buffer);
+			main_search(buffer);
 			break;
 		case 1:
 			cdata->tm_year = atoi(buffer);
@@ -45,13 +60,15 @@ void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 			cdata->tm_mday = atoi(buffer);
 			break;
 		case 4:
-			tz_name = buffer;
-			if (setenv("TZ", tz_name, 1) != 0)
+			fieldbuffer_trim(current, buffer);
+			if (setenv("TZ", buffer, 1) != 0)
 			{
 				perror("TZ setenv");
 				ERR_EXIT;
 			}
 			tzset();
+			printw("\t %s", getenv("TZ"));
+			printw("--tzname0 = %s tzname1 = %s", tzname[0], tzname[1]);
 			break;
 		case 5:
 			cdata->tm_hour = atoi(buffer);
@@ -71,16 +88,22 @@ void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 void chart_timeset(struct tm *cdata, Location *loc)
 {
 	time_t tret = mktime(cdata);
-	struct tm tmp;
+	if (tret == (time_t)-1)
+	{
+		fprintf(stderr, "mktime fail");
+		ERR_EXIT;
+	}
+	printw("tret: %ld", tret);
+	struct tm tmp = {0};
+	struct tm orig = *cdata;
 	localtime_r(&tret, &tmp);
-	cdata->tm_gmtoff = tmp.tm_gmtoff;
 	
-	long utc_sec = cdata->tm_gmtoff;
+	long utc_sec = tmp.tm_gmtoff;
 	
 	long utc_off = utc_sec / 3600;
-	double min = cdata->tm_min / 60;
+	double min = orig.tm_min / 60;
 	printw("cmin %f", min);
-	double dhour = (cdata->tm_hour + utc_off) + min;
+	double dhour = (orig.tm_hour + utc_off) + min;
 	if(dhour > 23.999999)
 	{
 		double offset = dhour - 23.999999;
@@ -95,6 +118,7 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	}
 	
 	loc->dhour = dhour; 
+	*cdata = orig;
 }
 
 void ichart_data(struct tm *cdata, Location *loc)
@@ -126,12 +150,44 @@ void ichart_data(struct tm *cdata, Location *loc)
 	starty = 4;
 	startx = 18;
 	
-	for (int i = 0; i < CMAX; ++i)
-	{
-		cdata_field[i] = new_field(1, 25, starty, startx, 0, 0);
-		set_field_back(cdata_field[i], A_UNDERLINE);
-		starty += 2;
-	}
+	// city search
+	cdata_field[0] = new_field(1, 25, starty, startx, 0, 0);
+	set_field_back(cdata_field[0], A_UNDERLINE);
+	field_opts_off(cdata_field[0], O_STATIC);
+	starty += 2;
+	// year
+	cdata_field[1] = new_field(1, 6, starty, startx, 0, 0);
+	set_field_back(cdata_field[1], A_UNDERLINE);
+	starty += 2;
+	// month
+	cdata_field[2] = new_field(1, 2, starty, startx, 0, 0);
+	set_field_back(cdata_field[2], A_UNDERLINE);
+	starty += 2;
+	// day
+	cdata_field[3] = new_field(1, 2, starty, startx, 0, 0);
+	set_field_back(cdata_field[3], A_UNDERLINE);
+	starty += 2;
+	// timezone
+	cdata_field[4] = new_field(1, 25, starty, startx, 0, 0);
+	set_field_back(cdata_field[4], A_UNDERLINE);
+	field_opts_off(cdata_field[4], O_STATIC);
+	starty += 2;
+	// hour
+	cdata_field[5] = new_field(1, 2, starty, startx, 0, 0);
+	set_field_back(cdata_field[5], A_UNDERLINE);
+	starty+= 2;
+	// minute
+	cdata_field[6] = new_field(1, 2, starty, startx, 0, 0);
+	set_field_back(cdata_field[6], A_UNDERLINE);
+	starty+= 2;
+	// lat. 
+	cdata_field[7] = new_field(1, 8, starty, startx, 0, 0);
+	set_field_back(cdata_field[7], A_UNDERLINE);
+	starty+= 2;
+	// long.
+	cdata_field[8] = new_field(1, 8, starty, startx, 0, 0);
+	set_field_back(cdata_field[8], A_UNDERLINE);
+	
 	cdata_field[CMAX] = NULL;
 	
 	cdata_form = new_form(cdata_field);
