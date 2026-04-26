@@ -63,7 +63,7 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 	return i;
 }
 
-void print_menu(Location **choices)
+void print_menu(Location **choices, size_t n_choices)
 {
 	int c;
 	ITEM **cities;
@@ -158,17 +158,21 @@ int main_search(char *argv)
 	FILE *fp;
 	const char *path = "cities";
 	char *search = argv;
-	Location **choices = calloc(1, sizeof(Location *) * 100);
+	size_t n_choices = 0;
 	
+	Location **choices = calloc(1, sizeof(Location *) * 100);
+	if (!choices)
+	{
+		perror("choices calloc");
+		ERR_EXIT;
+	}
 	
 	fp = fopen(path, "r");
 	if (fp == NULL)
 	{
 		fprintf(stderr, "can't open %s\n", path);
 		free(choices);
-		getch();
-		endwin();
-		exit(1);
+		ERR_EXIT;
 	}
 	
 	initscr();
@@ -192,7 +196,7 @@ int main_search(char *argv)
 		n_choices = location_parse(fp, search, choices);
 	}
 	
-	print_menu(choices);
+	print_menu(choices, n_choices);
 	
 	clear();
 	refresh();

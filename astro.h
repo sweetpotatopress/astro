@@ -42,6 +42,4 @@ typedef struct {
 	double dhour; //0.0 .. 23.999999;
 } Location;
 
-size_t n_choices = 0;
-
 int main_search(char *argv);
