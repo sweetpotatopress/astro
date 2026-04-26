@@ -80,13 +80,20 @@ void print_menu(Location **choices)
 	ITEM **cities;
 	MENU *city_menu;
 	char buffer[256];
-	cities = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
+	cities = calloc(n_choices + 1, sizeof(ITEM *));
 	if (!cities)
 	{
 		perror("cities calloc");
 		ERR_EXIT;
 	}
+	char **freecombined = malloc (n_choices * sizeof(char *));
+	if (!freecombined)
+	{
+		perror("freecombined malloc");
+		ERR_EXIT;
+	}
 
+	
 	for (size_t i = 0; i < n_choices; ++i)
 	{
 		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %-10s %s %s",
@@ -96,24 +103,26 @@ void print_menu(Location **choices)
 			choices[i]->latitude,
 			choices[i]->longitude);
 		
-		char *combined_location = calloc(1, strlen(buffer) + 1);
+	char *combined_location = calloc(1, strlen(buffer) + 1);
 		if(!combined_location)
 		{
 			perror("combined location malloc");
 			ERR_EXIT;
 		}
+	
 		strcpy(combined_location, buffer);
+		freecombined[i] = combined_location;
 		cities[i] = new_item(combined_location, NULL);
-		free(combined_location);
 	}
 	cities[n_choices] = NULL;
-	
+
 	city_menu = new_menu((ITEM **)cities);	
 	if (city_menu == NULL) 
 	{
 		fprintf(stderr, "ERROR: new_menu failed!");
 		getch();
 		endwin();
+		free(freecombined);
 		return;
 	}
 	menu_opts_off(city_menu, O_NONCYCLIC);
@@ -124,6 +133,7 @@ void print_menu(Location **choices)
 		fprintf(stderr, "ERROR: post_menu failed!, code %d", post_result);
 		getch();
 		endwin();
+		free(freecombined);
 		return;
 	}
 	
@@ -146,11 +156,11 @@ void print_menu(Location **choices)
 	}
 	
 	unpost_menu(city_menu);
-	wclear(stdscr);
 	for (size_t i = 0; i < n_choices; ++i)
 		free_item(cities[i]);
 	free_menu(city_menu);
 	free(cities);
+	free(freecombined);
 }
 		
 
