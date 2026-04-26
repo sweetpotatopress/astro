@@ -86,6 +86,8 @@ void print_menu(Location **choices)
 		perror("cities calloc");
 		ERR_EXIT;
 	}
+	// stores the combined_location pointer in the below loop
+	// to be freed later
 	char **freecombined = malloc (n_choices * sizeof(char *));
 	if (!freecombined)
 	{

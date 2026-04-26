@@ -399,11 +399,12 @@ int main()
 		ERR_EXIT;
 		exit(EXIT_FAILURE);
 	}
-	printw("asc %10.6lf", ascmc[0]);
+	printw("asc:%10.6lf\t mc:%10.2lf\n", ascmc[0], ascmc[1]);
 	for (i = 1; i <= 12; i++)
 	{
-		printw("cusp %2d  %10.6lf", i, cusps[i]);
+		printw("H:%2d  %10.6lf\n", i, cusps[i]);
 	}
+	draw_circle(maxy, maxx, maxx / 2, '*');
 	
 	refresh();
 	getch();
