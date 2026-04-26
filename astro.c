@@ -242,9 +242,11 @@ void ichart_data(struct tm *cdata, Location *loc)
 	
 	cdata_form = new_form(cdata_field);
 	cdata_form_win = newwin(100, 35, 1, 1);
+	
 	set_form_win(cdata_form, cdata_form_win);
 	set_form_sub(cdata_form,
 	derwin(cdata_form_win, 100, 35, 1, 1));
+	
 	post_form(cdata_form);
 	refresh();
 	
@@ -278,8 +280,10 @@ void ichart_data(struct tm *cdata, Location *loc)
 		pos_form_cursor(cdata_form);
 		refresh();
 	}
+	
 	unpost_form(cdata_form);
 	free_form(cdata_form);
+	
 	for (i = 0; i < 7; ++i)
 	{
 		free_field(cdata_field[i]);
@@ -314,8 +318,8 @@ int main()
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
-	double cusps[13], ascmc[10];
-	int ihsy = 'W';
+	double cusps[13], ascmc[10]; //houses, asc, mc
+	int ihsy = 'W'; // house system
 	struct tm *cdata = calloc(1, sizeof(struct tm));
 	if (!cdata)
 	{

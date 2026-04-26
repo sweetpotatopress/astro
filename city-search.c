@@ -196,32 +196,21 @@ int main_search(char *argv)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
 		getch();
-		endwin();
-		goto exit_err;
+		n_choices = location_search_parse(fp, search, choices, max_loc);
 	}
 	
-	fclose(fp);
 	if (n_choices == 0)
 	{
 		fprintf(stderr, "no search results\n");
 		getch();
-		endwin();
-		goto exit_err;
-	}
-	
-	if (ferror(stdout)) 
-	{
-		fprintf(stderr, "error writing stdout\n");
-		getch();
-		endwin();
-		goto exit_err;
+		n_choices = location_search_parse(fp, search, choices, max_loc);
 	}
 	
 	print_menu(choices);
 	
-	exit_err:
 	clear();
 	refresh();
+	fclose(fp);
 	free(choices);
 	endwin();
 	return 0;
