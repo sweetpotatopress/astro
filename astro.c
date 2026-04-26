@@ -38,7 +38,8 @@ void fieldbuffer_trim(FIELD *current, char *buffer)
 	}
 }
 
-void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
+void field_to_member
+(WINDOW *cdata_form_win, struct tm *cdata, Location *loc, FORM *cdata_form)
 {
 	FIELD *current = current_field(cdata_form);
 	char *buffer = field_buffer(current, 0);
@@ -49,6 +50,11 @@ void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 		case 0:
 			fieldbuffer_trim(current, buffer);
 			main_search(buffer);
+			unpost_form(cdata_form);
+			touchwin(cdata_form_win);
+			post_form(cdata_form);
+			wrefresh(cdata_form_win);
+			doupdate();
 			break;
 		case 1:
 			cdata->tm_year = atoi(buffer) - 1900;
@@ -91,6 +97,7 @@ void check_dst(struct tm *orig)
 	char *tz_name = getenv("TZ");
 	FILE *fp;
 	
+	//calls GNU coreutil date
 	snprintf(cmd, sizeof(cmd), "TZ=%s date -d '%d-%d-%d %d:%d' '+%%Z'", 
 	tz_name, orig->tm_year, orig->tm_mon, orig->tm_mday,
 	orig->tm_hour, orig->tm_min);
@@ -106,7 +113,8 @@ void check_dst(struct tm *orig)
 	buffer[strcspn(buffer, "\n")] = 0;
 	pclose(fp);
 	
-	orig->tm_isdst = (tzname[1] && strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
+	orig->tm_isdst = 
+	(tzname[1] && strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
 }
 
 void chart_timeset(struct tm *cdata, Location *loc)
@@ -155,6 +163,7 @@ void chart_timeset(struct tm *cdata, Location *loc)
 void ichart_data(struct tm *cdata, Location *loc)
 {
 
+	WINDOW *cdata_form_win;
 	FIELD *cdata_field[CMAX];
 	FORM *cdata_form;
 	int ch;
@@ -232,6 +241,10 @@ void ichart_data(struct tm *cdata, Location *loc)
 	cdata_field[9] = NULL;
 	
 	cdata_form = new_form(cdata_field);
+	cdata_form_win = newwin(100, 35, 1, 1);
+	set_form_win(cdata_form, cdata_form_win);
+	set_form_sub(cdata_form,
+	derwin(cdata_form_win, 100, 35, 1, 1));
 	post_form(cdata_form);
 	refresh();
 	
@@ -245,8 +258,10 @@ void ichart_data(struct tm *cdata, Location *loc)
 		{	
 			case KEY_DOWN: case '\n':
 				form_driver(cdata_form, REQ_VALIDATION);
-				field_to_member(cdata, loc,  cdata_form);
+				field_to_member(cdata_form_win, cdata, loc,  cdata_form);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
+				for (i = 0, starty = 4; i < 9; ++i, starty+= 2)
+					mvprintw(starty, startx - 12, "%s", c_labels[i]);
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
 			case KEY_UP:
@@ -369,7 +384,8 @@ int main()
 			exit(EXIT_FAILURE);
 		}
 		*p_deg_members[i] = xx[0];
-		printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n", xx[0], xx[1], xx[2], xx[3]);
+		printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n",
+		xx[0], xx[1], xx[2], xx[3]);
 		
 	}
 	//printw("%f p_deg", p_deg->dsun);

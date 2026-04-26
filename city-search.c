@@ -16,7 +16,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <menu.h>
  
-size_t location_search_parse(FILE *ifp, char *search, Location **choices, long unsigned int max_choices)
+size_t location_search_parse
+(FILE *ifp, char *search, Location **choices, long unsigned int max_choices)
 {
 	size_t i = 0;
 	char line[1024] = {0};
@@ -27,7 +28,7 @@ size_t location_search_parse(FILE *ifp, char *search, Location **choices, long u
 		if (line[len - 1] == '\n')
 			line[len - 1] = '\0';
 		
-		char *copy = malloc(strlen(line) + 1);
+		char *copy = calloc(1, strlen(line) + 1);
 		if (!copy)
 		{
 			perror("copy malloc");
@@ -41,7 +42,7 @@ size_t location_search_parse(FILE *ifp, char *search, Location **choices, long u
 				
 		while (token != NULL && field_count < 19)
 		{
-			fields[field_count] = malloc(strlen(token) + 1);
+			fields[field_count] = calloc(1, strlen(token) + 1);
 			strcpy(fields[field_count], token);
 			field_count++;
 			token = strtok(NULL, "\t");
@@ -49,7 +50,7 @@ size_t location_search_parse(FILE *ifp, char *search, Location **choices, long u
 		
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
 		{
-			Location *location = malloc(sizeof(Location));
+			Location *location = calloc(1, sizeof(Location));
 			location->city = fields[2];
 			location->state = fields[9];
 			location->country = fields[8];
@@ -80,6 +81,11 @@ void print_menu(Location **choices)
 	MENU *city_menu;
 	char buffer[256];
 	cities = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
+	if (!cities)
+	{
+		perror("cities calloc");
+		ERR_EXIT;
+	}
 
 	for (size_t i = 0; i < n_choices; ++i)
 	{
@@ -90,9 +96,15 @@ void print_menu(Location **choices)
 			choices[i]->latitude,
 			choices[i]->longitude);
 		
-		char *combined_location = malloc(strlen(buffer) + 1);
+		char *combined_location = calloc(1, strlen(buffer) + 1);
+		if(!combined_location)
+		{
+			perror("combined location malloc");
+			ERR_EXIT;
+		}
 		strcpy(combined_location, buffer);
 		cities[i] = new_item(combined_location, NULL);
+		free(combined_location);
 	}
 	cities[n_choices] = NULL;
 	
@@ -127,10 +139,14 @@ void print_menu(Location **choices)
 			case 'k':
 				menu_driver(city_menu, REQ_UP_ITEM);
 				break;
+			case '\n':
+				menu_driver(city_menu, REQ_TOGGLE_ITEM);
+				break;
 		}
 	}
 	
 	unpost_menu(city_menu);
+	wclear(stdscr);
 	for (size_t i = 0; i < n_choices; ++i)
 		free_item(cities[i]);
 	free_menu(city_menu);
