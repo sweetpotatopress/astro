@@ -16,25 +16,24 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <menu.h>
  
-size_t location_search_parse
-(FILE *ifp, char *search, Location **choices, long unsigned int max_choices)
+size_t location_search_parse(FILE *ifp, char *search, Location **choices)
 {
 	size_t i = 0;
-	char line[1024] = {0};
+	char buffer[1024] = {0};
 	
-	while (fgets(line, sizeof(line), ifp) != NULL)
+	while (fgets(buffer, sizeof(buffer), ifp) != NULL)
 	{
-		size_t len = strlen(line);
-		if (line[len - 1] == '\n')
-			line[len - 1] = '\0';
+		size_t len = strlen(buffer);
+		if (buffer[len - 1] == '\n')
+			buffer[len - 1] = '\0';
 		
-		char *copy = calloc(1, strlen(line) + 1);
+		char *copy = calloc(1, strlen(buffer) + 1);
 		if (!copy)
 		{
 			perror("copy malloc");
 			ERR_EXIT;
 		}
-		strcpy(copy, line);
+		strcpy(copy, buffer);
 		
 		char *token = strtok(copy, "\t");
 		int field_count = 0;
@@ -54,24 +53,14 @@ size_t location_search_parse
 			location->city = fields[2];
 			location->state = fields[9];
 			location->country = fields[8];
+			location->timezone = fields[14];
 			location->latitude = fields[4];
 			location->longitude = fields[5];
 			choices[i++] = location;
 		}
-		else
-		{
-			for(int j = 0; j < field_count; j++)
-				free(fields[j]);
-		}
 		free(copy);
 	}
-	if (i >= max_choices)
-	{
-		perror("invalid search");
-		ERR_EXIT;
-	}
-	else
-		return i;
+	return i;
 }
 
 void print_menu(Location **choices)
@@ -95,13 +84,13 @@ void print_menu(Location **choices)
 		ERR_EXIT;
 	}
 
-	
 	for (size_t i = 0; i < n_choices; ++i)
 	{
-		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %-10s %s %s",
+		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %-10s %-5s %-5s %s",
 			choices[i]->city,
 			choices[i]->state,
 			choices[i]->country,
+			choices[i]->timezone,
 			choices[i]->latitude,
 			choices[i]->longitude);
 		
@@ -158,8 +147,6 @@ void print_menu(Location **choices)
 	}
 	
 	unpost_menu(city_menu);
-	for (size_t i = 0; i < n_choices; ++i)
-		free_item(cities[i]);
 	free_menu(city_menu);
 	free(cities);
 	free(freecombined);
@@ -171,8 +158,7 @@ int main_search(char *argv)
 	FILE *fp;
 	const char *path = "cities";
 	char *search = argv;
-	long unsigned int max_loc = 100;
-	Location **choices = calloc(1, sizeof(Location *) * max_loc);
+	Location **choices = calloc(1, sizeof(Location *) * 100);
 	
 	
 	fp = fopen(path, "r");
@@ -190,20 +176,20 @@ int main_search(char *argv)
 	cbreak();
 	keypad(stdscr, TRUE);
 
-	n_choices = location_search_parse(fp, search, choices, max_loc);
+	n_choices = location_search_parse(fp, search, choices);
 	
 	if (n_choices >= 100)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
 		getch();
-		n_choices = location_search_parse(fp, search, choices, max_loc);
+		n_choices = location_search_parse(fp, search, choices);
 	}
 	
 	if (n_choices == 0)
 	{
 		fprintf(stderr, "no search results\n");
 		getch();
-		n_choices = location_search_parse(fp, search, choices, max_loc);
+		n_choices = location_search_parse(fp, search, choices);
 	}
 	
 	print_menu(choices);

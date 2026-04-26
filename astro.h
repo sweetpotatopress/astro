@@ -10,10 +10,6 @@ See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
-#include <ncurses.h>
-#include <form.h>
-#include <panel.h>
-#include <menu.h>
 
 #pragma once
 #define ERR_EXIT endwin(); swe_close(); exit(EXIT_FAILURE);
@@ -38,6 +34,7 @@ typedef struct {
 	char *city;
 	char *state;
 	char *country;
+	char *timezone;
 	char *latitude;
 	char *longitude;
 	double dlat;
