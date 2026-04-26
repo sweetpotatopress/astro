@@ -84,29 +84,56 @@ void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 			break;
 	}
 }
+void check_dst(struct tm *orig)
+{
+	char cmd[256] = {0};
+	char buffer[256] = {0};
+	char *tz_name = getenv("TZ");
+	FILE *fp;
+	
+	snprintf(cmd, sizeof(cmd), "TZ=%s date -d '%d-%d-%d %d:%d' '+%%Z'", 
+	tz_name, orig->tm_year, orig->tm_mon, orig->tm_mday,
+	orig->tm_hour, orig->tm_min);
+	
+	fp = popen(cmd, "r");
+	if (!fp)
+	{
+		perror("date command fail");
+		ERR_EXIT;
+	}
+	
+	fgets(buffer, sizeof(buffer), fp);
+	buffer[strcspn(buffer, "\n")] = 0;
+	pclose(fp);
+	
+	orig->tm_isdst = (tzname[1] && strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
+}
 
 void chart_timeset(struct tm *cdata, Location *loc)
 {
-	time_t tret = mktime(cdata);
-	if (tret == (time_t)-1)
-	{
-		fprintf(stderr, "mktime fail");
-		ERR_EXIT;
-	}
-	if (cdata->tm_isdst == 1)
-		--cdata->tm_hour;
-		
-	printw(" tret: %ld ", tret);
-	struct tm tmp = {0};
-	struct tm orig = *cdata;
-	localtime_r(&tret, &tmp);
+	struct tm *orig = cdata;
+	check_dst(orig);
 	
-	long utc_sec = tmp.tm_gmtoff;
+	//copy correct isdst and hour before mktime
+	//mktime "corrects" it to system defaults, which can be wrong
+	int isdst = orig->tm_isdst;
+	int tm_hour = orig->tm_hour;
+	int tm_min = orig->tm_min;
 	
-	long utc_off = utc_sec / 3600;
-	double min = (double)cdata->tm_min / 60;
-	printw(" cmin %f ", min);
-	double dhour = (double)(orig.tm_hour + utc_off) + min;
+	time_t tret = mktime(orig);
+	localtime_r(&tret, orig);
+	
+	orig->tm_isdst = isdst;
+	orig->tm_hour = tm_hour;
+	orig->tm_min = tm_min;
+
+	long utc_sec = orig->tm_gmtoff;
+	
+	double utc_off = (double)utc_sec / 3600;
+	double min = (double)orig->tm_min / 60;
+	
+	double dhour = (double)(orig->tm_hour + utc_off) + min;
+	
 	if(dhour > 23.999999)
 	{
 		double offset = dhour - 23.999999;
@@ -121,7 +148,7 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	}
 	
 	loc->dhour = dhour; 
-	*cdata = orig;
+	*cdata = *orig;
 }
 
 void ichart_data(struct tm *cdata, Location *loc)
@@ -310,7 +337,7 @@ int main()
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
 
-	printw(" %s ", cdata->tm_zone);
+	printw("DST? %d ", cdata->tm_isdst);
 	printw("%d, %d, %d, %d, %d, %f, %f, dhour:%f", 
 	cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
 	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
