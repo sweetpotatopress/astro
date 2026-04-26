@@ -16,7 +16,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <menu.h>
  
-size_t location_search_parse(FILE *ifp, char *search, Location **choices)
+size_t location_parse(FILE *ifp, char *search, Location **choices)
 {
 	size_t i = 0;
 	char buffer[1024] = {0};
@@ -176,20 +176,20 @@ int main_search(char *argv)
 	cbreak();
 	keypad(stdscr, TRUE);
 
-	n_choices = location_search_parse(fp, search, choices);
+	n_choices = location_parse(fp, search, choices);
 	
 	if (n_choices >= 100)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
 		getch();
-		n_choices = location_search_parse(fp, search, choices);
+		n_choices = location_parse(fp, search, choices);
 	}
 	
 	if (n_choices == 0)
 	{
 		fprintf(stderr, "no search results\n");
 		getch();
-		n_choices = location_search_parse(fp, search, choices);
+		n_choices = location_parse(fp, search, choices);
 	}
 	
 	print_menu(choices);
