@@ -51,10 +51,10 @@ void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 			main_search(buffer);
 			break;
 		case 1:
-			cdata->tm_year = atoi(buffer);
+			cdata->tm_year = atoi(buffer) - 1900;
 			break;
 		case 2:
-			cdata->tm_mon = atoi(buffer);
+			cdata->tm_mon = atoi(buffer) - 1;
 			break;
 		case 3: 
 			cdata->tm_mday = atoi(buffer);
@@ -74,7 +74,7 @@ void field_to_member(struct tm *cdata, Location *loc, FORM *cdata_form)
 			cdata->tm_hour = atoi(buffer);
 			break;
 		case 6:
-			cdata->tm_min = atoi(buffer);
+			cdata->tm_min = atoi(buffer) - 1;
 			break;
 		case 7:
 			loc->dlat = atof(buffer);
@@ -129,22 +129,23 @@ void chart_timeset(struct tm *cdata, Location *loc)
 
 	long utc_sec = orig->tm_gmtoff;
 	
-	double utc_off = (double)utc_sec / 3600;
+	double utc_offset = (double)-utc_sec / 3600;
+	printw("utc_off: %f", utc_offset);
 	double min = (double)orig->tm_min / 60;
+	printw("min: %f", min);
 	
-	double dhour = (double)(orig->tm_hour + utc_off) + min;
+	double dhour = (double)(orig->tm_hour + utc_offset) + min;
+	printw("dhour: %f", dhour);
 	
 	if(dhour > 23.999999)
 	{
-		double offset = dhour - 23.999999;
-		dhour = offset;
-		++cdata->tm_mday;
+		dhour -= 23.999999;
+		++orig->tm_mday;
 	}
 	if(dhour < 0)
 	{
-		double offset = dhour + 23.999999;
-		dhour = offset;
-		--cdata->tm_mday;
+		dhour += 23.999999;
+		--orig->tm_mday;
 	}
 	
 	loc->dhour = dhour; 
@@ -193,12 +194,12 @@ void ichart_data(struct tm *cdata, Location *loc)
 	field_opts_off(cdata_field[1], O_AUTOSKIP);
 	starty += 2;
 	// month
-	cdata_field[2] = new_field(1, 2, starty, startx, 0, 0);
+	cdata_field[2] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[2], A_UNDERLINE);
 	field_opts_off(cdata_field[2], O_AUTOSKIP);
 	starty += 2;
 	// day
-	cdata_field[3] = new_field(1, 2, starty, startx, 0, 0);
+	cdata_field[3] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[3], A_UNDERLINE);
 	field_opts_off(cdata_field[3], O_AUTOSKIP);
 	starty += 2;
@@ -209,12 +210,12 @@ void ichart_data(struct tm *cdata, Location *loc)
 	field_opts_off(cdata_field[4], O_AUTOSKIP);
 	starty += 2;
 	// hour
-	cdata_field[5] = new_field(1, 2, starty, startx, 0, 0);
+	cdata_field[5] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[5], A_UNDERLINE);
 	field_opts_off(cdata_field[5], O_AUTOSKIP);
 	starty+= 2;
 	// minute
-	cdata_field[6] = new_field(1, 2, starty, startx, 0, 0);
+	cdata_field[6] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[6], A_UNDERLINE);
 	field_opts_off(cdata_field[6], O_AUTOSKIP);
 	starty+= 2;
@@ -285,6 +286,13 @@ void draw_circle(int maxy, int maxx, int radius, chtype ch)
 	}
 }	
 
+void reset_struct(struct tm *cdata)
+{
+	cdata->tm_min += 1;
+	cdata->tm_mon += 1;
+	cdata->tm_year += 1900;
+}
+
 int main()
 {
 	int iret, iflag, ipl, i;
@@ -334,6 +342,7 @@ int main()
 	
 	ichart_data(cdata, loc); //this has to go before swe_julday
 	chart_timeset(cdata, loc);
+	reset_struct(cdata);
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
 
@@ -343,7 +352,7 @@ int main()
 	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
 	refresh();
 	
-	draw_circle(maxy, maxx, (maxy / 2) + 5, '*');
+	draw_circle(maxy, maxx, (maxx / 2), '*');
 	//printw("\njulian day:%lf\n", jul_day_UT);
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
@@ -374,11 +383,11 @@ int main()
 		ERR_EXIT;
 		exit(EXIT_FAILURE);
 	}
-	//printw("asc %10.6lf", ascmc[0]);
-	//for (int i = 1; i <= 12; i++)
-	//{
-	//	printw("cusp %2d  %10.6lf", i, cusps[i]);
-	//}
+	printw("asc %10.6lf", ascmc[0]);
+	for (i = 1; i <= 12; i++)
+	{
+		printw("cusp %2d  %10.6lf", i, cusps[i]);
+	}
 	
 	refresh();
 	getch();
