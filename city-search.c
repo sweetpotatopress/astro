@@ -15,73 +15,85 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <stdlib.h>
 #include <ncurses.h>
 #include <menu.h>
+
+char* strtok_E(char *str, const char *delim)
+{
+	static char *next_pos = NULL;
+	char *token_start;
+	static char empty_token[] = "E";
+	
+	if (str != NULL)
+		next_pos = str;
+		
+	if (next_pos == NULL || *next_pos == '\0')
+		return NULL;
+		
+	if (strchr(delim, *next_pos) != NULL)
+	{
+		next_pos++;
+		return empty_token;
+	}
+	
+	token_start = next_pos;
+	
+	while (*next_pos != '\0' && strchr(delim, *next_pos) == NULL)
+		next_pos++;
+		
+	if (*next_pos != '\0')
+	{
+		*next_pos = '\0';
+		next_pos++;
+	}
+	
+	return token_start;
+}
  
 size_t location_parse(FILE *ifp, char *search, Location **choices)
 {
 	size_t i = 0;
 	char buffer[1024] = {0};
-	char *tokens[19] = {NULL};
-	size_t token_idx = 0;
-	size_t start = 0;
-	size_t choice_count = 0;
 	
 	while (fgets(buffer, sizeof(buffer), ifp) != NULL)
 	{
+		size_t len = strlen(buffer);
+		if (buffer[len - 1] == '\n')
+			buffer[len - 1] = '\0';
+		
 		char *copy = calloc(1, strlen(buffer) + 1);
-			if (!copy)
-			{
-				perror("parse copy calloc");
-				ERR_EXIT;
-			}
+		if (!copy)
+		{
+			perror("parse copy calloc");
+			ERR_EXIT;
+		}
 		strcpy(copy, buffer);
 		
-		char *buf = NULL;	
-		for (i = 0; buffer[i] != '\n' && buffer[i] != '\0'; ++i)
+		char *token = strtok_E(copy, "\t");
+		int field_count = 0;
+		char *fields[19] = {NULL};
+		
+		while (token != NULL && field_count < 19)
 		{
-			
-			size_t token_len = i - start + (buffer[i] != '\t' ? 1 : 0);
-			buf = malloc(token_len + 1);
-			if (!buf)
-			{
-				perror("parse buf malloc");
-				ERR_EXIT;
-			}
-			
-			memcpy(buf, copy + start, token_len);
-			buf[token_len] = '\0';
-			tokens[token_idx++] = buf;
-			start = i + 1;
+			fields[field_count] = calloc(1, strlen(token) + 1);
+			strcpy(fields[field_count], token);
+			field_count++;
+			token = strtok_E(NULL, "\t");
 		}
 		
-		Location *local =  NULL;
-		if (token_idx > 1 && strcasestr(tokens[0], search) != NULL)
+		Location *local = NULL;
+		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
 		{
 			local = calloc(1, sizeof(Location));
-			if (!local)
-			{
-				perror("parse local calloc");
-				ERR_EXIT;
-			}
-			local->city = strdup(tokens[2]);
-			local->state = strdup(tokens[9]);
-			local->country = strdup(tokens[8]);
-			local->timezone = strdup(tokens[17]);
-			local->latitude = strdup(tokens[4]);
-			local->longitude = strdup(tokens[5]);
-			choices[choice_count++] = local;
-			printw("test: %s", local->city);
+			local->city = 		fields[2];
+			local->state = 		fields[10];
+			local->country =	fields[8];
+			local->timezone = 	fields[17];
+			local->latitude =	fields[4];
+			local->longitude = 	fields[5];
+			choices[i++] = local;
 		}
-		else
-			free(local);
-			
-		for (size_t j = 0; j < token_idx; ++j)
-			free(tokens[j]);
-		
 		free(copy);
-		token_idx = 0;
-		start = 0;
 	}
-	return choice_count;
+	return i;
 }
 
 void print_menu(Location **choices, size_t n_choices)
@@ -108,7 +120,7 @@ void print_menu(Location **choices, size_t n_choices)
 			ERR_EXIT;
 		}
 	
-		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %-10s %-5s %-5s %s",
+		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %.2s %-10s %-5s %s",
 			choices[i]->city,
 			choices[i]->state,
 			choices[i]->country,
@@ -165,7 +177,6 @@ void print_menu(Location **choices, size_t n_choices)
 	free_menu(city_menu);
 	for (size_t i = 0; i < n_choices; ++i)
 	{
-		free((char *)item_name(cities[i]));
 		free_item(cities[i]);
 	}
 	free(combined_location);
@@ -220,8 +231,7 @@ int main_search(char *argv)
 	clear();
 	refresh();
 	fclose(fp);
-	for (size_t i = 0; i < n_choices; ++i)
-		free(choices[i]);
+	free(choices);
 	endwin();
 	return 0;
 }
