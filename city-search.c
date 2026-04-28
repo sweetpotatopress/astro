@@ -20,47 +20,68 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 {
 	size_t i = 0;
 	char buffer[1024] = {0};
+	char *tokens[19] = {NULL};
+	size_t token_idx = 0;
+	size_t start = 0;
+	size_t choice_count = 0;
 	
 	while (fgets(buffer, sizeof(buffer), ifp) != NULL)
 	{
-		size_t len = strlen(buffer);
-		if (buffer[len - 1] == '\n')
-			buffer[len - 1] = '\0';
-		
 		char *copy = calloc(1, strlen(buffer) + 1);
-		if (!copy)
-		{
-			perror("copy malloc");
-			ERR_EXIT;
-		}
+			if (!copy)
+			{
+				perror("parse copy calloc");
+				ERR_EXIT;
+			}
 		strcpy(copy, buffer);
 		
-		char *token = strtok(copy, "\t");
-		int field_count = 0;
-		char *fields[19] = {0};
-				
-		while (token != NULL && field_count < 19)
+		char *buf = NULL;	
+		for (i = 0; buffer[i] != '\n' && buffer[i] != '\0'; ++i)
 		{
-			fields[field_count] = calloc(1, strlen(token) + 1);
-			strcpy(fields[field_count], token);
-			field_count++;
-			token = strtok(NULL, "\t");
+			
+			size_t token_len = i - start + (buffer[i] != '\t' ? 1 : 0);
+			buf = malloc(token_len + 1);
+			if (!buf)
+			{
+				perror("parse buf malloc");
+				ERR_EXIT;
+			}
+			
+			memcpy(buf, copy + start, token_len);
+			buf[token_len] = '\0';
+			tokens[token_idx++] = buf;
+			start = i + 1;
 		}
 		
-		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
+		Location *local =  NULL;
+		if (token_idx > 1 && strcasestr(tokens[0], search) != NULL)
 		{
-			Location *location = calloc(1, sizeof(Location));
-			location->city = fields[2];
-			location->state = fields[9];
-			location->country = fields[8];
-			location->timezone = fields[14];
-			location->latitude = fields[4];
-			location->longitude = fields[5];
-			choices[i++] = location;
+			local = calloc(1, sizeof(Location));
+			if (!local)
+			{
+				perror("parse local calloc");
+				ERR_EXIT;
+			}
+			local->city = strdup(tokens[2]);
+			local->state = strdup(tokens[9]);
+			local->country = strdup(tokens[8]);
+			local->timezone = strdup(tokens[17]);
+			local->latitude = strdup(tokens[4]);
+			local->longitude = strdup(tokens[5]);
+			choices[choice_count++] = local;
+			printw("test: %s", local->city);
 		}
+		else
+			free(local);
+			
+		for (size_t j = 0; j < token_idx; ++j)
+			free(tokens[j]);
+		
 		free(copy);
+		token_idx = 0;
+		start = 0;
 	}
-	return i;
+	return choice_count;
 }
 
 void print_menu(Location **choices, size_t n_choices)
@@ -68,24 +89,25 @@ void print_menu(Location **choices, size_t n_choices)
 	int c;
 	ITEM **cities;
 	MENU *city_menu;
-	char buffer[256];
+	char buffer[256] = {0};
 	cities = calloc(n_choices + 1, sizeof(ITEM *));
 	if (!cities)
 	{
 		perror("cities calloc");
 		ERR_EXIT;
 	}
-	// stores the combined_location pointer in the below loop
-	// to be freed later
-	char **freecombined = malloc (n_choices * sizeof(char *));
-	if (!freecombined)
-	{
-		perror("freecombined malloc");
-		ERR_EXIT;
-	}
+
+	char *combined_location = {NULL};
 
 	for (size_t i = 0; i < n_choices; ++i)
 	{
+		combined_location = malloc(256);
+		if(!combined_location)
+		{
+			perror("combined location malloc");
+			ERR_EXIT;
+		}
+	
 		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %-10s %-5s %-5s %s",
 			choices[i]->city,
 			choices[i]->state,
@@ -94,15 +116,8 @@ void print_menu(Location **choices, size_t n_choices)
 			choices[i]->latitude,
 			choices[i]->longitude);
 		
-	char *combined_location = calloc(1, strlen(buffer) + 1);
-		if(!combined_location)
-		{
-			perror("combined location malloc");
-			ERR_EXIT;
-		}
-	
+
 		strcpy(combined_location, buffer);
-		freecombined[i] = combined_location;
 		cities[i] = new_item(combined_location, NULL);
 	}
 	cities[n_choices] = NULL;
@@ -113,7 +128,7 @@ void print_menu(Location **choices, size_t n_choices)
 		fprintf(stderr, "ERROR: new_menu failed!");
 		getch();
 		endwin();
-		free(freecombined);
+		free(combined_location);
 		return;
 	}
 	menu_opts_off(city_menu, O_NONCYCLIC);
@@ -124,7 +139,7 @@ void print_menu(Location **choices, size_t n_choices)
 		fprintf(stderr, "ERROR: post_menu failed!, code %d", post_result);
 		getch();
 		endwin();
-		free(freecombined);
+		free(combined_location);
 		return;
 	}
 	
@@ -148,8 +163,12 @@ void print_menu(Location **choices, size_t n_choices)
 	
 	unpost_menu(city_menu);
 	free_menu(city_menu);
-	free(cities);
-	free(freecombined);
+	for (size_t i = 0; i < n_choices; ++i)
+	{
+		free((char *)item_name(cities[i]));
+		free_item(cities[i]);
+	}
+	free(combined_location);
 }
 		
 
@@ -201,7 +220,8 @@ int main_search(char *argv)
 	clear();
 	refresh();
 	fclose(fp);
-	free(choices);
+	for (size_t i = 0; i < n_choices; ++i)
+		free(choices[i]);
 	endwin();
 	return 0;
 }
