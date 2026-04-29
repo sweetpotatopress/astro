@@ -204,6 +204,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 				field_to_member(cdata_form_win, cdata, loc,
 				cdata_form, cdata_field);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
+				//validates every field, in case user didnt hit enter
 				
 				field_label(i, starty, startx);
 				
@@ -222,6 +223,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 		}
 		refresh();
 	}
+	//validates every field, in case user didnt hit enter
 	for (i = 1; i < 9; i++)
 	{
 		set_current_field(cdata_form, cdata_field[i]);
@@ -321,23 +323,41 @@ void reset_struct(struct tm *cdata)
 	cdata->tm_year += 1900;
 }
 
-void draw_circle(int maxy, int maxx, int radius, chtype ch)
+void draw_circle(WINDOW *main_win, int maxy, int maxx, int radius, chtype ch)
 {
-	int center_x = maxx /2;
+	int center_x = maxx / 2;
 	int center_y = maxy / 2;
 	
-	for (int angle = 0; angle < 360; angle +=5)
+	int x = 0;
+	int y = radius;
+	int d = 3 -2 * radius;
+	
+	while (x <= y)
 	{
-		double rad = angle * 3.14159 / 180.0;
-		int x = center_x + (int)(radius * cos(rad));
-		int y = center_y + (int)(radius * sin(rad) * 0.5);
+		mvwaddch(main_win, center_y + y / 2, center_x + x, ch);
+		mvwaddch(main_win, center_y + y / 2, center_x - x, ch);
+		mvwaddch(main_win, center_y - y / 2, center_x + x, ch);
+		mvwaddch(main_win, center_y - y / 2, center_x - x, ch);
 		
-		mvaddch(y, x, ch);
+		mvwaddch(main_win, center_y + x / 2, center_x + y, ch);
+		mvwaddch(main_win, center_y + x / 2, center_x - y, ch);
+		mvwaddch(main_win, center_y - x / 2, center_x + y, ch);
+		mvwaddch(main_win, center_y - x / 2, center_x - y, ch);
+	
+		if (d < 0)
+			d = d + 4 * x + 6;
+		else
+		{
+			d = d + 4 * (x - y) + 10;
+			y--;
+		}
+		x++;
 	}
-}	
+}
 
 int main()
 {
+	WINDOW *main_win;
 	int iret, iflag, ipl, i;
 	double xx[6];
 	char serr[AS_MAXCH];
@@ -369,8 +389,6 @@ int main()
 	&p_deg->dmars, &p_deg->djup,
 	&p_deg->dsat};
 	
-	//WINDOW *main;
-	//PANEL *main_panel;
 	int maxy, maxx;
 	
 	initscr();
@@ -378,10 +396,9 @@ int main()
 	raw();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
 
-	//main = newwin(maxy, maxx, 0, 0);
-	//main_panel = new_panel(main);
-	//update_panels();
-	doupdate();
+	main_win = newwin(maxy, maxx, 0, 0);
+	box(main_win, 0, 0);
+	wrefresh(main_win);
 	
 	ichart_data(cdata, loc); //this has to go before swe_julday
 	chart_timeset(cdata, loc);
@@ -395,8 +412,8 @@ int main()
 	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
 	refresh();
 	
-	draw_circle(maxy, maxx, (maxx / 2), '*');
-	//printw("\njulian day:%lf\n", jul_day_UT);
+	draw_circle(main_win, maxy, maxx, (maxx / 2), '*');
+	wrefresh(main_win);
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_SUN, i = 0; ipl <= SE_SATURN; ipl++, i++)
@@ -432,10 +449,12 @@ int main()
 	{
 		printw("H:%2d  %10.6lf\n", i, cusps[i]);
 	}
-	draw_circle(maxy, maxx, maxx / 2, '*');
+	draw_circle(main_win, maxy, maxx, maxx / 2, '*');
+	wrefresh(main_win);
 	
 	refresh();
 	getch();
+	delwin(main_win);
 	endwin();
 	swe_close();
 	free(cdata);
