@@ -98,7 +98,7 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 	return i;
 }
 
-void print_menu(Location **choices, size_t n_choices)
+void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 {
 	int c;
 	ITEM **cities;
@@ -139,6 +139,7 @@ void print_menu(Location **choices, size_t n_choices)
 
 		strcpy(combined_location, buffer);
 		cities[i] = new_item(combined_location, NULL);
+		set_item_userptr(cities[i], (void *)choices[i]);
 	}
 	cities[n_choices] = NULL;
 	
@@ -189,7 +190,8 @@ void print_menu(Location **choices, size_t n_choices)
 	
 	wrefresh(city_win);
 	
-	while((c = getch()) != KEY_F(1))
+	int menu_done = 0;
+	while((c = getch()) != KEY_F(1) && !menu_done)
 	{
 		switch(c)
 		{
@@ -200,7 +202,17 @@ void print_menu(Location **choices, size_t n_choices)
 				menu_driver(city_menu, REQ_UP_ITEM);
 				break;
 			case '\n':
-				menu_driver(city_menu, REQ_TOGGLE_ITEM);
+				ITEM *selected = current_item(city_menu);
+				Location *cdata = (Location *)item_userptr(selected);
+				if (!cdata)
+				{
+					printw("error: userptr NULL");
+					getch();
+				}
+				set_field_buffer(cdata_field[4], 0, cdata->timezone);
+				set_field_buffer(cdata_field[7], 0, cdata->latitude);
+				set_field_buffer(cdata_field[8], 0, cdata->longitude);
+				menu_done = 1;
 				break;
 		}	
 		wrefresh(city_win);
@@ -219,7 +231,7 @@ void print_menu(Location **choices, size_t n_choices)
 }
 		
 
-int main_search(char *argv)
+int main_search(FIELD *cdata_field[], char *argv)
 {
 	FILE *fp;
 	const char *path = "cities";
@@ -263,7 +275,7 @@ int main_search(char *argv)
 		n_choices = location_parse(fp, search, choices);
 	}
 	
-	print_menu(choices, n_choices);
+	print_menu(cdata_field, choices, n_choices);
 	
 	clear();
 	refresh();

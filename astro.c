@@ -41,7 +41,8 @@ void fieldbuffer_trim(FIELD *current, char *buffer)
 }
 
 void field_to_member
-(WINDOW *cdata_form_win, struct tm *cdata, Location *loc, FORM *cdata_form)
+(WINDOW *cdata_form_win, struct tm *cdata, Location *loc, 
+FORM *cdata_form, FIELD *cdata_field[])
 {
 	FIELD *current = current_field(cdata_form);
 	char *buffer = field_buffer(current, 0);
@@ -51,7 +52,7 @@ void field_to_member
 	{
 		case 0:
 			fieldbuffer_trim(current, buffer);
-			main_search(buffer);
+			main_search(cdata_field, buffer);
 			//redraws field underline
 			unpost_form(cdata_form);
 			touchwin(cdata_form_win);
@@ -170,12 +171,12 @@ void ichart_data(struct tm *cdata, Location *loc)
 	field_opts_off(cdata_field[6], O_AUTOSKIP);
 	starty+= 2;
 	// lat. 
-	cdata_field[7] = new_field(1, 8, starty, startx, 0, 0);
+	cdata_field[7] = new_field(1, 11, starty, startx, 0, 0);
 	set_field_back(cdata_field[7], A_UNDERLINE);
 	field_opts_off(cdata_field[7], O_AUTOSKIP);
 	starty+= 2;
 	// long.
-	cdata_field[8] = new_field(1, 8, starty, startx, 0, 0);
+	cdata_field[8] = new_field(1, 11, starty, startx, 0, 0);
 	set_field_back(cdata_field[8], A_UNDERLINE);
 	field_opts_off(cdata_field[8], O_AUTOSKIP);
 	
@@ -199,7 +200,8 @@ void ichart_data(struct tm *cdata, Location *loc)
 		{	
 			case KEY_DOWN: case '\n':
 				form_driver(cdata_form, REQ_VALIDATION);
-				field_to_member(cdata_form_win, cdata, loc,  cdata_form);
+				field_to_member(cdata_form_win, cdata, loc,
+				cdata_form, cdata_field);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
 				
 				field_label(i, starty, startx);

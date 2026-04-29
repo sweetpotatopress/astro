@@ -42,4 +42,5 @@ typedef struct {
 	double dhour; //0.0 .. 23.999999;
 } Location;
 
-int main_search(char *argv);
+int main_search(FIELD *cdata_field[], char *argv);
+
