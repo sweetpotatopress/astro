@@ -358,7 +358,7 @@ void draw_circle(WINDOW *main_win, int maxy, int maxx, int radius, chtype ch)
 int main()
 {
 	WINDOW *main_win;
-	int iret, iflag, ipl, i;
+	int iret, iflag, ipl, i, c, done = 0;
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
@@ -397,63 +397,72 @@ int main()
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
 
 	main_win = newwin(maxy, maxx, 0, 0);
-	box(main_win, 0, 0);
 	wrefresh(main_win);
 	
-	ichart_data(cdata, loc); //this has to go before swe_julday
-	chart_timeset(cdata, loc);
-	reset_struct(cdata);
-	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
-	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
-
-	printw("DST? %d ", cdata->tm_isdst);
-	printw("%d, %d, %d, %d, %d, %f, %f, dhour:%f", 
-	cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
-	cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
-	refresh();
-	
-	draw_circle(main_win, maxy, maxx, (maxx / 2), '*');
-	wrefresh(main_win);
-	
-	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
-	for (ipl = SE_SUN, i = 0; ipl <= SE_SATURN; ipl++, i++)
+	while (!done)
 	{
-		swe_get_planet_name(ipl, spname);
-		spname[7] = '\0';
-		printw("\n%s\t", spname);
-		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
-		if (iret < 0) 
+		ichart_data(cdata, loc); // ----
+		chart_timeset(cdata, loc); // goes before swe_julday
+		reset_struct(cdata); // ----
+		double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
+		cdata->tm_mday, loc->dhour, SE_GREG_CAL);
+
+		printw("DST? %d ", cdata->tm_isdst);
+		printw("%d, %d, %d, %d, %d, %f, %f, dhour:%f", 
+		cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
+		cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
+		refresh();
+		
+		draw_circle(main_win, maxy, maxx, (maxx / 2), '*');
+		wrefresh(main_win);
+		
+		iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+		for (ipl = SE_SUN, i = 0; ipl <= SE_SATURN; ipl++, i++)
+		{
+			swe_get_planet_name(ipl, spname);
+			spname[7] = '\0';
+			printw("\n%s\t", spname);
+			iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
+			if (iret < 0) 
+			{
+				fprintf(stderr, "%s", serr);
+				ERR_EXIT;
+				exit(EXIT_FAILURE);
+			}
+			*p_deg_members[i] = xx[0];
+			printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n",
+			xx[0], xx[1], xx[2], xx[3]);
+			
+		}
+		
+		iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
+		ihsy, cusps, ascmc);
+		if (iret < 0)
 		{
 			fprintf(stderr, "%s", serr);
 			ERR_EXIT;
 			exit(EXIT_FAILURE);
 		}
-		*p_deg_members[i] = xx[0];
-		printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n",
-		xx[0], xx[1], xx[2], xx[3]);
+		printw("asc:%10.6lf\t mc:%10.2lf\n", ascmc[0], ascmc[1]);
+		for (i = 1; i <= 12; i++)
+		{
+			printw("H:%2d  %10.6lf\n", i, cusps[i]);
+		}
+		draw_circle(main_win, maxy, maxx, maxx / 2, '*');
+		wrefresh(main_win);
 		
+		refresh();
+		
+		c = getch();
+		switch(c)
+		{
+			case 'q':
+				done = 1;
+				break;
+			case 'i':
+				break;
+		}
 	}
-	//printw("%f p_deg", p_deg->dsun);
-	//printw("%f sat", p_deg->dsat);
-	
-	iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
-	ihsy, cusps, ascmc);
-	if (iret < 0)
-	{
-		fprintf(stderr, "%s", serr);
-		ERR_EXIT;
-		exit(EXIT_FAILURE);
-	}
-	printw("asc:%10.6lf\t mc:%10.2lf\n", ascmc[0], ascmc[1]);
-	for (i = 1; i <= 12; i++)
-	{
-		printw("H:%2d  %10.6lf\n", i, cusps[i]);
-	}
-	draw_circle(main_win, maxy, maxx, maxx / 2, '*');
-	wrefresh(main_win);
-	
-	refresh();
-	getch();
 	delwin(main_win);
 	endwin();
 	swe_close();
