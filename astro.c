@@ -25,8 +25,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 void fieldbuffer_trim(FIELD *current, char *buffer)
 {
+	//remove trailing spaces in ncurses fieldbuffer
 	int i = 0;
 	
+	//set i to number of field collumns
 	field_info(current, NULL, NULL, NULL, &i, NULL, NULL);
 	
 	while(i >= 0 && (buffer[i] == ' '))
@@ -50,6 +52,7 @@ void field_to_member
 		case 0:
 			fieldbuffer_trim(current, buffer);
 			main_search(buffer);
+			//redraws field underline
 			unpost_form(cdata_form);
 			touchwin(cdata_form_win);
 			post_form(cdata_form);
@@ -73,7 +76,6 @@ void field_to_member
 				ERR_EXIT;
 			}
 			tzset();
-			printw("\t %s", getenv("TZ"));
 			printw("--tzname0 = %s tzname1 = %s", tzname[0], tzname[1]);
 			break;
 		case 5:
@@ -90,86 +92,9 @@ void field_to_member
 			break;
 	}
 }
-void check_dst(struct tm *orig)
+
+void field_label(size_t i, int starty, int startx)
 {
-	char cmd[256] = {0};
-	char buffer[256] = {0};
-	char *tz_name = getenv("TZ");
-	FILE *fp;
-	
-	//calls GNU coreutil date
-	snprintf(cmd, sizeof(cmd), "TZ=%s date -d '%d-%d-%d %d:%d' '+%%Z'", 
-	tz_name, orig->tm_year, orig->tm_mon, orig->tm_mday,
-	orig->tm_hour, orig->tm_min);
-	
-	fp = popen(cmd, "r");
-	if (!fp)
-	{
-		perror("date command fail");
-		ERR_EXIT;
-	}
-	
-	fgets(buffer, sizeof(buffer), fp);
-	buffer[strcspn(buffer, "\n")] = 0;
-	pclose(fp);
-	
-	orig->tm_isdst = 
-	(tzname[1] && strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
-}
-
-void chart_timeset(struct tm *cdata, Location *loc)
-{
-	struct tm *orig = cdata;
-	check_dst(orig);
-	
-	//copy correct isdst and hour before mktime
-	//mktime "corrects" it to system defaults, which can be wrong
-	int isdst = orig->tm_isdst;
-	int tm_hour = orig->tm_hour;
-	int tm_min = orig->tm_min;
-	
-	time_t tret = mktime(orig);
-	localtime_r(&tret, orig);
-	
-	orig->tm_isdst = isdst;
-	orig->tm_hour = tm_hour;
-	orig->tm_min = tm_min;
-
-	long utc_sec = orig->tm_gmtoff;
-	
-	double utc_offset = (double)-utc_sec / 3600;
-	printw("utc_off: %f", utc_offset);
-	double min = (double)orig->tm_min / 60;
-	printw("min: %f", min);
-	
-	double dhour = (double)(orig->tm_hour + utc_offset) + min;
-	printw("dhour: %f", dhour);
-	
-	if(dhour > 23.999999)
-	{
-		dhour -= 23.999999;
-		++orig->tm_mday;
-	}
-	if(dhour < 0)
-	{
-		dhour += 23.999999;
-		--orig->tm_mday;
-	}
-	
-	loc->dhour = dhour; 
-	*cdata = *orig;
-}
-
-void ichart_data(struct tm *cdata, Location *loc)
-{
-
-	WINDOW *cdata_form_win;
-	FIELD *cdata_field[CMAX];
-	FORM *cdata_form;
-	int ch;
-	int starty, startx;
-	size_t i;
-	
 	const char *c_labels[] = {
 		"city search:",
 		"year:",
@@ -183,6 +108,22 @@ void ichart_data(struct tm *cdata, Location *loc)
 		NULL
 	};
 	
+	for (i = 0, starty = 4; i < 9; ++i, starty+= 2)
+			mvprintw(starty, startx - 12, "%s", c_labels[i]);
+	refresh();
+}
+	
+void ichart_data(struct tm *cdata, Location *loc)
+{
+
+	WINDOW *cdata_form_win;
+	FIELD *cdata_field[CMAX];
+	FORM *cdata_form;
+	int ch;
+	int starty, startx;
+	size_t i = 0;
+	
+
 	initscr();
 	cbreak();
 	noecho();
@@ -250,9 +191,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	post_form(cdata_form);
 	refresh();
 	
-	for (i = 0, starty = 4; i < 9; ++i, starty+= 2)
-		mvprintw(starty, startx - 12, "%s", c_labels[i]);
-	refresh();
+	field_label(i, starty, startx);
 	
 	while((ch = getch()) != KEY_F(1))
 	{
@@ -262,8 +201,9 @@ void ichart_data(struct tm *cdata, Location *loc)
 				form_driver(cdata_form, REQ_VALIDATION);
 				field_to_member(cdata_form_win, cdata, loc,  cdata_form);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
-				for (i = 0, starty = 4; i < 9; ++i, starty+= 2)
-					mvprintw(starty, startx - 12, "%s", c_labels[i]);
+				
+				field_label(i, starty, startx);
+				
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
 			case KEY_UP:
@@ -290,6 +230,88 @@ void ichart_data(struct tm *cdata, Location *loc)
 	}
 	endwin();
 }
+void check_dst(struct tm *orig)
+{
+	char cmd[256] = {0};
+	char buffer[256] = {0};
+	char *tz_name = getenv("TZ");
+	FILE *fp;
+	
+	//calls GNU coreutil date
+	snprintf(cmd, sizeof(cmd), "TZ=%s date -d '%d-%d-%d %d:%d' '+%%Z'", 
+	tz_name, orig->tm_year, orig->tm_mon, orig->tm_mday,
+	orig->tm_hour, orig->tm_min);
+	
+	fp = popen(cmd, "r");
+	if (!fp)
+	{
+		perror("date command fail");
+		ERR_EXIT;
+	}
+	
+	fgets(buffer, sizeof(buffer), fp);
+	buffer[strcspn(buffer, "\n")] = 0;
+	pclose(fp);
+	
+	orig->tm_isdst = 
+	(tzname[1] && strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
+}
+
+void chart_timeset(struct tm *cdata, Location *loc)
+{
+	struct tm *orig = cdata;
+	check_dst(orig);
+	
+	//copy correct isdst and hour before mktime
+	//mktime "corrects" it to system defaults, which can be wrong
+	int isdst = orig->tm_isdst;
+	int tm_hour = orig->tm_hour;
+	int tm_min = orig->tm_min;
+	
+	time_t tret = mktime(orig);
+	localtime_r(&tret, orig);
+	
+	orig->tm_isdst = isdst;
+	orig->tm_hour = tm_hour;
+	orig->tm_min = tm_min;
+
+	long utc_sec = orig->tm_gmtoff;
+	
+	//get utc offset in seconds, reverse, and display in hours
+	double utc_offset = (double)-utc_sec / 3600;
+	printw("utc_off: %f", utc_offset);
+	
+	//convert inputted minutes to decimal
+	double min = (double)orig->tm_min / 60;
+	printw("min: %f", min);
+	
+	//add inputted hour, utc offset, and minutes to decimal
+	//swe_julday uses 24 hour UTC.
+	double dhour = (double)(orig->tm_hour + utc_offset) + min;
+	printw("dhour: %f", dhour);
+	
+	if(dhour > 23.999999)
+	{
+		dhour -= 23.999999;
+		++orig->tm_mday;
+	}
+	if(dhour < 0)
+	{
+		dhour += 23.999999;
+		--orig->tm_mday;
+	}
+	
+	loc->dhour = dhour; 
+	*cdata = *orig;
+}
+
+void reset_struct(struct tm *cdata)
+{
+	cdata->tm_min += 1;
+	cdata->tm_mon += 1;
+	cdata->tm_year += 1900;
+}
+
 void draw_circle(int maxy, int maxx, int radius, chtype ch)
 {
 	int center_x = maxx /2;
@@ -304,13 +326,6 @@ void draw_circle(int maxy, int maxx, int radius, chtype ch)
 		mvaddch(y, x, ch);
 	}
 }	
-
-void reset_struct(struct tm *cdata)
-{
-	cdata->tm_min += 1;
-	cdata->tm_mon += 1;
-	cdata->tm_year += 1900;
-}
 
 int main()
 {
