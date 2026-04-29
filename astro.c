@@ -562,7 +562,7 @@ int main()
 		for (i = 0; i < 7; ++i)
 		{
 			planet_pos(main_win, i, maxy, maxx,
-			radius - 2, *p_deg_members[i], cusps[1],
+			radius - 4, *p_deg_members[i], cusps[1],
 			pl_sym);
 		}
 		

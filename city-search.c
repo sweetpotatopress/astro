@@ -1,5 +1,4 @@
 /* Copyright (C) 2026 yam lynn
-This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by the 
 Free Software Foundation, either version 3 of the License, or (at your option)
 any later version.
@@ -85,15 +84,22 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
 		{
 			Location *local = calloc(1, sizeof(Location));
-			local->city = 		fields[2];
-			local->state = 		fields[10];
-			local->country =	fields[8];
-			local->timezone = 	fields[17];
-			local->latitude =	fields[4];
-			local->longitude = 	fields[5];
+			if (!local)
+			{
+				perror("local parser");
+				ERR_EXIT;
+			}
+			local->city = 		strdup(fields[2]);
+			local->state = 		strdup(fields[10]);
+			local->country =	strdup(fields[8]);
+			local->timezone = 	strdup(fields[17]);
+			local->latitude =	strdup(fields[4]);
+			local->longitude = 	strdup(fields[5]);
 			choices[i++] = local;
 		}
 		free(copy);
+		for (int j = 0; j < field_count; j++)
+			free(fields[j]);
 	}
 	return i;
 }
@@ -105,8 +111,12 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	MENU *city_menu;
 	WINDOW *city_win;
 	WINDOW *city_subwin;
-	char buffer[1024] = {0};
-	char *combined_location = {NULL};
+	char **strings = calloc(n_choices, sizeof(char *));
+	if (!strings)
+	{
+		perror("strings calloc");
+		ERR_EXIT;
+	}
 	int max_width = 0;
 	
 	cities = calloc(n_choices + 1, sizeof(ITEM *));
@@ -118,14 +128,15 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 
 	for (size_t i = 0; i < n_choices; ++i)
 	{
-		combined_location = malloc(1024);
-		if(!combined_location)
+		strings[i] = malloc(1024);
+		if(!strings)
 		{
 			perror("combined location malloc");
 			ERR_EXIT;
 		}
 	
-		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %.2s %-15s %-5s %s",
+		snprintf(strings[i], 1024,
+		"%-25.25s %.2s %.2s %-15s %-5s %s",
 			choices[i]->city,
 			choices[i]->state,
 			choices[i]->country,
@@ -133,12 +144,11 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 			choices[i]->latitude,
 			choices[i]->longitude);
 		
-		int len = (int)strlen(buffer);
+		int len = (int)strlen(strings[i]);
 		if (len > max_width)
 			max_width = len;
 
-		strcpy(combined_location, buffer);
-		cities[i] = new_item(combined_location, NULL);
+		cities[i] = new_item(strings[i], NULL);
 		set_item_userptr(cities[i], (void *)choices[i]);
 	}
 	cities[n_choices] = NULL;
@@ -148,10 +158,6 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 		{
 			perror("city_menu");
 			getch();
-			endwin();
-			free(combined_location);
-			free(cities);
-			return;
 		}
 	
 	int width = max_width + 4;
@@ -220,12 +226,13 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	unpost_menu(city_menu);
 	touchwin(city_win);
 	wrefresh(city_win);
-	free_menu(city_menu);
+	free_menu(city_menu); //free menu first
 	for (size_t i = 0; i < n_choices; ++i)
 	{
 		free_item(cities[i]);
+		free(strings[i]);
 	}
-	free(combined_location);
+	free(strings);
 	//always delwin subwin first
 	delwin(city_subwin);
 	delwin(city_win);
@@ -281,6 +288,8 @@ int main_search(FIELD *cdata_field[], char *argv)
 	refresh();
 	fclose(fp);
 	endwin();
+	for (size_t j = 0; j < n_choices; ++j)
+		free(choices[j]);
 	free(choices);
 	return 0;
 }
