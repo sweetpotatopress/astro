@@ -77,7 +77,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 				ERR_EXIT;
 			}
 			tzset();
-			printw("--tzname0 = %s tzname1 = %s", tzname[0], tzname[1]);
+			//printw("--tzname0 = %s tzname1 = %s", tzname[0], tzname[1]);
 			break;
 		case 5:
 			cdata->tm_hour = atoi(buffer);
@@ -94,7 +94,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 	}
 }
 
-void field_label(size_t i, int starty, int startx)
+void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
 {
 	const char *c_labels[] = {
 		"city search:",
@@ -110,8 +110,8 @@ void field_label(size_t i, int starty, int startx)
 	};
 	
 	for (i = 0, starty = 4; i < 9; ++i, starty+= 2)
-			mvprintw(starty, startx - 12, "%s", c_labels[i]);
-	refresh();
+			mvwprintw(cdata_form_win, starty, startx - 12, "%s", c_labels[i]);
+	wrefresh(cdata_form_win);
 }
 	
 void ichart_data(struct tm *cdata, Location *loc)
@@ -124,10 +124,17 @@ void ichart_data(struct tm *cdata, Location *loc)
 	int starty, startx;
 	size_t i = 0;
 	
+	int maxy, maxx;
+	getmaxyx(stdscr, maxy, maxx);
 
-	initscr();
 	cbreak();
 	noecho();
+	
+	cdata_form_win = newwin(maxy - 2, maxx - 2, 0, 0);
+	keypad(cdata_form_win, TRUE);
+	clearok(cdata_form_win, TRUE);
+	wclear(cdata_form_win);
+	wrefresh(cdata_form_win);
 	
 	starty = 4;
 	startx = 18;
@@ -180,22 +187,23 @@ void ichart_data(struct tm *cdata, Location *loc)
 	field_opts_off(cdata_field[8], O_AUTOSKIP);
 	
 	cdata_field[9] = NULL;
-	
+
 	cdata_form = new_form(cdata_field);
-	cdata_form_win = newwin(100, 35, 1, 1);
-	
 	set_form_win(cdata_form, cdata_form_win);
 	set_form_sub(cdata_form,
-	derwin(cdata_form_win, 100, 35, 1, 1));
+	derwin(cdata_form_win, maxy - 6, maxx - 6, 0, 0));
 	
+	touchwin(cdata_form_win);
 	post_form(cdata_form);
+	wrefresh(cdata_form_win);
 	
 	set_current_field(cdata_form, cdata_field[0]);
 	
 	wrefresh(cdata_form_win);
-	field_label(i, starty, startx);
+	field_label(cdata_form_win, i, starty, startx);
 	pos_form_cursor(cdata_form);
-	while((ch = getch()) != KEY_F(1))
+	
+	while((ch = wgetch(cdata_form_win)) != KEY_F(1))
 	{
 		switch(ch)
 		{	
@@ -205,7 +213,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 				cdata_form, cdata_field);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
 				
-				field_label(i, starty, startx);
+				field_label(cdata_form_win, i, starty, startx);
 				
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
@@ -232,13 +240,16 @@ void ichart_data(struct tm *cdata, Location *loc)
 	}
 	
 	unpost_form(cdata_form);
+	wclear(cdata_form_win);
+	touchwin(cdata_form_win);
+	wrefresh(cdata_form_win);
 	free_form(cdata_form);
 	
 	for (i = 0; i < 7; ++i)
 	{
 		free_field(cdata_field[i]);
 	}
-	endwin();
+	delwin(cdata_form_win);
 }
 void check_dst(struct tm *orig)
 {
@@ -289,16 +300,16 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	
 	//get utc offset in seconds, reverse, and display in hours
 	double utc_offset = (double)-utc_sec / 3600;
-	printw("utc_off: %f", utc_offset);
+	//printw("utc_off: %f", utc_offset);
 	
 	//convert inputted minutes to decimal
 	double min = (double)orig->tm_min / 60;
-	printw("min: %f", min);
+	//printw("min: %f", min);
 	
 	//add inputted hour, utc offset, and minutes to decimal
 	//swe_julday uses 24 hour UTC.
 	double dhour = (double)(orig->tm_hour + utc_offset) + min;
-	printw("dhour: %f", dhour);
+	//printw("dhour: %f", dhour);
 	
 	if(dhour > 23.999999)
 	{
@@ -322,7 +333,8 @@ void reset_struct(struct tm *cdata)
 	cdata->tm_year += 1900;
 }
 
-void draw_circle(WINDOW *main_win, int maxy, int maxx, int radius, chtype ch)
+void draw_circle(WINDOW *main_win,
+int maxy, int maxx, int radius, chtype ch)
 {
 	int center_x = maxx / 2;
 	int center_y = maxy / 2;
@@ -352,6 +364,20 @@ void draw_circle(WINDOW *main_win, int maxy, int maxx, int radius, chtype ch)
 		}
 		x++;
 	}
+}
+
+void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
+int radius, double angle, char *pl_sym[])
+{
+	int center_x = (maxx / 2);
+	int center_y = (maxy / 2);
+	
+	double rad = angle * 3.15159 / 180.0;
+	
+	int x = center_x + (int)(radius * cos(rad));
+	int y = center_y + (int)(radius * sin(rad) * 0.5);
+	
+	mvwaddstr(main_win, y, x, pl_sym[i]);
 }
 
 int main()
@@ -392,11 +418,11 @@ int main()
 	
 	initscr();
 	getmaxyx(stdscr, maxy, maxx);
-	raw();
+	cbreak();
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
 
 	main_win = newwin(maxy, maxx, 0, 0);
-	keypad(stdscr, TRUE);
+	keypad(main_win, TRUE);
 	wrefresh(main_win);
 	
 	while (!done)
@@ -407,10 +433,10 @@ int main()
 		double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 		cdata->tm_mday, loc->dhour, SE_GREG_CAL);
 
-		printw("DST? %d ", cdata->tm_isdst);
-		printw("%d, %d, %d, %d, %d, %f, %f, dhour:%f", 
-		cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
-		cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
+		//printw("DST? %d ", cdata->tm_isdst);
+		//printw("%d, %d, %d, %d, %d, %f, %f, dhour:%f", 
+		//cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
+		//cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
 		refresh();
 		
 		wrefresh(main_win);
@@ -420,7 +446,7 @@ int main()
 		{
 			swe_get_planet_name(ipl, spname);
 			spname[7] = '\0';
-			printw("\n%s\t", spname);
+			//printw("\n%s\t", spname);
 			iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 			if (iret < 0) 
 			{
@@ -429,8 +455,8 @@ int main()
 				exit(EXIT_FAILURE);
 			}
 			*p_deg_members[i] = xx[0];
-			printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n",
-			xx[0], xx[1], xx[2], xx[3]);
+			//printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n",
+			//xx[0], xx[1], xx[2], xx[3]);
 			
 		}
 		
@@ -442,25 +468,39 @@ int main()
 			ERR_EXIT;
 			exit(EXIT_FAILURE);
 		}
-		printw("asc:%10.6lf\t mc:%10.2lf\n", ascmc[0], ascmc[1]);
+		//printw("asc:%10.6lf\t mc:%10.2lf\n", ascmc[0], ascmc[1]);
 		for (i = 1; i <= 12; i++)
 		{
-			printw("H:%2d  %10.6lf\n", i, cusps[i]);
+			//printw("H:%2d  %10.6lf\n", i, cusps[i]);
 		}
+		
 		int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 2;
 		draw_circle(main_win, maxy, maxx, radius, '*');
+		char *pl_sym[] = {"S", "M", "m", "v", ">", "j", "<"};
+		for (i = 0; i < 7; ++i)
+		{
+			planet_pos(main_win, i, maxy, maxx,
+			radius - 10, *p_deg_members[i], pl_sym);
+		}
 		wrefresh(main_win);
 		
-		refresh();
-		
-		c = getch();
-		switch(c)
+		int chart_done = 0;
+		while(!chart_done && !done)
 		{
-			case 'q':
-				done = 1;
-				break;
-			case 'i':
-				break;
+			c = wgetch(main_win);
+			switch(c)
+			{
+				case 'q':
+					done = 1;
+					chart_done = 1;
+					break;
+				case 'i':
+					wclear(main_win);
+					chart_done = 1;
+					break;
+				default:
+					break;
+			}
 		}
 	}
 	delwin(main_win);

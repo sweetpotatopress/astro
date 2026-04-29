@@ -171,6 +171,10 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 		fprintf(stderr, "ERR: city_win failed");
 		getch();
 	}
+	keypad(city_win, TRUE);
+	clearok(city_win, TRUE);
+	wclear(city_win);
+	wrefresh(city_win);
 	
 	box(city_win, 0, 0);
 	
@@ -180,7 +184,6 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	set_menu_sub(city_menu, city_subwin);
 	menu_opts_off(city_menu, O_NONCYCLIC);
 	
-	
 	int iret = post_menu(city_menu);
 	if (iret != E_OK)
 	{
@@ -188,11 +191,10 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 		getch();
 	}
 	
-	wrefresh(city_win);
-	
 	int menu_done = 0;
-	while((c = getch()) != KEY_F(1) && !menu_done)
+	while(!menu_done)
 	{
+		c = wgetch(city_win);
 		switch(c)
 		{
 			case 'j': case KEY_DOWN:
@@ -204,21 +206,20 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 			case '\n':
 				ITEM *selected = current_item(city_menu);
 				Location *cdata = (Location *)item_userptr(selected);
-				if (!cdata)
-				{
-					printw("error: userptr NULL");
-					getch();
-				}
 				set_field_buffer(cdata_field[4], 0, cdata->timezone);
 				set_field_buffer(cdata_field[7], 0, cdata->latitude);
 				set_field_buffer(cdata_field[8], 0, cdata->longitude);
 				menu_done = 1;
+				break;
+			default:
 				break;
 		}	
 		wrefresh(city_win);
 	}
 	
 	unpost_menu(city_menu);
+	touchwin(city_win);
+	wrefresh(city_win);
 	free_menu(city_menu);
 	for (size_t i = 0; i < n_choices; ++i)
 	{
@@ -257,7 +258,6 @@ int main_search(FIELD *cdata_field[], char *argv)
 	initscr();
 	noecho();
 	cbreak();
-	keypad(stdscr, TRUE);
 
 	n_choices = location_parse(fp, search, choices);
 	
