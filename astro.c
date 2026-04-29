@@ -413,7 +413,6 @@ int main()
 		cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
 		refresh();
 		
-		draw_circle(main_win, maxy, maxx, (maxx / 2), '*');
 		wrefresh(main_win);
 		
 		iflag = SEFLG_SWIEPH | SEFLG_SPEED;
@@ -448,7 +447,8 @@ int main()
 		{
 			printw("H:%2d  %10.6lf\n", i, cusps[i]);
 		}
-		draw_circle(main_win, maxy, maxx, maxx / 2, '*');
+		int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 2;
+		draw_circle(main_win, maxy, maxx, radius, '*');
 		wrefresh(main_win);
 		
 		refresh();
