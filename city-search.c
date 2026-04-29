@@ -18,6 +18,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 char* strtok_E(char *str, const char *delim)
 {
+	//strtok that doesnt skip repeating delim's.
+	//correctly parses geonames data :3
+	
 	static char *next_pos = NULL;
 	char *token_start;
 	static char empty_token[] = "E";
@@ -79,10 +82,9 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 			token = strtok_E(NULL, "\t");
 		}
 		
-		Location *local = NULL;
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
 		{
-			local = calloc(1, sizeof(Location));
+			Location *local = calloc(1, sizeof(Location));
 			local->city = 		fields[2];
 			local->state = 		fields[10];
 			local->country =	fields[8];
@@ -101,7 +103,12 @@ void print_menu(Location **choices, size_t n_choices)
 	int c;
 	ITEM **cities;
 	MENU *city_menu;
-	char buffer[256] = {0};
+	WINDOW *city_win;
+	WINDOW *city_subwin;
+	char buffer[1024] = {0};
+	char *combined_location = {NULL};
+	int max_width = 0;
+	
 	cities = calloc(n_choices + 1, sizeof(ITEM *));
 	if (!cities)
 	{
@@ -109,18 +116,16 @@ void print_menu(Location **choices, size_t n_choices)
 		ERR_EXIT;
 	}
 
-	char *combined_location = {NULL};
-
 	for (size_t i = 0; i < n_choices; ++i)
 	{
-		combined_location = malloc(256);
+		combined_location = malloc(1024);
 		if(!combined_location)
 		{
 			perror("combined location malloc");
 			ERR_EXIT;
 		}
 	
-		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %.2s %-10s %-5s %s",
+		snprintf(buffer, sizeof(buffer), "%-25.25s %.2s %.2s %-15s %-5s %s",
 			choices[i]->city,
 			choices[i]->state,
 			choices[i]->country,
@@ -128,49 +133,77 @@ void print_menu(Location **choices, size_t n_choices)
 			choices[i]->latitude,
 			choices[i]->longitude);
 		
+		int len = (int)strlen(buffer);
+		if (len > max_width)
+			max_width = len;
 
 		strcpy(combined_location, buffer);
 		cities[i] = new_item(combined_location, NULL);
 	}
 	cities[n_choices] = NULL;
-
+	
 	city_menu = new_menu((ITEM **)cities);	
-	if (city_menu == NULL) 
+		if (!city_menu) 
+		{
+			perror("city_menu");
+			getch();
+			endwin();
+			free(combined_location);
+			free(cities);
+			return;
+		}
+	
+	int width = max_width + 4;
+	int height = (int)n_choices + 3;
+	
+	if (width > COLS)
+		width = COLS - 2;
+	if (height > LINES)
+		height = 18;
+		
+	int starty = (LINES - height) / 2;
+	int startx = (COLS - width) / 2;
+	
+	city_win = newwin(height, width, starty, startx);
+	if (!city_win)
 	{
-		fprintf(stderr, "ERROR: new_menu failed!");
+		fprintf(stderr, "ERR: city_win failed");
 		getch();
-		endwin();
-		free(combined_location);
-		return;
 	}
+	
+	box(city_win, 0, 0);
+	
+	city_subwin = derwin(city_win, height - 2, width - 2, 1, 1);
+	
+	set_menu_win(city_menu, city_win);
+	set_menu_sub(city_menu, city_subwin);
 	menu_opts_off(city_menu, O_NONCYCLIC);
 	
-	int post_result = post_menu(city_menu);
-	if (post_result != E_OK)
+	
+	int iret = post_menu(city_menu);
+	if (iret != E_OK)
 	{
-		fprintf(stderr, "ERROR: post_menu failed!, code %d", post_result);
+		fprintf(stderr, "ERR: post_menu failed!, %d", iret);
 		getch();
-		endwin();
-		free(combined_location);
-		return;
 	}
 	
-	refresh();
-
+	wrefresh(city_win);
+	
 	while((c = getch()) != KEY_F(1))
 	{
 		switch(c)
 		{
-			case 'j':
+			case 'j': case KEY_DOWN:
 				menu_driver(city_menu, REQ_DOWN_ITEM);
 				break;
-			case 'k':
+			case 'k': case KEY_UP:
 				menu_driver(city_menu, REQ_UP_ITEM);
 				break;
 			case '\n':
 				menu_driver(city_menu, REQ_TOGGLE_ITEM);
 				break;
-		}
+		}	
+		wrefresh(city_win);
 	}
 	
 	unpost_menu(city_menu);
@@ -180,6 +213,9 @@ void print_menu(Location **choices, size_t n_choices)
 		free_item(cities[i]);
 	}
 	free(combined_location);
+	//always delwin subwin first
+	delwin(city_subwin);
+	delwin(city_win);
 }
 		
 
@@ -189,8 +225,9 @@ int main_search(char *argv)
 	const char *path = "cities";
 	char *search = argv;
 	size_t n_choices = 0;
+	const size_t max_search = 100;
 	
-	Location **choices = calloc(1, sizeof(Location *) * 100);
+	Location **choices = calloc(1, sizeof(Location *) * max_search);
 	if (!choices)
 	{
 		perror("choices calloc");
@@ -212,7 +249,7 @@ int main_search(char *argv)
 
 	n_choices = location_parse(fp, search, choices);
 	
-	if (n_choices >= 100)
+	if (n_choices >= max_search)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
 		getch();
@@ -231,7 +268,7 @@ int main_search(char *argv)
 	clear();
 	refresh();
 	fclose(fp);
-	free(choices);
 	endwin();
+	free(choices);
 	return 0;
 }
