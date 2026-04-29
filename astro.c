@@ -367,17 +367,44 @@ int maxy, int maxx, int radius, chtype ch)
 }
 
 void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double angle, char *pl_sym[])
+int radius, double angle, double asc, char *pl_sym[])
 {
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
-	double rad = angle * 3.15159 / 180.0;
+	double rad = (angle - asc) * 3.15159 / 180.0;
 	
-	int x = center_x + (int)(radius * cos(rad));
+	int x = center_x - (int)(radius * cos(rad));
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
 	
 	mvwaddstr(main_win, y, x, pl_sym[i]);
+}
+
+void draw_house(WINDOW *main_win, int maxy, int maxx, 
+int radius, double angle, chtype ch)
+{
+	double rad = angle * 3.15159 / 180.0;
+	
+	int center_x = maxx / 2;
+	int center_y = maxy / 2;
+	
+	int edge_x = center_x - (int)(radius * cos(rad));
+	int edge_y = center_y + (int)(radius * sin(rad) * 0.5);
+	
+	int half_x = center_x - (int)((radius / 2) * cos(rad));
+	int half_y = center_y + (int)((radius / 2)  * sin(rad) * 0.5);
+	
+	int dx = edge_x - half_x;
+	int dy = edge_y - half_y;
+	
+	int distance = (int)sqrt(dx * dx + dy * dy);
+	
+	for(int i = 0; i <= distance; i++)
+	{
+		int x = half_x + (dx * i) / distance;
+		int y = half_y + (dy * i) / distance;
+		mvwaddch(main_win, y, x, ch);
+	}
 }
 
 int main()
@@ -427,6 +454,7 @@ int main()
 	
 	while (!done)
 	{
+		curs_set(1);
 		ichart_data(cdata, loc); // ----
 		chart_timeset(cdata, loc); // goes before swe_julday
 		reset_struct(cdata); // ----
@@ -474,14 +502,22 @@ int main()
 			//printw("H:%2d  %10.6lf\n", i, cusps[i]);
 		}
 		
+		curs_set(0);
 		int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 2;
-		draw_circle(main_win, maxy, maxx, radius, '*');
-		char *pl_sym[] = {"S", "M", "m", "v", ">", "j", "<"};
+		draw_circle(main_win, maxy, maxx, radius, '.');
+		draw_circle(main_win, maxy, maxx, radius / 2, '.');
+		for (i = 0; i < 13; ++i)
+		{
+			draw_house(main_win, maxy, maxx, radius,
+			cusps[i], '.');
+		}
+		char *pl_sym[] = {"S", "M", "me", "V", "ma", "j", "sa"};
 		for (i = 0; i < 7; ++i)
 		{
 			planet_pos(main_win, i, maxy, maxx,
-			radius - 10, *p_deg_members[i], pl_sym);
+			radius - 7, *p_deg_members[i], cusps[1], pl_sym);
 		}
+		
 		wrefresh(main_win);
 		
 		int chart_done = 0;
