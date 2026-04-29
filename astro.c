@@ -1,7 +1,6 @@
 /* Copyright (C) 2026 yam lynn
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by the 
-Free Software Foundation, either version 3 of the License, or (at your option)
 any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -20,8 +19,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <panel.h>
 #include "astro.h"
 #include "city-search.c"
-
-#define CMAX 10
 
 void fieldbuffer_trim(FIELD *current, char *buffer)
 {
@@ -70,6 +67,12 @@ FORM *cdata_form, FIELD *cdata_field[])
 			cdata->tm_mday = atoi(buffer);
 			break;
 		case 4:
+			cdata->tm_hour = atoi(buffer);
+			break;
+		case 5:
+			cdata->tm_min = atoi(buffer);
+			break;
+		case 6:
 			fieldbuffer_trim(current, buffer);
 			if (setenv("TZ", buffer, 1) != 0)
 			{
@@ -77,12 +80,6 @@ FORM *cdata_form, FIELD *cdata_field[])
 				ERR_EXIT;
 			}
 			tzset();
-			break;
-		case 5:
-			cdata->tm_hour = atoi(buffer);
-			break;
-		case 6:
-			cdata->tm_min = atoi(buffer) - 1;
 			break;
 		case 7:
 			loc->dlat = atof(buffer);
@@ -100,9 +97,9 @@ void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
 		"year:",
 		"month:",
 		"day:",
-		"timezone:",
 		"hour:",
 		"minute:",
+		"timezone:",
 		"lat.",
 		"long.",
 		NULL
@@ -117,7 +114,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 {
 
 	WINDOW *cdata_form_win;
-	FIELD *cdata_field[CMAX];
+	FIELD *cdata_field[10];
 	FORM *cdata_form;
 	int ch;
 	int starty, startx;
@@ -159,22 +156,22 @@ void ichart_data(struct tm *cdata, Location *loc)
 	set_field_back(cdata_field[3], A_UNDERLINE);
 	field_opts_off(cdata_field[3], O_AUTOSKIP);
 	starty += 2;
-	// timezone
-	cdata_field[4] = new_field(1, 25, starty, startx, 0, 0);
-	set_field_back(cdata_field[4], A_UNDERLINE);
-	field_opts_off(cdata_field[4], O_STATIC);
-	field_opts_off(cdata_field[4], O_AUTOSKIP);
-	starty += 2;
 	// hour
+	cdata_field[4] = new_field(1, 3, starty, startx, 0, 0);
+	set_field_back(cdata_field[4], A_UNDERLINE);
+	field_opts_off(cdata_field[4], O_AUTOSKIP);
+	starty+= 2;
+	// minute
 	cdata_field[5] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[5], A_UNDERLINE);
 	field_opts_off(cdata_field[5], O_AUTOSKIP);
 	starty+= 2;
-	// minute
-	cdata_field[6] = new_field(1, 3, starty, startx, 0, 0);
+	// timezone
+	cdata_field[6] = new_field(1, 25, starty, startx, 0, 0);
 	set_field_back(cdata_field[6], A_UNDERLINE);
+	field_opts_off(cdata_field[6], O_STATIC);
 	field_opts_off(cdata_field[6], O_AUTOSKIP);
-	starty+= 2;
+	starty += 2;
 	// lat. 
 	cdata_field[7] = new_field(1, 11, starty, startx, 0, 0);
 	set_field_back(cdata_field[7], A_UNDERLINE);
@@ -324,7 +321,6 @@ void chart_timeset(struct tm *cdata, Location *loc)
 
 void reset_struct(struct tm *cdata)
 {
-	cdata->tm_min += 1;
 	cdata->tm_mon += 1;
 	cdata->tm_year += 1900;
 }
@@ -363,8 +359,11 @@ int maxy, int maxx, int radius, chtype ch)
 }
 
 void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double angle, double asc, char *pl_sym[])
+int radius, double angle, double asc)
 {
+	char *pl_sym[] = {"[Su]", "[Mo]", "[Me]",
+	"[V]", "[Ma]", "[J]", "[Sa]"};
+	
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
@@ -385,6 +384,7 @@ int radius, double angle, double asc, char *pl_sym[])
 		offsetx += 3;
 	}
 	
+	//print planets degree
 	char buffer[56];
 	snprintf(buffer, sizeof(buffer), "%d", (int)angle % 30);
 	mvwaddstr(main_win, y - 1, x, buffer);
@@ -393,8 +393,9 @@ int radius, double angle, double asc, char *pl_sym[])
 }
 
 void ascmc_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double angle, double asc, char *ascmc_sym[])
+int radius, double angle, double asc)
 {
+	char *ascmc_sym[] = {"as", "mc"};
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
@@ -410,8 +411,14 @@ int radius, double angle, double asc, char *ascmc_sym[])
 }
 
 void zo_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double angle, double asc, char *zo_sym[])
+int radius, double angle, double asc)
 {
+		
+	char *zo_sym[] = {NULL, "aries", "taurus", "gemini", "cancer",
+	"leo", "virgo", "libra", "scor.", "sag.",
+	"cap.", "aqua.", "pisces"};
+	
+	
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
@@ -521,7 +528,6 @@ int main()
 				exit(EXIT_FAILURE);
 			}
 			*p_deg_members[i] = xx[0];
-			
 		}
 		
 		iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
@@ -535,42 +541,38 @@ int main()
 		
 		curs_set(0);
 		int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
+		//outer circle
 		draw_circle(main_win, maxy, maxx, radius, '.');
+		//inner circle
 		draw_circle(main_win, maxy, maxx, (radius / 2) - 1, '.');
+		
 		for (i = 0; i < 13; ++i)
 		{
 			draw_house(main_win, maxy, maxx, radius,
 			cusps[i], '.');
 		}
 		
-		int asc_sign = (int)(ascmc[0] / 30);
-		
-		char *zo_sym[] = {NULL, "aries", "taurus", "gemini", "cancer",
-		"leo", "virgo", "libra", "scorpio", "sagitarius",
-		"capricorn", "aquarius", "pisces"};
 		for (i = 1; i < 13; ++i)
 		{
+			int asc_sign = (int)(ascmc[0] / 30);
 			int sign_display = ((i + asc_sign - 1) % 12);
 			if (sign_display == 0)
 				sign_display = 12;
+	
 			zo_pos(main_win, sign_display, maxy, maxx,
-			radius + 3, cusps[i], ascmc[0], zo_sym);
+			radius + 3, cusps[i], ascmc[0]);
 		}
 	
-		char *pl_sym[] = {"[Su]", "[Mo]", "[Me]",
-		"[V]", "[Ma]", "[J]", "[Sa]"};
 		for (i = 0; i < 7; ++i)
 		{
 			planet_pos(main_win, i, maxy, maxx,
-			radius - 4, *p_deg_members[i], cusps[1],
-			pl_sym);
+			radius - 4, *p_deg_members[i], cusps[1]);
 		}
 		
-		char *ascmc_sym[] = {"as", "mc"};
 		for (i = 0; i < 2; ++i)
 		{
 			ascmc_pos(main_win, i, maxy, maxx,
-			radius - 9, ascmc[i], cusps[1], ascmc_sym);
+			radius - 9, ascmc[i], cusps[1]);
 		}
 			
 		wrefresh(main_win);
