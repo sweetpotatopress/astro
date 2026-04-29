@@ -194,6 +194,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	
 	field_label(i, starty, startx);
 	
+	pos_form_cursor(cdata_form);
 	while((ch = getch()) != KEY_F(1))
 	{
 		switch(ch)
@@ -219,8 +220,14 @@ void ichart_data(struct tm *cdata, Location *loc)
 				form_driver(cdata_form, ch);
 				break;
 		}
-		pos_form_cursor(cdata_form);
 		refresh();
+	}
+	for (i = 1; i < 9; i++)
+	{
+		set_current_field(cdata_form, cdata_field[i]);
+		form_driver(cdata_form, REQ_VALIDATION);
+		field_to_member(cdata_form_win, cdata, loc, 
+		cdata_form, cdata_field);
 	}
 	
 	unpost_form(cdata_form);
