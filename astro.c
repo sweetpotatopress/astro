@@ -77,7 +77,6 @@ FORM *cdata_form, FIELD *cdata_field[])
 				ERR_EXIT;
 			}
 			tzset();
-			//printw("--tzname0 = %s tzname1 = %s", tzname[0], tzname[1]);
 			break;
 		case 5:
 			cdata->tm_hour = atoi(buffer);
@@ -300,16 +299,13 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	
 	//get utc offset in seconds, reverse, and display in hours
 	double utc_offset = (double)-utc_sec / 3600;
-	//printw("utc_off: %f", utc_offset);
 	
 	//convert inputted minutes to decimal
 	double min = (double)orig->tm_min / 60;
-	//printw("min: %f", min);
 	
 	//add inputted hour, utc offset, and minutes to decimal
 	//swe_julday uses 24 hour UTC.
 	double dhour = (double)(orig->tm_hour + utc_offset) + min;
-	//printw("dhour: %f", dhour);
 	
 	if(dhour > 23.999999)
 	{
@@ -377,7 +373,54 @@ int radius, double angle, double asc, char *pl_sym[])
 	int x = center_x - (int)(radius * cos(rad));
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
 	
-	mvwaddstr(main_win, y, x, pl_sym[i]);
+	int offsetx = 0;
+	for (int j = 0; j < 7; j++)
+	{
+		if (i == j)
+		continue;
+	double anglediff = fabs(angle);
+	if (anglediff > 180)
+		anglediff = 360 - anglediff;
+	if (anglediff < 4)
+		offsetx += 3;
+	}
+	
+	char buffer[56];
+	snprintf(buffer, sizeof(buffer), "%d", (int)angle % 30);
+	mvwaddstr(main_win, y - 1, x, buffer);
+	
+	mvwaddstr(main_win, y, x + offsetx, pl_sym[i]);
+}
+
+void ascmc_pos(WINDOW *main_win, int i, int maxy, int maxx,
+int radius, double angle, double asc, char *ascmc_sym[])
+{
+	int center_x = (maxx / 2);
+	int center_y = (maxy / 2);
+	
+	double rad = (angle - asc) * 3.15159 / 180.0;
+	
+	int x = center_x - (int)(radius * cos(rad));
+	int y = center_y + (int)(radius * sin(rad) * 0.5);
+	
+	mvwaddstr(main_win, y, x, ascmc_sym[i]);
+	char buffer[56];
+	snprintf(buffer, sizeof(buffer), "%d", (int)angle % 30);
+	mvwaddstr(main_win, y - 1, x, buffer);
+}
+
+void zo_pos(WINDOW *main_win, int i, int maxy, int maxx,
+int radius, double angle, double asc, char *zo_sym[])
+{
+	int center_x = (maxx / 2);
+	int center_y = (maxy / 2);
+	
+	double rad = (angle - asc) * 3.15159 / 180.0;
+	
+	int x = center_x - (int)(radius * cos(rad));
+	int y = center_y + (int)(radius * sin(rad) * 0.5);
+	
+	mvwaddstr(main_win, y, x, zo_sym[i]);
 }
 
 void draw_house(WINDOW *main_win, int maxy, int maxx, 
@@ -461,10 +504,6 @@ int main()
 		double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 		cdata->tm_mday, loc->dhour, SE_GREG_CAL);
 
-		//printw("DST? %d ", cdata->tm_isdst);
-		//printw("%d, %d, %d, %d, %d, %f, %f, dhour:%f", 
-		//cdata->tm_year, cdata->tm_mon, cdata->tm_mday,
-		//cdata->tm_hour, cdata->tm_min, loc->dlon, loc->dlat, loc->dhour);
 		refresh();
 		
 		wrefresh(main_win);
@@ -474,7 +513,6 @@ int main()
 		{
 			swe_get_planet_name(ipl, spname);
 			spname[7] = '\0';
-			//printw("\n%s\t", spname);
 			iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 			if (iret < 0) 
 			{
@@ -483,8 +521,6 @@ int main()
 				exit(EXIT_FAILURE);
 			}
 			*p_deg_members[i] = xx[0];
-			//printw("%10.6lf\t%9.6lf\t%9.6lf\t%9.6lf\n",
-			//xx[0], xx[1], xx[2], xx[3]);
 			
 		}
 		
@@ -496,28 +532,42 @@ int main()
 			ERR_EXIT;
 			exit(EXIT_FAILURE);
 		}
-		//printw("asc:%10.6lf\t mc:%10.2lf\n", ascmc[0], ascmc[1]);
-		for (i = 1; i <= 12; i++)
-		{
-			//printw("H:%2d  %10.6lf\n", i, cusps[i]);
-		}
 		
 		curs_set(0);
-		int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 2;
+		int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
 		draw_circle(main_win, maxy, maxx, radius, '.');
-		draw_circle(main_win, maxy, maxx, radius / 2, '.');
+		draw_circle(main_win, maxy, maxx, (radius / 2) - 1, '.');
 		for (i = 0; i < 13; ++i)
 		{
 			draw_house(main_win, maxy, maxx, radius,
 			cusps[i], '.');
 		}
-		char *pl_sym[] = {"S", "M", "me", "V", "ma", "j", "sa"};
+		char *pl_sym[] = {"Su", "Mo", "Me", "V", "Ma", "J", "Sa"};
 		for (i = 0; i < 7; ++i)
 		{
 			planet_pos(main_win, i, maxy, maxx,
-			radius - 7, *p_deg_members[i], cusps[1], pl_sym);
+			radius - 9, *p_deg_members[i], cusps[1],
+			pl_sym);
 		}
+		char *ascmc_sym[] = {"as", "mc"};
+		for (i = 0; i < 2; ++i)
+		{
+			ascmc_pos(main_win, i, maxy, maxx,
+			radius - 5, ascmc[i], cusps[1], ascmc_sym);
+		}
+			
+		int asc_sign = (int)(ascmc[0] / 30);
 		
+		char *zo_sym[] = {NULL, "aries", "taurus", "gemini", "cancer",
+		"leo", "virgo", "libra", "scorpio", "sagitarius",
+		"capricorn", "aquarius", "pisces"};
+		for (i = 1; i < 13; ++i)
+		{
+			int sign_display = ((i - 1 + asc_sign) % 12) + 1;
+			zo_pos(main_win, sign_display, maxy, maxx,
+			radius + 3, cusps[i] + 45, ascmc[0], zo_sym);
+		}
+	
 		wrefresh(main_win);
 		
 		int chart_done = 0;
