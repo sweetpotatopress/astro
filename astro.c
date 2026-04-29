@@ -542,20 +542,7 @@ int main()
 			draw_house(main_win, maxy, maxx, radius,
 			cusps[i], '.');
 		}
-		char *pl_sym[] = {"Su", "Mo", "Me", "V", "Ma", "J", "Sa"};
-		for (i = 0; i < 7; ++i)
-		{
-			planet_pos(main_win, i, maxy, maxx,
-			radius - 9, *p_deg_members[i], cusps[1],
-			pl_sym);
-		}
-		char *ascmc_sym[] = {"as", "mc"};
-		for (i = 0; i < 2; ++i)
-		{
-			ascmc_pos(main_win, i, maxy, maxx,
-			radius - 5, ascmc[i], cusps[1], ascmc_sym);
-		}
-			
+		
 		int asc_sign = (int)(ascmc[0] / 30);
 		
 		char *zo_sym[] = {NULL, "aries", "taurus", "gemini", "cancer",
@@ -563,11 +550,29 @@ int main()
 		"capricorn", "aquarius", "pisces"};
 		for (i = 1; i < 13; ++i)
 		{
-			int sign_display = ((i - 1 + asc_sign) % 12) + 1;
+			int sign_display = ((i + asc_sign - 1) % 12);
+			if (sign_display == 0)
+				sign_display = 12;
 			zo_pos(main_win, sign_display, maxy, maxx,
-			radius + 3, cusps[i] + 45, ascmc[0], zo_sym);
+			radius + 3, cusps[i], ascmc[0], zo_sym);
 		}
 	
+		char *pl_sym[] = {"[Su]", "[Mo]", "[Me]",
+		"[V]", "[Ma]", "[J]", "[Sa]"};
+		for (i = 0; i < 7; ++i)
+		{
+			planet_pos(main_win, i, maxy, maxx,
+			radius - 2, *p_deg_members[i], cusps[1],
+			pl_sym);
+		}
+		
+		char *ascmc_sym[] = {"as", "mc"};
+		for (i = 0; i < 2; ++i)
+		{
+			ascmc_pos(main_win, i, maxy, maxx,
+			radius - 9, ascmc[i], cusps[1], ascmc_sym);
+		}
+			
 		wrefresh(main_win);
 		
 		int chart_done = 0;
