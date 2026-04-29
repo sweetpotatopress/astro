@@ -128,7 +128,6 @@ void ichart_data(struct tm *cdata, Location *loc)
 	initscr();
 	cbreak();
 	noecho();
-	keypad(stdscr, TRUE);
 	
 	starty = 4;
 	startx = 18;
@@ -190,10 +189,11 @@ void ichart_data(struct tm *cdata, Location *loc)
 	derwin(cdata_form_win, 100, 35, 1, 1));
 	
 	post_form(cdata_form);
-	refresh();
 	
+	set_current_field(cdata_form, cdata_field[0]);
+	
+	wrefresh(cdata_form_win);
 	field_label(i, starty, startx);
-	
 	pos_form_cursor(cdata_form);
 	while((ch = getch()) != KEY_F(1))
 	{
@@ -204,7 +204,6 @@ void ichart_data(struct tm *cdata, Location *loc)
 				field_to_member(cdata_form_win, cdata, loc,
 				cdata_form, cdata_field);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
-				//validates every field, in case user didnt hit enter
 				
 				field_label(i, starty, startx);
 				
@@ -221,7 +220,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 				form_driver(cdata_form, ch);
 				break;
 		}
-		refresh();
+		wrefresh(cdata_form_win);
 	}
 	//validates every field, in case user didnt hit enter
 	for (i = 1; i < 9; i++)
@@ -397,6 +396,7 @@ int main()
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
 
 	main_win = newwin(maxy, maxx, 0, 0);
+	keypad(stdscr, TRUE);
 	wrefresh(main_win);
 	
 	while (!done)
