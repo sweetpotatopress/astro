@@ -50,6 +50,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 		case 0:
 			fieldbuffer_trim(current, buffer);
 			main_search(cdata_field, buffer);
+			
 			//redraws field underline
 			unpost_form(cdata_form);
 			touchwin(cdata_form_win);
@@ -199,40 +200,65 @@ void ichart_data(struct tm *cdata, Location *loc)
 	field_label(cdata_form_win, i, starty, startx);
 	pos_form_cursor(cdata_form);
 	
+	
 	while((ch = wgetch(cdata_form_win)) != KEY_F(1))
 	{
-		switch(ch)
+		switch(mode)
 		{	
-			 case '\n':
-				form_driver(cdata_form, REQ_VALIDATION);
-				field_to_member(cdata_form_win, cdata, loc,
-				cdata_form, cdata_field);
-				form_driver(cdata_form, REQ_NEXT_FIELD);
-				
-				field_label(cdata_form_win, i, starty, startx);
-				
-				form_driver(cdata_form, REQ_END_LINE);
+			case NORMAL:
+				switch (ch)
+				{
+					case 'i':
+					mode = INSERT;
+					break;
+					case 'j': case KEY_DOWN:
+						form_driver(cdata_form, REQ_NEXT_FIELD);
+						form_driver(cdata_form, REQ_END_LINE);
+						break;
+					case 'k': case KEY_UP:
+						form_driver(cdata_form, REQ_PREV_FIELD);
+						form_driver(cdata_form, REQ_END_LINE);
+						break;
+				}
 				break;
-			case KEY_DOWN:
-				form_driver(cdata_form, REQ_NEXT_FIELD);
-				form_driver(cdata_form, REQ_END_LINE);
-				break;
-			case KEY_UP:
-				form_driver(cdata_form, REQ_PREV_FIELD);
-				form_driver(cdata_form, REQ_END_LINE);
-				break;
-			case KEY_LEFT:
-				form_driver(cdata_form, REQ_LEFT_CHAR);
-				break;
-			case KEY_RIGHT:
-				form_driver(cdata_form, REQ_RIGHT_CHAR);
-				break;
-			case KEY_BACKSPACE:
-				form_driver(cdata_form, REQ_DEL_PREV);
-				break;
-			default:
-				form_driver(cdata_form, ch);
-				break;
+			case INSERT:
+				switch (ch)
+				{
+					 case '\n':
+						form_driver(cdata_form, REQ_VALIDATION);
+						field_to_member(cdata_form_win, cdata, loc,
+						cdata_form, cdata_field);
+						form_driver(cdata_form, REQ_NEXT_FIELD);
+						
+						field_label(cdata_form_win, i, starty, startx);
+						
+						form_driver(cdata_form, REQ_END_LINE);
+						break;
+					case KEY_DOWN:
+						form_driver(cdata_form, REQ_NEXT_FIELD);
+						form_driver(cdata_form, REQ_END_LINE);
+						break;
+					case KEY_UP:
+						form_driver(cdata_form, REQ_PREV_FIELD);
+						form_driver(cdata_form, REQ_END_LINE);
+						break;
+					case KEY_LEFT:
+						form_driver(cdata_form, REQ_LEFT_CHAR);
+						break;
+					case KEY_RIGHT:
+						form_driver(cdata_form, REQ_RIGHT_CHAR);
+						break;
+					case KEY_BACKSPACE:
+						form_driver(cdata_form, REQ_DEL_PREV);
+						break;
+					case 27:
+						mode = NORMAL;
+						break;
+					default:
+						form_driver(cdata_form, ch);
+						break;
+					}
+					break;
 		}
 		wrefresh(cdata_form_win);
 	}

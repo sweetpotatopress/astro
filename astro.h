@@ -14,6 +14,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #pragma once
 #define ERR_EXIT endwin(); swe_close(); exit(EXIT_FAILURE);
 
+typedef enum { NORMAL, INSERT } Mode;
+Mode mode = NORMAL;
+
 //chart data
 
 typedef struct {
@@ -25,6 +28,7 @@ typedef struct {
 	double djup;
 	double dsat;
 } P_deg;
+
 
 
 //city-search
