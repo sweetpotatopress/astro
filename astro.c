@@ -58,7 +58,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 			doupdate();
 			break;
 		case 1:
-			cdata->tm_year = atoi(buffer) - 1900;
+			cdata->tm_year = atoi(buffer);
 			break;
 		case 2:
 			cdata->tm_mon = atoi(buffer) - 1;
@@ -203,7 +203,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	{
 		switch(ch)
 		{	
-			case KEY_DOWN: case '\n':
+			 case '\n':
 				form_driver(cdata_form, REQ_VALIDATION);
 				field_to_member(cdata_form_win, cdata, loc,
 				cdata_form, cdata_field);
@@ -211,6 +211,10 @@ void ichart_data(struct tm *cdata, Location *loc)
 				
 				field_label(cdata_form_win, i, starty, startx);
 				
+				form_driver(cdata_form, REQ_END_LINE);
+				break;
+			case KEY_DOWN:
+				form_driver(cdata_form, REQ_NEXT_FIELD);
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
 			case KEY_UP:
@@ -282,8 +286,11 @@ void check_dst(struct tm *orig)
 
 void chart_timeset(struct tm *cdata, Location *loc)
 {
+
 	struct tm *orig = cdata;
 	check_dst(orig);
+	//correct tm quirk after GNU date
+	orig->tm_year -= 1900;
 	
 	//copy correct isdst and hour before mktime
 	//mktime "corrects" it to system defaults, which can be wrong
@@ -363,37 +370,45 @@ int maxy, int maxx, int radius, chtype ch)
 }
 
 void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double angle, double asc)
+int radius, double planet, double asc, P_deg *p_deg)
 {
-	const char *pl_sym[] = {"[Su]", "[Mo]", "[Me]",
-	"[V]", "[Ma]", "[J]", "[Sa]"};
+	double p_arr[] = {
+		p_deg->dsun,
+		p_deg->dmoon,
+		p_deg->dmerc,
+		p_deg->dven,
+		p_deg->dmars,
+		p_deg->djup,
+		p_deg->dsat
+	};
+	
+	const char *pl_sym[] = {"[o]", "[(]", "[-o<]",
+	"[~:o]", "[o->]", "[\\-|]", "[h]"};
 	
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
-	double rad = (angle - asc) * 3.15159 / 180.0;
+	double rad = (planet - asc) * 3.15159 / 180.0;
 	
 	int x = center_x - (int)(radius * cos(rad));
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
 	
-	int offsetx = 0;
-	for (int j = 0; j < 7; j++)
+	int offsety = 0;
+	int direction = (sin(rad) < 0) ? 1 : -1;
+	
+	for (int j = 0; j < i; j++)
 	{
-		if (i == j)
-		continue;
-	double anglediff = fabs(angle);
-	if (anglediff > 180)
-		anglediff = 360 - anglediff;
-	if (anglediff < 4)
-		offsetx += 3;
+		if (fabs(planet - p_arr[j]) <= 8)	
+			offsety += 2;
 	}
+	offsety = direction * offsety;
 	
 	//print planets degree
 	char buffer[56];
-	snprintf(buffer, sizeof(buffer), "%d", (int)angle % 30);
-	mvwaddstr(main_win, y - 1, x, buffer);
+	snprintf(buffer, sizeof(buffer), "%d", (int)planet % 30);
+	mvwaddstr(main_win, (y + offsety) - 1, x, buffer);
 	
-	mvwaddstr(main_win, y, x + offsetx, pl_sym[i]);
+	mvwaddstr(main_win, y + offsety, x, pl_sym[i]);
 }
 
 void ascmc_pos(WINDOW *main_win, int i, int maxy, int maxx,
@@ -408,10 +423,22 @@ int radius, double angle, double asc)
 	int x = center_x - (int)(radius * cos(rad));
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
 	
+	if (i == 0) // draw asc line
+	{
+		for (int r = 0; r <= radius; r++)
+		{
+			int line_x = center_x - (int)(r * cos(rad));
+			
+			if (line_x >= 0 && line_x < maxx)
+				mvwaddch(main_win, y, line_x, '-');
+		}
+	}
+	
 	mvwaddstr(main_win, y, x, ascmc_sym[i]);
 	char buffer[56];
 	snprintf(buffer, sizeof(buffer), "%d", (int)angle % 30);
 	mvwaddstr(main_win, y - 1, x, buffer);
+
 }
 
 void zo_pos(WINDOW *main_win, int i, int maxy, int maxx,
@@ -570,13 +597,13 @@ int main()
 		for (i = 0; i < 7; ++i)
 		{
 			planet_pos(main_win, i, maxy, maxx,
-			radius - 4, *p_deg_members[i], cusps[1]);
+			radius - 4, *p_deg_members[i], cusps[1], p_deg);
 		}
 		
 		for (i = 0; i < 2; ++i)
 		{
 			ascmc_pos(main_win, i, maxy, maxx,
-			radius - 9, ascmc[i], cusps[1]);
+			(radius / 2) + 4 , ascmc[i], cusps[1]);
 		}
 			
 		wrefresh(main_win);
