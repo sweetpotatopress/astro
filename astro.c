@@ -217,6 +217,12 @@ void ichart_data(struct tm *cdata, Location *loc)
 				form_driver(cdata_form, REQ_PREV_FIELD);
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
+			case KEY_LEFT:
+				form_driver(cdata_form, REQ_LEFT_CHAR);
+				break;
+			case KEY_RIGHT:
+				form_driver(cdata_form, REQ_RIGHT_CHAR);
+				break;
 			case KEY_BACKSPACE:
 				form_driver(cdata_form, REQ_DEL_PREV);
 				break;
@@ -262,7 +268,7 @@ void check_dst(struct tm *orig)
 	fp = popen(cmd, "r");
 	if (!fp)
 	{
-		perror("date command fail");
+		perror("ERR: date file pointer");
 		ERR_EXIT;
 	}
 	
@@ -283,14 +289,12 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	//mktime "corrects" it to system defaults, which can be wrong
 	int isdst = orig->tm_isdst;
 	int tm_hour = orig->tm_hour;
-	int tm_min = orig->tm_min;
 	
 	time_t tret = mktime(orig);
 	localtime_r(&tret, orig);
 	
 	orig->tm_isdst = isdst;
 	orig->tm_hour = tm_hour;
-	orig->tm_min = tm_min;
 
 	long utc_sec = orig->tm_gmtoff;
 	
@@ -361,7 +365,7 @@ int maxy, int maxx, int radius, chtype ch)
 void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
 int radius, double angle, double asc)
 {
-	char *pl_sym[] = {"[Su]", "[Mo]", "[Me]",
+	const char *pl_sym[] = {"[Su]", "[Mo]", "[Me]",
 	"[V]", "[Ma]", "[J]", "[Sa]"};
 	
 	int center_x = (maxx / 2);
@@ -395,7 +399,7 @@ int radius, double angle, double asc)
 void ascmc_pos(WINDOW *main_win, int i, int maxy, int maxx,
 int radius, double angle, double asc)
 {
-	char *ascmc_sym[] = {"as", "mc"};
+	const char *ascmc_sym[] = {"as", "mc"};
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
@@ -414,7 +418,7 @@ void zo_pos(WINDOW *main_win, int i, int maxy, int maxx,
 int radius, double angle, double asc)
 {
 		
-	char *zo_sym[] = {NULL, "aries", "taurus", "gemini", "cancer",
+	const char *zo_sym[] = {NULL, "aries", "taurus", "gemini", "cancer",
 	"leo", "virgo", "libra", "scor.", "sag.",
 	"cap.", "aqua.", "pisces"};
 	

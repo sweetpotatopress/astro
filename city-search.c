@@ -1,4 +1,5 @@
 /* Copyright (C) 2026 yam lynn
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by the 
 Free Software Foundation, either version 3 of the License, or (at your option)
 any later version.
@@ -81,20 +82,21 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 			token = strtok_E(NULL, "\t");
 		}
 		
+		Location *local = NULL;
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
 		{
-			Location *local = calloc(1, sizeof(Location));
+			local = calloc(1, sizeof(Location));
 			if (!local)
 			{
 				perror("local parser");
 				ERR_EXIT;
 			}
-			local->city = 		strdup(fields[2]);
-			local->state = 		strdup(fields[10]);
-			local->country =	strdup(fields[8]);
-			local->timezone = 	strdup(fields[17]);
-			local->latitude =	strdup(fields[4]);
-			local->longitude = 	strdup(fields[5]);
+			local->city = 		fields[2];	fields[2] = NULL;
+			local->state = 		fields[10];	fields[10] = NULL;
+			local->country =	fields[8];	fields[8] = NULL;
+			local->timezone = 	fields[17]; fields[17] = NULL;
+			local->latitude =	fields[4]; 	fields[4] = NULL;
+			local->longitude = 	fields[5];	fields[5] = NULL;
 			choices[i++] = local;
 		}
 		free(copy);
@@ -111,12 +113,9 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	MENU *city_menu;
 	WINDOW *city_win;
 	WINDOW *city_subwin;
+	//use ** to not lose the pointer after the loop
 	char **strings = calloc(n_choices, sizeof(char *));
-	if (!strings)
-	{
-		perror("strings calloc");
-		ERR_EXIT;
-	}
+	char buffer[1024] = {0};
 	int max_width = 0;
 	
 	cities = calloc(n_choices + 1, sizeof(ITEM *));
@@ -135,7 +134,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 			ERR_EXIT;
 		}
 	
-		snprintf(strings[i], 1024,
+		snprintf(buffer, sizeof(buffer),
 		"%-25.25s %.2s %.2s %-15s %-5s %s",
 			choices[i]->city,
 			choices[i]->state,
@@ -143,8 +142,10 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 			choices[i]->timezone,
 			choices[i]->latitude,
 			choices[i]->longitude);
+			
+			strcpy(strings[i], buffer);
 		
-		int len = (int)strlen(strings[i]);
+		int len = (int)strlen(buffer) + 1;
 		if (len > max_width)
 			max_width = len;
 
@@ -247,7 +248,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	size_t n_choices = 0;
 	const size_t max_search = 100;
 	
-	Location **choices = calloc(1, sizeof(Location *) * max_search);
+	Location **choices = calloc(max_search, sizeof(Location *));
 	if (!choices)
 	{
 		perror("choices calloc");
@@ -271,6 +272,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	{
 		fprintf(stderr, "too many results, be more precise\n");
 		getch();
+		rewind(fp);
 		n_choices = location_parse(fp, search, choices);
 	}
 	
@@ -278,6 +280,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	{
 		fprintf(stderr, "no search results\n");
 		getch();
+		rewind(fp);
 		n_choices = location_parse(fp, search, choices);
 	}
 	
@@ -287,7 +290,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	refresh();
 	fclose(fp);
 	endwin();
-	for (size_t j = 0; j < n_choices; ++j)
+	for (size_t j = 0; j < max_search; ++j)
 		free(choices[j]);
 	free(choices);
 	return 0;
