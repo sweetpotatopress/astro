@@ -465,7 +465,7 @@ int radius, double planet, double asc, P_deg *p_deg)
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
-	double rad = (planet - asc) * 3.15159 / 180.0;
+	double rad = (planet - asc) * M_PI / 180.0;
 	
 	int x = center_x - (int)(radius * cos(rad));
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -473,22 +473,22 @@ int radius, double planet, double asc, P_deg *p_deg)
 	int offsety = 0;
 	int offsetx = 0;
 	int dir_y = (sin(rad) < 0) ? 1 : -1;
-	int dir_x = (cos(rad) < 180) ? 1 : -1;
+	int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
 	
 	for (int j = 0; j < i; j++)
 	{
 		if (fabs(planet - p_arr[j]) <= 8)	
 		{
 			offsety += 3;
-			offsetx -= 3;
+			offsetx -= 2;
 		}
 	}
 	for (int j = 0; j < i; j++)
 	{
 		if (fabs(planet - p_arr[j]) <= 8)	
 		{
-			offsetx += 3;
-			offsety -= 3;
+			offsetx += 5;
+			offsety -= 1;
 		}
 	}
 	
@@ -510,7 +510,7 @@ int radius, double angle, double asc)
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
-	double rad = (angle - asc) * 3.15159 / 180.0;
+	double rad = (angle - asc) * M_PI / 180.0;
 	
 	int x = center_x - (int)(radius * cos(rad));
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -547,7 +547,7 @@ int radius, double angle, double asc)
 	
 	int sign = (((int)asc / 30) * 30) + 15;
 	
-	double rad = (angle - sign) * 3.15159 / 180.0;
+	double rad = (angle - sign) * M_PI / 180.0;
 	
 	int x = center_x - (int)(radius * cos(rad));
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -558,7 +558,7 @@ int radius, double angle, double asc)
 void draw_house(WINDOW *main_win, int maxy, int maxx, 
 int radius, double angle, chtype ch)
 {
-	double rad = angle * 3.15159 / 180.0;
+	double rad = angle * M_PI / 180.0;
 	
 	int center_x = maxx / 2;
 	int center_y = maxy / 2;

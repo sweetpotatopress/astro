@@ -16,3 +16,19 @@
 --F1 to close data entry and open chart
 --i when in chartview to input new data
 --q to quit the program
+
+--license--AGPLv3
+
+TODO
+
+--save and open charts
+--animate chart
+--add birth data to chartview
+--new window with exact planet stats
+--add outers, lot of spirt + fortune
+--build makefile
+--add elemental colors
+--decans and bounds
+--aspects
+--window resize
+--zodiacal releasing
