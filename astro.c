@@ -353,7 +353,12 @@ void check_dst(struct tm *orig)
 		ERR_EXIT;
 	}
 	
-	fgets(buffer, sizeof(buffer), fp);
+	if (fgets(buffer, sizeof(buffer), fp) == NULL)
+	{
+		perror("dst fgets");
+		pclose(fp);
+		ERR_EXIT;
+	}
 	buffer[strcspn(buffer, "\n")] = 0;
 	pclose(fp);
 	

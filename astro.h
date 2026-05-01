@@ -13,11 +13,12 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #pragma once
 #define ERR_EXIT endwin(); swe_close(); exit(EXIT_FAILURE);
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 typedef enum { NORMAL, INSERT } Mode;
 Mode mode = INSERT;
 
-//chart data
+//planet degrees
 
 typedef struct {
 	double dsun;
@@ -29,10 +30,7 @@ typedef struct {
 	double dsat;
 } P_deg;
 
-
-
 //city-search
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 typedef struct {
 	char *city;
