@@ -12,6 +12,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 #include <swephexp.h>
 #include <ncurses.h>
 #include <math.h>
@@ -110,6 +111,48 @@ void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
 			mvwprintw(cdata_form_win, starty, startx - 12, "%s", c_labels[i]);
 	wrefresh(cdata_form_win);
 }
+
+void set_localtime(FIELD *cdata_field[], struct tm *cdata)
+{
+	cdata = malloc(sizeof(struct tm));
+	char buff[128] = {0};
+	ssize_t len = readlink("/etc/localtime", buff, sizeof(buff) - 1);
+	if (len != -1)
+	{
+		buff[len] = 0;
+		
+		char *tz = strstr(buff, "zoneinfo/");
+		if (tz)
+			memmove(buff, tz + 9, strlen(tz + 9) + 1);
+	}
+	setenv("TZ", buff, 1);
+	tzset();
+	
+	time_t now = time(NULL);
+	localtime_r(&now, cdata);
+	set_field_buffer(cdata_field[6], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", cdata->tm_year+1900);
+	set_field_buffer(cdata_field[1], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", cdata->tm_mon + 1);
+	set_field_buffer(cdata_field[2], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", cdata->tm_mday);
+	set_field_buffer(cdata_field[3], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", cdata->tm_hour);
+	set_field_buffer(cdata_field[4], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", cdata->tm_min);
+	set_field_buffer(cdata_field[5], 0, buff);
+	
+}
 	
 void ichart_data(struct tm *cdata, Location *loc)
 {
@@ -200,7 +243,6 @@ void ichart_data(struct tm *cdata, Location *loc)
 	field_label(cdata_form_win, i, starty, startx);
 	pos_form_cursor(cdata_form);
 	
-	
 	while((ch = wgetch(cdata_form_win)) != KEY_F(1))
 	{
 		switch(mode)
@@ -218,6 +260,15 @@ void ichart_data(struct tm *cdata, Location *loc)
 					case 'k': case KEY_UP:
 						form_driver(cdata_form, REQ_PREV_FIELD);
 						form_driver(cdata_form, REQ_END_LINE);
+						break;
+					case 'h': case KEY_LEFT:
+						form_driver(cdata_form, REQ_LEFT_CHAR);
+						break;
+					case 'l': case KEY_RIGHT:
+						form_driver(cdata_form, REQ_RIGHT_CHAR);
+						break;
+					case 27:
+						set_localtime(cdata_field, cdata);
 						break;
 				}
 				break;
