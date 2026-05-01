@@ -1,4 +1,5 @@
--- astroterm --
+-- astroterm -- (not final name)
+calculate astrology charts in your terminal
 
 ---vim bindings
 --hit esc to enter NORMAL mode
