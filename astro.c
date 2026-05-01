@@ -459,8 +459,8 @@ int radius, double planet, double asc, P_deg *p_deg)
 		p_deg->dsat
 	};
 	
-	const char *pl_sym[] = {"[o]", "[(]", "[-o<]",
-	"[~:o]", "[o->]", "[\\-|]", "[h]"};
+	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
+	"(~:o)", "(o->)", "(\\-|)", "(h)"};
 	
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
@@ -476,7 +476,7 @@ int radius, double planet, double asc, P_deg *p_deg)
 	for (int j = 0; j < i; j++)
 	{
 		if (fabs(planet - p_arr[j]) <= 8)	
-			offsety += 2;
+			offsety += 3;
 	}
 	offsety = direction * offsety;
 	
@@ -522,9 +522,9 @@ void zo_pos(WINDOW *main_win, int i, int maxy, int maxx,
 int radius, double angle, double asc)
 {
 		
-	const char *zo_sym[] = {NULL, "aries", "taurus", "gemini", "cancer",
-	"leo", "virgo", "libra", "scor.", "sag.",
-	"cap.", "aqua.", "pisces"};
+	const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
+	"leo", "vir", "lib", "sco", "sag",
+	"cap", "aqu", "pis"};
 	
 	
 	int center_x = (maxx / 2);

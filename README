@@ -1,0 +1,19 @@
+-- astroterm --
+
+---vim bindings
+
+--j == up
+--k == down
+
+--hit esc to enter NORMAL mode
+
+--esc again to fill data with local-time. 
+
+--hit i to enter INSERT mode (on by default)
+
+--up arrow == up
+--down arrow == down
+
+--F1 to close data entry and open chart
+--i when in chatview to input new data
+--q to quit the program
