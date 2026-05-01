@@ -530,7 +530,9 @@ int radius, double angle, double asc)
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
-	double rad = (angle - asc) * 3.15159 / 180.0;
+	int sign = (((int)asc / 30) * 30) + 15;
+	
+	double rad = (angle - sign) * 3.15159 / 180.0;
 	
 	int x = center_x - (int)(radius * cos(rad));
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -663,6 +665,7 @@ int main()
 		for (i = 1; i < 13; ++i)
 		{
 			int asc_sign = (int)(ascmc[0] / 30);
+			
 			int sign_display = ((i + asc_sign - 1) % 12);
 			if (sign_display == 0)
 				sign_display = 12;

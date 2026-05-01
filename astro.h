@@ -15,7 +15,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define ERR_EXIT endwin(); swe_close(); exit(EXIT_FAILURE);
 
 typedef enum { NORMAL, INSERT } Mode;
-Mode mode = NORMAL;
+Mode mode = INSERT;
 
 //chart data
 
