@@ -471,21 +471,36 @@ int radius, double planet, double asc, P_deg *p_deg)
 	int y = center_y + (int)(radius * sin(rad) * 0.5);
 	
 	int offsety = 0;
-	int direction = (sin(rad) < 0) ? 1 : -1;
+	int offsetx = 0;
+	int dir_y = (sin(rad) < 0) ? 1 : -1;
+	int dir_x = (cos(rad) < 180) ? 1 : -1;
 	
 	for (int j = 0; j < i; j++)
 	{
 		if (fabs(planet - p_arr[j]) <= 8)	
+		{
 			offsety += 3;
+			offsetx -= 3;
+		}
 	}
-	offsety = direction * offsety;
+	for (int j = 0; j < i; j++)
+	{
+		if (fabs(planet - p_arr[j]) <= 8)	
+		{
+			offsetx += 3;
+			offsety -= 3;
+		}
+	}
+	
+	offsety = dir_y * offsety;
+	offsetx = dir_x * offsetx;
 	
 	//print planets degree
 	char buffer[56];
 	snprintf(buffer, sizeof(buffer), "%d", (int)planet % 30);
-	mvwaddstr(main_win, (y + offsety) - 1, x, buffer);
+	mvwaddstr(main_win, (y + offsety) - 1, x + offsetx, buffer);
 	
-	mvwaddstr(main_win, y + offsety, x, pl_sym[i]);
+	mvwaddstr(main_win, y + offsety, x + offsetx, pl_sym[i]);
 }
 
 void ascmc_pos(WINDOW *main_win, int i, int maxy, int maxx,
