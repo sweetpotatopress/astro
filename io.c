@@ -28,6 +28,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	FORM *data_dir_form;
 	FIELD *data_dir_field[2];
 	char *tz_name = getenv("TZ");
+	struct stat buff;
 	
 	int ch = 0;
 	int starty, startx, maxy, maxx;
@@ -63,7 +64,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	touchwin(data_dir_win);
 	post_form(data_dir_form);
 	box(data_dir_win, 0, 0);
-	mvwaddstr(data_dir_win, 1, 1, "filename?");
+	mvwaddstr(data_dir_win, 1, 1, "-o--filename?-o");
 	wrefresh(data_dir_win);
 	
 	set_current_field(data_dir_form, data_dir_field[0]);
@@ -80,6 +81,15 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				form_driver(data_dir_form, REQ_VALIDATION);
 				done = 1;
 				break;
+			case KEY_BACKSPACE:
+				form_driver(data_dir_form, REQ_DEL_PREV);
+				break;
+			case KEY_LEFT:
+				form_driver(data_dir_form, REQ_LEFT_CHAR);
+				break;
+			case KEY_RIGHT:
+				form_driver(data_dir_form, REQ_RIGHT_CHAR);
+				break;
 			default:
 				form_driver(data_dir_form, ch);
 				break;
@@ -88,7 +98,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	}
 	
 	char *filename = field_buffer(data_dir_field[0], 0);
-	if (!filename || strlen(filename) == 0)
+	if (!filename)
 	{
 		endwin();
 		wprintw(data_dir_win, "ERR: file has no name");
@@ -97,7 +107,16 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		free(io);
 		return;
 	}
-	size_t i = strlen(filename);
+	
+	// trimming fieldbuffer is unsafe, make copy
+	// check for overwrite
+	char copy[128] = {0};
+	strncpy(copy, filename, sizeof(copy) - 1);
+	size_t i = strlen(copy);
+	
+	while (i > 0 && copy[i-1] == ' ')
+		copy[--i] = '\0';
+		
 	if (i >= 100)
 	{
 		endwin();
@@ -108,18 +127,51 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		return;
 	}
 	
-	//trim filename
-	while (i > 0 && filename[i - 1] == ' ')
-		filename[--i] = '\0';
-
-	char buffer[256] = {0};
-	snprintf(buffer, 256, "%s%s%s",
+	char fn_buff[128];
+	snprintf(fn_buff, 128, "%s%s%s",
 	io->data_dir,
 	io->filepath,
-	filename
+	copy
 	);
 	
-	FILE *ifp = fopen(buffer, "w");
+	if (stat(fn_buff, &buff) == 0)
+	{
+		wclear(data_dir_win);
+		mvwprintw(data_dir_win, 1, 1,
+		"overwrite:'%s'?\n -o--(y/n)-o:", copy);
+		box(data_dir_win, 0, 0);
+		wrefresh(data_dir_win);
+		ch = getch();
+		switch (ch)
+		{
+			case 'y':
+				wclear(data_dir_win);
+				mvwprintw(data_dir_win, 2, 1,
+				"overwritten!--o-");
+				box(data_dir_win, 0, 0);
+				wrefresh(data_dir_win);
+				getch();
+				mode = NORMAL;
+				break;
+			case 'n':
+				wclear(data_dir_win);
+				mvwprintw(data_dir_win, 2, 1, 
+				"your file is safe >w<");
+				box(data_dir_win, 0, 0);
+				wrefresh(data_dir_win);
+				getch();
+				endwin();
+				free(io->data_dir);
+				free(io->filepath);
+				free(io);
+				mode = NORMAL;
+				return;
+			default:
+				ch = getch();
+		}
+	}
+
+	FILE *ifp = fopen(fn_buff, "w");
 	if (!ifp)
 	{
 		endwin();
@@ -129,7 +181,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 			
 	fprintf(ifp, "%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
 		cdata->tm_year,
-		cdata->tm_mon,
+		cdata->tm_mon + 1,
 		cdata->tm_mday,
 		cdata->tm_hour,
 		cdata->tm_min,
@@ -152,6 +204,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 			free_field(data_dir_field[j]);
 		delwin(data_dir_subwin);
 		delwin(data_dir_win);
+		
+		mode = NORMAL;
 }
 
 void load_chart(FIELD *cdata_field[], Io *io)
@@ -160,6 +214,31 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	MENU *load_menu;
 	WINDOW *load_win;
 	WINDOW *load_subwin;
+	DIR *chart_dir;
+	struct dirent *entry;
+	struct stat *st;
+	
+	size_t i = 0;
+	size_t file_count = 0;
+	
+	load_files = calloc(file_count + 1, sizeof(int));
+	if (!load_files)
+	{
+		endwin();
+		perror("load file calloc");
+		ERR_EXIT;
+	}
+	
+	chart_dir = opendir(io->filepath);
+	if (!chart_dir)
+	{
+		endwin();
+		perror("load file opendir");
+		free(io->filepath);
+		free(io->data_dir);
+		free(io);
+		return;
+	}
 	
 }
 
@@ -201,7 +280,7 @@ Location *loc, const char ch)
 		ERR_EXIT;
 	}
 	
-	sprintf(io->filepath, "/astro/charts");
+	sprintf(io->filepath, "/astro/charts/");
 
 	if (ch == 'w')
 		save_chart(cdata, loc, io);
