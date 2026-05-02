@@ -1,22 +1,22 @@
--- astroterm -- (not final name)
-calculate astrology charts in your terminal
+-- astro --
+calculate astrology charts in the linux terminal
 
----vim bindings
---hit esc to enter NORMAL mode
+KEYBINDINGS---o-
 
---j == up
---k == down
+NORMAL MODE - esc
+-draw chart 	- 	enter
+-auto-localtime	-	tab
+-save chart 	-	w
+-navigation		-	hjkl
 
---esc again to fill data with local-time. 
+INSERT MODE - i (on by default)
+-navigation 	-	arrowkeys
 
---hit i to enter INSERT mode (on by default)
+CHART VIEW---o-
+-exit program	-	q
+-new chart		-	i
 
---up arrow == up
---down arrow == down
 
---F1 to close data entry and open chart
---i when in chartview to input new data
---q to quit the program
 
 --license--AGPLv3
 
