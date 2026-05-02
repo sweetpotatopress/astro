@@ -44,6 +44,14 @@ typedef struct {
 	double dhour; //0.0 .. 23.999999;
 } Location;
 
+//io
+
+typedef struct {
+	char *data_dir;
+	char *filepath;
+} Io;
+
 int main_search(FIELD *cdata_field[], char *argv);
-void save_chart(struct tm *cdata, Location *loc);
+void main_io(FIELD *cdata_field[], struct tm *cdata,
+Location *loc, const char ch);
 

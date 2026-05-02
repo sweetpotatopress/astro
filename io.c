@@ -12,11 +12,16 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <unistd.h>
 #include <pwd.h>
+#include <dirent.h>
+#include <string.h>
+#include <sys/stat.h>
 #include <ncurses.h>
 #include <form.h>
+#include <menu.h>
 #include "astro.h"
 
-void save_chart(struct tm *cdata, Location *loc)
+
+void save_chart(struct tm *cdata, Location *loc, Io *io)
 {
 	WINDOW *data_dir_win;
 	WINDOW *data_dir_subwin;
@@ -61,25 +66,6 @@ void save_chart(struct tm *cdata, Location *loc)
 	mvwaddstr(data_dir_win, 1, 1, "filename?");
 	wrefresh(data_dir_win);
 	
-	struct passwd *pw = getpwuid(getuid());
-	if (!pw) 
-	{
-		endwin();
-		perror("petpwuid data");
-		ERR_EXIT;
-	}
-	
-	char *data_dir = 
-	malloc(strlen(pw->pw_dir) + strlen("/.local/share") + 1);
-	if (!data_dir)
-	{
-		endwin();
-		perror("data_dir malloc");
-		ERR_EXIT;
-	}
-	
-	sprintf(data_dir, "%s/.local/share", pw->pw_dir);
-	
 	set_current_field(data_dir_form, data_dir_field[0]);
 	wrefresh(data_dir_win);
 	pos_form_cursor(data_dir_form);
@@ -106,23 +92,34 @@ void save_chart(struct tm *cdata, Location *loc)
 	{
 		endwin();
 		wprintw(data_dir_win, "ERR: file has no name");
-		free(data_dir);
+		free(io->data_dir);
+		free(io->filepath);
+		free(io);
 		return;
 	}
 	size_t i = strlen(filename);
+	if (i >= 100)
+	{
+		endwin();
+		wprintw(data_dir_win, "ERR: name too long");
+		free(io->data_dir);
+		free(io->filepath);
+		free(io);
+		return;
+	}
 	
 	//trim filename
 	while (i > 0 && filename[i - 1] == ' ')
 		filename[--i] = '\0';
-	
-	char filepath[PATH_MAX] = {0};
-	
-	snprintf(filepath, sizeof(filepath), "%s/astro/charts/%s",
-	data_dir,
+
+	char buffer[256] = {0};
+	snprintf(buffer, 256, "%s%s%s",
+	io->data_dir,
+	io->filepath,
 	filename
 	);
 	
-	FILE *ifp = fopen(filepath, "w");
+	FILE *ifp = fopen(buffer, "w");
 	if (!ifp)
 	{
 		endwin();
@@ -142,7 +139,9 @@ void save_chart(struct tm *cdata, Location *loc)
 		);
 		
 		fclose(ifp);
-		free(data_dir);
+		free(io->filepath);
+		free(io->data_dir);
+		free(io);
 		unpost_form(data_dir_form);
 		wclear(data_dir_win);
 		touchwin(data_dir_win);
@@ -155,4 +154,57 @@ void save_chart(struct tm *cdata, Location *loc)
 		delwin(data_dir_win);
 }
 
+void load_chart(FIELD *cdata_field[], Io *io)
+{
+	ITEM **load_files;
+	MENU *load_menu;
+	WINDOW *load_win;
+	WINDOW *load_subwin;
+	
+}
 
+void main_io(FIELD *cdata_field[], struct tm *cdata,
+Location *loc, const char ch)
+{
+	struct passwd *pw = getpwuid(getuid());
+	if (!pw) 
+	{
+		endwin();
+		perror("petpwuid data");
+		ERR_EXIT;
+	}
+	
+	Io *io = calloc(1, sizeof(Io));
+	if (!io)
+	{
+		endwin();
+		perror("Io struct calloc");
+		ERR_EXIT;
+	}
+	
+	io->data_dir = 
+	malloc(strlen(pw->pw_dir) + strlen("/.local/share") + 1);
+	if (!io->data_dir)
+	{
+		endwin();
+		perror("data_dir malloc");
+		ERR_EXIT;
+	}
+	
+	sprintf(io->data_dir, "%s/.local/share", pw->pw_dir);
+	
+	io->filepath = calloc(1, 256);
+	if (!io->filepath)
+	{
+		endwin();
+		perror("io filepath calloc");
+		ERR_EXIT;
+	}
+	
+	sprintf(io->filepath, "/astro/charts");
+
+	if (ch == 'w')
+		save_chart(cdata, loc, io);
+	if (ch == 'e')
+		load_chart(cdata_field, io);
+}
