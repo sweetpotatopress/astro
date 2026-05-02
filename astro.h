@@ -12,7 +12,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #pragma once
-#define ERR_EXIT endwin(); swe_close(); exit(EXIT_FAILURE);
+#define ERR_EXIT swe_close(); exit(EXIT_FAILURE);
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 typedef enum { NORMAL, INSERT } Mode;
@@ -45,4 +45,5 @@ typedef struct {
 } Location;
 
 int main_search(FIELD *cdata_field[], char *argv);
+void save_chart(struct tm *cdata, Location *loc);
 

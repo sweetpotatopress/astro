@@ -65,6 +65,7 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 		char *copy = calloc(1, strlen(buffer) + 1);
 		if (!copy)
 		{
+			endwin();
 			perror("parse copy calloc");
 			ERR_EXIT;
 		}
@@ -88,6 +89,7 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 			local = calloc(1, sizeof(Location));
 			if (!local)
 			{
+				endwin();
 				perror("local parser");
 				ERR_EXIT;
 			}
@@ -121,6 +123,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	cities = calloc(n_choices + 1, sizeof(ITEM *));
 	if (!cities)
 	{
+		endwin();
 		perror("cities calloc");
 		ERR_EXIT;
 	}
@@ -130,6 +133,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 		strings[i] = malloc(1024);
 		if(!strings)
 		{
+			endwin();
 			perror("combined location malloc");
 			ERR_EXIT;
 		}
@@ -157,6 +161,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	city_menu = new_menu((ITEM **)cities);	
 		if (!city_menu) 
 		{
+			endwin();
 			perror("city_menu");
 			getch();
 		}
@@ -243,7 +248,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 int main_search(FIELD *cdata_field[], char *argv)
 {
 	FILE *fp;
-	const char *path = "cities";
+	const char *path = "city-db";
 	char *search = argv;
 	size_t n_choices = 0;
 	const size_t max_search = 100;
@@ -251,6 +256,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	Location **choices = calloc(max_search, sizeof(Location *));
 	if (!choices)
 	{
+		endwin();
 		perror("choices calloc");
 		ERR_EXIT;
 	}
