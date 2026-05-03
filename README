@@ -5,7 +5,7 @@ KEYBINDINGS---o-
 
 NORMAL MODE - esc
 -draw chart 	- 	enter
--auto-localtime	-	tab
+-autofill systime-	tab
 -save chart 	-	w
 -navigation		-	hjkl
 
@@ -22,17 +22,17 @@ CHART VIEW---o-
 
 TODO
 
---save and open charts
+--save and load charts
 --animate chart
 --add birth data to chartview
+--write makefile
 --new window with exact planet stats
---add nodes, outers, lot of spirt + fortune
---build makefile
+--add nodes, outers, lot of spirit + fortune
+--retrograde, station, speed table
 --add elemental colors
---decans and bounds
+--essential dignities table
 --aspects
 --eclipse calender
---retrograde, stations, speed
---declination
---window resize
+--declination/bounds table
+--terminal window autoresize
 --zodiacal releasing
