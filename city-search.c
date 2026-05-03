@@ -289,6 +289,8 @@ int main_search(FIELD *cdata_field[], char *argv)
 	noecho();
 	cbreak();
 
+	/* sending the address of choices allows the memory assigned by calloc to
+	be realloced, hence ***Location in the function */
 	n_choices = location_parse(fp, search, &choices, &max_search);
 
 	if (n_choices == 0)

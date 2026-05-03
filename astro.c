@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 yam lynn
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by the 
+Free Software Foundation, either version 3 of the License, or (at your option)
 any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -488,7 +489,7 @@ int radius, double planet, double asc, P_deg *p_deg)
 	};
 	
 	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
-	"(~:o)", "(o->)", "(\\-|)", "(h)"};
+	"(~:o)", "(o->)", "(\\+)", "(h)"};
 	
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
@@ -500,6 +501,10 @@ int radius, double planet, double asc, P_deg *p_deg)
 	
 	int offsety = 0;
 	int offsetx = 0;
+	/* 	cos	1	0	-1	0
+			0	90	180	270
+		sin	0	1	0	-1
+	*/
 	int dir_y = (sin(rad) < 0) ? 1 : -1;
 	int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
 	
@@ -697,15 +702,18 @@ int main()
 		
 		curs_set(0);
 		int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
-		//outer circle
+		
+		// zodiac circle
+		draw_circle(main_win, maxy, maxx, radius + 4, '`');
+		// outer circle
 		draw_circle(main_win, maxy, maxx, radius, '.');
-		//inner circle
+		// inner circle
 		draw_circle(main_win, maxy, maxx, (radius / 2) - 1, '.');
 		
 		for (i = 0; i < 13; ++i)
 		{
-			draw_house(main_win, maxy, maxx, radius,
-			cusps[i], '.');
+			draw_house(main_win, maxy, maxx, radius + 4,
+			cusps[i], '`');
 		}
 		
 		for (i = 1; i < 13; ++i)

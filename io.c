@@ -240,6 +240,41 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		return;
 	}
 	
+	char fn_buff[1024] = {0};
+	char display[1024] = {0};
+	
+	while ((entry = readdir(chart_dir)) != NULL)
+	{
+		if (strcmp(entry->d_name, ".") == 0)
+			continue;
+		
+		snprintf(fn_buff, sizeof(fn_buff), "%s/%s",
+		io->filepath,
+		entry->d_name
+		);
+		stat(fn_buff, st);
+		
+		if (S_ISDIR(st->st_mode))
+			snprintf(display, sizeof(display), "[%s]",
+			entry->d_name);
+		else
+			snprintf(display, sizeof(display), " %s",
+			entry->d_name);
+			
+		load_files[i] = new_item(entry->d_name, display);
+		i++;
+	}
+	
+	file_count = i;
+	load_files[i] = NULL;
+	closedir(chart_dir);
+	
+	load_menu = new_menu(load_files);
+	menu_opts_off(load_menu, O_SHOWDESC);
+	set_menu_win(load_menu, load_win);
+	set_menu_sub(load_menu,
+	derwin(load_win, 15, 38, 1, 1));
+	post_menu(load_menu);
 }
 
 void main_io(FIELD *cdata_field[], struct tm *cdata,
