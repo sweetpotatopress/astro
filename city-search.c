@@ -51,7 +51,8 @@ char* strtok_E(char *str, const char *delim)
 	return token_start;
 }
  
-size_t location_parse(FILE *ifp, char *search, Location **choices)
+size_t location_parse(FILE *ifp, char *search,
+Location ***choices, size_t *max_search)
 {
 	size_t i = 0;
 	char buffer[1024] = {0};
@@ -86,6 +87,20 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 		Location *local = NULL;
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
 		{
+			if (i >= *max_search)
+			{
+				*max_search *= 2;
+				Location **temp = reallocarray(
+				*choices, *max_search, sizeof(Location*));
+				if (!temp)
+				{
+					endwin();
+					perror("choices realloc");
+					ERR_EXIT;
+				}
+				*choices = temp;
+			}
+			
 			local = calloc(1, sizeof(Location));
 			if (!local)
 			{
@@ -99,7 +114,7 @@ size_t location_parse(FILE *ifp, char *search, Location **choices)
 			local->timezone = 	fields[17]; fields[17] = NULL;
 			local->latitude =	fields[4]; 	fields[4] = NULL;
 			local->longitude = 	fields[5];	fields[5] = NULL;
-			choices[i++] = local;
+			(*choices)[i++] = local;
 		}
 		free(copy);
 		for (int j = 0; j < field_count; j++)
@@ -180,6 +195,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	city_win = newwin(height, width, starty, startx);
 	if (!city_win)
 	{
+		endwin();
 		fprintf(stderr, "ERR: city_win failed");
 		getch();
 	}
@@ -199,6 +215,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	int iret = post_menu(city_menu);
 	if (iret != E_OK)
 	{
+		endwin();
 		fprintf(stderr, "ERR: post_menu failed!, %d", iret);
 		getch();
 	}
@@ -251,7 +268,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	const char *path = "city-db";
 	char *search = argv;
 	size_t n_choices = 0;
-	const size_t max_search = 100;
+	size_t max_search = 100;
 	
 	Location **choices = calloc(max_search, sizeof(Location *));
 	if (!choices)
@@ -264,30 +281,28 @@ int main_search(FIELD *cdata_field[], char *argv)
 	fp = fopen(path, "r");
 	if (fp == NULL)
 	{
-		fprintf(stderr, "can't open %s\n", path);
-		free(choices);
+		endwin();
+		printw("can't open %s\n", path);
 		ERR_EXIT;
 	}
 	
 	noecho();
 	cbreak();
 
-	n_choices = location_parse(fp, search, choices);
-	
-	if (n_choices >= max_search)
-	{
-		fprintf(stderr, "too many results, be more precise\n");
-		getch();
-		rewind(fp);
-		n_choices = location_parse(fp, search, choices);
-	}
-	
+	n_choices = location_parse(fp, search, &choices, &max_search);
+
 	if (n_choices == 0)
 	{
-		fprintf(stderr, "no search results\n");
+		printw("no search results\n");
 		getch();
-		rewind(fp);
-		n_choices = location_parse(fp, search, choices);
+		clear();
+		refresh();
+		fclose(fp);
+		endwin();
+		for (size_t j = 0; j < max_search; ++j)
+			free(choices[j]);
+		free(choices);
+		return 0;
 	}
 	
 	print_menu(cdata_field, choices, n_choices);
