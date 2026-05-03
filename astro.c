@@ -378,9 +378,9 @@ void check_dst(struct tm *orig)
 	if (fgets(buffer, sizeof(buffer), fp) == NULL)
 	{
 		endwin();
-		perror("dst fgets");
+		perror("ERR:dst fgets");
 		pclose(fp);
-		ERR_EXIT;
+		return;
 	}
 	buffer[strcspn(buffer, "\n")] = 0;
 	pclose(fp);
@@ -747,6 +747,7 @@ int main()
 				case 'i':
 					wclear(main_win);
 					chart_done = 1;
+					mode = INSERT;
 					break;
 				default:
 					break;

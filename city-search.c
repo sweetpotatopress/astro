@@ -145,11 +145,11 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 
 	for (size_t i = 0; i < n_choices; ++i)
 	{
-		strings[i] = malloc(1024);
-		if(!strings)
+		strings[i] = malloc(sizeof(buffer));
+		if(!strings[i])
 		{
 			endwin();
-			perror("combined location malloc");
+			perror("strings[i] malloc");
 			ERR_EXIT;
 		}
 	
@@ -311,7 +311,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	refresh();
 	fclose(fp);
 	endwin();
-	for (size_t j = 0; j < max_search; ++j)
+	for (size_t j = 0; j < n_choices; ++j)
 		free(choices[j]);
 	free(choices);
 	return 0;
