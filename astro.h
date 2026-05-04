@@ -47,7 +47,6 @@ typedef struct {
 //io
 
 typedef struct {
-	char *mainpath;
 	char *filepath;
 	size_t file_count;
 } Io;

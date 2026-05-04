@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 yam lynn
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by the 
+Free Software Foundation, either version 3 of the License, or (at your option)
 any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -200,8 +201,6 @@ void load_chart(Io *io)
 	struct dirent *entry;
 	struct stat st;
 	
-	int in_menu = 0;
-	
 	char *newpath = malloc(1024);
 	if (!newpath)
 	{
@@ -209,15 +208,6 @@ void load_chart(Io *io)
 		perror("newpath malloc");
 		ERR_EXIT;
 	}
-	
-	char *prevpath = malloc(1024);
-	if (!prevpath)
-	{
-		endwin();
-		perror("prevpath malloc");
-		ERR_EXIT;
-	}
-	strcpy(prevpath, io->filepath);
 	
 	char *homepath = malloc(strlen(io->filepath) + 1);
 	if (!homepath)
@@ -228,14 +218,18 @@ void load_chart(Io *io)
 	}
 	strcpy(homepath, io->filepath);
 	
+	int in_menu = 0;
 	while (!in_menu)
 	{
-		MENU *load_menu = NULL;
-		WINDOW *load_win = NULL;
-		WINDOW *load_subwin = NULL;
+		MENU *load_menu;
+		WINDOW *load_win;
+		WINDOW *load_subwin;
 		
 		size_t i = 0;
 		size_t max_count = 20480;
+		
+		char fn_buff[1024] = {0};
+		int max_width = 0;
 		
 		ITEM **load_files = calloc(max_count, sizeof(ITEM *));
 		if (!load_files)
@@ -253,17 +247,14 @@ void load_chart(Io *io)
 			ERR_EXIT;
 		}
 		
-		char **item_desc = calloc(max_count, sizeof(char *));
-		if (!item_desc)
+		char **i_desc = calloc(max_count, sizeof(char *));
+		if (!i_desc)
 		{
 			endwin();
-			perror("load_menu item_desc calloc");
+			perror("load_menu i_desc calloc");
 			ERR_EXIT;
 		}
-		
-		char fn_buff[1024] = {0};
-		int max_width = 0;
-		
+	
 		chart_dir = opendir(io->filepath);
 		if (!chart_dir)
 		{
@@ -291,15 +282,15 @@ void load_chart(Io *io)
 					ERR_EXIT;
 				}
 				
-				item_desc[i] = malloc(1024);
-				if (!item_desc[i])
+				i_desc[i] = malloc(1024);
+				if (!i_desc[i])
 				{
 					endwin();
-					perror("item_desc malloc");
+					perror("i_desc malloc");
 					ERR_EXIT;
 				}
 				
-				snprintf(item_desc[i], 1024, "%s",
+				snprintf(i_desc[i], 1024, "%s",
 				entry->d_name);
 				
 				if (S_ISDIR(st.st_mode))
@@ -313,7 +304,7 @@ void load_chart(Io *io)
 				if (len > max_width)
 					max_width = len;
 					
-				load_files[i] = new_item(i_name[i], item_desc[i]);
+				load_files[i] = new_item(i_name[i], i_desc[i]);
 				i++;
 			}
 		}
@@ -369,6 +360,7 @@ void load_chart(Io *io)
 			perror("ERR: load_menu, post_menu");
 			ERR_EXIT;
 		}
+		
 		int menu_done = 0;
 		int ch = 0;
 		while (!menu_done)
@@ -440,10 +432,10 @@ void load_chart(Io *io)
 		{
 			free_item(load_files[j]);
 			free(i_name[j]);
-			free(item_desc[j]);
+			free(i_desc[j]);
 		}
 		free(i_name);
-		free(item_desc);
+		free(i_desc);
 		free(load_files);
 		
 		wclear(load_win);
@@ -452,7 +444,6 @@ void load_chart(Io *io)
 	}
 	free(newpath);
 	free(homepath);
-	free(prevpath);
 }
 
 void main_io(struct tm *cdata,
@@ -482,26 +473,14 @@ Location *loc, const char ch)
 		ERR_EXIT;
 	}
 	
-	io->mainpath = malloc(1024);
-	if (!io->mainpath)
-	{
-		endwin();
-		perror("io->mainpath malloc");
-		ERR_EXIT;
-	}
-	
 	snprintf(io->filepath, 1024,
 	"%s/.local/share/astro/charts", pw->pw_dir);
 	
-	snprintf(io->mainpath, 1024,
-	"%s/.local/share/astro/charts", pw->pw_dir);
-
 	if (ch == 'w')
 		save_chart(cdata, loc, io);
 	if (ch == 'e')
 		load_chart(io);
 		
 	free(io->filepath);
-	free(io->mainpath);
 	free(io);
 }
