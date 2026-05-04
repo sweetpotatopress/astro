@@ -70,7 +70,7 @@ Location ***choices, size_t *max_search)
 			perror("parse copy calloc");
 			ERR_EXIT;
 		}
-		strcpy(copy, buffer);
+		memcpy(copy, buffer, strlen(buffer) + 1);
 		
 		char *token = strtok_E(copy, "\t");
 		int field_count = 0;
@@ -79,7 +79,7 @@ Location ***choices, size_t *max_search)
 		while (token != NULL && field_count < 19)
 		{
 			fields[field_count] = calloc(1, strlen(token) + 1);
-			strcpy(fields[field_count], token);
+			memcpy(fields[field_count], token, strlen(token) + 1);
 			field_count++;
 			token = strtok_E(NULL, "\t");
 		}
@@ -162,7 +162,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 			choices[i]->latitude,
 			choices[i]->longitude);
 			
-			strcpy(strings[i], buffer);
+			memcpy(strings[i], buffer, strlen(buffer) + 1);
 		
 		int len = (int)strlen(buffer) + 1;
 		if (len > max_width)

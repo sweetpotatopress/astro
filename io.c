@@ -216,7 +216,7 @@ void load_chart(Io *io)
 		perror("homepath malloc");
 		ERR_EXIT;
 	}
-	strcpy(homepath, io->filepath);
+	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
 	
 	int in_menu = 0;
 	while (!in_menu)
@@ -393,7 +393,7 @@ void load_chart(Io *io)
 							perror("case l io->filepath");
 							ERR_EXIT;
 						}
-						strcpy(io->filepath, newpath);
+						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
 						wclear(load_win);
 						menu_done = 1 ;
@@ -409,7 +409,7 @@ void load_chart(Io *io)
 						ERR_EXIT;
 					}
 					
-					strcpy(io->filepath, homepath);
+					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					wclear(load_win);
 					menu_done = 1;
 					break;
