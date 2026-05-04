@@ -47,11 +47,10 @@ typedef struct {
 //io
 
 typedef struct {
-	char *data_dir;
 	char *filepath;
 } Io;
 
 int main_search(FIELD *cdata_field[], char *argv);
-void main_io(FIELD *cdata_field[], struct tm *cdata,
+void main_io(struct tm *cdata,
 Location *loc, const char ch);
 

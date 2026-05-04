@@ -102,7 +102,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	{
 		endwin();
 		wprintw(data_dir_win, "ERR: file has no name");
-		free(io->data_dir);
 		free(io->filepath);
 		free(io);
 		return;
@@ -121,15 +120,13 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	{
 		endwin();
 		wprintw(data_dir_win, "ERR: name too long");
-		free(io->data_dir);
 		free(io->filepath);
 		free(io);
 		return;
 	}
 	
 	char fn_buff[128];
-	snprintf(fn_buff, 128, "%s%s%s",
-	io->data_dir,
+	snprintf(fn_buff, 128, "%s%s",
 	io->filepath,
 	copy
 	);
@@ -161,7 +158,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				wrefresh(data_dir_win);
 				getch();
 				endwin();
-				free(io->data_dir);
 				free(io->filepath);
 				free(io);
 				mode = NORMAL;
@@ -192,7 +188,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		
 		fclose(ifp);
 		free(io->filepath);
-		free(io->data_dir);
 		free(io);
 		unpost_form(data_dir_form);
 		wclear(data_dir_win);
@@ -208,20 +203,19 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		mode = NORMAL;
 }
 
-void load_chart(FIELD *cdata_field[], Io *io)
+void load_chart(Io *io)
 {
-	ITEM **load_files;
 	MENU *load_menu;
 	WINDOW *load_win;
 	WINDOW *load_subwin;
 	DIR *chart_dir;
 	struct dirent *entry;
-	struct stat *st;
+	struct stat st;
 	
 	size_t i = 0;
-	size_t file_count = 0;
+	size_t file_count = 256;
 	
-	load_files = calloc(file_count + 1, sizeof(int));
+	ITEM **load_files = calloc(file_count, sizeof(ITEM *));
 	if (!load_files)
 	{
 		endwin();
@@ -229,19 +223,24 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		ERR_EXIT;
 	}
 	
+	char **strings = calloc(file_count, sizeof(char *));
+	if (!strings)
+	{
+		endwin();
+		perror("load_menu strings calloc");
+		ERR_EXIT;
+	}
+	
+	char fn_buff[1024] = {0};
+	int max_width = 0;
+	
 	chart_dir = opendir(io->filepath);
 	if (!chart_dir)
 	{
 		endwin();
 		perror("load file opendir");
-		free(io->filepath);
-		free(io->data_dir);
-		free(io);
-		return;
+		ERR_EXIT;
 	}
-	
-	char fn_buff[1024] = {0};
-	char display[1024] = {0};
 	
 	while ((entry = readdir(chart_dir)) != NULL)
 	{
@@ -252,32 +251,119 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		io->filepath,
 		entry->d_name
 		);
-		stat(fn_buff, st);
+		stat(fn_buff, &st);
 		
-		if (S_ISDIR(st->st_mode))
-			snprintf(display, sizeof(display), "[%s]",
+		strings[i] = malloc(1024);
+		if (!strings[i])
+		{
+			endwin();
+			perror("strings malloc");
+			ERR_EXIT;
+		}
+		
+		if (S_ISDIR(st.st_mode))
+			snprintf(strings[i], 1024, "[%s]",
 			entry->d_name);
 		else
-			snprintf(display, sizeof(display), " %s",
+			snprintf(strings[i], 1024, " %s",
 			entry->d_name);
 			
-		load_files[i] = new_item(entry->d_name, display);
+		int len = (int)strlen(strings[i]) + 1;
+		if (len > max_width)
+			max_width = len;
+			
+		load_files[i] = new_item(strings[i], NULL);
 		i++;
 	}
-	
-	file_count = i;
 	load_files[i] = NULL;
 	closedir(chart_dir);
 	
+	file_count = i;
+	
+	int width = max_width + 4;
+	int height = (int)file_count + 3;
+	
+	if (width > COLS)
+		width = COLS - 2;
+	if (height > LINES)
+		height = 18;
+		
+	int starty = (LINES - height) / 2;
+	int startx = (COLS - width) / 2;
+	
+	load_win = newwin(height, width, starty, startx);
+	if (!load_win)
+	{
+		endwin();
+		perror("ERR: load_win");
+		ERR_EXIT;
+	}
+	load_subwin = derwin(load_win, height - 2, width - 2, 1, 1);
+	
+	keypad(load_win, TRUE);
+	clearok(load_win, TRUE);
+	wclear(load_win);
+	wrefresh(load_win);
+	
+	box(load_win, 0, 0);
 	load_menu = new_menu(load_files);
+	if (!load_menu)
+	{
+		endwin();
+		perror("load menu");
+		ERR_EXIT;
+	}
+	
+	menu_opts_off(load_menu, O_NONCYCLIC);
 	menu_opts_off(load_menu, O_SHOWDESC);
 	set_menu_win(load_menu, load_win);
-	set_menu_sub(load_menu,
-	derwin(load_win, 15, 38, 1, 1));
-	post_menu(load_menu);
+	set_menu_sub(load_menu, load_subwin);
+	
+	int iret = post_menu(load_menu);
+	if (iret != E_OK)
+	{
+		endwin();
+		perror("ERR: load_menu, post_menu");
+		ERR_EXIT;
+	}
+	int menu_done = 0;
+	int ch = 0;
+	while (!menu_done)
+	{
+		ch = wgetch(load_win);
+		switch(ch)
+		{
+			case 'j': case KEY_DOWN:
+				menu_driver(load_menu, REQ_DOWN_ITEM);
+				break;
+			case 'q': 
+				menu_done = 1;
+				wclear(load_win);
+				break;
+		}
+		wrefresh(load_win);
+	}
+	
+	unpost_menu(load_menu);
+	touchwin(load_win);
+	wrefresh(load_win);
+	free_menu(load_menu);
+	for (size_t j = 0; j < file_count; ++j)
+	{
+		free_item(load_files[j]);
+		free(strings[j]);
+	}
+	free(strings);
+	free(load_files);
+	free(io->filepath);
+	free(io);
+	
+	wclear(load_win);
+	delwin(load_subwin);
+	delwin(load_win);
 }
 
-void main_io(FIELD *cdata_field[], struct tm *cdata,
+void main_io(struct tm *cdata,
 Location *loc, const char ch)
 {
 	struct passwd *pw = getpwuid(getuid());
@@ -296,29 +382,20 @@ Location *loc, const char ch)
 		ERR_EXIT;
 	}
 	
-	io->data_dir = 
-	malloc(strlen(pw->pw_dir) + strlen("/.local/share") + 1);
-	if (!io->data_dir)
+	io->filepath = 
+	malloc(strlen(pw->pw_dir) + strlen("/.local/share/astro/charts/") + 1);
+	if (!io->filepath)
 	{
 		endwin();
 		perror("data_dir malloc");
 		ERR_EXIT;
 	}
 	
-	sprintf(io->data_dir, "%s/.local/share", pw->pw_dir);
-	
-	io->filepath = calloc(1, 256);
-	if (!io->filepath)
-	{
-		endwin();
-		perror("io filepath calloc");
-		ERR_EXIT;
-	}
-	
-	sprintf(io->filepath, "/astro/charts/");
+	sprintf(io->filepath, "%s/.local/share/astro/charts/", pw->pw_dir);
 
 	if (ch == 'w')
 		save_chart(cdata, loc, io);
 	if (ch == 'e')
-		load_chart(cdata_field, io);
+		load_chart(io);
+		
 }
