@@ -20,7 +20,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <menu.h>
 #include "astro.h"
 
-
 void save_chart(struct tm *cdata, Location *loc, Io *io)
 {
 	WINDOW *data_dir_win;
@@ -244,36 +243,37 @@ void load_chart(Io *io)
 	
 	while ((entry = readdir(chart_dir)) != NULL)
 	{
-		if (strcmp(entry->d_name, ".") == 0)
-			continue;
-		
-		snprintf(fn_buff, sizeof(fn_buff), "%s/%s",
-		io->filepath,
-		entry->d_name
-		);
-		stat(fn_buff, &st);
-		
-		strings[i] = malloc(1024);
-		if (!strings[i])
+		if (strcmp(entry->d_name, ".") != 0 &&
+		strcmp(entry->d_name, "..") != 0)
 		{
-			endwin();
-			perror("strings malloc");
-			ERR_EXIT;
+			snprintf(fn_buff, sizeof(fn_buff), "%s/%s",
+			io->filepath,
+			entry->d_name
+			);
+			stat(fn_buff, &st);
+			
+			strings[i] = malloc(1024);
+			if (!strings[i])
+			{
+				endwin();
+				perror("strings malloc");
+				ERR_EXIT;
+			}
+			
+			if (S_ISDIR(st.st_mode))
+				snprintf(strings[i], 1024, "[%s]",
+				entry->d_name);
+			else
+				snprintf(strings[i], 1024, " %s",
+				entry->d_name);
+				
+			int len = (int)strlen(strings[i]) + 1;
+			if (len > max_width)
+				max_width = len;
+				
+			load_files[i] = new_item(strings[i], NULL);
+			i++;
 		}
-		
-		if (S_ISDIR(st.st_mode))
-			snprintf(strings[i], 1024, "[%s]",
-			entry->d_name);
-		else
-			snprintf(strings[i], 1024, " %s",
-			entry->d_name);
-			
-		int len = (int)strlen(strings[i]) + 1;
-		if (len > max_width)
-			max_width = len;
-			
-		load_files[i] = new_item(strings[i], NULL);
-		i++;
 	}
 	load_files[i] = NULL;
 	closedir(chart_dir);
@@ -383,7 +383,8 @@ Location *loc, const char ch)
 	}
 	
 	io->filepath = 
-	malloc(strlen(pw->pw_dir) + strlen("/.local/share/astro/charts/") + 1);
+	malloc(strlen(pw->pw_dir) +
+	strlen("/.local/share/astro/charts/") + 1);
 	if (!io->filepath)
 	{
 		endwin();
@@ -391,11 +392,11 @@ Location *loc, const char ch)
 		ERR_EXIT;
 	}
 	
-	sprintf(io->filepath, "%s/.local/share/astro/charts/", pw->pw_dir);
+	snprintf(io->filepath, 1024,
+	"%s/.local/share/astro/charts/", pw->pw_dir);
 
 	if (ch == 'w')
 		save_chart(cdata, loc, io);
 	if (ch == 'e')
 		load_chart(io);
-		
 }
