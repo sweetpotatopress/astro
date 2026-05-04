@@ -219,235 +219,239 @@ void load_chart(Io *io)
 	}
 	strcpy(prevpath, io->filepath);
 	
+	char *homepath = malloc(strlen(io->filepath) + 1);
+	if (!homepath)
+	{
+		endwin();
+		perror("homepath malloc");
+		ERR_EXIT;
+	}
+	strcpy(homepath, io->filepath);
+	
 	while (!in_menu)
 	{
-	MENU *load_menu = NULL;
-	WINDOW *load_win = NULL;
-	WINDOW *load_subwin = NULL;
-	
-	
-	size_t i = 0;
-	size_t max_count = 20480;
-	
-	ITEM **load_files = calloc(max_count, sizeof(ITEM *));
-	if (!load_files)
-	{
-		endwin();
-		perror("load file calloc");
-		ERR_EXIT;
-	}
-
-	char **i_name = calloc(max_count, sizeof(char *));
-	if (!i_name)
-	{
-		endwin();
-		perror("load_menu i_name calloc");
-		ERR_EXIT;
-	}
-	
-	char **item_desc = calloc(max_count, sizeof(char *));
-	if (!item_desc)
-	{
-		endwin();
-		perror("load_menu item_desc calloc");
-		ERR_EXIT;
-	}
-	
-	
-	char fn_buff[1024] = {0};
-	int max_width = 0;
-	
-	printw(" opendir %s\n", io->filepath);
-	wrefresh(load_win);
-	getch();
-	
-	chart_dir = opendir(io->filepath);
-	if (!chart_dir)
-	{
-		endwin();
-		perror("load file opendir");
-		ERR_EXIT;
-	}
-	
-	while ((entry = readdir(chart_dir)) != NULL)
-	{
-		if (strcmp(entry->d_name, ".") != 0 &&
-		strcmp(entry->d_name, "..") != 0)
-		{
-			snprintf(fn_buff, sizeof(fn_buff), "%s/%s",
-			io->filepath,
-			entry->d_name
-			);
-			stat(fn_buff, &st);
-			
-			i_name[i] = malloc(1024);
-			if (!i_name[i])
-			{
-				endwin();
-				perror("i_name malloc");
-				ERR_EXIT;
-			}
-			
-			item_desc[i] = malloc(1024);
-			if (!item_desc[i])
-			{
-				endwin();
-				perror("item_desc malloc");
-				ERR_EXIT;
-			}
-			
-			snprintf(item_desc[i], 1024, "%s",
-			entry->d_name);
-			
-			if (S_ISDIR(st.st_mode))
-				snprintf(i_name[i], 1024, "[%s]",
-				entry->d_name);
-			else
-				snprintf(i_name[i], 1024, " %s",
-				entry->d_name);
-				
-			int len = (int)strlen(i_name[i]) + 1;
-			if (len > max_width)
-				max_width = len;
-				
-			load_files[i] = new_item(i_name[i], item_desc[i]);
-			i++;
-		}
-	}
-	load_files[i] = NULL;
-	closedir(chart_dir);
-	
-	//to later free the appropriate amount of memory
-	io->file_count = i;
-	
-	int width = max_width + 4;
-	int height = (int)max_count + 3;
-	
-	if (width > COLS)
-		width = COLS - 2;
-	if (height > LINES)
-		height = 18;
+		MENU *load_menu = NULL;
+		WINDOW *load_win = NULL;
+		WINDOW *load_subwin = NULL;
 		
-	int starty = (LINES - height) / 2;
-	int startx = (COLS - width) / 2;
-	
-	load_win = newwin(height, width, starty, startx);
-	if (!load_win)
-	{
-		endwin();
-		perror("ERR: load_win");
-		ERR_EXIT;
-	}
-	load_subwin = derwin(load_win, height - 2, width - 2, 1, 1);
-	
-	keypad(load_win, TRUE);
-	clearok(load_win, TRUE);
-	wclear(load_win);
-	wrefresh(load_win);
-	
-	box(load_win, 0, 0);
-	load_menu = new_menu(load_files);
-	if (!load_menu)
-	{
-		endwin();
-		perror("load menu");
-		ERR_EXIT;
-	}
-	
-	menu_opts_off(load_menu, O_NONCYCLIC);
-	menu_opts_off(load_menu, O_SHOWDESC);
-	set_menu_win(load_menu, load_win);
-	set_menu_sub(load_menu, load_subwin);
-	
-	int iret = post_menu(load_menu);
-	if (iret != E_OK)
-	{
-		endwin();
-		perror("ERR: load_menu, post_menu");
-		ERR_EXIT;
-	}
-	int menu_done = 0;
-	int ch = 0;
-	while (!menu_done)
-	{
-		ch = wgetch(load_win);
-		switch(ch)
+		size_t i = 0;
+		size_t max_count = 20480;
+		
+		ITEM **load_files = calloc(max_count, sizeof(ITEM *));
+		if (!load_files)
 		{
-			case 'j': case KEY_DOWN:
-				menu_driver(load_menu, REQ_DOWN_ITEM);
-				break;
-			case 'k': case KEY_UP:
-				menu_driver(load_menu, REQ_UP_ITEM);
-				break;
-			case 'l': case KEY_RIGHT:
-				ITEM *cur = current_item(load_menu);
-				const char *selected = item_description(cur);
+			endwin();
+			perror("load file calloc");
+			ERR_EXIT;
+		}
+
+		char **i_name = calloc(max_count, sizeof(char *));
+		if (!i_name)
+		{
+			endwin();
+			perror("load_menu i_name calloc");
+			ERR_EXIT;
+		}
+		
+		char **item_desc = calloc(max_count, sizeof(char *));
+		if (!item_desc)
+		{
+			endwin();
+			perror("load_menu item_desc calloc");
+			ERR_EXIT;
+		}
+		
+		char fn_buff[1024] = {0};
+		int max_width = 0;
+		
+		chart_dir = opendir(io->filepath);
+		if (!chart_dir)
+		{
+			endwin();
+			perror("load file opendir");
+			ERR_EXIT;
+		}
+		
+		while ((entry = readdir(chart_dir)) != NULL)
+		{
+			if (strcmp(entry->d_name, ".") != 0 &&
+			strcmp(entry->d_name, "..") != 0)
+			{
+				snprintf(fn_buff, sizeof(fn_buff), "%s/%s",
+				io->filepath,
+				entry->d_name
+				);
+				stat(fn_buff, &st);
 				
-				snprintf(newpath, 1024,
-				"%s/%s", io->filepath, selected);
-				printw("l: %s\n", newpath);
-				wrefresh(load_win);
-				getch();
-					
-				if (stat(newpath, &st) == 0 &&
-				S_ISDIR(st.st_mode))
+				i_name[i] = malloc(1024);
+				if (!i_name[i])
 				{
-					if (prevpath)
-						free(prevpath);
-					prevpath = malloc(strlen(io->filepath) + 1);
-					if (!prevpath)
+					endwin();
+					perror("i_name malloc");
+					ERR_EXIT;
+				}
+				
+				item_desc[i] = malloc(1024);
+				if (!item_desc[i])
+				{
+					endwin();
+					perror("item_desc malloc");
+					ERR_EXIT;
+				}
+				
+				snprintf(item_desc[i], 1024, "%s",
+				entry->d_name);
+				
+				if (S_ISDIR(st.st_mode))
+					snprintf(i_name[i], 1024, "[%s]",
+					entry->d_name);
+				else
+					snprintf(i_name[i], 1024, " %s",
+					entry->d_name);
+					
+				int len = (int)strlen(i_name[i]) + 1;
+				if (len > max_width)
+					max_width = len;
+					
+				load_files[i] = new_item(i_name[i], item_desc[i]);
+				i++;
+			}
+		}
+		load_files[i] = NULL;
+		closedir(chart_dir);
+		
+		//to later free the appropriate amount of memory
+		io->file_count = i;
+		
+		int width = max_width + 4;
+		int height = (int)io->file_count + 2;
+		
+		if (width > COLS)
+			width = COLS - 2;
+		if (height > LINES)
+			height = 18;
+			
+		int starty = (LINES - height) / 2;
+		int startx = (COLS - width) / 2;
+		
+		load_win = newwin(height, width, starty, startx);
+		if (!load_win)
+		{
+			endwin();
+			perror("ERR: load_win");
+			ERR_EXIT;
+		}
+		load_subwin = derwin(load_win, height - 2, width - 2, 1, 1);
+		
+		keypad(load_win, TRUE);
+		clearok(load_win, TRUE);
+		wclear(load_win);
+		wrefresh(load_win);
+		
+		box(load_win, 0, 0);
+		load_menu = new_menu(load_files);
+		if (!load_menu)
+		{
+			endwin();
+			perror("load menu");
+			ERR_EXIT;
+		}
+		
+		menu_opts_off(load_menu, O_NONCYCLIC);
+		menu_opts_off(load_menu, O_SHOWDESC);
+		set_menu_win(load_menu, load_win);
+		set_menu_sub(load_menu, load_subwin);
+		
+		int iret = post_menu(load_menu);
+		if (iret != E_OK)
+		{
+			endwin();
+			perror("ERR: load_menu, post_menu");
+			ERR_EXIT;
+		}
+		int menu_done = 0;
+		int ch = 0;
+		while (!menu_done)
+		{
+			ch = wgetch(load_win);
+			switch(ch)
+			{
+				case 'j': case KEY_DOWN:
+					menu_driver(load_menu, REQ_DOWN_ITEM);
+					break;
+				case 'k': case KEY_UP:
+					menu_driver(load_menu, REQ_UP_ITEM);
+					break;
+				case 'l': case KEY_RIGHT:
+					ITEM *cur = current_item(load_menu);
+					const char *selected = item_description(cur);
+					
+					snprintf(newpath, 1024,
+					"%s/%s", io->filepath, selected);
+						
+					if (stat(newpath, &st) == 0 &&
+					S_ISDIR(st.st_mode))
+					{
+						free(io->filepath);
+						
+						io->filepath = malloc(strlen(newpath) + 1);
+						if (!io->filepath)
+						{
+							endwin();
+							perror("case l io->filepath");
+							ERR_EXIT;
+						}
+						strcpy(io->filepath, newpath);
+						
+						wclear(load_win);
+						menu_done = 1 ;
+					}
+					break;
+				case 'h': case KEY_LEFT:
+					free(io->filepath);
+					io->filepath = malloc(strlen(homepath) + 1);
+					if (!io->filepath)
 					{
 						endwin();
-						perror("prevpath S_ISDIR malloc");
+						perror("case h io->filepath");
 						ERR_EXIT;
 					}
-					strcpy(prevpath, io->filepath);
 					
-					free(io->filepath);
-					
-					io->filepath = newpath;
+					strcpy(io->filepath, homepath);
 					wclear(load_win);
-					menu_done = 1 ;
-				}
-				break;
-			case 'h': case KEY_LEFT:
-				char *tmp = io->mainpath;
-				io->filepath = tmp;
-				printw("h: %s\n", io->filepath);
-				wrefresh(load_win);
-				getch();
-				menu_done = 1;
-				break;
-			case 'q': 
-				in_menu = 1;
-				menu_done = 1;
-				wclear(load_win);
-				break;
-			default:
-				ch = wgetch(load_win);
+					menu_done = 1;
+					break;
+				case 'q': 
+					in_menu = 1;
+					menu_done = 1;
+					wclear(load_win);
+					break;
+				default:
+					ch = wgetch(load_win);
+			}
+			wrefresh(load_win);
 		}
+		
+		unpost_menu(load_menu);
+		touchwin(load_win);
 		wrefresh(load_win);
+		free_menu(load_menu);
+		for (size_t j = 0; j < io->file_count; ++j)
+		{
+			free_item(load_files[j]);
+			free(i_name[j]);
+			free(item_desc[j]);
+		}
+		free(i_name);
+		free(item_desc);
+		free(load_files);
+		
+		wclear(load_win);
+		delwin(load_subwin);
+		delwin(load_win);
 	}
-	
-	unpost_menu(load_menu);
-	touchwin(load_win);
-	wrefresh(load_win);
-	free_menu(load_menu);
-	for (size_t j = 0; j < io->file_count; ++j)
-	{
-		free_item(load_files[j]);
-		free(i_name[j]);
-		free(item_desc[j]);
-	}
-	free(i_name);
-	free(item_desc);
-	free(load_files);
-	
-	wclear(load_win);
-	delwin(load_subwin);
-	delwin(load_win);
-}
 	free(newpath);
+	free(homepath);
 	free(prevpath);
 }
 
