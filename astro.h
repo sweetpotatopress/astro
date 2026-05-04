@@ -47,7 +47,9 @@ typedef struct {
 //io
 
 typedef struct {
+	char *mainpath;
 	char *filepath;
+	size_t file_count;
 } Io;
 
 int main_search(FIELD *cdata_field[], char *argv);
