@@ -23,12 +23,271 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 void save_chart(struct tm *cdata, Location *loc, Io *io)
 {
-	WINDOW *data_dir_win;
-	WINDOW *data_dir_subwin;
-	FORM *data_dir_form;
-	FIELD *data_dir_field[2];
+	WINDOW *save_win;
+	WINDOW *save_subwin;
+	FORM *save_form;
+	FIELD *save_field[2];
 	char *tz_name = getenv("TZ");
-	struct stat buff;
+	DIR *chart_dir;
+	struct dirent *entry;
+	struct stat buff, st;
+	
+	char *homepath = malloc(strlen(io->filepath) + 1);
+	if (!homepath)
+	{
+		endwin();
+		perror("save homepath malloc");
+		ERR_EXIT;
+	}
+	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
+	
+	char *newpath = malloc(1024);
+	if (!newpath)
+	{
+		endwin();
+		perror("save newpath malloc");
+		ERR_EXIT;
+	}
+	
+	int savedir_done = 0;
+	while (!savedir_done)
+	{
+		MENU *save_menu;
+		
+		size_t i = 0;
+		size_t max_count = 20480;
+		
+		char fn_buff[1024] = {0};
+		int max_width = 0;
+		
+		ITEM **save_files = calloc(max_count, sizeof(ITEM *));
+		if (!save_files)
+		{
+			endwin();
+			perror("load file calloc");
+			ERR_EXIT;
+		}
+
+		char **i_name = calloc(max_count, sizeof(char *));
+		if (!i_name)
+		{
+			endwin();
+			perror("load_menu i_name calloc");
+			ERR_EXIT;
+		}
+		
+		char **i_desc = calloc(max_count, sizeof(char *));
+		if (!i_desc)
+		{
+			endwin();
+			perror("load_menu i_desc calloc");
+			ERR_EXIT;
+		}
+	
+		chart_dir = opendir(io->filepath);
+		if (!chart_dir)
+		{
+			endwin();
+			perror("load file opendir");
+			ERR_EXIT;
+		}
+		
+		while ((entry = readdir(chart_dir)) != NULL)
+		{
+			// hide the up and down directory, to restrict to only the charts dir
+			if (strcmp(entry->d_name, ".") != 0 &&
+			strcmp(entry->d_name, "..") != 0)
+			{
+				snprintf(fn_buff, sizeof(fn_buff), "%s/%s",
+				io->filepath,
+				entry->d_name
+				);
+				stat(fn_buff, &st);
+			
+				if (S_ISDIR(st.st_mode))
+				{
+					i_name[i] = malloc(sizeof(fn_buff));
+					if (!i_name[i])
+					{
+						endwin();
+						perror("i_name malloc");
+						ERR_EXIT;
+					}
+					
+					i_desc[i] = malloc(sizeof(fn_buff));
+					if (!i_desc[i])
+					{
+						endwin();
+						perror("i_desc malloc");
+						ERR_EXIT;
+					}
+					
+					snprintf(i_desc[i], sizeof(fn_buff), "%s",
+					entry->d_name);
+					
+					snprintf(i_name[i], sizeof(fn_buff), "[%s]",
+					entry->d_name);
+						
+					// menu window width
+					int len = (int)strlen(i_name[i]) + 1;
+					if (len > max_width)
+						max_width = len;
+						
+					save_files[i] = new_item(i_name[i], i_desc[i]);
+					i++;
+				}
+				
+				if (i == 0)
+				{
+					save_files[0] = new_item("save here?", " ");
+					max_width = 10;
+					i = 1;
+				}
+			}
+		}
+		save_files[i] = NULL;
+		closedir(chart_dir);
+		
+		//to later free the appropriate amount of memory
+		io->file_count = i;
+		
+		// window dimensions	
+		int width = max_width + 4;
+		int height = (int)io->file_count + 2;
+		
+		if (width > COLS)
+			width = COLS - 2;
+		if (height > LINES)
+			height = 18;
+			
+		int starty = (LINES - height) / 2;
+		int startx = (COLS - width) / 2;
+		
+		save_win = newwin(height, width, starty, startx);
+		if (!save_win)
+		{
+			endwin();
+			perror("ERR: load_win");
+			ERR_EXIT;
+		}
+		save_subwin = derwin(save_win, height - 2, width - 2, 1, 1);
+		
+		keypad(save_win, TRUE);
+		clearok(save_win, TRUE);
+		wclear(save_win);
+		wrefresh(save_win);
+		
+		box(save_win, 0, 0);
+		save_menu = new_menu(save_files);
+		if (!save_menu)
+		{
+			endwin();
+			perror("save menu");
+			ERR_EXIT;
+		}
+		
+		menu_opts_off(save_menu, O_NONCYCLIC);
+		menu_opts_off(save_menu, O_SHOWDESC);
+		set_menu_win(save_menu, save_win);
+		set_menu_sub(save_menu, save_subwin);
+		
+		int iret = post_menu(save_menu);
+		if (iret != E_OK)
+		{
+			endwin();
+			perror("ERR: save_menu, post_menu");
+			ERR_EXIT;
+		}
+		
+		int menu_done = 0;
+		int ch = 0;
+		while (!menu_done && (ch = wgetch(save_win)))
+		{
+			switch(ch)
+			{
+				case 'j': case KEY_DOWN:
+					menu_driver(save_menu, REQ_DOWN_ITEM);
+					break;
+				case 'k': case KEY_UP:
+					menu_driver(save_menu, REQ_UP_ITEM);
+					break;
+				case 'l': case KEY_RIGHT: case '\n':
+					ITEM *cur = current_item(save_menu);
+					const char *selected = item_description(cur);
+					
+					snprintf(newpath, 1024,
+					"%s/%s/", io->filepath, selected);
+			
+						//if file path is a directory
+					if (stat(newpath, &st) == 0 &&
+					S_ISDIR(st.st_mode))
+					{
+						free(io->filepath);
+						
+						io->filepath = malloc(strlen(newpath) + 1);
+						if (!io->filepath)
+						{
+							endwin();
+							perror("case l io->filepath");
+							ERR_EXIT;
+						}
+						//copy new file path to open
+						memcpy(io->filepath, newpath, strlen(newpath) + 1);
+						
+						wclear(save_win);
+						menu_done = 1 ;
+						break;
+					}
+					
+					break;
+				case 'h': case KEY_LEFT:
+					free(io->filepath);
+					
+					io->filepath = malloc(strlen(homepath) + 1);
+					if (!io->filepath)
+					{
+						endwin();
+						perror("case h io->filepath");
+						ERR_EXIT;
+					}
+					
+					//return to homepath
+					memcpy(io->filepath, homepath, strlen(homepath) + 1);
+					
+					wclear(save_win);
+					menu_done = 1;
+					break;
+				case 'd':
+					break;
+				case 'q': 
+					savedir_done = 1;
+					menu_done = 1;
+					wclear(save_win);
+					break;
+				default:
+					ch = wgetch(save_win);
+			}
+			wrefresh(save_win);
+		}
+		
+		unpost_menu(save_menu);
+		touchwin(save_win);
+		wrefresh(save_win);
+		free_menu(save_menu);
+		for (size_t j = 0; j < io->file_count; ++j)
+		{
+			free_item(save_files[j]);
+			free(i_name[j]);
+			free(i_desc[j]);
+		}
+		free(i_name);
+		free(i_desc);
+		free(save_files);
+		
+		wclear(save_win);
+		delwin(save_subwin);
+		delwin(save_win);
+	} // end of savedir_done loop
 	
 	int ch = 0;
 	int starty, startx, maxy, maxx;
@@ -40,54 +299,54 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	starty = (maxy - height) / 2;
 	startx = (maxx - width) / 2;
 	
-	data_dir_win = newwin(height, width, starty, startx);
+	save_win = newwin(height, width, starty, startx);
 	//only call derwin once
-	data_dir_subwin = 
-	derwin(data_dir_win, height - 2, width - 2, 0, 0);
+	save_subwin = 
+	derwin(save_win, height - 2, width - 2, 0, 0);
 	
 	cbreak();
-	keypad(data_dir_win, TRUE);
-	clearok(data_dir_win, TRUE);
-	wclear(data_dir_win);
+	keypad(save_win, TRUE);
+	clearok(save_win, TRUE);
+	wclear(save_win);
 	
-	data_dir_field[0] = new_field(1, 25, 2, 2, 0, 0);
-	set_field_back(data_dir_field[0], A_UNDERLINE);
-	field_opts_off(data_dir_field[0], O_STATIC);
-	field_opts_off(data_dir_field[0], O_AUTOSKIP);
+	save_field[0] = new_field(1, 25, 2, 2, 0, 0);
+	set_field_back(save_field[0], A_UNDERLINE);
+	field_opts_off(save_field[0], O_STATIC);
+	field_opts_off(save_field[0], O_AUTOSKIP);
 	
-	data_dir_field[1] = NULL;
+	save_field[1] = NULL;
 	
-	data_dir_form = new_form(data_dir_field);
-	set_form_win(data_dir_form, data_dir_win);
-	set_form_sub(data_dir_form, data_dir_subwin);
+	save_form = new_form(save_field);
+	set_form_win(save_form, save_win);
+	set_form_sub(save_form, save_subwin);
 	
-	touchwin(data_dir_win);
-	post_form(data_dir_form);
-	box(data_dir_win, 0, 0);
-	mvwaddstr(data_dir_win, 1, 1, "-o--filename?-o");
-	wrefresh(data_dir_win);
+	touchwin(save_win);
+	post_form(save_form);
+	box(save_win, 0, 0);
+	mvwaddstr(save_win, 1, 1, "-o--filename?-o");
+	wrefresh(save_win);
 	
-	set_current_field(data_dir_form, data_dir_field[0]);
-	wrefresh(data_dir_win);
-	pos_form_cursor(data_dir_form);
+	set_current_field(save_form, save_field[0]);
+	wrefresh(save_win);
+	pos_form_cursor(save_form);
 	
 	int done = 0;
-	while(!done && (ch = wgetch(data_dir_win)))
+	while(!done && (ch = wgetch(save_win)))
 	{
 		switch (ch)
 		{
 			case '\n':
-				form_driver(data_dir_form, REQ_VALIDATION);
+				form_driver(save_form, REQ_VALIDATION);
 				done = 1;
 				break;
 			case KEY_BACKSPACE:
-				form_driver(data_dir_form, REQ_DEL_PREV);
+				form_driver(save_form, REQ_DEL_PREV);
 				break;
 			case KEY_LEFT:
-				form_driver(data_dir_form, REQ_LEFT_CHAR);
+				form_driver(save_form, REQ_LEFT_CHAR);
 				break;
 			case KEY_RIGHT:
-				form_driver(data_dir_form, REQ_RIGHT_CHAR);
+				form_driver(save_form, REQ_RIGHT_CHAR);
 				break;
 			case 27:
 				done = 1;
@@ -95,18 +354,18 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				return;
 				break;
 			default:
-				form_driver(data_dir_form, ch);
+				form_driver(save_form, ch);
 				break;
 		}
-		wrefresh(data_dir_win);
+		wrefresh(save_win);
 		mode = NORMAL;
 	}
 	
-	char *filename = field_buffer(data_dir_field[0], 0);
+	char *filename = field_buffer(save_field[0], 0);
 	
 	// get field length, trim blank space from field_buffer, add null 0
 	int len = 0;
-	field_info(data_dir_field[0], NULL, NULL, NULL, &len, NULL, NULL);
+	field_info(save_field[0], NULL, NULL, NULL, &len, NULL, NULL);
 	
 	char *fn_copy = malloc((size_t)len + 1);
 	if (!fn_copy)
@@ -125,16 +384,16 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	
 	if (len >= 100)
 	{
-		wprintw(data_dir_win, "ERR: name too long");
-		wrefresh(data_dir_win);
+		wprintw(save_win, "ERR: name too long");
+		wrefresh(save_win);
 		endwin();
 		free(fn_copy);
 		return;
 	}
 	if (len <= 0)
 	{
-		wprintw(data_dir_win, "ERR: name too short");
-		wrefresh(data_dir_win);
+		wprintw(save_win, "ERR: name too short");
+		wrefresh(save_win);
 		endwin();
 		free(fn_copy);
 		return;
@@ -150,29 +409,29 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	// if file exists with same name, ask to overwrite
 	if (stat(fn_buff, &buff) == 0)
 	{
-		wclear(data_dir_win);
-		mvwprintw(data_dir_win, 1, 1,
+		wclear(save_win);
+		mvwprintw(save_win, 1, 1,
 		"overwrite:'%s'?\n -o--(y/n)-o:", filename);
-		box(data_dir_win, 0, 0);
-		wrefresh(data_dir_win);
+		box(save_win, 0, 0);
+		wrefresh(save_win);
 		ch = getch();
 		switch (ch)
 		{
 			case 'y':
-				wclear(data_dir_win);
-				mvwprintw(data_dir_win, 2, 1,
+				wclear(save_win);
+				mvwprintw(save_win, 2, 1,
 				"overwritten!--o-");
-				box(data_dir_win, 0, 0);
-				wrefresh(data_dir_win);
+				box(save_win, 0, 0);
+				wrefresh(save_win);
 				getch();
 				mode = NORMAL;
 				break;
 			case 'n':
-				wclear(data_dir_win);
-				mvwprintw(data_dir_win, 2, 1, 
+				wclear(save_win);
+				mvwprintw(save_win, 2, 1, 
 				"your file is safe >w<");
-				box(data_dir_win, 0, 0);
-				wrefresh(data_dir_win);
+				box(save_win, 0, 0);
+				wrefresh(save_win);
 				getch();
 				endwin();
 				mode = NORMAL;
@@ -204,16 +463,16 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		);
 		
 		fclose(ifp);
-		unpost_form(data_dir_form);
-		wclear(data_dir_win);
-		touchwin(data_dir_win);
-		wrefresh(data_dir_win);
-		free_form(data_dir_form);
+		unpost_form(save_form);
+		wclear(save_win);
+		touchwin(save_win);
+		wrefresh(save_win);
+		free_form(save_form);
 		
 		for (size_t j = 0; j < 2; ++j)
-			free_field(data_dir_field[j]);
-		delwin(data_dir_subwin);
-		delwin(data_dir_win);
+			free_field(save_field[j]);
+		delwin(save_subwin);
+		delwin(save_win);
 		
 		mode = NORMAL;
 		free(fn_copy);
@@ -428,6 +687,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 						break;
 					}
 					
+					// load selected file
 					FILE *fp;
 					int count = 0;
 					
