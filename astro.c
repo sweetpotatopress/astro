@@ -297,10 +297,10 @@ void ichart_data(struct tm *cdata, Location *loc)
 					case 'w':
 						validate_fields(cdata_form_win, cdata_field,
 						cdata_form, cdata, loc);
-						main_io(cdata, loc, 'w');
+						main_io(cdata_field, cdata, loc, 'w');
 						break;
 					case 'e':
-						main_io(cdata, loc, 'e');
+						main_io(cdata_field, cdata, loc, 'e');
 						break;
 					case '\n':
 						done = 1;

@@ -219,7 +219,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		free(fn_copy);
 }
 
-void load_chart(Io *io)
+void load_chart(FIELD *cdata_field[], Io *io)
 {
 	DIR *chart_dir;
 	struct dirent *entry;
@@ -289,6 +289,7 @@ void load_chart(Io *io)
 		
 		while ((entry = readdir(chart_dir)) != NULL)
 		{
+			// hide the up and down directory, to restrict to only the charts dir
 			if (strcmp(entry->d_name, ".") != 0 &&
 			strcmp(entry->d_name, "..") != 0)
 			{
@@ -399,14 +400,14 @@ void load_chart(Io *io)
 				case 'k': case KEY_UP:
 					menu_driver(load_menu, REQ_UP_ITEM);
 					break;
-				case 'l': case KEY_RIGHT:
+				case 'l': case KEY_RIGHT: case '\n':
 					ITEM *cur = current_item(load_menu);
 					const char *selected = item_description(cur);
 					
 					snprintf(newpath, 1024,
 					"%s/%s", io->filepath, selected);
-					
-					//if file path is a directory
+			
+						//if file path is a directory
 					if (stat(newpath, &st) == 0 &&
 					S_ISDIR(st.st_mode))
 					{
@@ -425,6 +426,90 @@ void load_chart(Io *io)
 						wclear(load_win);
 						menu_done = 1 ;
 					}
+					
+					FILE *fp;
+					int count = 0;
+					
+					char *buffer = malloc(1024);
+					if (!buffer)
+					{
+						endwin();
+						perror("load file buffer malloc");
+						ERR_EXIT;
+					}
+					char **field = calloc(1, 1024);
+					if (!field)
+					{
+						endwin();
+						perror("load file field calloc");
+						ERR_EXIT;
+					}
+					
+					char **copy_buff = calloc(1, 1024);
+					if (!copy_buff)
+					{
+						endwin();
+						perror("case l copy malloc");
+						ERR_EXIT;
+					}
+					
+					fp = fopen(newpath, "r");
+					if (fp == NULL)
+					{
+						endwin();
+						perror("cant load file");
+						ERR_EXIT;
+					}
+					
+					while (fgets(buffer, 1024, fp) != NULL)
+					{
+						char *copy = malloc(1024);
+						if (!copy)
+						{
+							endwin();
+							perror("case l copy malloc");
+							ERR_EXIT;
+						}
+					
+						memcpy(copy, buffer, strlen(buffer) + 1);
+						
+						char *token = strtok(copy, "\n");
+						
+						while (token != NULL && count < 9)
+						{
+							field[count] = malloc(strlen(token) + 1);
+							if (!field[count])
+							{
+								endwin();
+								perror("field[count] load file malloc");
+								ERR_EXIT;
+							}
+							memcpy(field[count], token, strlen(token) + 1);
+							count++;
+							token = strtok(NULL, "\n");
+						}
+					}
+						
+					set_field_buffer(cdata_field[0], 0, field[0]);
+					set_field_buffer(cdata_field[1], 0, field[1]);
+					set_field_buffer(cdata_field[2], 0, field[2]);
+					set_field_buffer(cdata_field[3], 0, field[3]);
+					set_field_buffer(cdata_field[4], 0, field[4]);
+					set_field_buffer(cdata_field[5], 0, field[5]);
+					set_field_buffer(cdata_field[6], 0, field[6]);
+					set_field_buffer(cdata_field[7], 0, field[7]);
+					set_field_buffer(cdata_field[8], 0, field[8]);
+					
+					for(int j = 0; j < count; ++j)
+					{
+						free(field[j]);
+						free(copy_buff[j]);
+					}
+					free(copy_buff);
+					free(field);
+					
+					load_done = 1;
+					menu_done = 1;
 					break;
 				case 'h': case KEY_LEFT:
 					free(io->filepath);
@@ -476,7 +561,7 @@ void load_chart(Io *io)
 	free(homepath);
 }
 
-void main_io(struct tm *cdata,
+void main_io(FIELD *cdata_field[], struct tm *cdata,
 Location *loc, const char ch)
 {
 	struct passwd *pw = getpwuid(getuid());
@@ -509,7 +594,7 @@ Location *loc, const char ch)
 	if (ch == 'w')
 		save_chart(cdata, loc, io);
 	if (ch == 'e')
-		load_chart(io);
+		load_chart(cdata_field, io);
 		
 	free(io->filepath);
 	free(io);
