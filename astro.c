@@ -24,36 +24,39 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "city-search.c"
 #include "io.c"
 
-
-void fieldbuffer_trim(FIELD *current, char *buffer)
-{
-	//remove trailing spaces in ncurses fieldbuffer
-	int i = 0;
-	
-	//set i to number of field collumns
-	field_info(current, NULL, NULL, NULL, &i, NULL, NULL);
-	
-	while(i >= 0 && (buffer[i] == ' '))
-		--i;
-	if (i >= 0)
-	{
-		++i;
-		buffer[i] = '\0';
-	}
-}
-
 void field_to_member
 (WINDOW *cdata_form_win, struct tm *cdata, Location *loc, 
 FORM *cdata_form, FIELD *cdata_field[])
 {
 	FIELD *current = current_field(cdata_form);
-	char *buffer = field_buffer(current, 0);
+	char *f_buf = field_buffer(current, 0);
 	int index = field_index(current);
+	
+	// get field length, trim blank space from field_buffer, add null 0
+	int len = 0;
+	field_info(current, NULL, NULL, NULL, &len, NULL, NULL);
+	char *buffer = malloc((size_t)len + 1);
+	if (!buffer)
+	{
+		endwin();
+		perror("field to member buffer malloc");
+		ERR_EXIT;
+	}
+	
+	memcpy(buffer, f_buf, (size_t)len);
+	
+	// decrement one to be in bounds, trim
+	--len;
+	while(len >= 0 && buffer[len] == ' ')
+	{
+		--len;
+	}
+	if (len >= 0)
+		buffer[len + 1] = '\0';
 	
 	switch(index)
 	{
 		case 0:
-			fieldbuffer_trim(current, buffer);
 			main_search(cdata_field, buffer);
 			
 			//redraws field underline
@@ -61,6 +64,8 @@ FORM *cdata_form, FIELD *cdata_field[])
 			touchwin(cdata_form_win);
 			post_form(cdata_form);
 			wrefresh(cdata_form_win);
+			
+			loc->city = buffer;
 			doupdate();
 			break;
 		case 1:
@@ -79,7 +84,6 @@ FORM *cdata_form, FIELD *cdata_field[])
 			cdata->tm_min = atoi(buffer);
 			break;
 		case 6:
-			fieldbuffer_trim(current, buffer);
 			if (setenv("TZ", buffer, 1) != 0)
 			{
 				endwin();
@@ -95,6 +99,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 			loc->dlon = atof(buffer);
 			break;
 	}
+	free(buffer);
 }
 
 void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)

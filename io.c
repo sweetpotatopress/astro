@@ -74,7 +74,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	int done = 0;
 	while(!done && (ch = wgetch(data_dir_win)))
 	{
-		mode = INSERT;
 		switch (ch)
 		{
 			case '\n':
@@ -90,48 +89,68 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 			case KEY_RIGHT:
 				form_driver(data_dir_form, REQ_RIGHT_CHAR);
 				break;
+			case 27:
+				done = 1;
+				endwin();
+				return;
+				break;
 			default:
 				form_driver(data_dir_form, ch);
 				break;
 		}
 		wrefresh(data_dir_win);
+		mode = NORMAL;
 	}
 	
 	char *filename = field_buffer(data_dir_field[0], 0);
-	if (!filename)
+	
+	// get field length, trim blank space from field_buffer, add null 0
+	int len = 0;
+	field_info(data_dir_field[0], NULL, NULL, NULL, &len, NULL, NULL);
+	
+	char *fn_copy = malloc((size_t)len + 1);
+	if (!fn_copy)
 	{
 		endwin();
-		wprintw(data_dir_win, "ERR: file has no name");
-		return;
+		perror("io fn_copy malloc");
+		ERR_EXIT;
 	}
+	memcpy(fn_copy, filename, (size_t)len);
 	
-	// trimming fieldbuffer is unsafe, make copy
-	// check for overwrite
-	char copy[128] = {0};
-	strncpy(copy, filename, sizeof(copy) - 1);
-	size_t i = strlen(copy);
+	--len;
+	while(len >= 0 && fn_copy[len] == ' ')
+		--len;
+	if (len >= 0)
+		fn_copy[len + 1] = '\0';
 	
-	while (i > 0 && copy[i-1] == ' ')
-		copy[--i] = '\0';
-		
-	if (i >= 100)
+	if (len >= 100)
 	{
-		endwin();
 		wprintw(data_dir_win, "ERR: name too long");
+		wrefresh(data_dir_win);
+		endwin();
+		return;
+	}
+	if (len <= 0)
+	{
+		wprintw(data_dir_win, "ERR: name too short");
+		wrefresh(data_dir_win);
+		endwin();
 		return;
 	}
 	
-	char fn_buff[128];
-	snprintf(fn_buff, 128, "%s%s",
+	// create file path 
+	char fn_buff[256];
+	snprintf(fn_buff, 256, "%s%s",
 	io->filepath,
-	copy
+	filename
 	);
 	
+	// if file exists with same name, ask to overwrite
 	if (stat(fn_buff, &buff) == 0)
 	{
 		wclear(data_dir_win);
 		mvwprintw(data_dir_win, 1, 1,
-		"overwrite:'%s'?\n -o--(y/n)-o:", copy);
+		"overwrite:'%s'?\n -o--(y/n)-o:", filename);
 		box(data_dir_win, 0, 0);
 		wrefresh(data_dir_win);
 		ch = getch();
@@ -168,8 +187,10 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		perror("data_dir fopen");
 		ERR_EXIT;
 	}
-			
-	fprintf(ifp, "%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
+
+	// copy data to file, \n delimited
+	fprintf(ifp, "%s\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
+		loc->city,
 		cdata->tm_year,
 		cdata->tm_mon + 1,
 		cdata->tm_mday,
@@ -193,6 +214,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		delwin(data_dir_win);
 		
 		mode = NORMAL;
+		free(fn_copy);
 }
 
 void load_chart(Io *io)
@@ -474,7 +496,7 @@ Location *loc, const char ch)
 	}
 	
 	snprintf(io->filepath, 1024,
-	"%s/.local/share/astro/charts", pw->pw_dir);
+	"%s/.local/share/astro/charts/", pw->pw_dir);
 	
 	if (ch == 'w')
 		save_chart(cdata, loc, io);

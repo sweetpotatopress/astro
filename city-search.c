@@ -235,6 +235,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 			case '\n':
 				ITEM *selected = current_item(city_menu);
 				Location *cdata = (Location *)item_userptr(selected);
+				set_field_buffer(cdata_field[0], 0, cdata->city);
 				set_field_buffer(cdata_field[6], 0, cdata->timezone);
 				set_field_buffer(cdata_field[7], 0, cdata->latitude);
 				set_field_buffer(cdata_field[8], 0, cdata->longitude);
