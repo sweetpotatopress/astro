@@ -128,6 +128,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		wprintw(data_dir_win, "ERR: name too long");
 		wrefresh(data_dir_win);
 		endwin();
+		free(fn_copy);
 		return;
 	}
 	if (len <= 0)
@@ -135,6 +136,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		wprintw(data_dir_win, "ERR: name too short");
 		wrefresh(data_dir_win);
 		endwin();
+		free(fn_copy);
 		return;
 	}
 	
@@ -240,8 +242,8 @@ void load_chart(Io *io)
 	}
 	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
 	
-	int in_menu = 0;
-	while (!in_menu)
+	int load_done = 0;
+	while (!load_done)
 	{
 		MENU *load_menu;
 		WINDOW *load_win;
@@ -296,7 +298,7 @@ void load_chart(Io *io)
 				);
 				stat(fn_buff, &st);
 				
-				i_name[i] = malloc(1024);
+				i_name[i] = malloc(sizeof(fn_buff));
 				if (!i_name[i])
 				{
 					endwin();
@@ -304,7 +306,7 @@ void load_chart(Io *io)
 					ERR_EXIT;
 				}
 				
-				i_desc[i] = malloc(1024);
+				i_desc[i] = malloc(sizeof(fn_buff));
 				if (!i_desc[i])
 				{
 					endwin();
@@ -312,16 +314,17 @@ void load_chart(Io *io)
 					ERR_EXIT;
 				}
 				
-				snprintf(i_desc[i], 1024, "%s",
+				snprintf(i_desc[i], sizeof(fn_buff), "%s",
 				entry->d_name);
 				
 				if (S_ISDIR(st.st_mode))
-					snprintf(i_name[i], 1024, "[%s]",
+					snprintf(i_name[i], sizeof(fn_buff), "[%s]",
 					entry->d_name);
 				else
-					snprintf(i_name[i], 1024, " %s",
+					snprintf(i_name[i], sizeof(fn_buff), " %s",
 					entry->d_name);
 					
+				// menu window width
 				int len = (int)strlen(i_name[i]) + 1;
 				if (len > max_width)
 					max_width = len;
@@ -336,6 +339,7 @@ void load_chart(Io *io)
 		//to later free the appropriate amount of memory
 		io->file_count = i;
 		
+		// window dimensions	
 		int width = max_width + 4;
 		int height = (int)io->file_count + 2;
 		
@@ -385,9 +389,8 @@ void load_chart(Io *io)
 		
 		int menu_done = 0;
 		int ch = 0;
-		while (!menu_done)
+		while (!menu_done && (ch = wgetch(load_win)))
 		{
-			ch = wgetch(load_win);
 			switch(ch)
 			{
 				case 'j': case KEY_DOWN:
@@ -402,7 +405,8 @@ void load_chart(Io *io)
 					
 					snprintf(newpath, 1024,
 					"%s/%s", io->filepath, selected);
-						
+					
+					//if file path is a directory
 					if (stat(newpath, &st) == 0 &&
 					S_ISDIR(st.st_mode))
 					{
@@ -415,6 +419,7 @@ void load_chart(Io *io)
 							perror("case l io->filepath");
 							ERR_EXIT;
 						}
+						//copy new file path to open
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
 						wclear(load_win);
@@ -423,6 +428,7 @@ void load_chart(Io *io)
 					break;
 				case 'h': case KEY_LEFT:
 					free(io->filepath);
+					
 					io->filepath = malloc(strlen(homepath) + 1);
 					if (!io->filepath)
 					{
@@ -431,12 +437,14 @@ void load_chart(Io *io)
 						ERR_EXIT;
 					}
 					
+					//return to homepath
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
+					
 					wclear(load_win);
 					menu_done = 1;
 					break;
 				case 'q': 
-					in_menu = 1;
+					load_done = 1;
 					menu_done = 1;
 					wclear(load_win);
 					break;
@@ -463,7 +471,7 @@ void load_chart(Io *io)
 		wclear(load_win);
 		delwin(load_subwin);
 		delwin(load_win);
-	}
+	} // end of load_done loop
 	free(newpath);
 	free(homepath);
 }
