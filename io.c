@@ -23,8 +23,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 void save_chart(struct tm *cdata, Location *loc, Io *io)
 {
-	WINDOW *save_win;
-	WINDOW *save_subwin;
+
 	FORM *save_form;
 	FIELD *save_field[2];
 	char *tz_name = getenv("TZ");
@@ -41,7 +40,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	}
 	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
 	
-	char *newpath = malloc(1024);
+	char *newpath = calloc(1, 1024);
 	if (!newpath)
 	{
 		endwin();
@@ -53,6 +52,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	while (!savedir_done)
 	{
 		MENU *save_menu;
+		WINDOW *save_win;
+		WINDOW *save_subwin;
 		
 		size_t i = 0;
 		size_t max_count = 20480;
@@ -136,15 +137,15 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					save_files[i] = new_item(i_name[i], i_desc[i]);
 					i++;
 				}
-				
-				if (i == 0)
-				{
-					save_files[0] = new_item("save here?", " ");
-					max_width = 10;
-					i = 1;
-				}
 			}
 		}
+		if (i == 0)
+		{
+			save_files[0] = new_item("save here?", " ");
+			max_width = 10;
+			i = 1;
+		}
+		
 		save_files[i] = NULL;
 		closedir(chart_dir);
 		
@@ -199,8 +200,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 			ERR_EXIT;
 		}
 		
-		int menu_done = 0;
 		int ch = 0;
+		int menu_done = 0;
 		while (!menu_done && (ch = wgetch(save_win)))
 		{
 			switch(ch)
@@ -235,7 +236,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
 						wclear(save_win);
-						menu_done = 1 ;
+						menu_done = 1;
 						break;
 					}
 					
@@ -257,7 +258,46 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					wclear(save_win);
 					menu_done = 1;
 					break;
-				case 'd':
+				case 'm':
+					char *mdir = calloc(1, 128);
+					if (!mdir)
+					{
+						endwin();
+						perror("case m mdir malloc");
+						ERR_EXIT;
+					}
+					
+					echo();
+					wclear(save_win);
+					box(save_win, 0, 0);
+					wprintw(save_win, "dir name?");
+					mvwgetnstr(save_win, 2, 2, mdir, 127);
+					noecho();
+					
+					snprintf(newpath, 1024,
+					"%s/%s", io->filepath, mdir);
+					
+					if (mkdir(newpath, 0755) == -1)
+					{
+						endwin();
+						perror("mkdir mdir failed");
+						ERR_EXIT;
+					}
+					
+					free(io->filepath);
+					
+					io->filepath = malloc(strlen(newpath) + 1);
+					if (!io->filepath)
+					{
+						endwin();
+						perror("case m io->filepath");
+						ERR_EXIT;
+					}
+					memcpy(io->filepath, newpath, strlen(newpath) + 1);	
+					
+					wclear(save_win);
+					free(mdir);
+					menu_done = 1;
 					break;
 				case 'q': 
 					savedir_done = 1;
@@ -288,6 +328,9 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		delwin(save_subwin);
 		delwin(save_win);
 	} // end of savedir_done loop
+	
+	WINDOW *save_win;
+	WINDOW *save_subwin;
 	
 	int ch = 0;
 	int starty, startx, maxy, maxx;
@@ -365,7 +408,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	
 	// get field length, trim blank space from field_buffer, add null 0
 	int len = 0;
-	field_info(save_field[0], NULL, NULL, NULL, &len, NULL, NULL);
+	field_info(save_field[0], NULL, &len, NULL, NULL, NULL, NULL);
 	
 	char *fn_copy = malloc((size_t)len + 1);
 	if (!fn_copy)
@@ -403,7 +446,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	char fn_buff[256];
 	snprintf(fn_buff, 256, "%s%s",
 	io->filepath,
-	filename
+	fn_copy
 	);
 	
 	// if file exists with same name, ask to overwrite
