@@ -269,6 +269,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 
 	cbreak();
 	noecho();
+	curs_set(1);
 	
 	cdata_form_win = newwin(maxy - 2, maxx - 2, 0, 0);
 	
@@ -478,7 +479,7 @@ void check_dst(struct tm *orig)
 	(tzname[1] && strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
 }
 
-void chart_timeset(struct tm *cdata, Location *loc)
+void chart_timeset(struct tm *cdata, Location *loc, int *offset)
 {
 	struct tm *orig = cdata;
 	check_dst(orig);
@@ -508,15 +509,17 @@ void chart_timeset(struct tm *cdata, Location *loc)
 	//swe_julday uses 24 hour UTC.
 	double dhour = (double)(orig->tm_hour + utc_offset) + min;
 	
-	if(dhour > 23.999999)
+	if((dhour >= 24.0))
 	{
 		dhour -= 23.999999;
 		++orig->tm_mday;
+		*offset -= 1;
 	}
-	if(dhour < 0)
+	if((dhour <= 0))
 	{
 		dhour += 23.999999;
 		--orig->tm_mday;
+		*offset += 1;
 	}
 	
 	loc->dhour = dhour; 
@@ -651,17 +654,14 @@ int radius, double angle, double asc)
 	char buffer[56];
 	snprintf(buffer, sizeof(buffer), "%d", (int)angle % 30);
 	mvwaddstr(main_win, y - 1, x, buffer);
-
 }
 
 void zo_pos(WINDOW *main_win, int i, int maxy, int maxx,
 int radius, double angle, double asc)
 {
-		
 	const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
 	"leo", "vir", "lib", "sco", "sag",
 	"cap", "aqu", "pis"};
-	
 	
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
@@ -713,17 +713,21 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	double cusps[13], ascmc[10]; //houses, asc, mc
 	int ihsy = 'W'; // house system
 	
+	int offset = 0;
+	
 	double *p_deg_members[] = {
 	&p_deg->dsun, &p_deg->dmoon,
 	&p_deg->dmerc, &p_deg->dven,
 	&p_deg->dmars, &p_deg->djup,
 	&p_deg->dsat};
 	
-	chart_timeset(cdata, loc); // goes before swe_julday
+	chart_timeset(cdata, loc, &offset); // goes before swe_julday
 	reset_struct(cdata); // ----
 	
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
+	
+	cdata->tm_mday += offset;
 
 	wclear(main_win);	
 	wrefresh(main_win);
@@ -796,34 +800,32 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	wrefresh(main_win);
 }
 
-void display_data(WINDOW *main_win, int maxy, int maxx, 
-struct tm *cdata)
+void display_data(WINDOW *main_win, int maxx, 
+struct tm *cdata, Location *loc)
 {	
 	int starty = 3;
-	int startx = maxx - 15;
+	int startx = maxx - 12;
 	
 	mvwprintw(main_win, starty, startx, "%d", cdata->tm_year);
-	wmove(main_win, starty, startx);
 	
 	starty += 1;
 	mvwprintw(main_win, starty, startx, "%d", cdata->tm_mon);
-	wmove(main_win, starty, startx);
 	
 	startx += 3;
 	mvwprintw(main_win, starty, startx, "%d", cdata->tm_mday);
-	wmove(main_win, starty, startx);
 	
-	starty += 5;
-	mvwprintw(main_win, starty - 2, startx, "%d", cdata->tm_hour);
-	wmove(main_win, starty, startx);
+	starty += 2; startx -= 3;
+	mvwprintw(main_win, starty, startx, "%d", cdata->tm_hour);
 	
 	startx += 3;
-	mvwprintw(main_win, starty - 2, startx + 3, "%d", cdata->tm_min);
-	wmove(main_win, starty, startx);
+	mvwprintw(main_win, starty, startx, "%d", cdata->tm_min);
+	
+	starty += 1; startx -= 3;
+	mvwprintw(main_win, starty, startx, "%f", loc->dhour);
+	
 	
 	wrefresh(main_win);
 }
-	
 
 void animate_chart(WINDOW *main_win, int maxy, int maxx,
 struct tm *cdata, Location *loc, P_deg *p_deg)
@@ -858,9 +860,14 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						{
 							++cdata->tm_hour;
 							cdata->tm_min = 0;
+							if ((cdata->tm_hour) > 23)
+							{
+								cdata->tm_hour = 0;
+								draw_chart(main_win, maxy, maxx, cdata, loc, p_deg);
+							}
 						}
 						draw_chart(main_win, maxy, maxx, cdata, loc, p_deg);
-						display_data(main_win, maxy, maxx, cdata);
+						display_data(main_win, maxx, cdata, loc);
 						break;
 			case '\n':
 				wmove(main_win, starty, startx);
@@ -951,6 +958,7 @@ int main()
 	{
 		ichart_data(cdata, loc);
 		draw_chart(main_win, maxy, maxx, cdata, loc, p_deg);
+		display_data(main_win, maxx, cdata, loc);
 			
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
