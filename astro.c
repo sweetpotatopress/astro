@@ -34,6 +34,10 @@ int normalize_input(WINDOW *win, int ch)
 	{
 		nodelay(win, TRUE);
 		int next = wgetch(win);
+		nodelay(win, FALSE);
+		
+		if (next == ERR)
+			return 27;
 		
 		if (next == '[')
 		{
@@ -348,6 +352,8 @@ void ichart_data(struct tm *cdata, Location *loc)
 			case NORMAL:
 				switch (ch)
 				{
+					case 27:
+						break;
 					case 'i':
 						mode = INSERT;
 						break;
@@ -786,13 +792,43 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		(radius / 2) + 4 , ascmc[i], cusps[1]);
 	}
 		
+	cdata->tm_mon -= 1;
 	wrefresh(main_win);
 }
 
+void display_data(WINDOW *main_win, int maxy, int maxx, 
+struct tm *cdata)
+{	
+	int starty = 3;
+	int startx = maxx - 15;
+	
+	mvwprintw(main_win, starty, startx, "%d", cdata->tm_year);
+	wmove(main_win, starty, startx);
+	
+	starty += 1;
+	mvwprintw(main_win, starty, startx, "%d", cdata->tm_mon);
+	wmove(main_win, starty, startx);
+	
+	startx += 3;
+	mvwprintw(main_win, starty, startx, "%d", cdata->tm_mday);
+	wmove(main_win, starty, startx);
+	
+	starty += 5;
+	mvwprintw(main_win, starty - 2, startx, "%d", cdata->tm_hour);
+	wmove(main_win, starty, startx);
+	
+	startx += 3;
+	mvwprintw(main_win, starty - 2, startx + 3, "%d", cdata->tm_min);
+	wmove(main_win, starty, startx);
+	
+	wrefresh(main_win);
+}
+	
+
 void animate_chart(WINDOW *main_win, int maxy, int maxx,
-struct tm *cdata, Location *loc)
+struct tm *cdata, Location *loc, P_deg *p_deg)
 {
-	int starty = 5;
+	int starty = 10;
 	int startx = maxx - 6;
 	
 	wmove(main_win, starty, startx);
@@ -818,8 +854,14 @@ struct tm *cdata, Location *loc)
 			case 'j':
 				switch(i)
 					case 0:
-						++cdata->tm_min;
-						chart_timeset(cdata, loc);
+						if ((++cdata->tm_min) > 59)
+						{
+							++cdata->tm_hour;
+							cdata->tm_min = 0;
+						}
+						draw_chart(main_win, maxy, maxx, cdata, loc, p_deg);
+						display_data(main_win, maxy, maxx, cdata);
+						break;
 			case '\n':
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
@@ -917,7 +959,7 @@ int main()
 			switch(ch)
 			{
 				case '\n':
-					animate_chart(main_win, maxy, maxx, cdata, loc);
+					animate_chart(main_win, maxy, maxx, cdata, loc, p_deg);
 					break;
 				case 'q':
 					main_done = 1;
