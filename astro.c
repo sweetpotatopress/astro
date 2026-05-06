@@ -82,11 +82,11 @@ int normalize_input(WINDOW *win, int ch)
 					return KEY_IC;
 				default:
 					nodelay(win, FALSE);
-					return ch;
+					return arrow;
 			}
 		}
 		nodelay(win, FALSE);
-		return ch;
+		return 27;
 	}
 	return ch;
 }
@@ -150,7 +150,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 			cdata->tm_year = atoi(buffer);
 			break;
 		case 2:
-			cdata->tm_mon = atoi(buffer) - 1;
+			cdata->tm_mon = atoi(buffer);
 			break;
 		case 3: 
 			cdata->tm_mday = atoi(buffer);
@@ -277,8 +277,6 @@ void ichart_data(struct tm *cdata, Location *loc)
 	
 	keypad(cdata_form_win, TRUE);	
 	clearok(cdata_form_win, TRUE);
-	wclear(cdata_form_win);
-	wrefresh(cdata_form_win);
 	
 	starty = 4;
 	startx = 18;
@@ -339,7 +337,6 @@ void ichart_data(struct tm *cdata, Location *loc)
 	
 	touchwin(cdata_form_win);
 	post_form(cdata_form);
-	wrefresh(cdata_form_win);
 	
 	set_current_field(cdata_form, cdata_field[0]);
 	
@@ -470,7 +467,7 @@ void check_dst(struct tm *orig)
 	if (fgets(buffer, sizeof(buffer), fp) == NULL)
 	{
 		endwin();
-		perror("ERR:dst fgets");
+		fprintf(stderr, "ERR: %s\n", cmd);
 		pclose(fp);
 		return;
 	}
@@ -487,6 +484,7 @@ void chart_timeset(struct tm *cdata, Location *loc, int *offset)
 	check_dst(orig);
 	//correct tm quirk after GNU date
 	orig->tm_year -= 1900;
+	orig->tm_mon -= 1;
 	
 	//copy correct isdst and hour before mktime
 	//mktime "corrects" it to system defaults, which can be wrong
@@ -729,10 +727,10 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
 	
+	// corrects loc->dhour offset from chart_timeset()
 	cdata->tm_mday += offset;
 
 	wclear(main_win);	
-	wrefresh(main_win);
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_SUN, i = 0; ipl <= SE_SATURN; ipl++, i++)
@@ -798,7 +796,6 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		(radius / 2) + 4 , ascmc[i], cusps[1]);
 	}
 		
-	cdata->tm_mon -= 1;
 	wrefresh(main_win);
 }
 
@@ -828,6 +825,17 @@ struct tm *cdata, Location *loc)
 	wrefresh(main_win);
 }
 
+int months(int month, int year)
+{
+	int days[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	
+	if (month == 2)
+		if ((year % 4 == 0 && year % 100 != 0) || 
+		(year % 400 == 0))
+			return 29;
+	return days[month];
+}
+
 void animate_chart(WINDOW *main_win, int maxy, int maxx,
 struct tm *cdata, Location *loc, P_deg *p_deg)
 {
@@ -842,6 +850,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	size_t i = 0;
 	int ch = 0;
 	int anim_done = 0;
+	halfdelay(1);
 	while(!anim_done && (ch = GET_INPUT(main_win)))
 	{
 		switch(ch)
@@ -856,6 +865,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 				break;
 			case 'j':
 				switch(i)
+				{
 					case 0:
 						if ((++cdata->tm_min) > 59)
 						{
@@ -864,14 +874,173 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							if ((cdata->tm_hour) > 23)
 							{
 								cdata->tm_hour = 0;
-								draw_chart(main_win, maxy,
-								maxx, cdata, loc, p_deg);
+								++cdata->tm_mday;
+								if (cdata->tm_mday > months(
+								cdata->tm_mon, cdata->tm_year))
+								{
+									cdata->tm_mday = 1;
+									++cdata->tm_mon;
+									if (cdata->tm_mon > 12)
+									{
+										cdata->tm_mon = 1;
+										++cdata->tm_year;
+									}
+								}
 							}
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
 						display_data(main_win, maxx, cdata, loc);
 						break;
+					case 1:
+						if ((++cdata->tm_hour) > 23)
+						{
+							cdata->tm_hour = 0;
+							++cdata->tm_mday;
+							if (cdata->tm_mday > months(
+							cdata->tm_mon, cdata->tm_year))
+							{
+								cdata->tm_mday = 1;
+								++cdata->tm_mon;
+								if (cdata->tm_mon > 12)
+								{
+									cdata->tm_mon = 1;
+									++cdata->tm_year;
+								}
+							}
+						}
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+					case 2:
+						if ((++cdata->tm_mday) > months(
+						cdata->tm_mon, cdata->tm_year))
+						{
+							cdata->tm_mday = 1;
+							++cdata->tm_mon;
+							if (cdata->tm_mon > 12)
+							{
+								cdata->tm_mon = 1;
+								++cdata->tm_year;
+							}
+						}
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+					case 3:
+						if ((++cdata->tm_mon) > 12)
+						{
+							cdata->tm_mon = 1;
+							++cdata->tm_year;
+						}
+						int max_day = months(
+						cdata->tm_mon, cdata->tm_year);
+						if (cdata->tm_mday > max_day)
+							cdata->tm_mday = max_day;
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+					case 4:
+						if ((++cdata->tm_year) > 16799)
+							cdata->tm_year = -12998;
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+				}
+				break;
+			case 'k':
+				switch(i)
+				{
+					case 0:
+						if ((--cdata->tm_min) < 0)
+						{
+							--cdata->tm_hour;
+							cdata->tm_min = 59;
+							if ((cdata->tm_hour) < 0)
+							{
+								cdata->tm_hour = 23;
+								--cdata->tm_mday;
+								if (cdata->tm_mday < 1)
+								{
+									--cdata->tm_mon;
+									if (cdata->tm_mon < 1)
+									{
+										cdata->tm_mon = 12;
+										--cdata->tm_year;
+									}
+									cdata->tm_mday = months(
+									cdata->tm_mon, cdata->tm_year);
+								}
+							}
+						}
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+					case 1:
+						if ((--cdata->tm_hour) < 0)
+						{
+							cdata->tm_hour = 23;
+							--cdata->tm_mday;
+							if (cdata->tm_mday < 1)
+							{
+								--cdata->tm_mon;
+								if (cdata->tm_mon < 1)
+								{
+									cdata->tm_mon = 12;
+									--cdata->tm_year;
+								}
+								cdata->tm_mday = months(
+								cdata->tm_mon, cdata->tm_year);
+							}
+						}
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+					case 2:
+						if ((--cdata->tm_mday) < 1)
+						{
+							--cdata->tm_mon;
+							if (cdata->tm_mon < 1)
+							{
+								cdata->tm_mon = 12;
+								--cdata->tm_year;
+							}
+							cdata->tm_mday = months(
+							cdata->tm_mon, cdata->tm_year);
+						}
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+					case 3:
+						if (--cdata->tm_mon < 1)
+						{
+							cdata->tm_mon = 12;
+							--cdata->tm_year;
+						}
+						int max_day = months(
+						cdata->tm_mon, cdata->tm_year);
+						if (cdata->tm_mday > max_day)
+							cdata->tm_mday = max_day;
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+					case 4:
+						if ((--cdata->tm_year) < -12998)
+							cdata->tm_year = 16799;
+						draw_chart(main_win, maxy,
+						maxx, cdata, loc, p_deg);
+						display_data(main_win, maxx, cdata, loc);
+						break;
+				}
+				break;
 			case '\n':
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
@@ -954,7 +1123,6 @@ int main()
 	main_win = newwin(maxy, maxx, 0, 0);
 	keypad(main_win, TRUE);
 	keypad(stdscr, TRUE);
-	wrefresh(main_win);
 	
 	int main_done = 0;
 	while (!main_done)
