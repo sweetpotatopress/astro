@@ -10,8 +10,11 @@ See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
-
+#include <ncurses.h>
 #pragma once
+
+
+#define GET_INPUT(win) normalize_input(win, wgetch(win))
 #define ERR_EXIT swe_close(); exit(EXIT_FAILURE);
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
@@ -51,7 +54,8 @@ typedef struct {
 	size_t file_count;
 } Io;
 
+
+int normalize_input(WINDOW *win, int ch);
 int main_search(FIELD *cdata_field[], char *argv);
 void main_io(FIELD *cdata_field[], struct tm *cdata,
 Location *loc, const char ch);
-

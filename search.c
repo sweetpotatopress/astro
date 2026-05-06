@@ -125,7 +125,7 @@ Location ***choices, size_t *max_search)
 
 void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 {
-	int c;
+	int ch;
 	ITEM **cities;
 	MENU *city_menu;
 	WINDOW *city_win;
@@ -221,10 +221,9 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	}
 	
 	int menu_done = 0;
-	while(!menu_done)
+	while(!menu_done && (ch = GET_INPUT(city_win)))
 	{
-		c = wgetch(city_win);
-		switch(c)
+		switch(ch)
 		{
 			case 'j': case KEY_DOWN:
 				menu_driver(city_menu, REQ_DOWN_ITEM);

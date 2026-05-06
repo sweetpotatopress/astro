@@ -24,6 +24,65 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "search.c"
 #include "io.c"
 
+int normalize_input(WINDOW *win, int ch)
+{
+	//fixes escape sequence compatibility 
+	if (ch == 27)
+	{
+		nodelay(win, TRUE);
+		int next = wgetch(win);
+		
+		if (next == '[')
+		{
+			int arrow = wgetch(win);
+			
+			switch(arrow)
+			{
+				case 'A':
+					nodelay(win, FALSE);
+					return KEY_UP;
+				case 'B':
+					nodelay(win, FALSE);
+					return KEY_DOWN;
+				case 'C':
+					nodelay(win, FALSE);
+					return KEY_RIGHT;
+				case 'D':
+					nodelay(win, FALSE);
+					return KEY_LEFT;
+				case 'H':
+					nodelay(win, FALSE);
+					return KEY_HOME;
+				case 'F':
+					nodelay(win, FALSE);
+					return KEY_END;
+				case '5':
+					wgetch(win);
+					nodelay(win, FALSE);
+					return KEY_PPAGE;
+				case '6':
+					wgetch(win);
+					nodelay(win, FALSE);
+					return KEY_NPAGE;
+				case '3':
+					wgetch(win);
+					nodelay(win, FALSE);
+					return KEY_DC;
+				case '2':
+					wgetch(win);
+					nodelay(win, FALSE);
+					return KEY_IC;
+				default:
+					nodelay(win, FALSE);
+					return ch;
+			}
+		}
+		nodelay(win, FALSE);
+		return ch;
+	}
+	return ch;
+}
+				
 void buff_trim(FIELD *current, char *buffer)
 {
 	char *f_buf = field_buffer(current, 0);
@@ -201,11 +260,11 @@ void ichart_data(struct tm *cdata, Location *loc)
 	int maxy, maxx;
 	getmaxyx(stdscr, maxy, maxx);
 
-	cbreak();
+	raw();
 	noecho();
 	
 	cdata_form_win = newwin(maxy - 2, maxx - 2, 0, 0);
-	keypad(cdata_form_win, TRUE);
+	
 	clearok(cdata_form_win, TRUE);
 	wclear(cdata_form_win);
 	wrefresh(cdata_form_win);
@@ -277,8 +336,8 @@ void ichart_data(struct tm *cdata, Location *loc)
 	field_label(cdata_form_win, i, starty, startx);
 	pos_form_cursor(cdata_form);
 	
-	int done = 0;
-	while(!done && (ch = wgetch(cdata_form_win)))
+	int cdata_entry = 0;
+	while(!cdata_entry && (ch = GET_INPUT(cdata_form_win)))
 	{
 		switch(mode)
 		{	
@@ -314,7 +373,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 						main_io(cdata_field, cdata, loc, 'e');
 						break;
 					case '\n':
-						done = 1;
+						cdata_entry = 1;
 						break;
 				}
 				break;
@@ -678,11 +737,12 @@ int main()
 	
 	initscr();
 	getmaxyx(stdscr, maxy, maxx);
-	cbreak();
+	
 	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
 
 	main_win = newwin(maxy, maxx, 0, 0);
 	keypad(main_win, TRUE);
+	keypad(stdscr, TRUE);
 	wrefresh(main_win);
 	
 	int main_done = 0;
