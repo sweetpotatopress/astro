@@ -24,24 +24,16 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "search.c"
 #include "io.c"
 
-void field_to_member
-(WINDOW *cdata_form_win, struct tm *cdata, Location *loc, 
-FORM *cdata_form, FIELD *cdata_field[])
+void buff_trim(FIELD *current, char *buffer)
 {
-	FIELD *current = current_field(cdata_form);
 	char *f_buf = field_buffer(current, 0);
-	int index = field_index(current);
-	
-	// get field buffer length, copy to buffer
 	int len = 0;
 	field_info(current, NULL, &len, NULL, NULL, NULL, NULL);
 	
-	char *buffer = malloc((size_t)len + 1);
-	if (!buffer)
+	if (len <= 0)
 	{
-		endwin();
-		perror("field to member buffer malloc");
-		ERR_EXIT;
+		buffer[0] = '\0';
+		return;
 	}
 	
 	memcpy(buffer, f_buf, (size_t)len);
@@ -49,11 +41,26 @@ FORM *cdata_form, FIELD *cdata_field[])
 	// decrement one to be in bounds, trim
 	--len;
 	while(len >= 0 && buffer[len] == ' ')
-	{
 		--len;
+	buffer[len + 1] = '\0';
+}
+
+void field_to_member
+(WINDOW *cdata_form_win, struct tm *cdata, Location *loc, 
+FORM *cdata_form, FIELD *cdata_field[])
+{
+	FIELD *current = current_field(cdata_form);
+	int index = field_index(current);
+	
+	char *buffer = malloc(1024);
+	if (!buffer)
+	{
+		endwin();
+		perror("field to member buffer malloc");
+		ERR_EXIT;
 	}
-	if (len >= 0)
-		buffer[len + 1] = '\0';
+	
+	buff_trim(current, buffer);
 	
 	switch(index)
 	{
@@ -67,7 +74,9 @@ FORM *cdata_form, FIELD *cdata_field[])
 			post_form(cdata_form);
 			wrefresh(cdata_form_win);
 			
-			loc->city = buffer;
+			buff_trim(current, buffer);
+			
+			loc->city = strdup(buffer);
 			doupdate();
 			break;
 		case 1:
@@ -236,7 +245,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	field_opts_off(cdata_field[5], O_AUTOSKIP);
 	starty+= 2;
 	// timezone
-	cdata_field[6] = new_field(1, 25, starty, startx, 0, 0);
+	cdata_field[6] = new_field(1, 30, starty, startx, 0, 0);
 	set_field_back(cdata_field[6], A_UNDERLINE);
 	field_opts_off(cdata_field[6], O_STATIC);
 	field_opts_off(cdata_field[6], O_AUTOSKIP);
