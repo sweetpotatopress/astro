@@ -1,24 +1,39 @@
 -- astro --
 calculate astrology charts in the linux terminal
 
-KEYBINDINGS---o-
+--o-KEYBINDS---o-
 
 NORMAL MODE - esc
+
+-navigation		-	hjkl
 -draw chart 	- 	enter
 -autofill systime-	tab
+
 -save chart 	-	w
--navigation		-	hjkl
+	-choose dir 	-	q
+	-cancel save	-	esc
+-load chart		-	e
+	-choose file	-	l / enter
+	-cancel			-	q
 
 INSERT MODE - i (on by default)
+
 -navigation 	-	arrowkeys
 
-CHART VIEW---o-
+CHART VIEW
+
 -exit program	-	q
 -new chart		-	i
 
 
+--license--
 
---license--AGPLv3
+astro
+AGPLv3
+
+geonames  - (city-db)
+CC BY 4.0
+https://creativecommons.org/licenses/by/4.0/
 
 TODO
 
