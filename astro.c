@@ -26,7 +26,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 int normalize_input(WINDOW *win, int ch)
 {
-	//fixes escape sequence compatibility 
+	// escape sequence compatibility 
+	
+	if (ch == 8 || ch == 127)
+		return KEY_BACKSPACE;
 	if (ch == 27)
 	{
 		nodelay(win, TRUE);
@@ -260,7 +263,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	int maxy, maxx;
 	getmaxyx(stdscr, maxy, maxx);
 
-	raw();
+	cbreak();
 	noecho();
 	
 	cdata_form_win = newwin(maxy - 2, maxx - 2, 0, 0);
@@ -582,23 +585,24 @@ int radius, double planet, double asc, P_deg *p_deg)
 			0	90	180	270
 		sin	0	1	0	-1
 	*/
-	int dir_y = (sin(rad) < 0) ? 1 : -1;
 	int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
+	int dir_y = ((int)sin(rad) != 0) ? 1 : -1;
 	
 	for (int j = 0; j < i; j++)
 	{
 		if (fabs(planet - p_arr[j]) <= 8)	
 		{
-			offsety += 3;
-			offsetx -= 2;
+			offsety -= 3;
+			offsetx -= 5;
 		}
 	}
 	for (int j = 0; j < i; j++)
 	{
-		if (fabs(planet - p_arr[j]) <= 8)	
+		if (fabs(planet - p_arr[j]) > 11 &&
+		fabs(planet - p_arr[j]) < 15)
 		{
-			offsetx += 5;
-			offsety -= 1;
+			offsety += 1;
+			offsetx -= 2;
 		}
 	}
 	
