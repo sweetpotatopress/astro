@@ -32,9 +32,10 @@ FORM *cdata_form, FIELD *cdata_field[])
 	char *f_buf = field_buffer(current, 0);
 	int index = field_index(current);
 	
-	// get field length, trim blank space from field_buffer, add null 0
+	// get field buffer length, copy to buffer
 	int len = 0;
-	field_info(current, NULL, NULL, NULL, &len, NULL, NULL);
+	field_info(current, NULL, &len, NULL, NULL, NULL, NULL);
+	
 	char *buffer = malloc((size_t)len + 1);
 	if (!buffer)
 	{
@@ -275,8 +276,8 @@ void ichart_data(struct tm *cdata, Location *loc)
 				switch (ch)
 				{
 					case 'i':
-					mode = INSERT;
-					break;
+						mode = INSERT;
+						break;
 					case 'j': case KEY_DOWN:
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						form_driver(cdata_form, REQ_END_LINE);
@@ -291,7 +292,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 					case 'l': case KEY_RIGHT:
 						form_driver(cdata_form, REQ_RIGHT_CHAR);
 						break;
-					case 9:
+					case 9: // tab
 						set_localtime(cdata_field, cdata);
 						break;
 					case 'w':
@@ -400,7 +401,6 @@ void check_dst(struct tm *orig)
 
 void chart_timeset(struct tm *cdata, Location *loc)
 {
-
 	struct tm *orig = cdata;
 	check_dst(orig);
 	//correct tm quirk after GNU date
@@ -626,12 +626,13 @@ int radius, double angle, chtype ch)
 int main()
 {
 	WINDOW *main_win;
-	int iret, iflag, ipl, i, c, done = 0;
+	int iret, iflag, ipl, i, c;
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
 	double cusps[13], ascmc[10]; //houses, asc, mc
 	int ihsy = 'W'; // house system
+	
 	struct tm *cdata = calloc(1, sizeof(struct tm));
 	if (!cdata)
 	{
@@ -639,6 +640,7 @@ int main()
 		perror("Cdata calloc");
 		ERR_EXIT;
 	}
+	
 	Location *loc = calloc(1, sizeof(Location));
 	if (!loc)
 	{
@@ -646,6 +648,7 @@ int main()
 		perror("main Location calloc");
 		ERR_EXIT;
 	}
+	
 	P_deg *p_deg = calloc(1, sizeof(P_deg));
 	if (!p_deg)
 	{
@@ -653,6 +656,7 @@ int main()
 		perror("P_deg calloc");
 		ERR_EXIT;
 	}
+	
 	//to fill each member of P_deg with its planets degree in later loops
 	double *p_deg_members[] = {
 	&p_deg->dsun, &p_deg->dmoon,
@@ -671,12 +675,14 @@ int main()
 	keypad(main_win, TRUE);
 	wrefresh(main_win);
 	
-	while (!done)
+	int main_done = 0;
+	while (!main_done)
 	{
 		curs_set(1);
 		ichart_data(cdata, loc); // ----
 		chart_timeset(cdata, loc); // goes before swe_julday
 		reset_struct(cdata); // ----
+		
 		double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 		cdata->tm_mday, loc->dhour, SE_GREG_CAL);
 
@@ -751,17 +757,18 @@ int main()
 		wrefresh(main_win);
 		
 		int chart_done = 0;
-		while(!chart_done && !done)
+		while(!chart_done && !main_done)
 		{
 			c = wgetch(main_win);
 			switch(c)
 			{
 				case 'q':
-					done = 1;
+					main_done = 1;
 					chart_done = 1;
 					break;
 				case 'i':
 					wclear(main_win);
+					wrefresh(main_win);
 					chart_done = 1;
 					mode = INSERT;
 					break;

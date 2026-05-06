@@ -139,6 +139,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				}
 			}
 		}
+		// keeps the menu alive in empty dirs
 		if (i == 0)
 		{
 			save_files[0] = new_item("save here?", " ");
@@ -304,8 +305,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					menu_done = 1;
 					wclear(save_win);
 					break;
-				default:
-					ch = wgetch(save_win);
 			}
 			wrefresh(save_win);
 		}
@@ -636,6 +635,13 @@ void load_chart(FIELD *cdata_field[], Io *io)
 				i++;
 			}
 		}
+		if (i == 0)
+		{
+			load_files[0] = new_item("empty dir", " ");
+			max_width = 10;
+			i = 1;
+		}
+		
 		load_files[i] = NULL;
 		closedir(chart_dir);
 		
@@ -709,7 +715,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					snprintf(newpath, 1024,
 					"%s/%s", io->filepath, selected);
 			
-						//if file path is a directory
+					// if file path is a directory
 					if (stat(newpath, &st) == 0 &&
 					S_ISDIR(st.st_mode))
 					{
@@ -722,7 +728,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 							perror("case l io->filepath");
 							ERR_EXIT;
 						}
-						//copy new file path to open
+						// copy new file path to open
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
 						wclear(load_win);
