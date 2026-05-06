@@ -21,7 +21,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <form.h>
 #include <panel.h>
 #include "astro.h"
-#include "city-search.c"
+#include "search.c"
 #include "io.c"
 
 void field_to_member
@@ -59,6 +59,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 	{
 		case 0:
 			main_search(cdata_field, buffer);
+			form_driver(cdata_form, REQ_VALIDATION);
 			
 			//redraws field underline
 			unpost_form(cdata_form);
@@ -338,7 +339,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 					case KEY_BACKSPACE:
 						form_driver(cdata_form, REQ_DEL_PREV);
 						break;
-					case 27:
+					case 27: // esc
 						mode = NORMAL;
 						break;
 					default:
