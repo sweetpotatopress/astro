@@ -268,6 +268,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	
 	cdata_form_win = newwin(maxy - 2, maxx - 2, 0, 0);
 	
+	keypad(cdata_form_win, TRUE);	
 	clearok(cdata_form_win, TRUE);
 	wclear(cdata_form_win);
 	wrefresh(cdata_form_win);
@@ -696,16 +697,177 @@ int radius, double angle, chtype ch)
 	}
 }
 
-int main()
+void draw_chart(WINDOW *main_win, int maxy, int maxx,
+struct tm *cdata, Location *loc, P_deg *p_deg)
 {
-	WINDOW *main_win;
-	int iret, iflag, ipl, i, c;
+	int iret, iflag, ipl, i;
 	double xx[6];
 	char serr[AS_MAXCH];
 	char spname[AS_MAXCH];
 	double cusps[13], ascmc[10]; //houses, asc, mc
 	int ihsy = 'W'; // house system
 	
+	double *p_deg_members[] = {
+	&p_deg->dsun, &p_deg->dmoon,
+	&p_deg->dmerc, &p_deg->dven,
+	&p_deg->dmars, &p_deg->djup,
+	&p_deg->dsat};
+	
+	chart_timeset(cdata, loc); // goes before swe_julday
+	reset_struct(cdata); // ----
+	
+	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
+	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
+
+	wclear(main_win);	
+	wrefresh(main_win);
+	
+	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+	for (ipl = SE_SUN, i = 0; ipl <= SE_SATURN; ipl++, i++)
+	{
+		swe_get_planet_name(ipl, spname);
+		spname[7] = '\0';
+		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
+		if (iret < 0) 
+		{
+			fprintf(stderr, "%s", serr);
+			ERR_EXIT;
+			exit(EXIT_FAILURE);
+		}
+		*p_deg_members[i] = xx[0];
+	}
+	
+	iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
+	ihsy, cusps, ascmc);
+	if (iret < 0)
+	{
+		fprintf(stderr, "%s", serr);
+		ERR_EXIT;
+		exit(EXIT_FAILURE);
+	}
+	
+	curs_set(0);
+	int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
+	
+	// zodiac circle
+	draw_circle(main_win, maxy, maxx, radius + 4, '`');
+	// outer circle
+	draw_circle(main_win, maxy, maxx, radius, '.');
+	// inner circle
+	draw_circle(main_win, maxy, maxx, (radius / 2) - 1, '.');
+	
+	for (i = 0; i < 13; ++i)
+	{
+		draw_house(main_win, maxy, maxx, radius + 4,
+		cusps[i], '`');
+	}
+	
+	for (i = 1; i < 13; ++i)
+	{
+		int asc_sign = (int)(ascmc[0] / 30);
+		
+		int sign_display = ((i + asc_sign - 1) % 12);
+		if (sign_display == 0)
+			sign_display = 12;
+
+		zo_pos(main_win, sign_display, maxy, maxx,
+		radius + 3, cusps[i], ascmc[0]);
+	}
+
+	for (i = 0; i < 7; ++i)
+	{
+		planet_pos(main_win, i, maxy, maxx,
+		radius - 4, *p_deg_members[i], cusps[1], p_deg);
+	}
+	
+	for (i = 0; i < 2; ++i)
+	{
+		ascmc_pos(main_win, i, maxy, maxx,
+		(radius / 2) + 4 , ascmc[i], cusps[1]);
+	}
+		
+	wrefresh(main_win);
+}
+
+void animate_chart(WINDOW *main_win, int maxy, int maxx,
+struct tm *cdata, Location *loc)
+{
+	int starty = 5;
+	int startx = maxx - 6;
+	
+	wmove(main_win, starty, startx);
+	wclrtoeol(main_win);
+	mvwprintw(main_win, starty, startx, "min");
+	wrefresh(main_win);
+	
+	size_t i = 0;
+	int ch = 0;
+	int anim_done = 0;
+	while(!anim_done && (ch = GET_INPUT(main_win)))
+	{
+		switch(ch)
+		{
+			case 'h':
+				if (i != 0)
+					--i;
+				break;
+			case 'l':
+				if (i != 5)
+					++i;
+				break;
+			case 'j':
+				switch(i)
+					case 0:
+						++cdata->tm_min;
+						chart_timeset(cdata, loc);
+			case '\n':
+				wmove(main_win, starty, startx);
+				wclrtoeol(main_win);
+				wrefresh(main_win);
+				anim_done = 1;
+				break;
+		}
+		
+		switch(i)
+		{
+			case 0:
+				wmove(main_win, starty, startx);
+				wclrtoeol(main_win);
+				mvwprintw(main_win, starty, startx, "min");
+				wrefresh(main_win);
+				break;
+			case 1:
+				wmove(main_win, starty, startx);
+				wclrtoeol(main_win);
+				mvwprintw(main_win, starty, startx, "hour");
+				wrefresh(main_win);
+				break;
+			case 2:
+				wmove(main_win, starty, startx);
+				wclrtoeol(main_win);
+				mvwprintw(main_win, starty, startx, "day");
+				wrefresh(main_win);
+				break;
+			case 3:
+				wmove(main_win, starty, startx);
+				wclrtoeol(main_win);
+				mvwprintw(main_win, starty, startx, "mon");
+				wrefresh(main_win);
+				break;
+			case 4:
+				wmove(main_win, starty, startx);
+				wclrtoeol(main_win);
+				mvwprintw(main_win, starty, startx, "year");
+				wrefresh(main_win);
+				break;
+		}
+	}
+}
+
+int main()
+{
+	WINDOW *main_win;
+
 	struct tm *cdata = calloc(1, sizeof(struct tm));
 	if (!cdata)
 	{
@@ -729,14 +891,7 @@ int main()
 		perror("P_deg calloc");
 		ERR_EXIT;
 	}
-	
-	//to fill each member of P_deg with its planets degree in later loops
-	double *p_deg_members[] = {
-	&p_deg->dsun, &p_deg->dmoon,
-	&p_deg->dmerc, &p_deg->dven,
-	&p_deg->dmars, &p_deg->djup,
-	&p_deg->dsat};
-	
+
 	int maxy, maxx;
 	
 	initscr();
@@ -752,90 +907,18 @@ int main()
 	int main_done = 0;
 	while (!main_done)
 	{
-		curs_set(1);
-		ichart_data(cdata, loc); // ----
-		chart_timeset(cdata, loc); // goes before swe_julday
-		reset_struct(cdata); // ----
-		
-		double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
-		cdata->tm_mday, loc->dhour, SE_GREG_CAL);
-
-		refresh();
-		
-		wrefresh(main_win);
-		
-		iflag = SEFLG_SWIEPH | SEFLG_SPEED;
-		for (ipl = SE_SUN, i = 0; ipl <= SE_SATURN; ipl++, i++)
-		{
-			swe_get_planet_name(ipl, spname);
-			spname[7] = '\0';
-			iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
-			if (iret < 0) 
-			{
-				fprintf(stderr, "%s", serr);
-				ERR_EXIT;
-				exit(EXIT_FAILURE);
-			}
-			*p_deg_members[i] = xx[0];
-		}
-		
-		iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
-		ihsy, cusps, ascmc);
-		if (iret < 0)
-		{
-			fprintf(stderr, "%s", serr);
-			ERR_EXIT;
-			exit(EXIT_FAILURE);
-		}
-		
-		curs_set(0);
-		int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
-		
-		// zodiac circle
-		draw_circle(main_win, maxy, maxx, radius + 4, '`');
-		// outer circle
-		draw_circle(main_win, maxy, maxx, radius, '.');
-		// inner circle
-		draw_circle(main_win, maxy, maxx, (radius / 2) - 1, '.');
-		
-		for (i = 0; i < 13; ++i)
-		{
-			draw_house(main_win, maxy, maxx, radius + 4,
-			cusps[i], '`');
-		}
-		
-		for (i = 1; i < 13; ++i)
-		{
-			int asc_sign = (int)(ascmc[0] / 30);
+		ichart_data(cdata, loc);
+		draw_chart(main_win, maxy, maxx, cdata, loc, p_deg);
 			
-			int sign_display = ((i + asc_sign - 1) % 12);
-			if (sign_display == 0)
-				sign_display = 12;
-	
-			zo_pos(main_win, sign_display, maxy, maxx,
-			radius + 3, cusps[i], ascmc[0]);
-		}
-	
-		for (i = 0; i < 7; ++i)
+		int chart_done = 0, ch = 0;
+		while(!chart_done && !main_done &&
+		(ch = GET_INPUT(main_win)))
 		{
-			planet_pos(main_win, i, maxy, maxx,
-			radius - 4, *p_deg_members[i], cusps[1], p_deg);
-		}
-		
-		for (i = 0; i < 2; ++i)
-		{
-			ascmc_pos(main_win, i, maxy, maxx,
-			(radius / 2) + 4 , ascmc[i], cusps[1]);
-		}
-			
-		wrefresh(main_win);
-		
-		int chart_done = 0;
-		while(!chart_done && !main_done)
-		{
-			c = wgetch(main_win);
-			switch(c)
+			switch(ch)
 			{
+				case '\n':
+					animate_chart(main_win, maxy, maxx, cdata, loc);
+					break;
 				case 'q':
 					main_done = 1;
 					chart_done = 1;
@@ -855,6 +938,7 @@ int main()
 	endwin();
 	swe_close();
 	free(cdata);
+	free(loc->city);
 	free(loc);
 	free(p_deg);
 	return 0;
