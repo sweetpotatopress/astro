@@ -802,25 +802,27 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 void display_data(WINDOW *main_win, int maxx, 
 struct tm *cdata, Location *loc)
 {	
-	int starty = 3;
-	int startx = maxx - 12;
+	int starty = 1;
+	int startx = maxx - 22;
 	
+	mvwprintw(main_win, starty, startx, "%s", loc->city);
+	
+	starty += 1;
 	mvwprintw(main_win, starty, startx, "%d", cdata->tm_year);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "%d", cdata->tm_mon);
+	mvwprintw(main_win, starty, startx, "%d/%d", cdata->tm_mon, cdata->tm_mday);
 	
-	startx += 3;
-	mvwprintw(main_win, starty, startx, "%d", cdata->tm_mday);
+	starty += 1;
+	mvwprintw(main_win, starty, startx, "%d:%d", cdata->tm_hour, cdata->tm_min);
 	
-	starty += 2; startx -= 3;
-	mvwprintw(main_win, starty, startx, "%d", cdata->tm_hour);
+	starty += 1;
+	mvwprintw(main_win, starty, startx, "lat.%.3f", loc->dlat);
 	
-	startx += 3;
-	mvwprintw(main_win, starty, startx, "%d", cdata->tm_min);
+	starty += 1;
+	mvwprintw(main_win, starty, startx, "lon.%.3f", loc->dlon);
 	
-	starty += 1; startx -= 3;
-	mvwprintw(main_win, starty, startx, "%f", loc->dhour);
+	
 	
 	wrefresh(main_win);
 }
@@ -839,12 +841,9 @@ int months(int month, int year)
 void animate_chart(WINDOW *main_win, int maxy, int maxx,
 struct tm *cdata, Location *loc, P_deg *p_deg)
 {
-	int starty = 10;
-	int startx = maxx - 6;
+	int starty = 8;
+	int startx = maxx - 22;
 	
-	wmove(main_win, starty, startx);
-	wclrtoeol(main_win);
-	mvwprintw(main_win, starty, startx, "min");
 	wrefresh(main_win);
 	
 	size_t i = 0;
@@ -1042,9 +1041,6 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 				}
 				break;
 			case '\n':
-				wmove(main_win, starty, startx);
-				wclrtoeol(main_win);
-				wrefresh(main_win);
 				anim_done = 1;
 				break;
 		}
@@ -1054,35 +1050,38 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 			case 0:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "min");
+				mvwprintw(main_win, starty, startx, "(min)");
 				wrefresh(main_win);
 				break;
 			case 1:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "hour");
+				mvwprintw(main_win, starty, startx, "(hour)");
 				wrefresh(main_win);
 				break;
 			case 2:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "day");
+				mvwprintw(main_win, starty, startx, "(day)");
 				wrefresh(main_win);
 				break;
 			case 3:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "mon");
+				mvwprintw(main_win, starty, startx, "(mon)");
 				wrefresh(main_win);
 				break;
 			case 4:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "year");
+				mvwprintw(main_win, starty, startx, "(year)");
 				wrefresh(main_win);
 				break;
 		}
 	}
+	wmove(main_win, starty, startx);
+	wclrtoeol(main_win);
+	wrefresh(main_win);
 }
 
 int main()

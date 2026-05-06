@@ -23,27 +23,30 @@ INSERT MODE - i (on by default)
 
 CHART VIEW
 
+-animate chart 	-	enter
+	-swap increment -	h/l
+	-++ and --		-	j/k
+
 -exit program	-	q
 -new chart		-	i
 
 DATA
 
 charts are saved in $XDG_DATA_HOME
+(~/.local/share/astro/charts)
 
---license--
+DEPENDENCIES
+-ncurses
+-GNU coreutil date
+-/etc/localtime symlink to IANA timezone, to autofill. 
 
-astro
-AGPLv3
-
-geonames  - (city-db)
-CC BY 4.0
-https://creativecommons.org/licenses/by/4.0/
+basically, it should work on every linux distro :)
 
 TODO
 
 --save and load charts -- [DONE]
---animate chart
---add birth data to chartview
+--animate chart --	[DONE]
+--add birth data to chartview -- [DONE]
 --write makefile
 --new window with exact planet stats
 --add nodes, outers, lot of spirit + fortune
@@ -55,3 +58,12 @@ TODO
 --declination/bounds table
 --terminal window autoresize
 --zodiacal releasing
+
+--license--
+
+astro
+AGPLv3
+
+geonames  - (city-db)
+CC BY 4.0
+https://creativecommons.org/licenses/by/4.0/
