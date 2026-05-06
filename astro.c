@@ -603,7 +603,7 @@ int radius, double planet, double asc, P_deg *p_deg)
 		if (fabs(planet - p_arr[j]) <= 8)	
 		{
 			offsety -= 3;
-			offsetx -= 5;
+			offsetx -= 6;
 		}
 	}
 	for (int j = 0; j < i; j++)
@@ -619,10 +619,14 @@ int radius, double planet, double asc, P_deg *p_deg)
 	offsety = dir_y * offsety;
 	offsetx = dir_x * offsetx;
 	
-	//print planets degree
+	double decimal  = (((planet - (int)planet) * 60) / 100);
+	
 	char buffer[56];
-	snprintf(buffer, sizeof(buffer), "%d", (int)planet % 30);
-	mvwaddstr(main_win, (y + offsety) - 1, x + offsetx, buffer);
+	snprintf(buffer, sizeof(buffer), "%.2f", ((int)planet % 30) +
+	decimal);
+	
+	
+	mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
 	
 	mvwaddstr(main_win, y + offsety, x + offsetx, pl_sym[i]);
 }
@@ -644,15 +648,22 @@ int radius, double angle, double asc)
 		for (int r = 0; r <= radius; r++)
 		{
 			int line_x = center_x - (int)(r * cos(rad));
+			int line_y = center_y + (int)(r * sin(rad) * 0.5);
 			
-			if (line_x >= 0 && line_x < maxx)
-				mvwaddch(main_win, y, line_x, '-');
+			if (line_x >= 0 && line_x < maxx
+			&& line_y >= 0 && line_y < maxy)
+				mvwaddch(main_win, line_y, line_x, '`');
 		}
 	}
 	
 	mvwaddstr(main_win, y, x, ascmc_sym[i]);
+	
+	double decimal = (((angle - (int)angle) * 60) / 100);
+	
 	char buffer[56];
-	snprintf(buffer, sizeof(buffer), "%d", (int)angle % 30);
+	snprintf(buffer, sizeof(buffer), "%.2f", ((int)angle % 30) + 
+	decimal);
+	
 	mvwaddstr(main_win, y - 1, x, buffer);
 }
 
@@ -787,7 +798,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	for (i = 0; i < 7; ++i)
 	{
 		planet_pos(main_win, i, maxy, maxx,
-		radius - 4, *p_deg_members[i], cusps[1], p_deg);
+		radius - 6, *p_deg_members[i], cusps[1], p_deg);
 	}
 	
 	for (i = 0; i < 2; ++i)
