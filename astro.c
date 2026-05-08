@@ -20,10 +20,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <ncurses.h>
 #include <form.h>
-#include <panel.h>
 #include "astro.h"
-#include "search.c"
-#include "io.c"
+
+Mode mode = INSERT;
 
 int normalize_input(WINDOW *win, int ch)
 {
@@ -203,7 +202,6 @@ void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
 
 void set_localtime(FIELD *cdata_field[], struct tm *cdata)
 {
-	cdata = malloc(sizeof(struct tm));
 	char buff[128] = {0};
 	ssize_t len = readlink("/etc/localtime", buff, sizeof(buff) - 1);
 	if (len != -1)
@@ -377,10 +375,10 @@ void ichart_data(struct tm *cdata, Location *loc)
 					case 'w':
 						validate_fields(cdata_form_win, cdata_field,
 						cdata_form, cdata, loc);
-						main_io(cdata_field, cdata, loc, 'w');
+						main_io(cdata_field, cdata, loc, mode, 'w');
 						break;
 					case 'e':
-						main_io(cdata_field, cdata, loc, 'e');
+						main_io(cdata_field, cdata, loc, mode, 'e');
 						break;
 					case '\n':
 						cdata_entry = 1;
@@ -438,7 +436,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	wrefresh(cdata_form_win);
 	free_form(cdata_form);
 	
-	for (i = 0; i < 7; ++i)
+	for (i = 0; i < 9; ++i)
 	{
 		free_field(cdata_field[i]);
 	}
@@ -624,7 +622,6 @@ int radius, double planet, double asc, P_deg *p_deg)
 	char buffer[56];
 	snprintf(buffer, sizeof(buffer), "%.2f", ((int)planet % 30) +
 	decimal);
-	
 	
 	mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
 	
@@ -833,8 +830,6 @@ struct tm *cdata, Location *loc)
 	starty += 1;
 	mvwprintw(main_win, starty, startx, "lon.%.3f", loc->dlon);
 	
-	
-	
 	wrefresh(main_win);
 }
 
@@ -860,7 +855,6 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	size_t i = 0;
 	int ch = 0;
 	int anim_done = 0;
-	halfdelay(1);
 	while(!anim_done && (ch = GET_INPUT(main_win)))
 	{
 		switch(ch)
@@ -949,6 +943,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						cdata->tm_mon, cdata->tm_year);
 						if (cdata->tm_mday > max_day)
 							cdata->tm_mday = max_day;
+							
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
 						display_data(main_win, maxx, cdata, loc);

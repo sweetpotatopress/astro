@@ -13,6 +13,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <unistd.h>
+#include <stdlib.h>
 #include <pwd.h>
 #include <dirent.h>
 #include <string.h>
@@ -22,7 +23,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <menu.h>
 #include "astro.h"
 
-void save_chart(struct tm *cdata, Location *loc, Io *io)
+void save_chart(struct tm *cdata, Location *loc, Io *io, Mode mode)
 {
 
 	FORM *save_form;
@@ -158,6 +159,9 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		
 		// window dimensions	
 		int width = max_width + 4;
+		if (max_width < 20)
+			max_width = 20;
+			
 		int height = (int)io->file_count + 2;
 		
 		if (width > COLS)
@@ -206,7 +210,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		
 		int ch = 0;
 		int menu_done = 0;
-		while (!menu_done && (ch = wgetch(save_win)))
+		while (!menu_done && (ch = GET_INPUT(save_win)))
 		{
 			switch(ch)
 			{
@@ -376,7 +380,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	pos_form_cursor(save_form);
 	
 	int done = 0;
-	while(!done && (ch = wgetch(save_win)))
+	while(!done && (ch = GET_INPUT(save_win)))
 	{
 		switch (ch)
 		{
@@ -498,7 +502,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	fprintf(ifp, "%s\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
 		loc->city,
 		cdata->tm_year,
-		cdata->tm_mon + 1,
+		cdata->tm_mon,
 		cdata->tm_mday,
 		cdata->tm_hour,
 		cdata->tm_min,
@@ -655,6 +659,9 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		
 		// window dimensions	
 		int width = max_width + 4;
+		if (max_width < 18)
+			max_width = 18;
+			
 		int height = (int)io->file_count + 2;
 		
 		if (width > COLS)
@@ -703,7 +710,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		
 		int menu_done = 0;
 		int ch = 0;
-		while (!menu_done && (ch = wgetch(load_win)))
+		while (!menu_done && (ch = GET_INPUT(load_win)))
 		{
 			switch(ch)
 			{
@@ -826,7 +833,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 }
 
 void main_io(FIELD *cdata_field[], struct tm *cdata,
-Location *loc, const char ch)
+Location *loc, Mode mode, const char ch)
 {
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw) 
@@ -856,7 +863,7 @@ Location *loc, const char ch)
 	"%s/.local/share/astro/charts/", pw->pw_dir);
 	
 	if (ch == 'w')
-		save_chart(cdata, loc, io);
+		save_chart(cdata, loc, io, mode);
 	if (ch == 'e')
 		load_chart(cdata_field, io);
 		

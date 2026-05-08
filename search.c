@@ -15,7 +15,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <string.h>
 #include <stdlib.h>
 #include <ncurses.h>
+#include <form.h>
 #include <menu.h>
+#include "astro.h"
 
 char* strtok_E(char *str, const char *delim)
 {
@@ -264,7 +266,6 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	delwin(city_win);
 }
 		
-
 int main_search(FIELD *cdata_field[], char *argv)
 {
 	FILE *fp;
