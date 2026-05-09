@@ -81,7 +81,7 @@ int normalize_input(WINDOW *win, int ch)
 					return KEY_IC;
 				default:
 					nodelay(win, FALSE);
-					return arrow;
+					return 27;
 			}
 		}
 		nodelay(win, FALSE);
@@ -573,11 +573,17 @@ int radius, double planet, double asc, P_deg *p_deg)
 		p_deg->dven,
 		p_deg->dmars,
 		p_deg->djup,
-		p_deg->dsat
+		p_deg->dsat,
+		p_deg->dura,
+		p_deg->dnep,
+		p_deg->dplu,
+		p_deg->dmnod,
+		p_deg->dtnod
 	};
 	
 	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
-	"(~:o)", "(o->)", "(\\+)", "(h)"};
+	"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
+	"(P)", NULL, "(^)"};
 	
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
@@ -594,23 +600,14 @@ int radius, double planet, double asc, P_deg *p_deg)
 		sin	0	1	0	-1
 	*/
 	int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
-	int dir_y = ((int)sin(rad) != 0) ? 1 : -1;
+	int dir_y = ((int)sin(rad) != 0) ? -1 : 1;
 	
 	for (int j = 0; j < i; j++)
 	{
 		if (fabs(planet - p_arr[j]) <= 8)	
 		{
 			offsety -= 3;
-			offsetx -= 6;
-		}
-	}
-	for (int j = 0; j < i; j++)
-	{
-		if (fabs(planet - p_arr[j]) > 11 &&
-		fabs(planet - p_arr[j]) < 15)
-		{
-			offsety += 1;
-			offsetx -= 2;
+			offsetx += 4;
 		}
 	}
 	
@@ -623,9 +620,12 @@ int radius, double planet, double asc, P_deg *p_deg)
 	snprintf(buffer, sizeof(buffer), "%.2f", ((int)planet % 30) +
 	decimal);
 	
-	mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
+	if (i != 10)
+	{
+		mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
 	
-	mvwaddstr(main_win, y + offsety, x + offsetx, pl_sym[i]);
+		mvwaddstr(main_win, y + offsety, x + offsetx, pl_sym[i]);
+	}
 }
 
 void ascmc_pos(WINDOW *main_win, int i, int maxy, int maxx,
@@ -727,7 +727,9 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	&p_deg->dsun, &p_deg->dmoon,
 	&p_deg->dmerc, &p_deg->dven,
 	&p_deg->dmars, &p_deg->djup,
-	&p_deg->dsat};
+	&p_deg->dsat, &p_deg->dura,
+	&p_deg->dnep, &p_deg->dplu,
+	&p_deg->dmnod, &p_deg->dtnod};
 	
 	chart_timeset(cdata, loc, &offset); // goes before swe_julday
 	reset_struct(cdata); // ----
@@ -741,10 +743,10 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	wclear(main_win);	
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
-	for (ipl = SE_SUN, i = 0; ipl <= SE_SATURN; ipl++, i++)
+	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
 	{
 		swe_get_planet_name(ipl, spname);
-		spname[7] = '\0';
+		spname[17] = '\0';
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
 		{
@@ -792,7 +794,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		radius + 3, cusps[i], ascmc[0]);
 	}
 
-	for (i = 0; i < 7; ++i)
+	for (i = 0; i < 12; ++i)
 	{
 		planet_pos(main_win, i, maxy, maxx,
 		radius - 6, *p_deg_members[i], cusps[1], p_deg);

@@ -135,6 +135,12 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	WINDOW *city_subwin;
 	//use ** to not lose the pointer after the loop
 	char **strings = calloc(n_choices, sizeof(char *));
+	if (!strings)
+	{
+		endwin();
+		perror("strings calloc");
+		ERR_EXIT;
+	}
 	char buffer[1024] = {0};
 	int max_width = 0;
 	

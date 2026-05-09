@@ -32,6 +32,11 @@ typedef struct {
 	double dmars;
 	double djup;
 	double dsat;
+	double dura;
+	double dnep;
+	double dplu;
+	double dmnod;
+	double dtnod;
 } P_deg;
 
 // chart data that doesnt fit in struct tm
