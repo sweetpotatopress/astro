@@ -1,6 +1,21 @@
 -- astro --
 calculate astrology charts in the linux terminal
 
+-xo-INSTALL--o
+
+sudo make clean install
+
+run by typing astro
+
+--o-DEPENDENCIES---
+
+-swiss ephemeris (built with the makefile)
+-ncurses
+-GNU coreutil date
+-/etc/localtime symlink to IANA timezone, to autofill. 
+
+basically, it should work on every linux distro :)
+
 --o-KEYBINDS---o-
 
 NORMAL MODE - esc
@@ -35,12 +50,6 @@ DATA
 charts are saved in $XDG_DATA_HOME
 (~/.local/share/astro/charts)
 
-DEPENDENCIES
--ncurses
--GNU coreutil date
--/etc/localtime symlink to IANA timezone, to autofill. 
-
-basically, it should work on every linux distro :)
 
 TODO
 
