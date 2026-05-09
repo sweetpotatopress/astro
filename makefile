@@ -35,13 +35,18 @@ all: $(SWE_DEPS)
 	@echo "-o--o-Building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
 	     -L$(SWE_LIB) -lswe -lm \
-	     -lncurses -lmenu -lform -lpanel -ltinfo
-
+	     -lncurses -lmenu -lform -ltinfo
+	     
 install: all
 	@echo "-x--o Installing astro --oo-"
 	/bin/mkdir -p $(INSTALL_DIR)
 	/bin/cp $(TARGET) $(INSTALL_DIR)/$(TARGET)
-	
+	@echo "-x--o Creating data directories --oo-"
+	@REAL_USER=$${SUDO_USER:-$${DOAS_USER:-$$USER}}; \
+	REAL_HOME=$$(getent passwd $$REAL_USER | cut -d: -f6); \
+	/bin/mkdir -p $$REAL_HOME/.local/share/astro/charts; \
+	/bin/cp city-db $$REAL_HOME/.local/share/astro/city-db
+
 swe-install: $(SWE_DIR)/libswe.a
 	@echo "--o-Installing Swiss Ephemeris x<--o-"
 	/bin/mkdir -p $(SWE_INC) $(SWE_LIB)
