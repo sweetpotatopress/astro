@@ -14,7 +14,11 @@ run by typing astro
 -GNU coreutil date
 -/etc/localtime symlink to IANA timezone, to autofill. 
 
-basically, it should work on every linux distro :)
+basically, it should work on most linux distros, it may not work on systems
+using musl, you are welcome to share patches in order to fix that // 
+send bug reports. 
+i am interested in it working with BSD and will hear bug reports.
+i will not fix bug reports for winblows, wsl users or macos
 
 --o-KEYBINDS---o-
 
@@ -48,7 +52,7 @@ CHART VIEW
 DATA
 
 charts are saved in $XDG_DATA_HOME
-(~/.local/share/astro/charts)
+(~/.local/share/astro/c)
 
 
 TODO
