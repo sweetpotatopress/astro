@@ -63,5 +63,5 @@ typedef struct {
 int normalize_input(WINDOW *win, int ch);
 int main_search(FIELD *cdata_field[], char *argv);
 void main_io(FIELD *cdata_field[], struct tm *cdata,
-Location *loc, Mode mode, const char ch);
+Location *loc, const char ch);
 

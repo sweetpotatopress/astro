@@ -23,7 +23,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <menu.h>
 #include "astro.h"
 
-void save_chart(struct tm *cdata, Location *loc, Io *io, Mode mode)
+void save_chart(struct tm *cdata, Location *loc, Io *io)
 {
 
 	FORM *save_form;
@@ -407,7 +407,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io, Mode mode)
 				break;
 		}
 		wrefresh(save_win);
-		mode = NORMAL;
 	}
 	
 	char *filename = field_buffer(save_field[0], 0);
@@ -473,7 +472,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io, Mode mode)
 				box(save_win, 0, 0);
 				wrefresh(save_win);
 				getch();
-				mode = NORMAL;
 				break;
 			case 'n':
 				wclear(save_win);
@@ -483,7 +481,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io, Mode mode)
 				wrefresh(save_win);
 				getch();
 				endwin();
-				mode = NORMAL;
 				return;
 			default:
 				ch = getch();
@@ -523,7 +520,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io, Mode mode)
 		delwin(save_subwin);
 		delwin(save_win);
 		
-		mode = NORMAL;
 		free(fn_copy);
 }
 
@@ -771,7 +767,10 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					}
 					
 					while (fgets(buffer, 1024, fp) != NULL && count < 9)
+					{
+						buffer[strcspn(buffer, "\n")] = 0;
 						memcpy(field[count++], buffer, strlen(buffer) + 1);
+					}
 						
 					for (int j = 0; j < 9; ++j)
 						set_field_buffer(cdata_field[j], 0, field[j]);
@@ -833,7 +832,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 }
 
 void main_io(FIELD *cdata_field[], struct tm *cdata,
-Location *loc, Mode mode, const char ch)
+Location *loc, const char ch)
 {
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw) 
@@ -863,7 +862,7 @@ Location *loc, Mode mode, const char ch)
 	"%s/.local/share/astro/charts/", pw->pw_dir);
 	
 	if (ch == 'w')
-		save_chart(cdata, loc, io, mode);
+		save_chart(cdata, loc, io);
 	if (ch == 'e')
 		load_chart(cdata_field, io);
 		

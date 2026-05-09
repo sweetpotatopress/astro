@@ -46,45 +46,33 @@ int normalize_input(WINDOW *win, int ch)
 			switch(arrow)
 			{
 				case 'A':
-					nodelay(win, FALSE);
 					return KEY_UP;
 				case 'B':
-					nodelay(win, FALSE);
 					return KEY_DOWN;
 				case 'C':
-					nodelay(win, FALSE);
 					return KEY_RIGHT;
 				case 'D':
-					nodelay(win, FALSE);
 					return KEY_LEFT;
 				case 'H':
-					nodelay(win, FALSE);
 					return KEY_HOME;
 				case 'F':
-					nodelay(win, FALSE);
 					return KEY_END;
 				case '5':
 					wgetch(win);
-					nodelay(win, FALSE);
 					return KEY_PPAGE;
 				case '6':
 					wgetch(win);
-					nodelay(win, FALSE);
 					return KEY_NPAGE;
 				case '3':
 					wgetch(win);
-					nodelay(win, FALSE);
 					return KEY_DC;
 				case '2':
 					wgetch(win);
-					nodelay(win, FALSE);
 					return KEY_IC;
 				default:
-					nodelay(win, FALSE);
 					return 27;
 			}
 		}
-		nodelay(win, FALSE);
 		return 27;
 	}
 	return ch;
@@ -375,10 +363,14 @@ void ichart_data(struct tm *cdata, Location *loc)
 					case 'w':
 						validate_fields(cdata_form_win, cdata_field,
 						cdata_form, cdata, loc);
-						main_io(cdata_field, cdata, loc, mode, 'w');
+						main_io(cdata_field, cdata, loc, 'w');
+						mode = NORMAL;
 						break;
 					case 'e':
-						main_io(cdata_field, cdata, loc, mode, 'e');
+						main_io(cdata_field, cdata, loc, 'e');
+						validate_fields(cdata_form_win, cdata_field,
+						cdata_form, cdata, loc);
+						mode = NORMAL;
 						break;
 					case '\n':
 						cdata_entry = 1;

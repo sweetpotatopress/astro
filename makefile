@@ -45,6 +45,7 @@ install: all
 	@REAL_USER=$${SUDO_USER:-$${DOAS_USER:-$$USER}}; \
 	REAL_HOME=$$(getent passwd $$REAL_USER | cut -d: -f6); \
 	/bin/mkdir -p $$REAL_HOME/.local/share/astro/charts; \
+	/bin/chown -R $$REAL_USER:$$REAL_USER $$REAL_HOME/.local/share/astro; \
 	/bin/cp city-db $$REAL_HOME/.local/share/astro/city-db
 
 swe-install: $(SWE_DIR)/libswe.a
