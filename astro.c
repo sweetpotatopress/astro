@@ -602,16 +602,28 @@ int radius, double planet, double asc, P_deg *p_deg)
 	int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
 	int dir_y = ((int)sin(rad) != 0) ? -1 : 1;
 	
+	bool near_horizontal = (fabs(sin(rad)) < 0.5);
+
 	for (int j = 0; j < i; j++)
 	{
 		if (fabs(planet - p_arr[j]) <= 8)	
 		{
-			offsety -= 3;
-			offsetx += 4;
+			if (near_horizontal)
+			{
+				offsetx += 7;
+				offsety += 2;
+			}
+			else
+			{
+				offsety -= 3;
+				offsetx += 4;
+			}
 		}
 	}
 	
-	offsety = dir_y * offsety;
+	if (!near_horizontal)
+		offsety = dir_y * offsety;
+	
 	offsetx = dir_x * offsetx;
 	
 	double decimal  = (((planet - (int)planet) * 60) / 100);
