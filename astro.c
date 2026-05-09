@@ -368,8 +368,6 @@ void ichart_data(struct tm *cdata, Location *loc)
 						break;
 					case 'e':
 						main_io(cdata_field, cdata, loc, 'e');
-						validate_fields(cdata_form_win, cdata_field,
-						cdata_form, cdata, loc);
 						mode = NORMAL;
 						break;
 					case '\n':
@@ -499,7 +497,7 @@ void chart_timeset(struct tm *cdata, Location *loc, int *offset)
 	//swe_julday uses 24 hour UTC.
 	double dhour = (double)(orig->tm_hour + utc_offset) + min;
 	
-	if((dhour >= 24.0))
+	if((dhour >= 23.999999))
 	{
 		dhour -= 23.999999;
 		++orig->tm_mday;
@@ -801,7 +799,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	for (i = 0; i < 12; ++i)
 	{
 		planet_pos(main_win, i, maxy, maxx,
-		radius - 6, *p_deg_members[i], cusps[1], p_deg);
+		radius - 9, *p_deg_members[i], cusps[1], p_deg);
 	}
 	
 	for (i = 0; i < 2; ++i)

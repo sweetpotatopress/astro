@@ -42,7 +42,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	}
 	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
 	
-	char *newpath = calloc(1, 1024);
+	char *newpath = calloc(1, 2048);
 	if (!newpath)
 	{
 		endwin();
@@ -111,7 +111,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 			
 				if (S_ISDIR(st.st_mode))
 				{
-					i_name[i] = malloc(sizeof(fn_buff));
+					i_name[i] = malloc(strlen(entry->d_name) + 1);
 					if (!i_name[i])
 					{
 						endwin();
@@ -119,7 +119,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 						ERR_EXIT;
 					}
 					
-					i_desc[i] = malloc(sizeof(fn_buff));
+					i_desc[i] = malloc(strlen(entry->d_name) + 1);
 					if (!i_desc[i])
 					{
 						endwin();
@@ -127,10 +127,10 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 						ERR_EXIT;
 					}
 					
-					snprintf(i_desc[i], sizeof(fn_buff), "%s",
+					snprintf(i_desc[i], strlen(entry->d_name) + 1, "%s",
 					entry->d_name);
 					
-					snprintf(i_name[i], sizeof(fn_buff), "[%s]",
+					snprintf(i_name[i], strlen(entry->d_name) + 1, "[%s]",
 					entry->d_name);
 						
 					// menu window width
@@ -224,7 +224,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					ITEM *cur = current_item(save_menu);
 					const char *selected = item_description(cur);
 					
-					snprintf(newpath, 1024,
+					snprintf(newpath, 2048,
 					"%s/%s/", io->filepath, selected);
 			
 						//if file path is a directory
@@ -282,7 +282,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					mvwgetnstr(save_win, 2, 2, mdir, 127);
 					noecho();
 					
-					snprintf(newpath, 1024,
+					snprintf(newpath, 2048,
 					"%s/%s", io->filepath, mdir);
 					
 					if (mkdir(newpath, 0755) == -1)
@@ -328,6 +328,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		}
 		free(i_name);
 		free(i_desc);
+		free(homepath);
 		free(save_files);
 		
 		wclear(save_win);
@@ -448,8 +449,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	}
 	
 	// create file path 
-	char fn_buff[256];
-	snprintf(fn_buff, 256, "%s%s",
+	char fn_buff[1024];
+	snprintf(fn_buff, 1024, "%s%s",
 	io->filepath,
 	fn_copy
 	);
@@ -529,7 +530,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	struct dirent *entry;
 	struct stat st;
 	
-	char *newpath = malloc(1024);
+	char *newpath = malloc(2048);
 	if (!newpath)
 	{
 		endwin();
@@ -605,7 +606,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 				);
 				stat(fn_buff, &st);
 				
-				i_name[i] = malloc(sizeof(fn_buff));
+				i_name[i] = malloc(strlen(entry->d_name) + 1);
 				if (!i_name[i])
 				{
 					endwin();
@@ -613,7 +614,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					ERR_EXIT;
 				}
 				
-				i_desc[i] = malloc(sizeof(fn_buff));
+				i_desc[i] = malloc(strlen(entry->d_name) + 1);
 				if (!i_desc[i])
 				{
 					endwin();
@@ -621,14 +622,14 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					ERR_EXIT;
 				}
 				
-				snprintf(i_desc[i], sizeof(fn_buff), "%s",
+				snprintf(i_desc[i], strlen(entry->d_name) + 1, "%s",
 				entry->d_name);
 				
 				if (S_ISDIR(st.st_mode))
-					snprintf(i_name[i], sizeof(fn_buff), "[%s]",
+					snprintf(i_name[i], strlen(entry->d_name) + 1, "[%s]",
 					entry->d_name);
 				else
-					snprintf(i_name[i], sizeof(fn_buff), " %s",
+					snprintf(i_name[i], strlen(entry->d_name) + 1, " %s",
 					entry->d_name);
 					
 				// menu window width
@@ -720,7 +721,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					ITEM *cur = current_item(load_menu);
 					const char *selected = item_description(cur);
 					
-					snprintf(newpath, 1024,
+					snprintf(newpath, 2048,
 					"%s/%s", io->filepath, selected);
 			
 					// if file path is a directory

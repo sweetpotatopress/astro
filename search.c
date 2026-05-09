@@ -278,7 +278,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	const char *path = "city-db";
 	char *search = argv;
 	size_t n_choices = 0;
-	size_t max_search = 100;
+	size_t max_search = 1024;
 	
 	Location **choices = calloc(max_search, sizeof(Location *));
 	if (!choices)
