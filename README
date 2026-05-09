@@ -57,12 +57,12 @@ charts are saved in $XDG_DATA_HOME
 
 TODO
 
---save and load charts -- [DONE]
---animate chart --	[DONE]
---add birth data to chartview -- [DONE]
---write makefile -- [DONE]
---new window with exact planet stats
---add nodes, outers --	[DONE]
+--save and load charts --			[DONE]
+--animate chart --					[DONE]
+--add birth data to chartview --	[DONE]
+--write makefile -- 				[DONE]
+--window with exact planet stats
+--add nodes, outers --				[DONE]
 --add lot of spirit + fortune
 --retrograde, station, speed table
 --add elemental colors
@@ -72,6 +72,8 @@ TODO
 --declination/bounds table
 --terminal window autoresize
 --zodiacal releasing
+
+feel free to suggest additions.
 
 --license--
 
