@@ -428,7 +428,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		len--;
 	fn_copy[len] = '\0';
 	
-	
 	if (len >= 100)
 	{
 		wprintw(save_win, "ERR: name too long");

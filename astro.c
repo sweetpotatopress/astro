@@ -22,7 +22,18 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <form.h>
 #include "astro.h"
 
+
 Mode mode = INSERT;
+
+// planet symbols
+const char *pl_sym[] = {"(o)", "(()", "(-o<)",
+"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
+"(P)", NULL, "(^)"};
+
+const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
+"leo", "vir", "lib", "sco", "sag",
+"cap", "aqu", "pis"};
+
 
 void buff_trim(FIELD *current, char *buffer)
 {
@@ -517,10 +528,7 @@ int radius, double planet, double asc, P_deg *p_deg)
 		p_deg->dtnod
 	};
 	
-	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
-	"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
-	"(P)", NULL, "(^)"};
-	
+
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
@@ -615,10 +623,7 @@ int radius, double angle, double asc)
 void zo_pos(WINDOW *main_win, int i, int maxy, int maxx,
 int radius, double angle, double asc)
 {
-	const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
-	"leo", "vir", "lib", "sco", "sag",
-	"cap", "aqu", "pis"};
-	
+
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
 	
@@ -807,10 +812,8 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 		
 		if (!full_data_win)
 		{
-			full_data_win = newwin(25, 30, 0, 0);
+			full_data_win = newwin(23, 35, 0, 0);
 		}
-		
-		box(full_data_win, 0, 0);
 		
 		int starty = 1, startx = 2;
 		
@@ -820,11 +823,17 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 			spname[11] ='\0';
 			int deg = (int)p_arr[i] % 30;
 			double dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
-			char buff[56];
-			snprintf(buff, sizeof(buff), "%.2f", (deg + dec));
-			mvwprintw(full_data_win, starty, startx, "%s", spname);
-			mvwprintw(full_data_win, starty, startx + (int)strlen(spname) + 2, "%s", buff);
-			starty += 2;
+			int a_dec = (int)(dec * 100) % 100;
+			char buff[1024];
+			if ( i != 10)
+			{
+				int zo_pos = ((int)p_arr[i] / 30) + 1;
+				snprintf(buff, sizeof(buff), "%-10s %-6s %d\xc2\xb0%d` %-5s",
+				spname, pl_sym[i], deg, a_dec, zo_sym[zo_pos]);
+				
+				mvwprintw(full_data_win, starty, startx, "%s", buff);
+				starty += 2;
+			}
 		}
 		
 			wrefresh(full_data_win);
