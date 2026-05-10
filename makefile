@@ -46,6 +46,7 @@ install: all
 	REAL_HOME=$$(getent passwd $$REAL_USER | cut -d: -f6); \
 	/bin/mkdir -p $$REAL_HOME/.local/share/astro/charts; \
 	/bin/chown -R $$REAL_USER:$$REAL_USER $$REAL_HOME/.local/share/astro; \
+	/bin/cp -r $(SWE_DIR)/ephe $$REAL_HOME/.local/share/astro; \
 	/bin/cp city-db $$REAL_HOME/.local/share/astro/city-db
 
 swe-install: $(SWE_DIR)/libswe.a
@@ -55,6 +56,12 @@ swe-install: $(SWE_DIR)/libswe.a
 	/bin/cp $(SWE_DIR)/sweph.h     $(SWE_INC)/sweph.h
 	/bin/cp $(SWE_DIR)/sweodef.h   $(SWE_INC)/sweodef.h
 	/bin/cp $(SWE_DIR)/libswe.a    $(SWE_LIB)/libswe.a
+	@REAL_USER=$${SUDO_USER:-$${DOAS_USER:=$$USER}}; \
+	REAL_HOME=$$(getent passwd $$REAL_USER | cut -d: -f6); \
+	/bin/mkdir -p $$REAL_HOME/.local/share/astro/charts; \
+	/bin/chown -R $$REAL_USER:$$REAL_USER $$REAL_HOME/.local/share/astro; \
+	/bin/cp -r $(SWE_DIR)/ephe $$REAL_HOME/.local/share/astro/; \
+	
 
 $(SWE_DIR)/libswe.a: $(SWE_DIR)/Makefile
 	@echo "--o Building libswe.a -ow0-"
