@@ -24,60 +24,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 Mode mode = INSERT;
 
-int normalize_input(WINDOW *win, int ch)
-{
-	// escape sequence compatibility 
-	
-	if (ch == 8 || ch == 127)
-		return KEY_BACKSPACE;
-	if (ch == 27)
-	{
-		nodelay(win, TRUE);
-		int next = wgetch(win);
-		nodelay(win, FALSE);
-		
-		if (next == ERR)
-			return 27;
-		
-		if (next == '[')
-		{
-			int arrow = wgetch(win);
-			
-			switch(arrow)
-			{
-				case 'A':
-					return KEY_UP;
-				case 'B':
-					return KEY_DOWN;
-				case 'C':
-					return KEY_RIGHT;
-				case 'D':
-					return KEY_LEFT;
-				case 'H':
-					return KEY_HOME;
-				case 'F':
-					return KEY_END;
-				case '5':
-					wgetch(win);
-					return KEY_PPAGE;
-				case '6':
-					wgetch(win);
-					return KEY_NPAGE;
-				case '3':
-					wgetch(win);
-					return KEY_DC;
-				case '2':
-					wgetch(win);
-					return KEY_IC;
-				default:
-					return 27;
-			}
-		}
-		return 27;
-	}
-	return ch;
-}
-				
 void buff_trim(FIELD *current, char *buffer)
 {
 	char *f_buf = field_buffer(current, 0);
@@ -331,7 +277,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	pos_form_cursor(cdata_form);
 	
 	int cdata_entry = 0;
-	while(!cdata_entry && (ch = GET_INPUT(cdata_form_win)))
+	while(!cdata_entry && (ch = wgetch(cdata_form_win)))
 	{
 		switch(mode)
 		{	
@@ -719,7 +665,6 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	int iret, iflag, ipl, i;
 	double xx[6];
 	char serr[AS_MAXCH];
-	char spname[AS_MAXCH];
 	double cusps[13], ascmc[10]; //houses, asc, mc
 	int ihsy = 'W'; // house system
 	
@@ -747,8 +692,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
 	{
-		swe_get_planet_name(ipl, spname);
-		spname[17] = '\0';
+	
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
 		{
@@ -811,7 +755,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	wrefresh(main_win);
 }
 
-void display_data(WINDOW *main_win, int maxx, 
+void cur_chart_data(WINDOW *main_win, int maxx, 
 struct tm *cdata, Location *loc)
 {	
 	int starty = 1;
@@ -837,6 +781,48 @@ struct tm *cdata, Location *loc)
 	wrefresh(main_win);
 }
 
+void win_full_data(P_deg *p_deg)
+{
+	WINDOW *full_data_win;
+	char spname[AS_MAXCH];
+	int p_count = 12;
+	
+	double p_arr[] = {
+		p_deg->dsun,
+		p_deg->dmoon,
+		p_deg->dmerc,
+		p_deg->dven,
+		p_deg->dmars,
+		p_deg->djup,
+		p_deg->dsat,
+		p_deg->dura,
+		p_deg->dnep,
+		p_deg->dplu,
+		p_deg->dmnod,
+		p_deg->dtnod
+	};
+	
+	full_data_win = newwin(25, 30, 0, 0);
+	box(full_data_win, 0, 0);
+	
+	int starty = 1, startx = 2;
+	
+	for (int i = 0; i < p_count; ++i)
+	{
+		swe_get_planet_name(i, spname);
+		spname[11] ='\0';
+		int deg = (int)p_arr[i] % 30;
+		double dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
+		char buff[56];
+		snprintf(buff, sizeof(buff), "%.2f", (deg + dec));
+		mvwprintw(full_data_win, starty, startx, "%s", spname);
+		mvwprintw(full_data_win, starty, startx + (int)strlen(spname) + 2, "%s", buff);
+		starty += 2;
+	}
+	
+	wrefresh(full_data_win);
+}
+
 int months(int month, int year)
 {
 	int days[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -859,7 +845,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	size_t i = 0;
 	int ch = 0;
 	int anim_done = 0;
-	while(!anim_done && (ch = GET_INPUT(main_win)))
+	while(!anim_done && (ch = wgetch(main_win)))
 	{
 		switch(ch)
 		{
@@ -898,7 +884,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 1:
 						if ((++cdata->tm_hour) > 23)
@@ -919,7 +905,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 2:
 						if ((++cdata->tm_mday) > months(
@@ -935,7 +921,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 3:
 						if ((++cdata->tm_mon) > 12)
@@ -950,14 +936,14 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 4:
 						if ((++cdata->tm_year) > 16799)
 							cdata->tm_year = -12998;
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 				}
 				break;
@@ -988,7 +974,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 1:
 						if ((--cdata->tm_hour) < 0)
@@ -1009,7 +995,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 2:
 						if ((--cdata->tm_mday) < 1)
@@ -1025,7 +1011,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 3:
 						if (--cdata->tm_mon < 1)
@@ -1039,14 +1025,14 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							cdata->tm_mday = max_day;
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 4:
 						if ((--cdata->tm_year) < -12998)
 							cdata->tm_year = 16799;
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, p_deg);
-						display_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 				}
 				break;
@@ -1137,6 +1123,7 @@ int main()
 	"%s/.local/share/astro/ephe", pw->pw_dir);
 	
 	initscr();
+	set_escdelay(25);
 	getmaxyx(stdscr, maxy, maxx);
 	
 	swe_set_ephe_path(fn_buff);
@@ -1150,11 +1137,11 @@ int main()
 	{
 		ichart_data(cdata, loc);
 		draw_chart(main_win, maxy, maxx, cdata, loc, p_deg);
-		display_data(main_win, maxx, cdata, loc);
+		cur_chart_data(main_win, maxx, cdata, loc);
 			
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
-		(ch = GET_INPUT(main_win)))
+		(ch = wgetch(main_win)))
 		{
 			switch(ch)
 			{
@@ -1171,6 +1158,10 @@ int main()
 					wrefresh(main_win);
 					chart_done = 1;
 					mode = INSERT;
+					break;
+				case 'p':
+					wrefresh(main_win);
+					win_full_data(p_deg);
 					break;
 				default:
 					break;

@@ -16,7 +16,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <time.h>
 
-#define GET_INPUT(win) normalize_input(win, wgetch(win))
 #define ERR_EXIT swe_close(); exit(EXIT_FAILURE);
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 

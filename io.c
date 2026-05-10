@@ -210,7 +210,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		
 		int ch = 0;
 		int menu_done = 0;
-		while (!menu_done && (ch = GET_INPUT(save_win)))
+		while (!menu_done && (ch = wgetch(save_win)))
 		{
 			switch(ch)
 			{
@@ -381,7 +381,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	pos_form_cursor(save_form);
 	
 	int done = 0;
-	while(!done && (ch = GET_INPUT(save_win)))
+	while(!done && (ch = wgetch(save_win)))
 	{
 		switch (ch)
 		{
@@ -707,7 +707,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		
 		int menu_done = 0;
 		int ch = 0;
-		while (!menu_done && (ch = GET_INPUT(load_win)))
+		while (!menu_done && (ch = wgetch(load_win)))
 		{
 			switch(ch)
 			{

@@ -231,7 +231,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	}
 	
 	int menu_done = 0;
-	while(!menu_done && (ch = GET_INPUT(city_win)))
+	while(!menu_done && (ch = wgetch(city_win)))
 	{
 		switch(ch)
 		{
