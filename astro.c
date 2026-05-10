@@ -1124,10 +1124,22 @@ int main()
 
 	int maxy, maxx;
 	
+	struct passwd *pw = getpwuid(getuid());
+	if (!pw)
+	{
+		endwin();
+		perror("getpwuid astro main");
+		ERR_EXIT;
+	}
+	char fn_buff[1024] = {0};
+	
+	snprintf(fn_buff, 1024, 
+	"%s/.local/share/astro/ephe", pw->pw_dir);
+	
 	initscr();
 	getmaxyx(stdscr, maxy, maxx);
 	
-	swe_set_ephe_path("/home/plum/Builds/swisseph/ephe");
+	swe_set_ephe_path(fn_buff);
 
 	main_win = newwin(maxy, maxx, 0, 0);
 	keypad(main_win, TRUE);

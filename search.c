@@ -14,6 +14,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <string.h>
 #include <stdlib.h>
+#include <pwd.h>
 #include <ncurses.h>
 #include <form.h>
 #include <menu.h>
@@ -275,7 +276,6 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 int main_search(FIELD *cdata_field[], char *argv)
 {
 	FILE *fp;
-	const char *path = "city-db";
 	char *search = argv;
 	size_t n_choices = 0;
 	size_t max_search = 1024;
@@ -288,11 +288,24 @@ int main_search(FIELD *cdata_field[], char *argv)
 		ERR_EXIT;
 	}
 	
-	fp = fopen(path, "r");
+	struct passwd *pw = getpwuid(getuid());
+	if (!pw)
+	{
+		endwin();
+		perror("getpwuid city-db");
+		ERR_EXIT;
+	}
+	
+	char fn_buff[1024] = {0};
+	
+	snprintf(fn_buff, 1024,
+	"%s/.local/share/astro/city-db", pw->pw_dir);
+	
+	fp = fopen(fn_buff, "r");
 	if (fp == NULL)
 	{
 		endwin();
-		printw("can't open %s\n", path);
+		printw("can't open %s\n", fn_buff);
 		ERR_EXIT;
 	}
 	
