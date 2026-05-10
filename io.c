@@ -111,7 +111,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 			
 				if (S_ISDIR(st.st_mode))
 				{
-					i_name[i] = malloc(strlen(entry->d_name) + 1);
+					i_name[i] = malloc(sizeof(fn_buff));
 					if (!i_name[i])
 					{
 						endwin();
@@ -119,7 +119,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 						ERR_EXIT;
 					}
 					
-					i_desc[i] = malloc(strlen(entry->d_name) + 1);
+					i_desc[i] = malloc(sizeof(fn_buff));
 					if (!i_desc[i])
 					{
 						endwin();
@@ -127,10 +127,10 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 						ERR_EXIT;
 					}
 					
-					snprintf(i_desc[i], strlen(entry->d_name) + 1, "%s",
+					snprintf(i_desc[i], sizeof(fn_buff), "%s",
 					entry->d_name);
 					
-					snprintf(i_name[i], strlen(entry->d_name) + 1, "[%s]",
+					snprintf(i_name[i], sizeof(fn_buff), "[%s]",
 					entry->d_name);
 						
 					// menu window width
@@ -424,11 +424,10 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	}
 	memcpy(fn_copy, filename, (size_t)len);
 	
-	--len;
-	while(len >= 0 && fn_copy[len] == ' ')
-		--len;
-	if (len >= 0)
-		fn_copy[len + 1] = '\0';
+	while (len > 0 && fn_copy[len - 1] == ' ')
+		len--;
+	fn_copy[len] = '\0';
+	
 	
 	if (len >= 100)
 	{
@@ -605,7 +604,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 				);
 				stat(fn_buff, &st);
 				
-				i_name[i] = malloc(strlen(entry->d_name) + 1);
+				i_name[i] = malloc(sizeof(fn_buff));
 				if (!i_name[i])
 				{
 					endwin();
@@ -613,7 +612,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					ERR_EXIT;
 				}
 				
-				i_desc[i] = malloc(strlen(entry->d_name) + 1);
+				i_desc[i] = malloc(sizeof(fn_buff));
 				if (!i_desc[i])
 				{
 					endwin();
@@ -621,14 +620,14 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					ERR_EXIT;
 				}
 				
-				snprintf(i_desc[i], strlen(entry->d_name) + 1, "%s",
+				snprintf(i_desc[i], sizeof(fn_buff), "%s",
 				entry->d_name);
 				
 				if (S_ISDIR(st.st_mode))
-					snprintf(i_name[i], strlen(entry->d_name) + 1, "[%s]",
+					snprintf(i_name[i], sizeof(fn_buff), "[%s]",
 					entry->d_name);
 				else
-					snprintf(i_name[i], strlen(entry->d_name) + 1, " %s",
+					snprintf(i_name[i], sizeof(fn_buff), " %s",
 					entry->d_name);
 					
 				// menu window width
