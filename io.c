@@ -328,7 +328,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		}
 		free(i_name);
 		free(i_desc);
-		free(homepath);
 		free(save_files);
 		
 		wclear(save_win);
