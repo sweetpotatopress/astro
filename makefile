@@ -18,12 +18,17 @@ INSTALL_DIR = /usr/local/bin
 TARGET    = astro
 SRCS      = astro.c io.c search.c
 
+# Determine the real user and home directory
+REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
+REAL_HOME := $(shell getent passwd $(REAL_USER) | cut -d: -f6)
+
 SWE_HEADERS_EXIST := $(shell test -f $(SWE_INC)/swephexp.h && test -f $(SWE_INC)/sweph.h && echo 1 || echo 0)
 SWE_LIB_EXISTS := $(shell test -f $(SWE_LIB)/libswe.a && echo 1 || echo 0)
+EPHE_EXISTS := $(shell test -d $(REAL_HOME)/.local/share/astro/ephe && echo 1 || echo 0)
 
-ifeq ($(SWE_HEADERS_EXIST)$(SWE_LIB_EXISTS),11)
+ifeq ($(SWE_HEADERS_EXIST)$(SWE_LIB_EXISTS)$(EPHE_EXISTS),111)
   SWE_DEPS :=
-  $(info Swiss Ephemeris found in /usr/local - skipping build)
+  $(info Swiss Ephemeris found - skipping build)
 else
   SWE_DEPS := swe-install
   $(info Swiss Ephemeris not found - will build locally)
@@ -42,12 +47,14 @@ install: all
 	/bin/mkdir -p $(INSTALL_DIR)
 	/bin/cp $(TARGET) $(INSTALL_DIR)/$(TARGET)
 	@echo "-x--o Creating data directories --oo-"
-	@REAL_USER=$${SUDO_USER:-$${DOAS_USER:-$$USER}}; \
-	REAL_HOME=$$(getent passwd $$REAL_USER | cut -d: -f6); \
-	/bin/mkdir -p $$REAL_HOME/.local/share/astro/charts; \
-	/bin/chown -R $$REAL_USER:$$REAL_USER $$REAL_HOME/.local/share/astro; \
-	/bin/cp -r $(SWE_DIR)/ephe $$REAL_HOME/.local/share/astro; \
-	/bin/cp city-db $$REAL_HOME/.local/share/astro/city-db
+	/bin/mkdir -p $(REAL_HOME)/.local/share/astro/charts; \
+	/bin/chown -R $(REAL_USER):$(REAL_USER) $(REAL_HOME)/.local/share/astro; \
+	if [ -d "$(SWE_DIR)/ephe" ]; then \
+	  /bin/cp -r $(SWE_DIR)/ephe $(REAL_HOME)/.local/share/astro/; \
+	else \
+	  echo "Warning: $(SWE_DIR)/ephe directory not found"; \
+	fi; \
+	/bin/cp city-db $(REAL_HOME)/.local/share/astro/city-db
 
 swe-install: $(SWE_DIR)/libswe.a
 	@echo "--o-Installing Swiss Ephemeris x<--o-"
@@ -56,12 +63,13 @@ swe-install: $(SWE_DIR)/libswe.a
 	/bin/cp $(SWE_DIR)/sweph.h     $(SWE_INC)/sweph.h
 	/bin/cp $(SWE_DIR)/sweodef.h   $(SWE_INC)/sweodef.h
 	/bin/cp $(SWE_DIR)/libswe.a    $(SWE_LIB)/libswe.a
-	@REAL_USER=$${SUDO_USER:-$${DOAS_USER:=$$USER}}; \
-	REAL_HOME=$$(getent passwd $$REAL_USER | cut -d: -f6); \
-	/bin/mkdir -p $$REAL_HOME/.local/share/astro/charts; \
-	/bin/chown -R $$REAL_USER:$$REAL_USER $$REAL_HOME/.local/share/astro; \
-	/bin/cp -r $(SWE_DIR)/ephe $$REAL_HOME/.local/share/astro/; \
-	
+	/bin/mkdir -p $(REAL_HOME)/.local/share/astro/charts; \
+	/bin/chown -R $(REAL_USER):$(REAL_USER) $(REAL_HOME)/.local/share/astro; \
+	if [ -d "$(SWE_DIR)/ephe" ]; then \
+	  /bin/cp -r $(SWE_DIR)/ephe $(REAL_HOME)/.local/share/astro/; \
+	else \
+	  echo "Warning: $(SWE_DIR)/ephe directory not found"; \
+	fi;
 
 $(SWE_DIR)/libswe.a: $(SWE_DIR)/Makefile
 	@echo "--o Building libswe.a -ow0-"
