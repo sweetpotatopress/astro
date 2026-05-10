@@ -48,10 +48,11 @@ INSERT MODE - i (on by default)
 
 CHART VIEW
 
+-planet table	-	p
+
 -animate chart 	-	enter
 	-swap increment -	h/l
 	-++ and --		-	j/k
-	-planet legend	-	p
 
 -exit program	-	q
 -new chart		-	i
