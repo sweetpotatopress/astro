@@ -49,11 +49,7 @@ install: all
 	@echo "-x--o Creating data directories --oo-"
 	/bin/mkdir -p $(REAL_HOME)/.local/share/astro/charts; \
 	/bin/chown -R $(REAL_USER):$(REAL_USER) $(REAL_HOME)/.local/share/astro; \
-	if [ -d "$(SWE_DIR)/ephe" ]; then \
-	  /bin/cp -r $(SWE_DIR)/ephe $(REAL_HOME)/.local/share/astro/; \
-	else \
-	  echo "Warning: $(SWE_DIR)/ephe directory not found"; \
-	fi; \
+	/bin/cp -r $(SWE_DIR)/ephe $(REAL_HOME)/.local/share/astro/; \
 	/bin/cp city-db $(REAL_HOME)/.local/share/astro/city-db
 
 swe-install: $(SWE_DIR)/libswe.a
@@ -65,11 +61,7 @@ swe-install: $(SWE_DIR)/libswe.a
 	/bin/cp $(SWE_DIR)/libswe.a    $(SWE_LIB)/libswe.a
 	/bin/mkdir -p $(REAL_HOME)/.local/share/astro/charts; \
 	/bin/chown -R $(REAL_USER):$(REAL_USER) $(REAL_HOME)/.local/share/astro; \
-	if [ -d "$(SWE_DIR)/ephe" ]; then \
-	  /bin/cp -r $(SWE_DIR)/ephe $(REAL_HOME)/.local/share/astro/; \
-	else \
-	  echo "Warning: $(SWE_DIR)/ephe directory not found"; \
-	fi;
+	/bin/cp -r $(SWE_DIR)/ephe $(REAL_HOME)/.local/share/astro/; \
 
 $(SWE_DIR)/libswe.a: $(SWE_DIR)/Makefile
 	@echo "--o Building libswe.a -ow0-"
