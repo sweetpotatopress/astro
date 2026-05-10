@@ -781,9 +781,9 @@ struct tm *cdata, Location *loc)
 	wrefresh(main_win);
 }
 
-void win_full_data(P_deg *p_deg)
+void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 {
-	WINDOW *full_data_win;
+	static WINDOW *full_data_win = NULL;
 	char spname[AS_MAXCH];
 	int p_count = 12;
 	
@@ -802,25 +802,42 @@ void win_full_data(P_deg *p_deg)
 		p_deg->dtnod
 	};
 	
-	full_data_win = newwin(25, 30, 0, 0);
-	box(full_data_win, 0, 0);
-	
-	int starty = 1, startx = 2;
-	
-	for (int i = 0; i < p_count; ++i)
+	if (*p == 0)
 	{
-		swe_get_planet_name(i, spname);
-		spname[11] ='\0';
-		int deg = (int)p_arr[i] % 30;
-		double dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
-		char buff[56];
-		snprintf(buff, sizeof(buff), "%.2f", (deg + dec));
-		mvwprintw(full_data_win, starty, startx, "%s", spname);
-		mvwprintw(full_data_win, starty, startx + (int)strlen(spname) + 2, "%s", buff);
-		starty += 2;
+		
+		if (!full_data_win)
+		{
+			full_data_win = newwin(25, 30, 0, 0);
+		}
+		
+		box(full_data_win, 0, 0);
+		
+		int starty = 1, startx = 2;
+		
+		for (int i = 0; i < p_count; ++i)
+		{
+			swe_get_planet_name(i, spname);
+			spname[11] ='\0';
+			int deg = (int)p_arr[i] % 30;
+			double dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
+			char buff[56];
+			snprintf(buff, sizeof(buff), "%.2f", (deg + dec));
+			mvwprintw(full_data_win, starty, startx, "%s", spname);
+			mvwprintw(full_data_win, starty, startx + (int)strlen(spname) + 2, "%s", buff);
+			starty += 2;
+		}
+		
+			wrefresh(full_data_win);
+			*p = 1;
 	}
-	
-	wrefresh(full_data_win);
+	else if (*p == 1)
+	{
+		wclear(full_data_win);
+		wrefresh(full_data_win);
+		touchwin(main_win);
+		wrefresh(main_win);
+		*p = 0;
+	}
 }
 
 int months(int month, int year)
@@ -1132,7 +1149,7 @@ int main()
 	keypad(main_win, TRUE);
 	keypad(stdscr, TRUE);
 	
-	int main_done = 0;
+	int main_done = 0, p_swi = 0;
 	while (!main_done)
 	{
 		ichart_data(cdata, loc);
@@ -1160,8 +1177,7 @@ int main()
 					mode = INSERT;
 					break;
 				case 'p':
-					wrefresh(main_win);
-					win_full_data(p_deg);
+					win_full_data(main_win, p_deg, &p_swi);
 					break;
 				default:
 					break;
