@@ -26,6 +26,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 void save_chart(struct tm *cdata, Location *loc, Io *io)
 {
 
+	MENU *save_menu;
+	WINDOW *save_win;
+	WINDOW *save_subwin;
+	
 	FORM *save_form;
 	FIELD *save_field[2];
 	char *tz_name = getenv("TZ");
@@ -53,10 +57,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	int savedir_done = 0;
 	while (!savedir_done)
 	{
-		MENU *save_menu;
-		WINDOW *save_win;
-		WINDOW *save_subwin;
-		
+	
 		size_t i = 0;
 		size_t max_count = 20480;
 		
@@ -335,9 +336,6 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		delwin(save_win);
 	} // end of savedir_done loop
 	
-	WINDOW *save_win;
-	WINDOW *save_subwin;
-	
 	int ch = 0;
 	int starty, startx, maxy, maxx;
 	int height = 5;
@@ -523,6 +521,10 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 
 void load_chart(FIELD *cdata_field[], Io *io)
 {
+	MENU *load_menu;
+	WINDOW *load_win;
+	WINDOW *load_subwin;
+		
 	DIR *chart_dir;
 	struct dirent *entry;
 	struct stat st;
@@ -547,10 +549,6 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	int load_done = 0;
 	while (!load_done)
 	{
-		MENU *load_menu;
-		WINDOW *load_win;
-		WINDOW *load_subwin;
-		
 		size_t i = 0;
 		size_t max_count = 20480;
 		
