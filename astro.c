@@ -25,7 +25,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 Mode mode = INSERT;
 
-// planet symbols
+// sun, moon, mercury, venus, mars, jupiter,
+// saturn, uranus, neptune, pluto, mean node, true node
 const char *pl_sym[] = {"(o)", "(()", "(-o<)",
 "(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
 "(P)", NULL, "(^)"};
@@ -190,7 +191,7 @@ void validate_fields(WINDOW *cdata_form_win, FIELD *cdata_field[],
 FORM *cdata_form, struct tm *cdata, Location *loc)
 {
 	size_t i = 0;
-	//validates every field, in case user didnt hit enter
+	//validates every field
 	for (i = 1; i < 9; i++)
 	{
 		set_current_field(cdata_form, cdata_field[i]);
@@ -664,6 +665,27 @@ int radius, double angle, chtype ch)
 	}
 }
 
+int sect(P_deg *p_deg, double ascmc[])
+{
+	static int sect = 0;
+	
+	if ((p_deg->dsun - ascmc[0]) * 1 < 180)
+		sect = 1; // day
+		
+	if ((p_deg->dsun - ascmc[0]) * 1 > 180)
+		sect = 0; // night
+		
+	return sect;
+}
+
+void lots(int sect, double parts[], P_deg *p_deg)
+{
+	if(sect)
+	{
+		double fortune = 0;
+	}
+}
+
 void draw_chart(WINDOW *main_win, int maxy, int maxx,
 struct tm *cdata, Location *loc, P_deg *p_deg)
 {
@@ -681,7 +703,9 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	&p_deg->dmars, &p_deg->djup,
 	&p_deg->dsat, &p_deg->dura,
 	&p_deg->dnep, &p_deg->dplu,
-	&p_deg->dmnod, &p_deg->dtnod};
+	&p_deg->dmnod, &p_deg->dtnod,
+	&p_deg->dasc, &p_deg->dmc,
+	&p_deg->ddsc, &p_deg->dic};
 	
 	chart_timeset(cdata, loc, &offset); // goes before swe_julday
 	reset_struct(cdata); // ----
@@ -716,6 +740,21 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		ERR_EXIT;
 		exit(EXIT_FAILURE);
 	}
+	
+	
+	double asc = ascmc[0];
+	double dsc = (ascmc[0] + 180);
+	if (dsc > 360)
+		dsc -= 360;
+	double ic = (ascmc[1] + 180);
+	if (ic >= 360)
+		ic -= 360;
+	double mc = ascmc[1];
+	
+	p_deg->dasc = asc;
+	p_deg->ddsc = dsc;
+	p_deg->dic = ic;
+	p_deg->dmc = mc;
 	
 	curs_set(0);
 	int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
@@ -760,6 +799,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	wrefresh(main_win);
 }
 
+
 void cur_chart_data(WINDOW *main_win, int maxx, 
 struct tm *cdata, Location *loc)
 {	
@@ -790,7 +830,7 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 {
 	static WINDOW *full_data_win = NULL;
 	char spname[AS_MAXCH];
-	int p_count = 12;
+	int p_count = 16;
 	
 	double p_arr[] = {
 		p_deg->dsun,
@@ -804,7 +844,11 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 		p_deg->dnep,
 		p_deg->dplu,
 		p_deg->dmnod,
-		p_deg->dtnod
+		p_deg->dtnod,
+		p_deg->dasc,
+		p_deg->dmc,
+		p_deg->ddsc,
+		p_deg->dic
 	};
 	
 	if (*p == 0)
@@ -812,27 +856,43 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 		
 		if (!full_data_win)
 		{
-			full_data_win = newwin(23, 35, 0, 0);
+			full_data_win = newwin(31, 35, 0, 0);
 		}
 		
 		int starty = 1, startx = 2;
 		
 		for (int i = 0; i < p_count; ++i)
 		{
-			swe_get_planet_name(i, spname);
-			spname[11] ='\0';
 			int deg = (int)p_arr[i] % 30;
 			double dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
 			int a_dec = (int)(dec * 100) % 100;
-			char buff[1024];
-			if ( i != 10)
+			int zo_pos = ((int)p_arr[i] / 30) + 1;
+			
+			if ( i != 10 && i < 12) // sun -> node (skipping mean node)
 			{
-				int zo_pos = ((int)p_arr[i] / 30) + 1;
-				snprintf(buff, sizeof(buff), "%-10s %-6s %d\xc2\xb0%d` %-5s",
-				spname, pl_sym[i], deg, a_dec, zo_sym[zo_pos]);
+				swe_get_planet_name(i, spname);
+				spname[3] ='\0';
+				
+				char buff[1024];
+				snprintf(buff, sizeof(buff), "%-4s %-6s %-7.2f %d\xc2\xb0%d` %-5s",
+				spname, pl_sym[i], p_arr[i], deg, a_dec, zo_sym[zo_pos]);
 				
 				mvwprintw(full_data_win, starty, startx, "%s", buff);
 				starty += 2;
+			}
+			
+			else if ( i != 10 && i >= 12) // asc -> ic
+			{
+				static int j = 0;
+				const char *points[] = {"asc", "mc", "des", "ic"};
+				char point_buff[1024];
+				
+				snprintf(point_buff, sizeof(point_buff), "%-10s %-7.2f %d\xc2\xb0%d` %-5s",
+				points[j], p_arr[i], deg, a_dec, zo_sym[zo_pos]);
+				
+				mvwprintw(full_data_win, starty, startx, "%s", point_buff);
+				starty += 2;
+				++j;
 			}
 		}
 		
@@ -848,6 +908,7 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 		*p = 0;
 	}
 }
+
 
 int months(int month, int year)
 {
