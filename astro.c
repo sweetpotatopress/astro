@@ -392,7 +392,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 }
 void check_dst(struct tm *orig)
 {
-	char cmd[256] = {0};
+	char cmd[1024] = {0};
 	char buffer[256] = {0};
 	char *tz_name = getenv("TZ");
 	FILE *fp;
@@ -421,10 +421,12 @@ void check_dst(struct tm *orig)
 	pclose(fp);
 	
 	orig->tm_isdst = 
-	(tzname[1] && strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
+	(tzname[1] && 
+	tzname[0] != tzname[1] &&
+	strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
 }
 
-void chart_timeset(struct tm *cdata, Location *loc, int *offset)
+void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
 {
 	struct tm *orig = cdata;
 	check_dst(orig);
@@ -455,17 +457,17 @@ void chart_timeset(struct tm *cdata, Location *loc, int *offset)
 	//swe_julday uses 24 hour UTC.
 	double dhour = (double)(orig->tm_hour + utc_offset) + min;
 	
-	if((dhour >= 23.999999))
+	if((dhour >= 24.0))
 	{
-		dhour -= 23.999999;
+		dhour -= 24.0;
 		++orig->tm_mday;
-		*offset -= 1;
+		*day_offset -= 1;
 	}
 	if((dhour <= 0))
 	{
 		dhour += 23.999999;
 		--orig->tm_mday;
-		*offset += 1;
+		*day_offset += 1;
 	}
 	
 	loc->dhour = dhour; 
@@ -667,12 +669,12 @@ int radius, double angle, chtype ch)
 
 int sect(P_deg *p_deg, double ascmc[])
 {
-	static int sect = 0;
+	int sect = 0;
 	
-	if ((p_deg->dsun - ascmc[0]) * 1 < 180)
+	if ((p_deg->dsun - ascmc[0]) < 180)
 		sect = 1; // day
 		
-	else if ((p_deg->dsun - ascmc[0]) * 1 > 180)
+	else if ((p_deg->dsun - ascmc[0]) > 180)
 		sect = 0; // night
 		
 	return sect;
@@ -712,7 +714,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	double cusps[13], ascmc[10]; //houses, asc, mc
 	int ihsy = 'W'; // house system
 	
-	int offset = 0;
+	int day_offset = 0;
 	
 	double *p_deg_members[] = {
 	&p_deg->dsun, &p_deg->dmoon,
@@ -725,14 +727,14 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	&p_deg->ddsc, &p_deg->dic,
 	&p_deg->dfor, &p_deg->dspir};
 	
-	chart_timeset(cdata, loc, &offset); // goes before swe_julday
+	chart_timeset(cdata, loc, &day_offset); // goes before swe_julday
 	reset_struct(cdata); // ----
 	
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
 	
 	// corrects loc->dhour offset from chart_timeset()
-	cdata->tm_mday += offset;
+	cdata->tm_mday += day_offset;
 
 	wclear(main_win);	
 	
@@ -761,7 +763,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	
 	double asc = ascmc[0];
 	double dsc = (ascmc[0] + 180);
-	if (dsc > 360)
+	if (dsc >= 360)
 		dsc -= 360;
 	double ic = (ascmc[1] + 180);
 	if (ic >= 360)
@@ -792,9 +794,9 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		cusps[i], '`');
 	}
 	
+	int asc_sign = (int)(ascmc[0] / 30);
 	for (i = 1; i < 13; ++i)
 	{
-		int asc_sign = (int)(ascmc[0] / 30);
 		
 		int sign_display = ((i + asc_sign - 1) % 12);
 		if (sign_display == 0)
