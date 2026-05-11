@@ -856,17 +856,23 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 		
 		if (!full_data_win)
 		{
-			full_data_win = newwin(31, 35, 0, 0);
+			full_data_win = newwin(31, 37, 0, 0);
 		}
 		
 		int starty = 1, startx = 2;
+		int j = 0;
 		
 		for (int i = 0; i < p_count; ++i)
 		{
+			int zo_pos = ((int)p_arr[i] / 30) + 1;
+			
 			int deg = (int)p_arr[i] % 30;
 			double dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
 			int a_dec = (int)(dec * 100) % 100;
-			int zo_pos = ((int)p_arr[i] / 30) + 1;
+			
+			int full_deg = (int)p_arr[i];
+			double full_dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
+			int a_full_dec = (int)(full_dec * 100) % 100;
 			
 			if ( i != 10 && i < 12) // sun -> node (skipping mean node)
 			{
@@ -874,8 +880,8 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 				spname[3] ='\0';
 				
 				char buff[1024];
-				snprintf(buff, sizeof(buff), "%-4s %-6s %-7.2f %d\xc2\xb0%d` %-5s",
-				spname, pl_sym[i], p_arr[i], deg, a_dec, zo_sym[zo_pos]);
+				snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %5s",
+				spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
 				
 				mvwprintw(full_data_win, starty, startx, "%s", buff);
 				starty += 2;
@@ -883,12 +889,11 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 			
 			else if ( i != 10 && i >= 12) // asc -> ic
 			{
-				static int j = 0;
-				const char *points[] = {"asc", "mc", "des", "ic"};
+				const char *points[] = {"asc", "mc", "dsc", "ic"};
 				char point_buff[1024];
 				
-				snprintf(point_buff, sizeof(point_buff), "%-10s %-7.2f %d\xc2\xb0%d` %-5s",
-				points[j], p_arr[i], deg, a_dec, zo_sym[zo_pos]);
+				snprintf(point_buff, sizeof(point_buff), "%-11s %3d.%-2d :  %2d\xc2\xb0%d` %-5s",
+				points[j], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
 				
 				mvwprintw(full_data_win, starty, startx, "%s", point_buff);
 				starty += 2;
