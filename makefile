@@ -4,7 +4,7 @@ CFLAGS    ?= -Wall -Wextra -Wpedantic \
              -Wunused-variable -Wunused-function \
              -Wshadow -Wno-implicit-fallthrough \
              -Wredundant-decls -Wfloat-equal \
-             -Winline -Wnull-dereference \
+             -Winline \
              -Waddress -Wno-long-long \
              -Wimplicit-function-declaration \
              -Wno-null-dereference -fanalyzer
