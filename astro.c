@@ -672,18 +672,35 @@ int sect(P_deg *p_deg, double ascmc[])
 	if ((p_deg->dsun - ascmc[0]) * 1 < 180)
 		sect = 1; // day
 		
-	if ((p_deg->dsun - ascmc[0]) * 1 > 180)
+	else if ((p_deg->dsun - ascmc[0]) * 1 > 180)
 		sect = 0; // night
 		
 	return sect;
 }
 
-void lots(int sect, double parts[], P_deg *p_deg)
+void lots(int sect, P_deg *p_deg)
 {
-	if(sect)
+	double diff;
+	
+	if (sect) // day
 	{
-		double fortune = 0;
+		diff = p_deg->dmoon - p_deg->dsun;
+		p_deg->dfor = p_deg->dasc - diff;
+		p_deg->dspir = p_deg->dasc + diff;
 	}
+	else // night
+	{
+		diff = p_deg->dmoon - p_deg->dsun;
+		p_deg->dfor = p_deg->dasc + diff;
+		p_deg->dspir = p_deg->dasc - diff;
+	}
+	
+	p_deg->dfor = fmod(p_deg->dfor, 360.0);
+	if (p_deg->dfor < 0.0)
+		p_deg->dfor += 360.0;
+	p_deg->dspir = fmod(p_deg->dspir, 360.0);
+	if (p_deg->dspir < 0.0)
+		p_deg->dspir += 360.0;
 }
 
 void draw_chart(WINDOW *main_win, int maxy, int maxx,
@@ -705,7 +722,8 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	&p_deg->dnep, &p_deg->dplu,
 	&p_deg->dmnod, &p_deg->dtnod,
 	&p_deg->dasc, &p_deg->dmc,
-	&p_deg->ddsc, &p_deg->dic};
+	&p_deg->ddsc, &p_deg->dic,
+	&p_deg->dfor, &p_deg->dspir};
 	
 	chart_timeset(cdata, loc, &offset); // goes before swe_julday
 	reset_struct(cdata); // ----
@@ -741,7 +759,6 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		exit(EXIT_FAILURE);
 	}
 	
-	
 	double asc = ascmc[0];
 	double dsc = (ascmc[0] + 180);
 	if (dsc > 360)
@@ -755,6 +772,9 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	p_deg->ddsc = dsc;
 	p_deg->dic = ic;
 	p_deg->dmc = mc;
+	
+	int chart_sect = sect(p_deg, ascmc);
+	lots(chart_sect, p_deg);
 	
 	curs_set(0);
 	int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
@@ -826,11 +846,11 @@ struct tm *cdata, Location *loc)
 	wrefresh(main_win);
 }
 
-void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
+void full_chart_data(WINDOW *main_win, P_deg *p_deg, int *p)
 {
 	static WINDOW *full_data_win = NULL;
 	char spname[AS_MAXCH];
-	int p_count = 16;
+	int p_count = 18;
 	
 	double p_arr[] = {
 		p_deg->dsun,
@@ -845,6 +865,8 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 		p_deg->dplu,
 		p_deg->dmnod,
 		p_deg->dtnod,
+		p_deg->dfor,
+		p_deg->dspir,
 		p_deg->dasc,
 		p_deg->dmc,
 		p_deg->ddsc,
@@ -856,7 +878,7 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 		
 		if (!full_data_win)
 		{
-			full_data_win = newwin(31, 37, 0, 0);
+			full_data_win = newwin(38, 37, 0, 0);
 		}
 		
 		int starty = 1, startx = 2;
@@ -880,7 +902,7 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 				spname[3] ='\0';
 				
 				char buff[1024];
-				snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %5s",
+				snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
 				spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
 				
 				mvwprintw(full_data_win, starty, startx, "%s", buff);
@@ -889,12 +911,23 @@ void win_full_data(WINDOW *main_win, P_deg *p_deg, int *p)
 			
 			else if ( i != 10 && i >= 12) // asc -> ic
 			{
-				const char *points[] = {"asc", "mc", "dsc", "ic"};
+				const char *points[] = {"for", "spi", "asc", "mc", "dsc", "ic"};
 				char point_buff[1024];
 				
-				snprintf(point_buff, sizeof(point_buff), "%-11s %3d.%-2d :  %2d\xc2\xb0%d` %-5s",
+				snprintf(point_buff, sizeof(point_buff), "%-11s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
 				points[j], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
 				
+				if (i == 12) // lots divider
+				{
+					mvwprintw(full_data_win, starty, startx, "------------------------------");
+					starty += 2;
+				}
+				
+				if (i == 14) // points divider
+				{
+					mvwprintw(full_data_win, starty, startx, "------------------------------");
+					starty += 2;
+				}
 				mvwprintw(full_data_win, starty, startx, "%s", point_buff);
 				starty += 2;
 				++j;
@@ -1252,7 +1285,7 @@ int main()
 					mode = INSERT;
 					break;
 				case 'p':
-					win_full_data(main_win, p_deg, &p_swi);
+					full_chart_data(main_win, p_deg, &p_swi);
 					break;
 				default:
 					break;
