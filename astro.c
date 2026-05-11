@@ -546,7 +546,7 @@ int radius, double planet, double asc, P_deg *p_deg)
 	int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
 	int dir_y = ((int)sin(rad) != 0) ? -1 : 1;
 	
-	bool near_horizontal = (fabs(sin(rad)) < 0.5);
+	bool near_horizontal = (fabs(sin(rad)) < 0.8);
 
 	for (int j = 0; j < i; j++)
 	{
@@ -559,8 +559,8 @@ int radius, double planet, double asc, P_deg *p_deg)
 			}
 			else
 			{
-				offsety -= 3;
-				offsetx += 4;
+				offsety -= 4;
+				offsetx -= 3;
 			}
 		}
 	}
