@@ -1,6 +1,8 @@
 -- astro --
 calculate astrology charts in the linux terminal
 
+![picture of the chart with the planet table open](https://i.postimg.cc/JnfmSqsw-/screenshot.png)
+
 -xo-INSTALL--o
 
 sudo make clean install
