@@ -8,8 +8,6 @@ fast astrology charts in the terminal/tty
 sudo make clean install
 ```
 
-run by typing `astro`
-
 --o-DEPENDENCIES---
 
 - swiss ephemeris (built with the makefile)
@@ -31,40 +29,20 @@ you can find it in astro.c function `planet_pos()`;
 
 --o-KEYBINDS---o-
 
-**NORMAL MODE** - esc
+**keybindings**
 
-| | |
-|---|---|
-| navigation | hjkl |
-| draw chart | enter |
-| autofill systime | tab |
-
-| | |
-|---|---|
-| save chart | w |
-| choose dir | q |
-| mkdir | m |
-| cancel save | esc |
-| load chart | e |
-| choose file | l / enter |
-| cancel | q |
-
-**INSERT MODE** - i (on by default)
-
-| | |
-|---|---|
-| navigation | arrowkeys |
-
-**CHART VIEW**
-
-| | |
-|---|---|
-| planet table | p |
-| animate chart | enter |
-| swap increment | h/l |
-| ++ and -- | j/k |
-| exit program | q |
-| new chart | i |
+| NORMAL MODE (esc) | INSERT MODE (i) | CHART VIEW |
+|---|---|---|
+| navigation: hjkl | navigation: arrowkeys | planet table: p |
+| draw chart: enter | | animate chart: enter |
+| autofill systime: tab | | swap increment: h/l |
+| save chart: w | | ++ and --: j/k |
+| choose dir: q | | exit program: q |
+| mkdir: m | | new chart: i |
+| cancel save: esc | | |
+| load chart: e | | |
+| choose file: l/enter | | |
+| cancel: q | | |
 
 **DATA**
 
