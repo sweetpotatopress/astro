@@ -953,8 +953,9 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	
 	wrefresh(main_win);
 	
-	int max_day = 0;
-	size_t i = 0;
+	int max_day = 0; // months() return flag
+	size_t i = 0; // time inc/dec
+	
 	int ch = 0;
 	int anim_done = 0;
 	while(!anim_done && (ch = wgetch(main_win)))
@@ -966,7 +967,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 					--i;
 				break;
 			case 'l':
-				if (i != 5)
+				if (i != 4) // time inc/dec
 					++i;
 				break;
 			case 'j':
