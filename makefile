@@ -1,11 +1,16 @@
 CC        ?= gcc
 CFLAGS    ?= -Wall -Wextra -Wpedantic \
              -Wconversion -Wsign-conversion \
-             -Wunused-variable -Wunused-function \
+             -Wdouble-promotion -Wtype-limits \
+             -Wold-style-declaration \
+             -Wformat-security -Wformat-nonliteral \
+             -Wjump-misses-init -Wuninitialized \
+             -Wmissing-field-initializers \
+             -Wunused-variable -Wunused-function -Wunused-parameter \
              -Wshadow -Wno-implicit-fallthrough \
              -Wredundant-decls -Wfloat-equal \
-             -Winline \
-             -Waddress -Wno-long-long \
+             -Winline -Waddress \
+             -Wno-long-long \
              -Wimplicit-function-declaration \
              -Wno-null-dereference -fanalyzer
 
@@ -39,9 +44,9 @@ endif
 all: $(SWE_DEPS)
 	@echo "-o--o-Building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
-	     -L$(SWE_LIB) -lswe -lm \
-	     -lncurses -lmenu -lform -ltinfo
-	     
+	    -L$(SWE_LIB) -lswe -lm \
+	    -lncurses -lmenu -lform -ltinfo
+	    
 install: all
 	@echo "-x--o Installing astro --oo-"
 	/bin/mkdir -p $(INSTALL_DIR)
