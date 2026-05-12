@@ -209,6 +209,10 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 			ERR_EXIT;
 		}
 		
+		ITEM *cur = NULL;
+		const char *selected = NULL;
+		char *mdir = NULL;
+		
 		int ch = 0;
 		int menu_done = 0;
 		while (!menu_done && (ch = wgetch(save_win)))
@@ -222,8 +226,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					menu_driver(save_menu, REQ_UP_ITEM);
 					break;
 				case 'l': case KEY_RIGHT: case '\n':
-					ITEM *cur = current_item(save_menu);
-					const char *selected = item_description(cur);
+					cur = current_item(save_menu);
+					selected = item_description(cur);
 					
 					snprintf(newpath, 2048,
 					"%s/%s/", io->filepath, selected);
@@ -268,7 +272,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					menu_done = 1;
 					break;
 				case 'm':
-					char *mdir = calloc(1, 128);
+					mdir = calloc(1, 128);
 					if (!mdir)
 					{
 						endwin();
@@ -700,6 +704,13 @@ void load_chart(FIELD *cdata_field[], Io *io)
 			ERR_EXIT;
 		}
 		
+		char *buffer = NULL;
+		const char *selected = NULL;
+		ITEM *cur = NULL;
+		FILE *fp;
+		char field[9][562];
+		
+		int count = 0;
 		int menu_done = 0;
 		int ch = 0;
 		while (!menu_done && (ch = wgetch(load_win)))
@@ -713,8 +724,8 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					menu_driver(load_menu, REQ_UP_ITEM);
 					break;
 				case 'l': case KEY_RIGHT: case '\n':
-					ITEM *cur = current_item(load_menu);
-					const char *selected = item_description(cur);
+					cur = current_item(load_menu);
+					selected = item_description(cur);
 					
 					snprintf(newpath, 2048,
 					"%s/%s", io->filepath, selected);
@@ -741,18 +752,14 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					}
 					
 					// load selected file
-					FILE *fp;
-					int count = 0;
 					
-					char *buffer = malloc(1024);
+					buffer = malloc(1024);
 					if (!buffer)
 					{
 						endwin();
 						perror("load file buffer malloc");
 						ERR_EXIT;
 					}
-					
-					char field[9][562];
 					
 					fp = fopen(newpath, "r");
 					if (fp == NULL)

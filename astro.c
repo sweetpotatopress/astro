@@ -31,6 +31,7 @@ const char *pl_sym[] = {"(o)", "(()", "(-o<)",
 "(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
 "(P)", NULL, "(^)"};
 
+// 0 = NULL because the swiss ephemeris skips 0
 const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
 "leo", "vir", "lib", "sco", "sag",
 "cap", "aqu", "pis"};
@@ -517,20 +518,12 @@ void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
 int radius, double planet, double asc, P_deg *p_deg)
 {
 	double p_arr[] = {
-		p_deg->dsun,
-		p_deg->dmoon,
-		p_deg->dmerc,
-		p_deg->dven,
-		p_deg->dmars,
-		p_deg->djup,
-		p_deg->dsat,
-		p_deg->dura,
-		p_deg->dnep,
-		p_deg->dplu,
-		p_deg->dmnod,
-		p_deg->dtnod
-	};
-	
+		p_deg->dsun, p_deg->dmoon,
+		p_deg->dmerc, p_deg->dven,
+		p_deg->dmars, p_deg->djup,
+		p_deg->dsat, p_deg->dura,
+		p_deg->dnep, p_deg->dplu,
+		p_deg->dmnod, p_deg->dtnod};
 
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
@@ -761,6 +754,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		exit(EXIT_FAILURE);
 	}
 	
+	// calculates ic/mc and fills struct members
 	double asc = ascmc[0];
 	double dsc = (ascmc[0] + 180);
 	if (dsc >= 360)
@@ -855,25 +849,15 @@ void full_chart_data(WINDOW *main_win, P_deg *p_deg, int *p)
 	int p_count = 18;
 	
 	double p_arr[] = {
-		p_deg->dsun,
-		p_deg->dmoon,
-		p_deg->dmerc,
-		p_deg->dven,
-		p_deg->dmars,
-		p_deg->djup,
-		p_deg->dsat,
-		p_deg->dura,
-		p_deg->dnep,
-		p_deg->dplu,
-		p_deg->dmnod,
-		p_deg->dtnod,
-		p_deg->dfor,
-		p_deg->dspir,
-		p_deg->dasc,
-		p_deg->dmc,
-		p_deg->ddsc,
-		p_deg->dic
-	};
+		p_deg->dsun, p_deg->dmoon,
+		p_deg->dmerc, p_deg->dven,
+		p_deg->dmars, p_deg->djup,
+		p_deg->dsat, p_deg->dura,
+		p_deg->dnep, p_deg->dplu,
+		p_deg->dmnod, p_deg->dtnod,
+		p_deg->dfor, p_deg->dspir,
+		p_deg->dasc, p_deg->dmc,
+		p_deg->ddsc, p_deg->dic};
 	
 	if (*p == 0)
 	{
@@ -969,6 +953,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	
 	wrefresh(main_win);
 	
+	int max_day = 0;
 	size_t i = 0;
 	int ch = 0;
 	int anim_done = 0;
@@ -1056,7 +1041,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							cdata->tm_mon = 1;
 							++cdata->tm_year;
 						}
-						int max_day = months(
+						max_day = months(
 						cdata->tm_mon, cdata->tm_year);
 						if (cdata->tm_mday > max_day)
 							cdata->tm_mday = max_day;
@@ -1146,7 +1131,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							cdata->tm_mon = 12;
 							--cdata->tm_year;
 						}
-						int max_day = months(
+						max_day = months(
 						cdata->tm_mon, cdata->tm_year);
 						if (cdata->tm_mday > max_day)
 							cdata->tm_mday = max_day;

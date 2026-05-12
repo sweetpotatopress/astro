@@ -230,6 +230,10 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 		getch();
 	}
 	
+	//case '\n'
+	ITEM *selected = NULL;
+	Location *cdata = NULL;
+	
 	int menu_done = 0;
 	while(!menu_done && (ch = wgetch(city_win)))
 	{
@@ -242,8 +246,8 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 				menu_driver(city_menu, REQ_UP_ITEM);
 				break;
 			case '\n':
-				ITEM *selected = current_item(city_menu);
-				Location *cdata = (Location *)item_userptr(selected);
+				selected = current_item(city_menu);
+				cdata = (Location *)item_userptr(selected);
 				
 				set_field_buffer(cdata_field[0], 0, cdata->city);
 				set_field_buffer(cdata_field[6], 0, cdata->timezone);
