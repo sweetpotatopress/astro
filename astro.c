@@ -538,7 +538,10 @@ int radius, double planet, double asc, Pxx *pxx)
 
 	for (int j = 0; j < i; j++)
 	{
-		if (fabs(planet - p_arr[j]) <= 8)	
+		double adj_angle = p_arr[j];
+		double ang_dist = fabs(planet - adj_angle);
+		
+		if (ang_dist <= 8 || ang_dist >= 352)
 		{
 			if (near_horizontal)
 			{
@@ -549,6 +552,25 @@ int radius, double planet, double asc, Pxx *pxx)
 			{
 				offsety -= 4;
 				offsetx -= 3;
+			}
+		}
+	}
+	
+	for (int j = 0; j < i; j++)
+	{
+		double adj_angle = p_arr[j];
+		double ang_dist = fabs(planet - adj_angle);
+		if (ang_dist <= 8 || ang_dist >= 352)
+		{
+			if (near_horizontal)
+			{
+				offsetx += 3;
+				offsety -= 2;
+			}
+			else
+			{
+				offsetx += 5;
+				offsety += 2;
 			}
 		}
 	}
