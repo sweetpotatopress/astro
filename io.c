@@ -704,9 +704,10 @@ void load_chart(FIELD *cdata_field[], Io *io)
 			ERR_EXIT;
 		}
 		
-		char *buffer = NULL;
-		const char *selected = NULL;
 		ITEM *cur = NULL;
+		const char *selected = NULL;
+		char *buffer = NULL;
+		
 		FILE *fp;
 		char field[9][562];
 		

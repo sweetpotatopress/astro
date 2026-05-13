@@ -83,6 +83,13 @@ Location ***choices, size_t *max_search)
 		while (token != NULL && field_count < 19)
 		{
 			fields[field_count] = calloc(1, strlen(token) + 1);
+			if (!fields[field_count])
+			{
+				endwin();
+				perror("location parse fields calloc");
+				ERR_EXIT;
+			}
+			
 			memcpy(fields[field_count], token, strlen(token) + 1);
 			field_count++;
 			token = strtok_E(NULL, "\t");

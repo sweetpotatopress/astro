@@ -702,12 +702,11 @@ void draw_chart(WINDOW *main_win, int maxy, int maxx,
 struct tm *cdata, Location *loc, P_deg *p_deg)
 {
 	int iret, iflag, ipl, i;
-	double xx[6];
+	double xx[6];	 // longitude, latitude, distance 
+					// speed in long. speed in lat, speed in dist.
 	char serr[AS_MAXCH];
 	double cusps[13], ascmc[10]; //houses, asc, mc
 	int ihsy = 'W'; // house system
-	
-	int day_offset = 0;
 	
 	double *p_deg_members[] = {
 	&p_deg->dsun, &p_deg->dmoon,
@@ -720,6 +719,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	&p_deg->ddsc, &p_deg->dic,
 	&p_deg->dfor, &p_deg->dspir};
 	
+	int day_offset = 0;
 	chart_timeset(cdata, loc, &day_offset); // goes before swe_julday
 	reset_struct(cdata); // ----
 	
@@ -738,9 +738,9 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
 		{
+			endwin();
 			fprintf(stderr, "%s", serr);
 			ERR_EXIT;
-			exit(EXIT_FAILURE);
 		}
 		*p_deg_members[i] = xx[0];
 	}
@@ -749,9 +749,9 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	ihsy, cusps, ascmc);
 	if (iret < 0)
 	{
+		endwin();
 		fprintf(stderr, "%s", serr);
 		ERR_EXIT;
-		exit(EXIT_FAILURE);
 	}
 	
 	// calculates ic/mc and fills struct members
@@ -819,7 +819,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 void cur_chart_data(WINDOW *main_win, int maxx, 
 struct tm *cdata, Location *loc)
 {	
-	int starty = 1;
+	int starty = 3;
 	int startx = maxx - 22;
 	
 	mvwprintw(main_win, starty, startx, "%s", loc->city);
@@ -834,10 +834,10 @@ struct tm *cdata, Location *loc)
 	mvwprintw(main_win, starty, startx, "%d:%d", cdata->tm_hour, cdata->tm_min);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "lat.%.3f", loc->dlat);
+	mvwprintw(main_win, starty, startx, "lat.%f", loc->dlat);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "lon.%.3f", loc->dlon);
+	mvwprintw(main_win, starty, startx, "lon.%f", loc->dlon);
 	
 	wrefresh(main_win);
 }
