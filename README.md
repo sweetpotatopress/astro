@@ -18,31 +18,24 @@ sudo make clean install
 basically, it should work on most linux distros, it may not work on systems
 using musl, you are welcome to share patches in order to fix that //
 send bug reports.
-i am interested in it working with BSD and will hear bug reports.
-i will not fix bug reports for winblows, wsl users or macos
-
---HELP WANTED--o-
-
-writing a better planet collision offset that keeps them within their house
-it's /usually/ ok right now, but gets worse the smaller the screen is
-you can find it in astro.c function `planet_pos()`;
+in theory astro works on BSD. in theory . . 
 
 --o-KEYBINDS---o-
 
 **keybindings**
 
-| NORMAL MODE (esc) | INSERT MODE (i) | CHART VIEW |
+| mode INSERT (i) | mode NORMAL (esc) | CHART VIEW |
 |---|---|---|
-| navigation: hjkl | navigation: arrowkeys | planet table: p |
-| draw chart: enter | | animate chart: enter |
-| autofill systime: tab | | swap increment: h/l |
-| save chart: w | | ++ and --: j/k |
-| choose dir: q | | exit program: q |
-| mkdir: m | | new chart: i |
-| cancel save: esc | | |
-| load chart: e | | |
-| choose file: l/enter | | |
-| cancel: q | | |
+| arrowkeys | navigation: hjkl | planet table: p |
+|| draw chart: enter | animate chart: enter |
+|| autofill systime: tab | swap increment: h/l |
+||  save chart: w | ++ and --: j/k |
+||  choose dir: q | exit program: q |
+||  mkdir: m | new chart: i |
+||  cancel save: esc | |
+||  load chart: e | |
+||  choose file: l/enter | |
+||  cancel: q | |
 
 **DATA**
 
@@ -60,12 +53,14 @@ charts, city-db, and the swiss ephemeris
  | window with exact planet stats | [DONE] |
  | add nodes, outers | [DONE] |
  | add lot of spirit + fortune | [DONE] |
+ | add ncurses panels to most things |^
+ | keep tables open when animating chart |^
  | retrograde, station, speed table | |
  | add elemental colors | |
  | essential dignities table | |
  | aspects | |
  | eclipse calender | |
- | declination/bounds table | |
+ | declination/out of bounds table | |
  | terminal window autoresize | |
  | zodiacal releasing | |
  
