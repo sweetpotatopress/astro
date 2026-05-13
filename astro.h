@@ -51,7 +51,7 @@ typedef struct {
 	double dic;
 	double dfor;
 	double dspir;
-} P_deg;
+} Pxx;
 
 // chart data that doesnt fit in struct tm
 

@@ -504,15 +504,15 @@ int maxy, int maxx, int radius, chtype ch)
 }
 
 void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double planet, double asc, P_deg *p_deg)
+int radius, double planet, double asc, Pxx *pxx)
 {
 	double p_arr[] = {
-		p_deg->dsun[LONG], p_deg->dmoon[LONG],
-		p_deg->dmerc[LONG], p_deg->dven[LONG],
-		p_deg->dmars[LONG], p_deg->djup[LONG],
-		p_deg->dsat[LONG], p_deg->dura[LONG],
-		p_deg->dnep[LONG], p_deg->dplu[LONG],
-		p_deg->dmnod[LONG], p_deg->dtnod[LONG]};
+		pxx->dsun[LONG], pxx->dmoon[LONG],
+		pxx->dmerc[LONG], pxx->dven[LONG],
+		pxx->dmars[LONG], pxx->djup[LONG],
+		pxx->dsat[LONG], pxx->dura[LONG],
+		pxx->dnep[LONG], pxx->dplu[LONG],
+		pxx->dmnod[LONG], pxx->dtnod[LONG]};
 
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
@@ -649,46 +649,46 @@ int radius, double angle, chtype ch)
 	}
 }
 
-int sect(P_deg *p_deg, double ascmc[])
+int sect(Pxx *pxx, double ascmc[])
 {
 	int sect = 0;
 	
-	if ((p_deg->dsun[LONG] - ascmc[0]) < 180)
+	if ((pxx->dsun[LONG] - ascmc[0]) < 180)
 		sect = 1; // day
 		
-	else if ((p_deg->dsun[LONG] - ascmc[0]) > 180)
+	else if ((pxx->dsun[LONG] - ascmc[0]) > 180)
 		sect = 0; // night
 		
 	return sect;
 }
 
-void lots(int sect, P_deg *p_deg)
+void lots(int sect, Pxx *pxx)
 {
 	double diff;
 	
 	if (sect) // day
 	{
-		diff = p_deg->dmoon[LONG] - p_deg->dsun[LONG];
-		p_deg->dfor = p_deg->dasc - diff;
-		p_deg->dspir = p_deg->dasc + diff;
+		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
+		pxx->dfor = pxx->dasc - diff;
+		pxx->dspir = pxx->dasc + diff;
 	}
 	else // night
 	{
-		diff = p_deg->dmoon[LONG] - p_deg->dsun[LONG];
-		p_deg->dfor = p_deg->dasc + diff;
-		p_deg->dspir = p_deg->dasc - diff;
+		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
+		pxx->dfor = pxx->dasc + diff;
+		pxx->dspir = pxx->dasc - diff;
 	}
 	
-	p_deg->dfor = fmod(p_deg->dfor, 360.0);
-	if (p_deg->dfor < 0.0)
-		p_deg->dfor += 360.0;
-	p_deg->dspir = fmod(p_deg->dspir, 360.0);
-	if (p_deg->dspir < 0.0)
-		p_deg->dspir += 360.0;
+	pxx->dfor = fmod(pxx->dfor, 360.0);
+	if (pxx->dfor < 0.0)
+		pxx->dfor += 360.0;
+	pxx->dspir = fmod(pxx->dspir, 360.0);
+	if (pxx->dspir < 0.0)
+		pxx->dspir += 360.0;
 }
 
 void draw_chart(WINDOW *main_win, int maxy, int maxx,
-struct tm *cdata, Location *loc, P_deg *p_deg)
+struct tm *cdata, Location *loc, Pxx *pxx)
 {
 	int iret, iflag, ipl, i;
 	double xx[6];	 // longitude, latitude, distance 
@@ -697,16 +697,16 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	double cusps[13], ascmc[10]; //houses, asc, mc
 	int ihsy = 'W'; // house system
 	
-	double *p_deg_members[] = {
-	&*p_deg->dsun, &*p_deg->dmoon,
-	&*p_deg->dmerc, &*p_deg->dven,
-	&*p_deg->dmars, &*p_deg->djup,
-	&*p_deg->dsat, &*p_deg->dura,
-	&*p_deg->dnep, &*p_deg->dplu,
-	&*p_deg->dmnod, &*p_deg->dtnod,
-	&p_deg->dasc, &p_deg->dmc,
-	&p_deg->ddsc, &p_deg->dic,
-	&p_deg->dfor, &p_deg->dspir};
+	double *pxx_members[] = {
+	&*pxx->dsun, &*pxx->dmoon,
+	&*pxx->dmerc, &*pxx->dven,
+	&*pxx->dmars, &*pxx->djup,
+	&*pxx->dsat, &*pxx->dura,
+	&*pxx->dnep, &*pxx->dplu,
+	&*pxx->dmnod, &*pxx->dtnod,
+	&pxx->dasc, &pxx->dmc,
+	&pxx->ddsc, &pxx->dic,
+	&pxx->dfor, &pxx->dspir};
 	
 	int day_offset = 0;
 	chart_timeset(cdata, loc, &day_offset); // goes before swe_julday
@@ -728,12 +728,12 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		if (iret < 0) 
 			ERR_EXIT("ERR: swe_calc_ut failure");
 			
-		p_deg_members[i][LONG] = xx[LONG];
-		p_deg_members[i][LAT] = xx[LAT];
-		p_deg_members[i][DIST] = xx[DIST];
-		p_deg_members[i][LONG_S] = xx[LONG_S];
-		p_deg_members[i][LAT_S] = xx[LAT_S];
-		p_deg_members[i][DIST_S] = xx[DIST_S];
+		pxx_members[i][LONG] = xx[LONG];
+		pxx_members[i][LAT] = xx[LAT];
+		pxx_members[i][DIST] = xx[DIST];
+		pxx_members[i][LONG_S] = xx[LONG_S];
+		pxx_members[i][LAT_S] = xx[LAT_S];
+		pxx_members[i][DIST_S] = xx[DIST_S];
 	}
 	
 	iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
@@ -751,13 +751,13 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 		ic -= 360;
 	double mc = ascmc[1];
 	
-	p_deg->dasc = asc;
-	p_deg->ddsc = dsc;
-	p_deg->dic = ic;
-	p_deg->dmc = mc;
+	pxx->dasc = asc;
+	pxx->ddsc = dsc;
+	pxx->dic = ic;
+	pxx->dmc = mc;
 	
-	int chart_sect = sect(p_deg, ascmc);
-	lots(chart_sect, p_deg);
+	int chart_sect = sect(pxx, ascmc);
+	lots(chart_sect, pxx);
 	
 	curs_set(0);
 	int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
@@ -790,7 +790,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	for (i = 0; i < 12; ++i)
 	{
 		planet_pos(main_win, i, maxy, maxx,
-		radius - 9, *p_deg_members[i], cusps[1], p_deg);
+		radius - 9, *pxx_members[i], cusps[1], pxx);
 	}
 	
 	for (i = 0; i < 2; ++i)
@@ -829,22 +829,22 @@ struct tm *cdata, Location *loc)
 	wrefresh(main_win);
 }
 
-void full_chart_data(WINDOW *main_win, P_deg *p_deg, int *p)
+void full_chart_data(WINDOW *main_win, Pxx *pxx, int *p)
 {
 	static WINDOW *full_data_win = NULL;
 	char spname[AS_MAXCH];
 	int p_count = 18;
 	
 	double p_arr[] = {
-		*p_deg->dsun, *p_deg->dmoon,
-		*p_deg->dmerc, *p_deg->dven,
-		*p_deg->dmars, *p_deg->djup,
-		*p_deg->dsat, *p_deg->dura,
-		*p_deg->dnep, *p_deg->dplu,
-		*p_deg->dmnod, *p_deg->dtnod,
-		p_deg->dfor, p_deg->dspir,
-		p_deg->dasc, p_deg->dmc,
-		p_deg->ddsc, p_deg->dic};
+		*pxx->dsun, *pxx->dmoon,
+		*pxx->dmerc, *pxx->dven,
+		*pxx->dmars, *pxx->djup,
+		*pxx->dsat, *pxx->dura,
+		*pxx->dnep, *pxx->dplu,
+		*pxx->dmnod, *pxx->dtnod,
+		pxx->dfor, pxx->dspir,
+		pxx->dasc, pxx->dmc,
+		pxx->ddsc, pxx->dic};
 	
 	if (*p == 0)
 	{
@@ -933,7 +933,7 @@ int months(int month, int year)
 }
 
 void animate_chart(WINDOW *main_win, int maxy, int maxx,
-struct tm *cdata, Location *loc, P_deg *p_deg)
+struct tm *cdata, Location *loc, Pxx *pxx)
 {
 	int starty = 8;
 	int startx = maxx - 22;
@@ -983,7 +983,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							}
 						}
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 1:
@@ -1004,7 +1004,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							}
 						}
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 2:
@@ -1020,7 +1020,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							}
 						}
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 3:
@@ -1035,14 +1035,14 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							cdata->tm_mday = max_day;
 							
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 4:
 						if ((++cdata->tm_year) > 16799)
 							cdata->tm_year = -12998;
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 				}
@@ -1073,7 +1073,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							}
 						}
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 1:
@@ -1094,7 +1094,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							}
 						}
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 2:
@@ -1110,7 +1110,7 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 							cdata->tm_mon, cdata->tm_year);
 						}
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 3:
@@ -1124,14 +1124,14 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 						if (cdata->tm_mday > max_day)
 							cdata->tm_mday = max_day;
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 					case 4:
 						if ((--cdata->tm_year) < -12998)
 							cdata->tm_year = 16799;
 						draw_chart(main_win, maxy,
-						maxx, cdata, loc, p_deg);
+						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, cdata, loc);
 						break;
 				}
@@ -1192,47 +1192,47 @@ int main()
 	if (!loc)
 		ERR_EXIT("main Location calloc");
 		
-	P_deg *p_deg = calloc(1, sizeof(P_deg));
-	if (!p_deg)
-		ERR_EXIT("main P_deg");
+	Pxx *pxx = calloc(1, sizeof(Pxx));
+	if (!pxx)
+		ERR_EXIT("main pxx");
 	
 	// xx[] lat, long, dist, lat_s, long_s, dist_s
-	p_deg->dsun   = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dmoon  = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dmerc  = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dven   = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dmars  = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->djup   = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dsat   = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dura   = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dnep   = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dplu   = calloc(5, sizeof(double));                                  
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dmnod  = calloc(5, sizeof(double));                                 
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
-	p_deg->dtnod  = calloc(5, sizeof(double)); 
-	if(!p_deg->dsun)
-		ERR_EXIT("p_deg->d calloc");
+	pxx->dsun   = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dmoon  = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dmerc  = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dven   = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dmars  = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->djup   = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dsat   = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dura   = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dnep   = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dplu   = calloc(5, sizeof(double));                                  
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dmnod  = calloc(5, sizeof(double));                                 
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dtnod  = calloc(5, sizeof(double)); 
+	if(!pxx->dsun)
+		ERR_EXIT("pxx->d calloc");
 	
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw)
@@ -1258,7 +1258,7 @@ int main()
 	while (!main_done)
 	{
 		ichart_data(cdata, loc);
-		draw_chart(main_win, maxy, maxx, cdata, loc, p_deg);
+		draw_chart(main_win, maxy, maxx, cdata, loc, pxx);
 		cur_chart_data(main_win, maxx, cdata, loc);
 			
 		int chart_done = 0, ch = 0;
@@ -1269,7 +1269,7 @@ int main()
 			{
 				case '\n':
 					animate_chart(main_win, maxy, maxx,
-					cdata, loc, p_deg);
+					cdata, loc, pxx);
 					break;
 				case 'q':
 					main_done = 1;
@@ -1282,7 +1282,7 @@ int main()
 					mode = INSERT;
 					break;
 				case 'p':
-					full_chart_data(main_win, p_deg, &p_swi);
+					full_chart_data(main_win, pxx, &p_swi);
 					break;
 				default:
 					break;
@@ -1296,20 +1296,7 @@ int main()
 	free(loc->city);
 	free(loc);
 	
-	free(p_deg->dsun);
-	free(p_deg->dmoon);
-	free(p_deg->dmerc);
-	free(p_deg->dven);
-	free(p_deg->dmars);
-	free(p_deg->djup);
-	free(p_deg->dsat);
-	free(p_deg->dura);
-	free(p_deg->dnep);
-	free(p_deg->dplu);
-	free(p_deg->dmnod);
-	free(p_deg->dtnod);
-	
-	free(p_deg);
+	free(pxx);
 	return 0;
 }
 
