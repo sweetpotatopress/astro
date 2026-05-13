@@ -57,6 +57,7 @@ typedef struct {
 
 typedef struct {
 	char *city;
+	char *citybuffer;
 	char *state;
 	char *country;
 	char *timezone;
@@ -71,10 +72,11 @@ typedef struct {
 
 typedef struct {
 	char *filepath;
+	char *filename;
 	size_t file_count;
 } Io;
 
 int main_search(FIELD *cdata_field[], char *argv);
-void main_io(FIELD *cdata_field[], struct tm *cdata,
+void main_io(Io *io, FIELD *cdata_field[], struct tm *cdata,
 Location *loc, const char ch);
 

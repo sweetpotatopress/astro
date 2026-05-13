@@ -618,6 +618,9 @@ void load_chart(FIELD *cdata_field[], Io *io)
 				case 'l': case KEY_RIGHT: case '\n':
 					cur = current_item(load_menu);
 					selected = item_description(cur);
+					io->filename = strdup(selected);
+					if (!io->filename)
+						ERR_EXIT("load_chart io->filename strdup");
 					
 					snprintf(newpath, 2048,
 					"%s/%s", io->filepath, selected);
@@ -711,20 +714,12 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	free(homepath);
 }
 
-void main_io(FIELD *cdata_field[], struct tm *cdata,
+void main_io(Io *io, FIELD *cdata_field[], struct tm *cdata,
 Location *loc, const char ch)
 {
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw) 
 		ERR_EXIT("main_io getpwuid");
-	
-	Io *io = calloc(1, sizeof(Io));
-	if (!io)
-		ERR_EXIT("main_io io calloc");
-	
-	io->filepath = malloc(1024);
-	if (!io->filepath)
-		ERR_EXIT("main_io io->filepath malloc");
 	
 	snprintf(io->filepath, 1024,
 	"%s/.local/share/astro/charts/", pw->pw_dir);
@@ -734,6 +729,4 @@ Location *loc, const char ch)
 	if (ch == 'e')
 		load_chart(cdata_field, io);
 		
-	free(io->filepath);
-	free(io);
 }

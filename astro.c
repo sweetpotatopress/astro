@@ -55,7 +55,11 @@ void buff_trim(FIELD *current, char *buffer)
 	// decrement one to be in bounds, trim
 	--len;
 	while(len >= 0 && buffer[len] == ' ')
+	{
+		if (buffer[len] == '\n')
+			buffer[len] = 0;
 		--len;
+	}
 	buffer[len + 1] = '\0';
 }
 
@@ -66,16 +70,12 @@ FORM *cdata_form, FIELD *cdata_field[])
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
 	
-	char *buffer = malloc(1024);
-	if (!buffer)
-		ERR_EXIT("ERR: field_to_member buffer alloc fail");
-	
-	buff_trim(current, buffer);
+	buff_trim(current, loc->citybuffer);
 	
 	switch(index)
 	{
 		case 0:
-			main_search(cdata_field, buffer);
+			main_search(cdata_field, loc->citybuffer);
 			form_driver(cdata_form, REQ_VALIDATION);
 			
 			//redraws field underline
@@ -84,39 +84,39 @@ FORM *cdata_form, FIELD *cdata_field[])
 			post_form(cdata_form);
 			wrefresh(cdata_form_win);
 			
-			buff_trim(current, buffer);
+			buff_trim(current, loc->citybuffer);
 			
-			loc->city = strdup(buffer);
+			free(loc->city);
+			loc->city = loc->citybuffer;
 			doupdate();
 			break;
 		case 1:
-			cdata->tm_year = atoi(buffer);
+			cdata->tm_year = atoi(loc->citybuffer);
 			break;
 		case 2:
-			cdata->tm_mon = atoi(buffer);
+			cdata->tm_mon = atoi(loc->citybuffer);
 			break;
 		case 3: 
-			cdata->tm_mday = atoi(buffer);
+			cdata->tm_mday = atoi(loc->citybuffer);
 			break;
 		case 4:
-			cdata->tm_hour = atoi(buffer);
+			cdata->tm_hour = atoi(loc->citybuffer);
 			break;
 		case 5:
-			cdata->tm_min = atoi(buffer);
+			cdata->tm_min = atoi(loc->citybuffer);
 			break;
 		case 6:
-			if (setenv("TZ", buffer, 1) != 0)
+			if (setenv("TZ", loc->citybuffer, 1) != 0)
 				ERR_EXIT("ERR: TZ setenv fail field_to_membver");
 			tzset();
 			break;
 		case 7:
-			loc->dlat = atof(buffer);
+			loc->dlat = atof(loc->citybuffer);
 			break;
 		case 8:
-			loc->dlon = atof(buffer);
+			loc->dlon = atof(loc->citybuffer);
 			break;
 	}
-	free(buffer);
 }
 
 void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
@@ -195,7 +195,7 @@ FORM *cdata_form, struct tm *cdata, Location *loc)
 	}
 }
 	
-void input_chart_data(struct tm *cdata, Location *loc)
+void input_chart_data(Io *io, struct tm *cdata, Location *loc)
 {
 	WINDOW *cdata_form_win;
 	FIELD *cdata_field[10];
@@ -315,11 +315,11 @@ void input_chart_data(struct tm *cdata, Location *loc)
 					case 'w':
 						validate_fields(cdata_form_win, cdata_field,
 						cdata_form, cdata, loc);
-						main_io(cdata_field, cdata, loc, 'w');
+						main_io(io, cdata_field, cdata, loc, 'w');
 						mode = NORMAL;
 						break;
 					case 'e':
-						main_io(cdata_field, cdata, loc, 'e');
+						main_io(io, cdata_field, cdata, loc, 'e');
 						mode = NORMAL;
 						break;
 					case '\n':
@@ -830,12 +830,15 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 }
 
 
-void cur_chart_data(WINDOW *main_win, int maxx, 
+void cur_chart_data(WINDOW *main_win, int maxx, Io *io, 
 struct tm *cdata, Location *loc)
 {	
 	int starty = 3;
 	int startx = maxx - 22;
 	
+	mvwprintw(main_win, starty, startx, "%s", io->filename);
+	
+	starty += 1;
 	mvwprintw(main_win, starty, startx, "%s", loc->city);
 	
 	starty += 1;
@@ -959,7 +962,7 @@ int months(int month, int year)
 	return days[month];
 }
 
-void animate_chart(WINDOW *main_win, int maxy, int maxx,
+void animate_chart(WINDOW *main_win, int maxy, int maxx, Io *io,
 struct tm *cdata, Location *loc, Pxx *pxx)
 {
 	int starty = 8;
@@ -1011,7 +1014,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 					case 1:
 						if ((++cdata->tm_hour) > 23)
@@ -1032,7 +1035,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 					case 2:
 						if ((++cdata->tm_mday) > months(
@@ -1048,7 +1051,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 					case 3:
 						if ((++cdata->tm_mon) > 12)
@@ -1063,14 +1066,14 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 							
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 					case 4:
 						if ((++cdata->tm_year) > 16799)
 							cdata->tm_year = -12998;
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 				}
 				break;
@@ -1101,7 +1104,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 					case 1:
 						if ((--cdata->tm_hour) < 0)
@@ -1122,7 +1125,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 					case 2:
 						if ((--cdata->tm_mday) < 1)
@@ -1138,7 +1141,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						}
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 					case 3:
 						if (--cdata->tm_mon < 1)
@@ -1152,14 +1155,14 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 							cdata->tm_mday = max_day;
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 					case 4:
 						if ((--cdata->tm_year) < -12998)
 							cdata->tm_year = 16799;
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
-						cur_chart_data(main_win, maxx, cdata, loc);
+						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
 				}
 				break;
@@ -1219,6 +1222,14 @@ int main()
 	if (!loc)
 		ERR_EXIT("main Location calloc");
 		
+	loc->city = malloc(1024);
+	if (!loc->city)
+		ERR_EXIT("ERR: main loc->city malloc");
+	loc->citybuffer = malloc(1024);
+	if (!loc->citybuffer)
+		ERR_EXIT("ERR: main loc->citybuffer alloc fail");
+	
+		
 	Pxx *pxx = calloc(1, sizeof(Pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
@@ -1260,6 +1271,16 @@ int main()
 	pxx->dtnod  = calloc(5, sizeof(double)); 
 	if(!pxx->dtnod)
 		ERR_EXIT("pxx->d calloc");
+		
+	Io *io = calloc(1, sizeof(Io));
+	if (!io)
+		ERR_EXIT("mai io calloc");
+	io->filepath = malloc(1024);
+	if (!io->filepath)
+		ERR_EXIT("main io->filepath malloc");
+	io->filename = malloc(256);
+	if (!io->filename)
+		ERR_EXIT("main io->filename malloc");
 	
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw)
@@ -1284,9 +1305,9 @@ int main()
 	int main_done = 0, p_swi = 0;
 	while (!main_done)
 	{
-		input_chart_data(cdata, loc);
+		input_chart_data(io, cdata, loc);
 		draw_chart(main_win, maxy, maxx, cdata, loc, pxx);
-		cur_chart_data(main_win, maxx, cdata, loc);
+		cur_chart_data(main_win, maxx, io,  cdata, loc);
 			
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
@@ -1295,7 +1316,7 @@ int main()
 			switch(ch)
 			{
 				case '\n':
-					animate_chart(main_win, maxy, maxx,
+					animate_chart(main_win, maxy, maxx, io,
 					cdata, loc, pxx);
 					break;
 				case 'q':
@@ -1319,8 +1340,10 @@ int main()
 	delwin(main_win);
 	endwin();
 	swe_close();
+	free(io);
 	free(cdata);
 	free(loc->city);
+	free(loc->citybuffer);
 	free(loc);
 	
 	free(pxx);
