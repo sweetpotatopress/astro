@@ -175,7 +175,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 		}
 	
 	int width = max_width + 4;
-	int height = (int)n_choices + 3;
+	int height = (int)n_choices + 2;
 	
 	if (width > COLS)
 		width = COLS - 2;

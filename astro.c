@@ -22,6 +22,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <form.h>
 #include "astro.h"
 
+#define VERSION 0.56
 
 Mode mode = INSERT;
 
@@ -194,7 +195,7 @@ FORM *cdata_form, struct tm *cdata, Location *loc)
 	}
 }
 	
-void ichart_data(struct tm *cdata, Location *loc)
+void input_chart_data(struct tm *cdata, Location *loc)
 {
 	WINDOW *cdata_form_win;
 	FIELD *cdata_field[10];
@@ -383,7 +384,7 @@ void ichart_data(struct tm *cdata, Location *loc)
 	}
 	delwin(cdata_form_win);
 }
-void check_dst(struct tm *orig)
+void check_dst(struct tm *c_copy)
 {
 	char cmd[1024] = {0};
 	char buffer[256] = {0};
@@ -392,8 +393,8 @@ void check_dst(struct tm *orig)
 	
 	//calls GNU coreutil date
 	snprintf(cmd, sizeof(cmd), "TZ=%s date -d '%d-%d-%d %d:%d' '+%%Z'", 
-	tz_name, orig->tm_year, orig->tm_mon, orig->tm_mday,
-	orig->tm_hour, orig->tm_min);
+	tz_name, c_copy->tm_year, c_copy->tm_mon, c_copy->tm_mday,
+	c_copy->tm_hour, c_copy->tm_min);
 	
 	fp = popen(cmd, "r");
 	if (!fp)
@@ -410,7 +411,7 @@ void check_dst(struct tm *orig)
 	buffer[strcspn(buffer, "\n")] = 0;
 	pclose(fp);
 	
-	orig->tm_isdst = 
+	c_copy->tm_isdst = 
 	(tzname[1] && 
 	tzname[0] != tzname[1] &&
 	strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
@@ -418,50 +419,50 @@ void check_dst(struct tm *orig)
 
 void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
 {
-	struct tm *orig = cdata;
-	check_dst(orig);
+	struct tm *c_copy = cdata;
+	check_dst(c_copy);
 	//correct tm quirk after GNU date
-	orig->tm_year -= 1900;
-	orig->tm_mon -= 1;
+	c_copy->tm_year -= 1900;
+	c_copy->tm_mon -= 1;
 	
 	//copy correct isdst and hour before mktime
 	//mktime "corrects" it to system defaults, which can be wrong
-	int isdst = orig->tm_isdst;
-	int tm_hour = orig->tm_hour;
+	int isdst = c_copy->tm_isdst;
+	int tm_hour = c_copy->tm_hour;
 	
-	time_t tret = mktime(orig);
-	localtime_r(&tret, orig);
+	time_t tret = mktime(c_copy);
+	localtime_r(&tret, c_copy);
 	
-	orig->tm_isdst = isdst;
-	orig->tm_hour = tm_hour;
+	c_copy->tm_isdst = isdst;
+	c_copy->tm_hour = tm_hour;
 
-	long utc_sec = orig->tm_gmtoff;
+	long utc_sec = c_copy->tm_gmtoff;
 	
 	//get utc offset in seconds, reverse, and display in hours
 	double utc_offset = (double)-utc_sec / 3600;
 	
 	//convert inputted minutes to decimal
-	double min = (double)orig->tm_min / 60;
+	double min = (double)c_copy->tm_min / 60;
 	
 	//add inputted hour, utc offset, and minutes to decimal
 	//swe_julday uses 24 hour UTC.
-	double dhour = (double)(orig->tm_hour + utc_offset) + min;
+	double dhour = (double)(c_copy->tm_hour + utc_offset) + min;
 	
 	if((dhour >= 24.0))
 	{
 		dhour -= 24.0;
-		++orig->tm_mday;
+		++c_copy->tm_mday;
 		*day_offset -= 1;
 	}
 	if((dhour <= 0))
 	{
 		dhour += 23.999999;
-		--orig->tm_mday;
+		--c_copy->tm_mday;
 		*day_offset += 1;
 	}
 	
 	loc->dhour = dhour; 
-	*cdata = *orig;
+	*cdata = *c_copy;
 }
 
 void reset_struct(struct tm *cdata)
@@ -829,7 +830,7 @@ struct tm *cdata, Location *loc)
 	wrefresh(main_win);
 }
 
-void full_chart_data(WINDOW *main_win, Pxx *pxx, int *p)
+void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
 {
 	static WINDOW *full_data_win = NULL;
 	char spname[AS_MAXCH];
@@ -1257,7 +1258,7 @@ int main()
 	int main_done = 0, p_swi = 0;
 	while (!main_done)
 	{
-		ichart_data(cdata, loc);
+		input_chart_data(cdata, loc);
 		draw_chart(main_win, maxy, maxx, cdata, loc, pxx);
 		cur_chart_data(main_win, maxx, cdata, loc);
 			
@@ -1282,7 +1283,7 @@ int main()
 					mode = INSERT;
 					break;
 				case 'p':
-					full_chart_data(main_win, pxx, &p_swi);
+					planet_table(main_win, pxx, &p_swi);
 					break;
 				default:
 					break;
