@@ -85,9 +85,9 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				io->filepath,
 				entry->d_name
 				);
-				stat(fn_buff, &st);
 			
-				if (S_ISDIR(st.st_mode))
+				if (stat(fn_buff, &st) == 0 &&
+				S_ISDIR(st.st_mode))
 				{
 					i_name[i] = malloc(sizeof(fn_buff));
 					if (!i_name[i])

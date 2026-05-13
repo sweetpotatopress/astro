@@ -389,6 +389,8 @@ void check_dst(struct tm *c_copy)
 	char cmd[1024] = {0};
 	char buffer[256] = {0};
 	char *tz_name = getenv("TZ");
+	if (!tz_name)
+		tz_name = "UTC";
 	FILE *fp;
 	
 	//calls GNU coreutil date
@@ -454,7 +456,7 @@ void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
 		++c_copy->tm_mday;
 		*day_offset -= 1;
 	}
-	if((dhour <= 0))
+	else if((dhour <= 0))
 	{
 		dhour += 23.999999;
 		--c_copy->tm_mday;
@@ -641,6 +643,8 @@ int radius, double angle, chtype ch)
 	int dy = edge_y - half_y;
 	
 	int distance = (int)sqrt(dx * dx + dy * dy);
+	if (distance == 0)
+		distance = 1;
 	
 	for(int i = 0; i <= distance; i++)
 	{
@@ -699,12 +703,12 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 	int ihsy = 'W'; // house system
 	
 	double *pxx_members[] = {
-	&*pxx->dsun, &*pxx->dmoon,
-	&*pxx->dmerc, &*pxx->dven,
-	&*pxx->dmars, &*pxx->djup,
-	&*pxx->dsat, &*pxx->dura,
-	&*pxx->dnep, &*pxx->dplu,
-	&*pxx->dmnod, &*pxx->dtnod,
+	pxx->dsun, pxx->dmoon,
+	pxx->dmerc, pxx->dven,
+	pxx->dmars, pxx->djup,
+	pxx->dsat, pxx->dura,
+	pxx->dnep, pxx->dplu,
+	pxx->dmnod, pxx->dtnod,
 	&pxx->dasc, &pxx->dmc,
 	&pxx->ddsc, &pxx->dic,
 	&pxx->dfor, &pxx->dspir};
@@ -1202,37 +1206,37 @@ int main()
 	if(!pxx->dsun)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dmoon  = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->dmoon)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dmerc  = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->dmerc)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dven   = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->dven)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dmars  = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->dmars)
 		ERR_EXIT("pxx->d calloc");
 	pxx->djup   = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->djup)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dsat   = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->dsat)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dura   = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->dura)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dnep   = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->dnep)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dplu   = calloc(5, sizeof(double));                                  
-	if(!pxx->dsun)
+	if(!pxx->dplu)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dmnod  = calloc(5, sizeof(double));                                 
-	if(!pxx->dsun)
+	if(!pxx->dmnod)
 		ERR_EXIT("pxx->d calloc");
 	pxx->dtnod  = calloc(5, sizeof(double)); 
-	if(!pxx->dsun)
+	if(!pxx->dtnod)
 		ERR_EXIT("pxx->d calloc");
 	
 	struct passwd *pw = getpwuid(getuid());

@@ -89,7 +89,8 @@ Location ***choices, size_t *max_search)
 		}
 		
 		Location *local = NULL;
-		if (field_count > 1 && strcasestr(fields[1], search) != NULL)
+		if (field_count > 1 && strcasestr(fields[1], search) != NULL &&
+		fields[1] != NULL)
 		{
 			if (i >= *max_search)
 			{
