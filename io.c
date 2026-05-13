@@ -39,20 +39,13 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	
 	char *homepath = malloc(strlen(io->filepath) + 1);
 	if (!homepath)
-	{
-		endwin();
-		perror("save homepath malloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("save_chart homepath malloc");
+		
 	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
 	
 	char *newpath = calloc(1, 2048);
 	if (!newpath)
-	{
-		endwin();
-		perror("save newpath malloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("save_chart newpath calloc");
 	
 	int savedir_done = 0;
 	while (!savedir_done)
@@ -66,35 +59,19 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		
 		ITEM **save_files = calloc(max_count, sizeof(ITEM *));
 		if (!save_files)
-		{
-			endwin();
-			perror("load file calloc");
-			ERR_EXIT;
-		}
+			ERR_EXIT("**save_files calloc");
 
 		char **i_name = calloc(max_count, sizeof(char *));
 		if (!i_name)
-		{
-			endwin();
-			perror("load_menu i_name calloc");
-			ERR_EXIT;
-		}
+			ERR_EXIT("save_chart i_name calloc");
 		
 		char **i_desc = calloc(max_count, sizeof(char *));
 		if (!i_desc)
-		{
-			endwin();
-			perror("load_menu i_desc calloc");
-			ERR_EXIT;
-		}
+			ERR_EXIT("save_chart i_desc calloc");
 	
 		chart_dir = opendir(io->filepath);
 		if (!chart_dir)
-		{
-			endwin();
-			perror("load file opendir");
-			ERR_EXIT;
-		}
+			ERR_EXIT("ERR: save_chart chart_dir opendir");
 		
 		while ((entry = readdir(chart_dir)) != NULL)
 		{
@@ -114,19 +91,11 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				{
 					i_name[i] = malloc(sizeof(fn_buff));
 					if (!i_name[i])
-					{
-						endwin();
-						perror("i_name malloc");
-						ERR_EXIT;
-					}
+						ERR_EXIT("S_ISDIR save_chart i_name");
 					
 					i_desc[i] = malloc(sizeof(fn_buff));
 					if (!i_desc[i])
-					{
-						endwin();
-						perror("i_desc malloc");
-						ERR_EXIT;
-					}
+						ERR_EXIT("S_ISDIR save_chart i_desc");
 					
 					snprintf(i_desc[i], sizeof(fn_buff), "%s",
 					entry->d_name);
@@ -175,11 +144,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		
 		save_win = newwin(height, width, starty, startx);
 		if (!save_win)
-		{
-			endwin();
-			perror("ERR: load_win");
-			ERR_EXIT;
-		}
+			ERR_EXIT("ERR: save_win newwin");
+			
 		save_subwin = derwin(save_win, height - 2, width - 2, 1, 1);
 		
 		keypad(save_win, TRUE);
@@ -190,11 +156,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		box(save_win, 0, 0);
 		save_menu = new_menu(save_files);
 		if (!save_menu)
-		{
-			endwin();
-			perror("save menu");
-			ERR_EXIT;
-		}
+			ERR_EXIT("ERR: save_menu new_menu");
 		
 		menu_opts_off(save_menu, O_NONCYCLIC);
 		menu_opts_off(save_menu, O_SHOWDESC);
@@ -203,11 +165,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		
 		int iret = post_menu(save_menu);
 		if (iret != E_OK)
-		{
-			endwin();
-			perror("ERR: save_menu, post_menu");
-			ERR_EXIT;
-		}
+			ERR_EXIT("ERR: post_menu(save_menu)");
 		
 		ITEM *cur = NULL;
 		const char *selected = NULL;
@@ -240,11 +198,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 						
 						io->filepath = malloc(strlen(newpath) + 1);
 						if (!io->filepath)
-						{
-							endwin();
-							perror("case l io->filepath");
-							ERR_EXIT;
-						}
+							ERR_EXIT("save_chart case l malloc");
+							
 						//copy new file path to open
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
@@ -259,11 +214,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					
 					io->filepath = malloc(strlen(homepath) + 1);
 					if (!io->filepath)
-					{
-						endwin();
-						perror("case h io->filepath");
-						ERR_EXIT;
-					}
+						ERR_EXIT("save_chart case h malloc");
 					
 					//return to homepath
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
@@ -274,11 +225,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				case 'm':
 					mdir = calloc(1, 128);
 					if (!mdir)
-					{
-						endwin();
-						perror("case m mdir malloc");
-						ERR_EXIT;
-					}
+						ERR_EXIT("save_chart mdir case m");
 					
 					echo();
 					wclear(save_win);
@@ -291,21 +238,14 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					"%s/%s", io->filepath, mdir);
 					
 					if (mkdir(newpath, 0755) == -1)
-					{
-						endwin();
-						perror("mkdir mdir failed");
-						ERR_EXIT;
-					}
+						ERR_EXIT("save_menu mkdir fail");
 					
 					free(io->filepath);
 					
 					io->filepath = malloc(strlen(newpath) + 1);
 					if (!io->filepath)
-					{
-						endwin();
-						perror("case m io->filepath");
-						ERR_EXIT;
-					}
+						ERR_EXIT("save_chart case m io->filepath");
+						
 					memcpy(io->filepath, newpath, strlen(newpath) + 1);	
 					
 					wclear(save_win);
@@ -419,11 +359,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	
 	char *fn_copy = malloc((size_t)len + 1);
 	if (!fn_copy)
-	{
-		endwin();
-		perror("io fn_copy malloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("save_chart fn_copy malloc");
+		
 	memcpy(fn_copy, filename, (size_t)len);
 	
 	while (len > 0 && fn_copy[len - 1] == ' ')
@@ -489,11 +426,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 
 	FILE *ifp = fopen(fn_buff, "w");
 	if (!ifp)
-	{
-		endwin();
-		perror("data_dir fopen");
-		ERR_EXIT;
-	}
+		ERR_EXIT("ERR: save_chart ifp fopen");
 
 	// copy data to file, \n delimited
 	fprintf(ifp, "%s\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
@@ -535,19 +468,12 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	
 	char *newpath = malloc(2048);
 	if (!newpath)
-	{
-		endwin();
-		perror("newpath malloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("load_chart newpath malloc");
 	
 	char *homepath = malloc(strlen(io->filepath) + 1);
 	if (!homepath)
-	{
-		endwin();
-		perror("homepath malloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("load_chart homepath malloc");
+		
 	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
 	
 	int load_done = 0;
@@ -561,35 +487,19 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		
 		ITEM **load_files = calloc(max_count, sizeof(ITEM *));
 		if (!load_files)
-		{
-			endwin();
-			perror("load file calloc");
-			ERR_EXIT;
-		}
+			ERR_EXIT("load_chart load_files calloc");
 
 		char **i_name = calloc(max_count, sizeof(char *));
 		if (!i_name)
-		{
-			endwin();
-			perror("load_menu i_name calloc");
-			ERR_EXIT;
-		}
+			ERR_EXIT("load_chart i_name calloc");
 		
 		char **i_desc = calloc(max_count, sizeof(char *));
 		if (!i_desc)
-		{
-			endwin();
-			perror("load_menu i_desc calloc");
-			ERR_EXIT;
-		}
+			ERR_EXIT("load_chart i_desc calloc");
 	
 		chart_dir = opendir(io->filepath);
 		if (!chart_dir)
-		{
-			endwin();
-			perror("load file opendir");
-			ERR_EXIT;
-		}
+			ERR_EXIT("ERR: load_chart chart_dir");
 		
 		while ((entry = readdir(chart_dir)) != NULL)
 		{
@@ -607,19 +517,11 @@ void load_chart(FIELD *cdata_field[], Io *io)
 				
 				i_name[i] = malloc(sizeof(fn_buff));
 				if (!i_name[i])
-				{
-					endwin();
-					perror("i_name malloc");
-					ERR_EXIT;
-				}
+					ERR_EXIT("load_chart i_name[i] malloc");
 				
 				i_desc[i] = malloc(sizeof(fn_buff));
 				if (!i_desc[i])
-				{
-					endwin();
-					perror("i_desc malloc");
-					ERR_EXIT;
-				}
+					ERR_EXIT("load_chart i_desc[i] malloc");
 				
 				snprintf(i_desc[i], sizeof(fn_buff), "%s",
 				entry->d_name);
@@ -670,11 +572,8 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		
 		load_win = newwin(height, width, starty, startx);
 		if (!load_win)
-		{
-			endwin();
-			perror("ERR: load_win");
-			ERR_EXIT;
-		}
+			ERR_EXIT("ERR: load_win newwin");
+			
 		load_subwin = derwin(load_win, height - 2, width - 2, 1, 1);
 		
 		keypad(load_win, TRUE);
@@ -685,11 +584,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		box(load_win, 0, 0);
 		load_menu = new_menu(load_files);
 		if (!load_menu)
-		{
-			endwin();
-			perror("load menu");
-			ERR_EXIT;
-		}
+			ERR_EXIT("ERR: load_menu new_menu");
 		
 		menu_opts_off(load_menu, O_NONCYCLIC);
 		menu_opts_off(load_menu, O_SHOWDESC);
@@ -698,11 +593,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		
 		int iret = post_menu(load_menu);
 		if (iret != E_OK)
-		{
-			endwin();
-			perror("ERR: load_menu, post_menu");
-			ERR_EXIT;
-		}
+			ERR_EXIT("ERR: post_menu(load_menu)");
 		
 		ITEM *cur = NULL;
 		const char *selected = NULL;
@@ -739,11 +630,8 @@ void load_chart(FIELD *cdata_field[], Io *io)
 						
 						io->filepath = malloc(strlen(newpath) + 1);
 						if (!io->filepath)
-						{
-							endwin();
-							perror("case l io->filepath");
-							ERR_EXIT;
-						}
+							ERR_EXIT("load_chart case l io->filepath");
+							
 						// copy new file path to open
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
@@ -756,19 +644,11 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					
 					buffer = malloc(1024);
 					if (!buffer)
-					{
-						endwin();
-						perror("load file buffer malloc");
-						ERR_EXIT;
-					}
+						ERR_EXIT("load_chart case l buffer");
 					
 					fp = fopen(newpath, "r");
 					if (fp == NULL)
-					{
-						endwin();
-						perror("cant load file");
-						ERR_EXIT;
-					}
+						ERR_EXIT("load_chart fopen fail");
 					
 					while (fgets(buffer, 1024, fp) != NULL && count < 9)
 					{
@@ -790,11 +670,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					
 					io->filepath = malloc(strlen(homepath) + 1);
 					if (!io->filepath)
-					{
-						endwin();
-						perror("case h io->filepath");
-						ERR_EXIT;
-					}
+						ERR_EXIT("load_chart case h io->filepath");
 					
 					//return to homepath
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
@@ -840,27 +716,15 @@ Location *loc, const char ch)
 {
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw) 
-	{
-		endwin();
-		perror("petpwuid data");
-		ERR_EXIT;
-	}
+		ERR_EXIT("main_io getpwuid");
 	
 	Io *io = calloc(1, sizeof(Io));
 	if (!io)
-	{
-		endwin();
-		perror("Io struct calloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("main_io io calloc");
 	
 	io->filepath = malloc(1024);
 	if (!io->filepath)
-	{
-		endwin();
-		perror("data_dir malloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("main_io io->filepath malloc");
 	
 	snprintf(io->filepath, 1024,
 	"%s/.local/share/astro/charts/", pw->pw_dir);

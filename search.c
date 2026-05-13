@@ -69,11 +69,8 @@ Location ***choices, size_t *max_search)
 		
 		char *copy = calloc(1, strlen(buffer) + 1);
 		if (!copy)
-		{
-			endwin();
-			perror("parse copy calloc");
-			ERR_EXIT;
-		}
+			ERR_EXIT("location_parse copy calloc");
+			
 		memcpy(copy, buffer, strlen(buffer) + 1);
 		
 		char *token = strtok_E(copy, "\t");
@@ -84,11 +81,7 @@ Location ***choices, size_t *max_search)
 		{
 			fields[field_count] = calloc(1, strlen(token) + 1);
 			if (!fields[field_count])
-			{
-				endwin();
-				perror("location parse fields calloc");
-				ERR_EXIT;
-			}
+				ERR_EXIT("location_parse fields[field_count] calloc");
 			
 			memcpy(fields[field_count], token, strlen(token) + 1);
 			field_count++;
@@ -104,21 +97,15 @@ Location ***choices, size_t *max_search)
 				Location **temp = reallocarray(
 				*choices, *max_search, sizeof(Location*));
 				if (!temp)
-				{
-					endwin();
-					perror("choices realloc");
-					ERR_EXIT;
-				}
+					ERR_EXIT("location_parse temp realloc");
+					
 				*choices = temp;
 			}
 			
 			local = calloc(1, sizeof(Location));
 			if (!local)
-			{
-				endwin();
-				perror("local parser");
-				ERR_EXIT;
-			}
+				ERR_EXIT("location_parse local calloc");
+				
 			local->city = 		fields[2];	fields[2] = NULL;
 			local->state = 		fields[10];	fields[10] = NULL;
 			local->country =	fields[8];	fields[8] = NULL;
@@ -144,31 +131,20 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	//use ** to not lose the pointer after the loop
 	char **strings = calloc(n_choices, sizeof(char *));
 	if (!strings)
-	{
-		endwin();
-		perror("strings calloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("print_menu strings calloc");
+		
 	char buffer[1024] = {0};
 	int max_width = 0;
 	
 	cities = calloc(n_choices + 1, sizeof(ITEM *));
 	if (!cities)
-	{
-		endwin();
-		perror("cities calloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("print_menu citties calloc");
 
 	for (size_t i = 0; i < n_choices; ++i)
 	{
 		strings[i] = malloc(sizeof(buffer));
 		if(!strings[i])
-		{
-			endwin();
-			perror("strings[i] malloc");
-			ERR_EXIT;
-		}
+			ERR_EXIT("print_menu strings[i] malloc");
 	
 		snprintf(buffer, sizeof(buffer),
 		"%-25.25s %.2s %.2s %-15s %-5s %s",
@@ -293,19 +269,11 @@ int main_search(FIELD *cdata_field[], char *argv)
 	
 	Location **choices = calloc(max_search, sizeof(Location *));
 	if (!choices)
-	{
-		endwin();
-		perror("choices calloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("main_search choices calloc");
 	
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw)
-	{
-		endwin();
-		perror("getpwuid city-db");
-		ERR_EXIT;
-	}
+		ERR_EXIT("main_search getpwuid");
 	
 	char fn_buff[1024] = {0};
 	
@@ -314,11 +282,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	
 	fp = fopen(fn_buff, "r");
 	if (fp == NULL)
-	{
-		endwin();
-		printw("can't open %s\n", fn_buff);
-		ERR_EXIT;
-	}
+		ERR_EXIT("main_search fopen");
 	
 	noecho();
 	cbreak();

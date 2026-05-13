@@ -67,11 +67,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 	
 	char *buffer = malloc(1024);
 	if (!buffer)
-	{
-		endwin();
-		perror("field to member buffer malloc");
-		ERR_EXIT;
-	}
+		ERR_EXIT("ERR: field_to_member buffer alloc fail");
 	
 	buff_trim(current, buffer);
 	
@@ -109,11 +105,7 @@ FORM *cdata_form, FIELD *cdata_field[])
 			break;
 		case 6:
 			if (setenv("TZ", buffer, 1) != 0)
-			{
-				endwin();
-				perror("TZ setenv");
-				ERR_EXIT;
-			}
+				ERR_EXIT("ERR: TZ setenv fail field_to_membver");
 			tzset();
 			break;
 		case 7:
@@ -405,11 +397,7 @@ void check_dst(struct tm *orig)
 	
 	fp = popen(cmd, "r");
 	if (!fp)
-	{
-		endwin();
-		perror("ERR: date file pointer");
-		ERR_EXIT;
-	}
+		ERR_EXIT("ERR: popen, youre dead mate nya");
 	
 	if (fgets(buffer, sizeof(buffer), fp) == NULL)
 	{
@@ -418,6 +406,7 @@ void check_dst(struct tm *orig)
 		pclose(fp);
 		return;
 	}
+	
 	buffer[strcspn(buffer, "\n")] = 0;
 	pclose(fp);
 	
@@ -518,12 +507,12 @@ void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
 int radius, double planet, double asc, P_deg *p_deg)
 {
 	double p_arr[] = {
-		p_deg->dsun, p_deg->dmoon,
-		p_deg->dmerc, p_deg->dven,
-		p_deg->dmars, p_deg->djup,
-		p_deg->dsat, p_deg->dura,
-		p_deg->dnep, p_deg->dplu,
-		p_deg->dmnod, p_deg->dtnod};
+		p_deg->dsun[LONG], p_deg->dmoon[LONG],
+		p_deg->dmerc[LONG], p_deg->dven[LONG],
+		p_deg->dmars[LONG], p_deg->djup[LONG],
+		p_deg->dsat[LONG], p_deg->dura[LONG],
+		p_deg->dnep[LONG], p_deg->dplu[LONG],
+		p_deg->dmnod[LONG], p_deg->dtnod[LONG]};
 
 	int center_x = (maxx / 2);
 	int center_y = (maxy / 2);
@@ -664,10 +653,10 @@ int sect(P_deg *p_deg, double ascmc[])
 {
 	int sect = 0;
 	
-	if ((p_deg->dsun - ascmc[0]) < 180)
+	if ((p_deg->dsun[LONG] - ascmc[0]) < 180)
 		sect = 1; // day
 		
-	else if ((p_deg->dsun - ascmc[0]) > 180)
+	else if ((p_deg->dsun[LONG] - ascmc[0]) > 180)
 		sect = 0; // night
 		
 	return sect;
@@ -679,13 +668,13 @@ void lots(int sect, P_deg *p_deg)
 	
 	if (sect) // day
 	{
-		diff = p_deg->dmoon - p_deg->dsun;
+		diff = p_deg->dmoon[LONG] - p_deg->dsun[LONG];
 		p_deg->dfor = p_deg->dasc - diff;
 		p_deg->dspir = p_deg->dasc + diff;
 	}
 	else // night
 	{
-		diff = p_deg->dmoon - p_deg->dsun;
+		diff = p_deg->dmoon[LONG] - p_deg->dsun[LONG];
 		p_deg->dfor = p_deg->dasc + diff;
 		p_deg->dspir = p_deg->dasc - diff;
 	}
@@ -709,12 +698,12 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	int ihsy = 'W'; // house system
 	
 	double *p_deg_members[] = {
-	&p_deg->dsun, &p_deg->dmoon,
-	&p_deg->dmerc, &p_deg->dven,
-	&p_deg->dmars, &p_deg->djup,
-	&p_deg->dsat, &p_deg->dura,
-	&p_deg->dnep, &p_deg->dplu,
-	&p_deg->dmnod, &p_deg->dtnod,
+	&*p_deg->dsun, &*p_deg->dmoon,
+	&*p_deg->dmerc, &*p_deg->dven,
+	&*p_deg->dmars, &*p_deg->djup,
+	&*p_deg->dsat, &*p_deg->dura,
+	&*p_deg->dnep, &*p_deg->dplu,
+	&*p_deg->dmnod, &*p_deg->dtnod,
 	&p_deg->dasc, &p_deg->dmc,
 	&p_deg->ddsc, &p_deg->dic,
 	&p_deg->dfor, &p_deg->dspir};
@@ -737,22 +726,20 @@ struct tm *cdata, Location *loc, P_deg *p_deg)
 	
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
-		{
-			endwin();
-			fprintf(stderr, "%s", serr);
-			ERR_EXIT;
-		}
-		*p_deg_members[i] = xx[0];
+			ERR_EXIT("ERR: swe_calc_ut failure");
+			
+		p_deg_members[i][LONG] = xx[LONG];
+		p_deg_members[i][LAT] = xx[LAT];
+		p_deg_members[i][DIST] = xx[DIST];
+		p_deg_members[i][LONG_S] = xx[LONG_S];
+		p_deg_members[i][LAT_S] = xx[LAT_S];
+		p_deg_members[i][DIST_S] = xx[DIST_S];
 	}
 	
 	iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
 	ihsy, cusps, ascmc);
 	if (iret < 0)
-	{
-		endwin();
-		fprintf(stderr, "%s", serr);
-		ERR_EXIT;
-	}
+		ERR_EXIT("ERR: swe_houses_ex failure");
 	
 	// calculates ic/mc and fills struct members
 	double asc = ascmc[0];
@@ -849,12 +836,12 @@ void full_chart_data(WINDOW *main_win, P_deg *p_deg, int *p)
 	int p_count = 18;
 	
 	double p_arr[] = {
-		p_deg->dsun, p_deg->dmoon,
-		p_deg->dmerc, p_deg->dven,
-		p_deg->dmars, p_deg->djup,
-		p_deg->dsat, p_deg->dura,
-		p_deg->dnep, p_deg->dplu,
-		p_deg->dmnod, p_deg->dtnod,
+		*p_deg->dsun, *p_deg->dmoon,
+		*p_deg->dmerc, *p_deg->dven,
+		*p_deg->dmars, *p_deg->djup,
+		*p_deg->dsat, *p_deg->dura,
+		*p_deg->dnep, *p_deg->dplu,
+		*p_deg->dmnod, *p_deg->dtnod,
 		p_deg->dfor, p_deg->dspir,
 		p_deg->dasc, p_deg->dmc,
 		p_deg->ddsc, p_deg->dic};
@@ -1199,41 +1186,63 @@ int main()
 
 	struct tm *cdata = calloc(1, sizeof(struct tm));
 	if (!cdata)
-	{
-		endwin();
-		perror("Cdata calloc");
-		ERR_EXIT;
-	}
-	
+		ERR_EXIT("main cdata calloc");
+		
 	Location *loc = calloc(1, sizeof(Location));
 	if (!loc)
-	{
-		endwin();
-		perror("main Location calloc");
-		ERR_EXIT;
-	}
-	
+		ERR_EXIT("main Location calloc");
+		
 	P_deg *p_deg = calloc(1, sizeof(P_deg));
 	if (!p_deg)
-	{
-		endwin();
-		perror("P_deg calloc");
-		ERR_EXIT;
-	}
-
-	int maxy, maxx;
+		ERR_EXIT("main P_deg");
+	
+	// xx[] lat, long, dist, lat_s, long_s, dist_s
+	p_deg->dsun   = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dmoon  = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dmerc  = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dven   = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dmars  = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->djup   = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dsat   = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dura   = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dnep   = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dplu   = calloc(5, sizeof(double));                                  
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dmnod  = calloc(5, sizeof(double));                                 
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
+	p_deg->dtnod  = calloc(5, sizeof(double)); 
+	if(!p_deg->dsun)
+		ERR_EXIT("p_deg->d calloc");
 	
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw)
-	{
-		endwin();
-		perror("getpwuid astro main");
-		ERR_EXIT;
-	}
+		ERR_EXIT("getpwuid main");
+		
 	char fn_buff[1024] = {0};
-	
 	snprintf(fn_buff, 1024, 
 	"%s/.local/share/astro/ephe", pw->pw_dir);
+	
+	int maxy, maxx;
 	
 	initscr();
 	set_escdelay(25);
@@ -1286,6 +1295,20 @@ int main()
 	free(cdata);
 	free(loc->city);
 	free(loc);
+	
+	free(p_deg->dsun);
+	free(p_deg->dmoon);
+	free(p_deg->dmerc);
+	free(p_deg->dven);
+	free(p_deg->dmars);
+	free(p_deg->djup);
+	free(p_deg->dsat);
+	free(p_deg->dura);
+	free(p_deg->dnep);
+	free(p_deg->dplu);
+	free(p_deg->dmnod);
+	free(p_deg->dtnod);
+	
 	free(p_deg);
 	return 0;
 }

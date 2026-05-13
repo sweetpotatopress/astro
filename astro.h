@@ -16,25 +16,35 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <time.h>
 
-#define ERR_EXIT swe_close(); exit(EXIT_FAILURE);
+#define ERR_EXIT(str) do { \
+	endwin(); \
+	perror(str); \
+	swe_close(); \
+	exit(EXIT_FAILURE); \
+} while (0)
 
 typedef enum { NORMAL, INSERT } Mode;
 
-//planet degrees
+#define LONG 0
+#define LAT 1
+#define DIST 2
+#define LONG_S 3
+#define LAT_S 4
+#define DIST_S 5
 
 typedef struct {
-	double dsun;
-	double dmoon;
-	double dmerc;
-	double dven;
-	double dmars;
-	double djup;
-	double dsat;
-	double dura;
-	double dnep;
-	double dplu;
-	double dmnod;
-	double dtnod;
+	double *dsun;
+	double *dmoon;
+	double *dmerc;
+	double *dven;
+	double *dmars;
+	double *djup;
+	double *dsat;
+	double *dura;
+	double *dnep;
+	double *dplu;
+	double *dmnod;
+	double *dtnod;
 	double dasc;
 	double dmc;
 	double ddsc;
