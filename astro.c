@@ -65,58 +65,59 @@ void buff_trim(FIELD *current, char *buffer)
 
 void field_to_member
 (WINDOW *cdata_form_win, struct tm *cdata, Location *loc, 
-FORM *cdata_form, FIELD *cdata_field[])
+FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 {
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
 	
-	buff_trim(current, loc->citybuffer);
+	char *buffer = malloc(1024);
+	if (!buffer)
+		ERR_EXIT("field_to_member buffer");
+	
+	buff_trim(current, buffer);
 	
 	switch(index)
 	{
 		case 0:
-			main_search(cdata_field, loc->citybuffer);
+			main_search(cdata_field, buffer);
 			form_driver(cdata_form, REQ_VALIDATION);
 			
-			//redraws field underline
-			unpost_form(cdata_form);
-			touchwin(cdata_form_win);
-			post_form(cdata_form);
 			wrefresh(cdata_form_win);
 			
-			buff_trim(current, loc->citybuffer);
+			buff_trim(current, buffer);
 			
-			free(loc->city);
-			loc->city = loc->citybuffer;
+			memcpy(citybuffer, buffer, strlen(buffer) + 1);
+			
 			doupdate();
 			break;
 		case 1:
-			cdata->tm_year = atoi(loc->citybuffer);
+			cdata->tm_year = atoi(buffer);
 			break;
 		case 2:
-			cdata->tm_mon = atoi(loc->citybuffer);
+			cdata->tm_mon = atoi(buffer);
 			break;
 		case 3: 
-			cdata->tm_mday = atoi(loc->citybuffer);
+			cdata->tm_mday = atoi(buffer);
 			break;
 		case 4:
-			cdata->tm_hour = atoi(loc->citybuffer);
+			cdata->tm_hour = atoi(buffer);
 			break;
 		case 5:
-			cdata->tm_min = atoi(loc->citybuffer);
+			cdata->tm_min = atoi(buffer);
 			break;
 		case 6:
-			if (setenv("TZ", loc->citybuffer, 1) != 0)
+			if (setenv("TZ", buffer, 1) != 0)
 				ERR_EXIT("ERR: TZ setenv fail field_to_membver");
 			tzset();
 			break;
 		case 7:
-			loc->dlat = atof(loc->citybuffer);
+			loc->dlat = atof(buffer);
 			break;
 		case 8:
-			loc->dlon = atof(loc->citybuffer);
+			loc->dlon = atof(buffer);
 			break;
 	}
+	free(buffer);
 }
 
 void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
@@ -182,20 +183,20 @@ void set_localtime(FIELD *cdata_field[], struct tm *cdata)
 }
 
 void validate_fields(WINDOW *cdata_form_win, FIELD *cdata_field[],
-FORM *cdata_form, struct tm *cdata, Location *loc)
+FORM *cdata_form, struct tm *cdata, Location *loc, char *citybuffer)
 {
-	size_t i = 0;
 	//validates every field
-	for (i = 1; i < 9; i++)
+	for (size_t i = 1; i < 9; i++)
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
 		field_to_member(cdata_form_win, cdata, loc, 
-		cdata_form, cdata_field);
+		cdata_form, cdata_field, citybuffer);
 	}
 }
 	
-void input_chart_data(Io *io, struct tm *cdata, Location *loc)
+void input_chart_data(Io *io, struct tm *cdata, Location *loc,
+char *citybuffer)
 {
 	WINDOW *cdata_form_win;
 	FIELD *cdata_field[10];
@@ -314,7 +315,7 @@ void input_chart_data(Io *io, struct tm *cdata, Location *loc)
 						break;
 					case 'w':
 						validate_fields(cdata_form_win, cdata_field,
-						cdata_form, cdata, loc);
+						cdata_form, cdata, loc, citybuffer);
 						main_io(io, cdata_field, cdata, loc, 'w');
 						mode = NORMAL;
 						break;
@@ -333,7 +334,7 @@ void input_chart_data(Io *io, struct tm *cdata, Location *loc)
 					 case '\n':
 						form_driver(cdata_form, REQ_VALIDATION);
 						field_to_member(cdata_form_win, cdata, loc,
-						cdata_form, cdata_field);
+						cdata_form, cdata_field, citybuffer);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						
 						field_label(cdata_form_win, i, starty, startx);
@@ -370,7 +371,7 @@ void input_chart_data(Io *io, struct tm *cdata, Location *loc)
 	}
 	
 	validate_fields(cdata_form_win, cdata_field,
-	cdata_form, cdata, loc);
+	cdata_form, cdata, loc, citybuffer);
 
 	unpost_form(cdata_form);
 	wclear(cdata_form_win);
@@ -965,7 +966,7 @@ int months(int month, int year)
 void animate_chart(WINDOW *main_win, int maxy, int maxx, Io *io,
 struct tm *cdata, Location *loc, Pxx *pxx)
 {
-	int starty = 8;
+	int starty = 10;
 	int startx = maxx - 22;
 	
 	wrefresh(main_win);
@@ -1225,9 +1226,9 @@ int main()
 	loc->city = malloc(1024);
 	if (!loc->city)
 		ERR_EXIT("ERR: main loc->city malloc");
-	loc->citybuffer = malloc(1024);
-	if (!loc->citybuffer)
-		ERR_EXIT("ERR: main loc->citybuffer alloc fail");
+	char *citybuffer = malloc(1024);
+	if (!citybuffer)
+		ERR_EXIT("ERR: main citybuffer alloc fail");
 	
 		
 	Pxx *pxx = calloc(1, sizeof(Pxx));
@@ -1305,7 +1306,8 @@ int main()
 	int main_done = 0, p_swi = 0;
 	while (!main_done)
 	{
-		input_chart_data(io, cdata, loc);
+		input_chart_data(io, cdata, loc, citybuffer);
+		loc->city = citybuffer;
 		draw_chart(main_win, maxy, maxx, cdata, loc, pxx);
 		cur_chart_data(main_win, maxx, io,  cdata, loc);
 			
@@ -1343,7 +1345,7 @@ int main()
 	free(io);
 	free(cdata);
 	free(loc->city);
-	free(loc->citybuffer);
+	free(citybuffer);
 	free(loc);
 	
 	free(pxx);

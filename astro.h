@@ -57,7 +57,6 @@ typedef struct {
 
 typedef struct {
 	char *city;
-	char *citybuffer;
 	char *state;
 	char *country;
 	char *timezone;

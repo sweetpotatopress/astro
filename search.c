@@ -169,11 +169,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	
 	city_menu = new_menu((ITEM **)cities);	
 		if (!city_menu) 
-		{
-			endwin();
-			perror("city_menu");
-			getch();
-		}
+			ERR_EXIT("search city_menu new_menu");
 	
 	int width = max_width + 4;
 	int height = (int)n_choices + 2;
@@ -188,11 +184,8 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	
 	city_win = newwin(height, width, starty, startx);
 	if (!city_win)
-	{
-		endwin();
-		fprintf(stderr, "ERR: city_win failed");
-		getch();
-	}
+		ERR_EXIT("search city_win newwin");
+		
 	keypad(city_win, TRUE);
 	clearok(city_win, TRUE);
 	wclear(city_win);
@@ -208,11 +201,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	
 	int iret = post_menu(city_menu);
 	if (iret != E_OK)
-	{
-		endwin();
-		fprintf(stderr, "ERR: post_menu failed!, %d", iret);
-		getch();
-	}
+		ERR_EXIT("searcg post_menu(city_menu)");
 	
 	//case '\n'
 	ITEM *selected = NULL;
@@ -263,6 +252,9 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 		
 int main_search(FIELD *cdata_field[], char *argv)
 {
+	if (!argv || argv[0] == '\0')
+		return 0;
+		
 	FILE *fp;
 	char *search = argv;
 	size_t n_choices = 0;
@@ -299,7 +291,6 @@ int main_search(FIELD *cdata_field[], char *argv)
 		clear();
 		refresh();
 		fclose(fp);
-		endwin();
 		for (size_t j = 0; j < max_search; ++j)
 			free(choices[j]);
 		free(choices);
@@ -311,7 +302,6 @@ int main_search(FIELD *cdata_field[], char *argv)
 	clear();
 	refresh();
 	fclose(fp);
-	endwin();
 	for (size_t j = 0; j < n_choices; ++j)
 		free(choices[j]);
 	free(choices);
