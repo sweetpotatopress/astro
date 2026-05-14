@@ -70,7 +70,7 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
 	
-	char *buffer = malloc(1024);
+	char *buffer = malloc(MAXBUF);
 	if (!buffer)
 		ERR_EXIT("field_to_member buffer");
 	
@@ -387,7 +387,7 @@ char *citybuffer)
 }
 void check_dst(struct tm *c_copy)
 {
-	char cmd[1024] = {0};
+	char cmd[MAXBUF] = {0};
 	char buffer[256] = {0};
 	char *tz_name = getenv("TZ");
 	if (!tz_name)
@@ -905,7 +905,7 @@ void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
 				swe_get_planet_name(i, spname);
 				spname[3] ='\0';
 				
-				char buff[1024];
+				char buff[MAXBUF];
 				snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
 				spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
 				
@@ -916,7 +916,7 @@ void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
 			else if ( i != 10 && i >= 12) // asc -> ic
 			{
 				const char *points[] = {"for", "spi", "asc", "mc", "dsc", "ic"};
-				char point_buff[1024];
+				char point_buff[MAXBUF];
 				
 				snprintf(point_buff, sizeof(point_buff), "%-11s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
 				points[j], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
@@ -1223,14 +1223,13 @@ int main()
 	if (!loc)
 		ERR_EXIT("main Location calloc");
 		
-	loc->city = malloc(1024);
+	loc->city = malloc(MAXBUF);
 	if (!loc->city)
 		ERR_EXIT("ERR: main loc->city malloc");
-	char *citybuffer = malloc(1024);
+	char *citybuffer = malloc(MAXBUF);
 	if (!citybuffer)
 		ERR_EXIT("ERR: main citybuffer alloc fail");
 	
-		
 	Pxx *pxx = calloc(1, sizeof(Pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
@@ -1276,7 +1275,7 @@ int main()
 	Io *io = calloc(1, sizeof(Io));
 	if (!io)
 		ERR_EXIT("mai io calloc");
-	io->filepath = malloc(1024);
+	io->filepath = malloc(MAXBUF);
 	if (!io->filepath)
 		ERR_EXIT("main io->filepath malloc");
 	io->filename = malloc(256);
@@ -1287,8 +1286,8 @@ int main()
 	if (!pw)
 		ERR_EXIT("getpwuid main");
 		
-	char fn_buff[1024] = {0};
-	snprintf(fn_buff, 1024, 
+	char fn_buff[MAXBUF] = {0};
+	snprintf(fn_buff, MAXBUF, 
 	"%s/.local/share/astro/ephe", pw->pw_dir);
 	
 	int maxy, maxx;
@@ -1342,13 +1341,12 @@ int main()
 	delwin(main_win);
 	endwin();
 	swe_close();
-	free(io);
+	
 	free(cdata);
-	free(loc->city);
 	free(citybuffer);
 	free(loc);
-	
 	free(pxx);
+	
 	return 0;
 }
 

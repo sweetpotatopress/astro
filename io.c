@@ -43,7 +43,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 		
 	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
 	
-	char *newpath = calloc(1, 2048);
+	char *newpath = calloc(1, MAXPATH);
 	if (!newpath)
 		ERR_EXIT("save_chart newpath calloc");
 	
@@ -52,9 +52,9 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	{
 	
 		size_t i = 0;
-		size_t max_count = 20480;
+		size_t max_count = MAXPATH0;
 		
-		char fn_buff[1024] = {0};
+		char fn_buff[MAXBUF] = {0};
 		int max_width = 0;
 		
 		ITEM **save_files = calloc(max_count, sizeof(ITEM *));
@@ -187,7 +187,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					cur = current_item(save_menu);
 					selected = item_description(cur);
 					
-					snprintf(newpath, 2048,
+					snprintf(newpath, MAXPATH,
 					"%s/%s/", io->filepath, selected);
 			
 						//if file path is a directory
@@ -234,7 +234,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 					mvwgetnstr(save_win, 2, 2, mdir, 127);
 					noecho();
 					
-					snprintf(newpath, 2048,
+					snprintf(newpath, MAXPATH,
 					"%s/%s", io->filepath, mdir);
 					
 					if (mkdir(newpath, 0755) == -1)
@@ -341,7 +341,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				break;
 			case 27:
 				done = 1;
-				endwin();
+				delwin(save_subwin);
+				delwin(save_win);
 				return;
 				break;
 			default:
@@ -371,7 +372,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	{
 		wprintw(save_win, "ERR: name too long");
 		wrefresh(save_win);
-		endwin();
+		delwin(save_subwin);
+		delwin(save_win);
 		free(fn_copy);
 		return;
 	}
@@ -379,14 +381,15 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	{
 		wprintw(save_win, "ERR: name too short");
 		wrefresh(save_win);
-		endwin();
+		delwin(save_subwin);
+		delwin(save_win);
 		free(fn_copy);
 		return;
 	}
 	
 	// create file path 
-	char fn_buff[1024];
-	snprintf(fn_buff, 1024, "%s%s",
+	char fn_buff[MAXBUF];
+	snprintf(fn_buff, MAXBUF, "%s%s",
 	io->filepath,
 	fn_copy
 	);
@@ -408,6 +411,8 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				"overwritten!--o-");
 				box(save_win, 0, 0);
 				wrefresh(save_win);
+				delwin(save_subwin);
+				delwin(save_win);
 				getch();
 				break;
 			case 'n':
@@ -416,8 +421,9 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 				"your file is safe >w<");
 				box(save_win, 0, 0);
 				wrefresh(save_win);
+				delwin(save_subwin);
+				delwin(save_win);
 				getch();
-				endwin();
 				return;
 			default:
 				ch = getch();
@@ -466,7 +472,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	struct dirent *entry;
 	struct stat st;
 	
-	char *newpath = malloc(2048);
+	char *newpath = malloc(MAXPATH);
 	if (!newpath)
 		ERR_EXIT("load_chart newpath malloc");
 	
@@ -480,9 +486,9 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	while (!load_done)
 	{
 		size_t i = 0;
-		size_t max_count = 20480;
+		size_t max_count = MAXPATH0;
 		
-		char fn_buff[1024] = {0};
+		char fn_buff[MAXBUF] = {0};
 		int max_width = 0;
 		
 		ITEM **load_files = calloc(max_count, sizeof(ITEM *));
@@ -622,7 +628,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					if (!io->filename)
 						ERR_EXIT("load_chart io->filename strdup");
 					
-					snprintf(newpath, 2048,
+					snprintf(newpath, MAXPATH,
 					"%s/%s", io->filepath, selected);
 			
 					// if file path is a directory
@@ -645,7 +651,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					
 					// load selected file
 					
-					buffer = malloc(1024);
+					buffer = malloc(MAXBUF);
 					if (!buffer)
 						ERR_EXIT("load_chart case l buffer");
 					
@@ -653,7 +659,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					if (fp == NULL)
 						ERR_EXIT("load_chart fopen fail");
 					
-					while (fgets(buffer, 1024, fp) != NULL && count < 9)
+					while (fgets(buffer, MAXBUF, fp) != NULL && count < 9)
 					{
 						buffer[strcspn(buffer, "\n")] = 0;
 						memcpy(field[count++], buffer, strlen(buffer) + 1);
@@ -721,7 +727,7 @@ Location *loc, const char ch)
 	if (!pw) 
 		ERR_EXIT("main_io getpwuid");
 	
-	snprintf(io->filepath, 1024,
+	snprintf(io->filepath, MAXBUF,
 	"%s/.local/share/astro/charts/", pw->pw_dir);
 	
 	if (ch == 'w')

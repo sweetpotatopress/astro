@@ -59,7 +59,7 @@ size_t location_parse(FILE *ifp, char *search,
 Location ***choices, size_t *max_search)
 {
 	size_t i = 0;
-	char buffer[1024] = {0};
+	char buffer[MAXBUF] = {0};
 	
 	while (fgets(buffer, sizeof(buffer), ifp) != NULL)
 	{
@@ -134,7 +134,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	if (!strings)
 		ERR_EXIT("print_menu strings calloc");
 		
-	char buffer[1024] = {0};
+	char buffer[MAXBUF] = {0};
 	int max_width = 0;
 	
 	cities = calloc(n_choices + 1, sizeof(ITEM *));
@@ -258,7 +258,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	FILE *fp;
 	char *search = argv;
 	size_t n_choices = 0;
-	size_t max_search = 1024;
+	size_t max_search = MAXBUF;
 	
 	Location **choices = calloc(max_search, sizeof(Location *));
 	if (!choices)
@@ -268,9 +268,9 @@ int main_search(FIELD *cdata_field[], char *argv)
 	if (!pw)
 		ERR_EXIT("main_search getpwuid");
 	
-	char fn_buff[1024] = {0};
+	char fn_buff[MAXBUF] = {0};
 	
-	snprintf(fn_buff, 1024,
+	snprintf(fn_buff, MAXBUF,
 	"%s/.local/share/astro/city-db", pw->pw_dir);
 	
 	fp = fopen(fn_buff, "r");
