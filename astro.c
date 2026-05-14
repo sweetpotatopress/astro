@@ -94,8 +94,8 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			
 			memcpy(citybuffer, buffer, strlen(buffer) + 1);
 			
-			doupdate();
 			break;
+			
 		case 1:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE)
@@ -103,6 +103,7 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			else
 				cdata->tm_year = 1970;
 			break;
+			
 		case 2:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
@@ -110,6 +111,7 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			else
 				cdata->tm_mon = 1;
 			break;
+			
 		case 3: 
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
@@ -117,6 +119,7 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			else
 				cdata->tm_mday = 1;
 			break;
+			
 		case 4:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1) 
@@ -124,6 +127,7 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			else
 				cdata->tm_hour = 1;
 			break;
+			
 		case 5:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
@@ -131,11 +135,13 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			else
 				cdata->tm_min = 1;
 			break;
+			
 		case 6:
 			if (setenv("TZ", buffer, 1) != 0)
 				ERR_EXIT("ERR: TZ setenv fail field_to_membver");
 			tzset();
 			break;
+			
 		case 7:
 			dret = strtod(buffer, &endptr);
 			if (errno != ERANGE)
@@ -143,6 +149,7 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			else
 				loc->dlat = 0.0;
 			break;
+			
 		case 8:
 			dret = strtod(buffer, &endptr);
 			if (errno != ERANGE)
@@ -222,7 +229,7 @@ FORM *cdata_form, struct tm *cdata, Location *loc, char *citybuffer)
 	size_t i = 0;
 	
 	while (i == 0)
-	{
+	{ // save city name
 		set_current_field(cdata_form, cdata_field[i]);
 		FIELD *current = current_field(cdata_form);
 		char buffer[MAXBUF] = {0};
@@ -338,41 +345,52 @@ char *citybuffer)
 				{
 					case 27:
 						break;
+						
 					case 'i':
 						mode = INSERT;
 						break;
+						
 					case 'j': case KEY_DOWN:
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
+						
 					case 'k': case KEY_UP:
 						form_driver(cdata_form, REQ_PREV_FIELD);
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
+						
 					case 'h': case KEY_LEFT:
 						form_driver(cdata_form, REQ_LEFT_CHAR);
 						break;
+						
 					case 'l': case KEY_RIGHT:
 						form_driver(cdata_form, REQ_RIGHT_CHAR);
 						break;
+						
 					case 9: // tab
 						set_localtime(cdata_field, cdata);
 						break;
+						
 					case 'w':
 						validate_fields(cdata_form_win, cdata_field,
 						cdata_form, cdata, loc, citybuffer);
 						main_io(io, cdata_field, cdata, loc, 'w');
 						mode = NORMAL;
 						break;
+						
 					case 'e':
 						main_io(io, cdata_field, cdata, loc, 'e');
 						mode = NORMAL;
 						break;
+						
 					case '\n':
 						cdata_entry = 1;
 						break;
+						
 				}
 				break;
+				
 			case INSERT:
 				switch (ch)
 				{
@@ -386,29 +404,37 @@ char *citybuffer)
 						
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
+						
 					case KEY_DOWN:
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
+						
 					case KEY_UP:
 						form_driver(cdata_form, REQ_PREV_FIELD);
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
+						
 					case KEY_LEFT:
 						form_driver(cdata_form, REQ_LEFT_CHAR);
 						break;
+						
 					case KEY_RIGHT:
 						form_driver(cdata_form, REQ_RIGHT_CHAR);
 						break;
+						
 					case KEY_BACKSPACE:
 						form_driver(cdata_form, REQ_DEL_PREV);
 						break;
+						
 					case 27: // esc
 						mode = NORMAL;
 						break;
+						
 					default:
 						form_driver(cdata_form, ch);
 						break;
+						
 					}
 					break;
 		}
@@ -467,7 +493,7 @@ void check_dst(struct tm *c_copy)
 void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
 {
 	struct tm *c_copy = cdata;
-	check_dst(c_copy);
+	check_dst(c_copy); // save city name
 	//correct tm quirk after GNU date
 	c_copy->tm_year -= 1900;
 	c_copy->tm_mon -= 1;
@@ -885,22 +911,28 @@ struct tm *cdata, Location *loc)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "%s", loc->city);
+	if(loc->city)
+		mvwprintw(main_win, starty, startx, "%s", loc->city);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "%d", cdata->tm_year);
+	if(cdata->tm_year)
+		mvwprintw(main_win, starty, startx, "%d", cdata->tm_year);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "%d/%d", cdata->tm_mon, cdata->tm_mday);
+	if(cdata->tm_mon && cdata->tm_mday)
+		mvwprintw(main_win, starty, startx, "%d/%d", cdata->tm_mon, cdata->tm_mday);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "%d:%d", cdata->tm_hour, cdata->tm_min);
+	if(cdata->tm_hour && cdata->tm_min)
+		mvwprintw(main_win, starty, startx, "%d:%d", cdata->tm_hour, cdata->tm_min);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "lat.%f", loc->dlat);
+	if (fabs(loc->dlat) > 1e-6)
+		mvwprintw(main_win, starty, startx, "lat.%f", loc->dlat);
 	
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "lon.%f", loc->dlon);
+	if (fabs(loc->dlon) > 1e-6)
+		mvwprintw(main_win, starty, startx, "lon.%f", loc->dlon);
 	
 	wrefresh(main_win);
 }
@@ -1010,9 +1042,10 @@ int months(int month, int year)
 void animate_chart(WINDOW *main_win, int maxy, int maxx, Io *io,
 struct tm *cdata, Location *loc, Pxx *pxx)
 {
-	int starty = 10;
+	int starty = 11;
 	int startx = maxx - 22;
 	
+	mvwprintw(main_win, starty, startx, "(mins)");
 	wrefresh(main_win);
 	
 	int max_day = 0; // months() return flag
@@ -1028,10 +1061,12 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 				if (i != 0)
 					--i;
 				break;
+				
 			case 'l':
 				if (i != 4) // time inc/dec
 					++i;
 				break;
+				
 			case 'j':
 				switch(i)
 				{
@@ -1061,6 +1096,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
+						
 					case 1:
 						if ((++cdata->tm_hour) > 23)
 						{
@@ -1082,6 +1118,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
+						
 					case 2:
 						if ((++cdata->tm_mday) > months(
 						cdata->tm_mon, cdata->tm_year))
@@ -1098,6 +1135,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
+						
 					case 3:
 						if ((++cdata->tm_mon) > 12)
 						{
@@ -1113,6 +1151,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
+						
 					case 4:
 						if ((++cdata->tm_year) > 16799)
 							cdata->tm_year = -12998;
@@ -1151,6 +1190,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
+						
 					case 1:
 						if ((--cdata->tm_hour) < 0)
 						{
@@ -1172,6 +1212,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
+						
 					case 2:
 						if ((--cdata->tm_mday) < 1)
 						{
@@ -1188,6 +1229,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
+						
 					case 3:
 						if (--cdata->tm_mon < 1)
 						{
@@ -1202,6 +1244,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						break;
+						
 					case 4:
 						if ((--cdata->tm_year) < -12998)
 							cdata->tm_year = 16799;
@@ -1224,24 +1267,28 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 				mvwprintw(main_win, starty, startx, "(min)");
 				wrefresh(main_win);
 				break;
+				
 			case 1:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(hour)");
 				wrefresh(main_win);
 				break;
+				
 			case 2:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(day)");
 				wrefresh(main_win);
 				break;
+				
 			case 3:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(mon)");
 				wrefresh(main_win);
 				break;
+				
 			case 4:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
