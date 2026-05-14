@@ -17,6 +17,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <time.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <errno.h>
 #include <swephexp.h>
 #include <ncurses.h>
 #include <form.h>
@@ -70,6 +71,11 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
 	
+	char *endptr = NULL;
+	long iret;
+	double dret;
+	errno = 0;
+	
 	char *buffer = malloc(MAXBUF);
 	if (!buffer)
 		ERR_EXIT("field_to_member buffer");
@@ -91,19 +97,39 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			doupdate();
 			break;
 		case 1:
-			cdata->tm_year = atoi(buffer);
+			iret = strtol(buffer, &endptr, 10);
+			if (errno != ERANGE)
+				cdata->tm_year = (int)iret;
+			else
+				cdata->tm_year = 1970;
 			break;
 		case 2:
-			cdata->tm_mon = atoi(buffer);
+			iret = strtol(buffer, &endptr, 10);
+			if (errno != ERANGE && iret != -1)
+				cdata->tm_mon = (int)iret;
+			else
+				cdata->tm_mon = 1;
 			break;
 		case 3: 
-			cdata->tm_mday = atoi(buffer);
+			iret = strtol(buffer, &endptr, 10);
+			if (errno != ERANGE && iret != -1)
+				cdata->tm_mday = (int)iret;
+			else
+				cdata->tm_mday = 1;
 			break;
 		case 4:
-			cdata->tm_hour = atoi(buffer);
+			iret = strtol(buffer, &endptr, 10);
+			if (errno != ERANGE && iret != -1) 
+				cdata->tm_hour = (int)iret;
+			else
+				cdata->tm_hour = 1;
 			break;
 		case 5:
-			cdata->tm_min = atoi(buffer);
+			iret = strtol(buffer, &endptr, 10);
+			if (errno != ERANGE && iret != -1)
+				cdata->tm_min = (int)iret;
+			else
+				cdata->tm_min = 1;
 			break;
 		case 6:
 			if (setenv("TZ", buffer, 1) != 0)
@@ -111,10 +137,18 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			tzset();
 			break;
 		case 7:
-			loc->dlat = atof(buffer);
+			dret = strtod(buffer, &endptr);
+			if (errno != ERANGE)
+				loc->dlat = dret;
+			else
+				loc->dlat = 0.0;
 			break;
 		case 8:
-			loc->dlon = atof(buffer);
+			dret = strtod(buffer, &endptr);
+			if (errno != ERANGE)
+				loc->dlon = dret;
+			else
+				loc->dlon = 0.0;
 			break;
 	}
 	free(buffer);
