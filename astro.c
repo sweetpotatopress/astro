@@ -657,7 +657,7 @@ int radius, double planet, double asc, Pxx *pxx)
 	snprintf(buffer, sizeof(buffer), "%.2f", ((int)planet % 30) +
 	decimal);
 	
-	if (i != 10)
+	if (i != 10) // skip mean node
 	{
 		mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
 	
@@ -751,10 +751,10 @@ int sect(Pxx *pxx, double ascmc[])
 {
 	int sect = 0;
 	
-	if ((pxx->dsun[LONG] - ascmc[0]) < 180)
+	if ((pxx->dsun[LONG] - ascmc[0]) <= 180)
 		sect = 1; // day
 		
-	else if ((pxx->dsun[LONG] - ascmc[0]) > 180)
+	else if ((pxx->dsun[LONG] - ascmc[0]) >= 180)
 		sect = 0; // night
 		
 	return sect;
@@ -943,23 +943,23 @@ void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
 	char spname[AS_MAXCH];
 	int p_count = 18;
 	
-	double p_arr[] = {
-		*pxx->dsun, *pxx->dmoon,
-		*pxx->dmerc, *pxx->dven,
-		*pxx->dmars, *pxx->djup,
-		*pxx->dsat, *pxx->dura,
-		*pxx->dnep, *pxx->dplu,
-		*pxx->dmnod, *pxx->dtnod,
-		pxx->dfor, pxx->dspir,
-		pxx->dasc, pxx->dmc,
-		pxx->ddsc, pxx->dic};
+	double *p_arr[] = {
+		pxx->dsun, pxx->dmoon,
+		pxx->dmerc, pxx->dven,
+		pxx->dmars, pxx->djup,
+		pxx->dsat, pxx->dura,
+		pxx->dnep, pxx->dplu,
+		pxx->dmnod, pxx->dtnod,
+		&pxx->dfor, &pxx->dspir,
+		&pxx->dasc, &pxx->dmc,
+		&pxx->ddsc, &pxx->dic};
 	
 	if (*p == 0)
 	{
 		
 		if (!full_data_win)
 		{
-			full_data_win = newwin(38, 37, 0, 0);
+			full_data_win = newwin(38, 45, 0, 0);
 		}
 		
 		int starty = 1, startx = 2;
@@ -967,14 +967,14 @@ void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
 		
 		for (int i = 0; i < p_count; ++i)
 		{
-			int zo_pos = ((int)p_arr[i] / 30) + 1;
+			int zo_pos = ((int)p_arr[i][LONG] / 30) + 1;
 			
-			int deg = (int)p_arr[i] % 30;
-			double dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
+			int deg = (int)p_arr[i][LONG] % 30;
+			double dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
 			int a_dec = (int)(dec * 100) % 100;
 			
-			int full_deg = (int)p_arr[i];
-			double full_dec = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
+			int full_deg = (int)p_arr[i][LONG];
+			double full_dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
 			int a_full_dec = (int)(full_dec * 100) % 100;
 			
 			if ( i != 10 && i < 12) // sun -> node (skipping mean node)
@@ -983,8 +983,8 @@ void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
 				spname[3] ='\0';
 				
 				char buff[MAXBUF];
-				snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
-				spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
+				snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s %-5.3f",
+				spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos], p_arr[i][LONG_S]);
 				
 				mvwprintw(full_data_win, starty, startx, "%s", buff);
 				starty += 2;
