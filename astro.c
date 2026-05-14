@@ -185,8 +185,19 @@ void set_localtime(FIELD *cdata_field[], struct tm *cdata)
 void validate_fields(WINDOW *cdata_form_win, FIELD *cdata_field[],
 FORM *cdata_form, struct tm *cdata, Location *loc, char *citybuffer)
 {
-	//validates every field
-	for (size_t i = 1; i < 9; i++)
+	size_t i = 0;
+	
+	while (i == 0)
+	{
+		set_current_field(cdata_form, cdata_field[i]);
+		FIELD *current = current_field(cdata_form);
+		char buffer[MAXBUF] = {0};
+		buff_trim(current, buffer);
+		memcpy(citybuffer, buffer, strlen(buffer) + 1);
+		++i;
+	}
+		
+	for (; i < 9; i++)
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
@@ -405,7 +416,6 @@ void check_dst(struct tm *c_copy)
 	
 	if (fgets(buffer, sizeof(buffer), fp) == NULL)
 	{
-		endwin();
 		fprintf(stderr, "ERR: %s\n", cmd);
 		pclose(fp);
 		return;
@@ -837,7 +847,8 @@ struct tm *cdata, Location *loc)
 	int starty = 3;
 	int startx = maxx - 22;
 	
-	mvwprintw(main_win, starty, startx, "%s", io->filename);
+	if(io->filename)
+		mvwprintw(main_win, starty, startx, "%s", io->filename);
 	
 	starty += 1;
 	mvwprintw(main_win, starty, startx, "%s", loc->city);
@@ -950,7 +961,6 @@ void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
 		*p = 0;
 	}
 }
-
 
 int months(int month, int year)
 {
@@ -1327,6 +1337,8 @@ int main()
 				case 'i':
 					wclear(main_win);
 					wrefresh(main_win);
+					free(io->filename);
+					io->filename = NULL;
 					chart_done = 1;
 					mode = INSERT;
 					break;

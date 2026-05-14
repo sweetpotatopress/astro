@@ -16,14 +16,15 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <time.h>
 
+#define MAXBUF 1024
+#define MAXPATH 2048
+
 #define ERR_EXIT(str) do { \
 	endwin(); \
 	perror(str); \
 	swe_close(); \
 	exit(EXIT_FAILURE); \
 } while (0)
-
-typedef enum { NORMAL, INSERT } Mode;
 
 #define LONG 0
 #define LAT 1
@@ -74,6 +75,8 @@ typedef struct {
 	char *filename;
 	size_t file_count;
 } Io;
+
+typedef enum { NORMAL, INSERT } Mode;
 
 int main_search(FIELD *cdata_field[], char *argv);
 void main_io(Io *io, FIELD *cdata_field[], struct tm *cdata,

@@ -52,7 +52,7 @@ void save_chart(struct tm *cdata, Location *loc, Io *io)
 	{
 	
 		size_t i = 0;
-		size_t max_count = MAXPATH0;
+		size_t max_count = 20480;
 		
 		char fn_buff[MAXBUF] = {0};
 		int max_width = 0;
@@ -486,7 +486,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	while (!load_done)
 	{
 		size_t i = 0;
-		size_t max_count = MAXPATH0;
+		size_t max_count = 20480;
 		
 		char fn_buff[MAXBUF] = {0};
 		int max_width = 0;
