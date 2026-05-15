@@ -21,6 +21,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <ncurses.h>
 #include <form.h>
+#include <panel.h>
 #include "astro.h"
 
 #define VERSION 0.56
@@ -937,9 +938,10 @@ struct tm *cdata, Location *loc)
 	wrefresh(main_win);
 }
 
-void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
+void planet_table(WINDOW *main_win, PANEL *planet_panel, Pxx *pxx)
 {
-	static WINDOW *full_data_win = NULL;
+	static WINDOW *p_table_win = NULL;
+	
 	char spname[AS_MAXCH];
 	int p_count = 18;
 	
@@ -954,78 +956,71 @@ void planet_table(WINDOW *main_win, Pxx *pxx, int *p)
 		&pxx->dasc, &pxx->dmc,
 		&pxx->ddsc, &pxx->dic};
 	
-	if (*p == 0)
+	
+	if (!p_table_win)
 	{
+		p_table_win = newwin(38, 45, 0, 0);
+		planet_panel = new_panel(p_table_win);
+	}
+	
+	int starty = 1, startx = 2;
+	int j = 0;
+	
+	for (int i = 0; i < p_count; ++i)
+	{
+		int zo_pos = ((int)p_arr[i][LONG] / 30) + 1;
 		
-		if (!full_data_win)
+		int deg = (int)p_arr[i][LONG] % 30;
+		double dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
+		int a_dec = (int)(dec * 100) % 100;
+		
+		int full_deg = (int)p_arr[i][LONG];
+		double full_dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
+		int a_full_dec = (int)(full_dec * 100) % 100;
+		
+		if ( i != 10 && i < 12) // sun -> node (skipping mean node)
 		{
-			full_data_win = newwin(38, 45, 0, 0);
+			swe_get_planet_name(i, spname);
+			spname[3] ='\0';
+			
+			char buff[MAXBUF];
+			snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s %-5.3f",
+			spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos], p_arr[i][LONG_S]);
+			
+			mvwprintw(p_table_win, starty, startx, "%s", buff);
+			starty += 2;
 		}
 		
-		int starty = 1, startx = 2;
-		int j = 0;
-		
-		for (int i = 0; i < p_count; ++i)
+		else if ( i != 10 && i >= 12) // asc -> ic
 		{
-			int zo_pos = ((int)p_arr[i][LONG] / 30) + 1;
+			const char *points[] = {"for", "spi", "asc", "mc", "dsc", "ic"};
+			char point_buff[MAXBUF];
 			
-			int deg = (int)p_arr[i][LONG] % 30;
-			double dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
-			int a_dec = (int)(dec * 100) % 100;
+			snprintf(point_buff, sizeof(point_buff), "%-11s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
+			points[j], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
 			
-			int full_deg = (int)p_arr[i][LONG];
-			double full_dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
-			int a_full_dec = (int)(full_dec * 100) % 100;
-			
-			if ( i != 10 && i < 12) // sun -> node (skipping mean node)
+			if (i == 12) // lots divider
 			{
-				swe_get_planet_name(i, spname);
-				spname[3] ='\0';
-				
-				char buff[MAXBUF];
-				snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s %-5.3f",
-				spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos], p_arr[i][LONG_S]);
-				
-				mvwprintw(full_data_win, starty, startx, "%s", buff);
+				mvwprintw(p_table_win, starty, startx, "------------------------------");
 				starty += 2;
 			}
 			
-			else if ( i != 10 && i >= 12) // asc -> ic
+			if (i == 14) // points divider
 			{
-				const char *points[] = {"for", "spi", "asc", "mc", "dsc", "ic"};
-				char point_buff[MAXBUF];
-				
-				snprintf(point_buff, sizeof(point_buff), "%-11s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
-				points[j], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
-				
-				if (i == 12) // lots divider
-				{
-					mvwprintw(full_data_win, starty, startx, "------------------------------");
-					starty += 2;
-				}
-				
-				if (i == 14) // points divider
-				{
-					mvwprintw(full_data_win, starty, startx, "------------------------------");
-					starty += 2;
-				}
-				mvwprintw(full_data_win, starty, startx, "%s", point_buff);
+				mvwprintw(p_table_win, starty, startx, "------------------------------");
 				starty += 2;
-				++j;
 			}
+			mvwprintw(p_table_win, starty, startx, "%s", point_buff);
+			starty += 2;
+			++j;
 		}
+	}
+	
+		show_panel(planet_panel);
+		update_panels();
+		doupdate();
+		wrefresh(p_table_win);
 		
-			wrefresh(full_data_win);
-			*p = 1;
-	}
-	else if (*p == 1)
-	{
-		wclear(full_data_win);
-		wrefresh(full_data_win);
-		touchwin(main_win);
-		wrefresh(main_win);
-		*p = 0;
-	}
 }
 
 int months(int month, int year)
@@ -1039,13 +1034,13 @@ int months(int month, int year)
 	return days[month];
 }
 
-void animate_chart(WINDOW *main_win, int maxy, int maxx, Io *io,
-struct tm *cdata, Location *loc, Pxx *pxx)
+void animate_chart(WINDOW *main_win, PANEL *planet_panel,
+int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 {
 	int starty = 11;
 	int startx = maxx - 22;
 	
-	mvwprintw(main_win, starty, startx, "(mins)");
+	mvwprintw(main_win, starty, startx, "(min)");
 	wrefresh(main_win);
 	
 	int max_day = 0; // months() return flag
@@ -1167,7 +1162,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 					case 0:
 						if ((--cdata->tm_min) < 0)
 						{
-							--cdata->tm_hour;
+								--cdata->tm_hour;
 							cdata->tm_min = 59;
 							if ((cdata->tm_hour) < 0)
 							{
@@ -1296,6 +1291,13 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 				wrefresh(main_win);
 				break;
 		}
+		if (planet_panel)
+		{
+			planet_table(main_win, planet_panel, pxx);
+			show_panel(planet_panel);
+			update_panels();
+			doupdate();
+		}
 	}
 	wmove(main_win, starty, startx);
 	wclrtoeol(main_win);
@@ -1305,6 +1307,7 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 int main()
 {
 	WINDOW *main_win;
+	PANEL *main_panel;
 
 	struct tm *cdata = calloc(1, sizeof(struct tm));
 	if (!cdata)
@@ -1390,10 +1393,12 @@ int main()
 	swe_set_ephe_path(fn_buff);
 
 	main_win = newwin(maxy, maxx, 0, 0);
+	main_panel = new_panel(main_win);
 	keypad(main_win, TRUE);
 	keypad(stdscr, TRUE);
 	
-	int main_done = 0, p_swi = 0;
+	PANEL *planet_panel = NULL;
+	int main_done = 0;
 	while (!main_done)
 	{
 		input_chart_data(io, cdata, loc, citybuffer);
@@ -1408,7 +1413,7 @@ int main()
 			switch(ch)
 			{
 				case '\n':
-					animate_chart(main_win, maxy, maxx, io,
+					animate_chart(main_win, planet_panel, maxy, maxx, io,
 					cdata, loc, pxx);
 					break;
 				case 'q':
@@ -1424,7 +1429,7 @@ int main()
 					mode = INSERT;
 					break;
 				case 'p':
-					planet_table(main_win, pxx, &p_swi);
+					planet_table(main_win, planet_panel, pxx);
 					break;
 				default:
 					break;

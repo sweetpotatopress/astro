@@ -45,7 +45,7 @@ all: $(SWE_DEPS)
 	@echo "-o--o-Building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
 	    -L$(SWE_LIB) -lswe -lm \
-	    -lncurses -lmenu -lform -ltinfo
+	    -lpanel -lmenu -lform -lncurses -ltinfo
 	    
 install: all
 	@echo "-x--o Installing astro --oo-"
