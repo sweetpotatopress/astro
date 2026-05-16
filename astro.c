@@ -924,7 +924,7 @@ struct tm *cdata, Location *loc)
 		mvwprintw(main_win, starty, startx, "%d/%d", cdata->tm_mon, cdata->tm_mday);
 	
 	starty += 1;
-	if(cdata->tm_hour && cdata->tm_min)
+	if(cdata->tm_hour >= 0 && cdata->tm_min >= 0)
 		mvwprintw(main_win, starty, startx, "%d:%d", cdata->tm_hour, cdata->tm_min);
 	
 	starty += 1;
@@ -1033,7 +1033,8 @@ int months(int month, int year)
 }
 
 void animate_chart(WINDOW *main_win, PANEL *planet_panel,
-int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
+int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx,
+int *planet_trig)
 {
 	int starty = 11;
 	int startx = maxx - 22;
@@ -1044,7 +1045,6 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 	int max_day = 0; // months() return flag
 	size_t i = 0; // time inc/dec
 	
-	int planet_trig = 0;
 	int ch = 0;
 	int anim_done = 0;
 	while(!anim_done && (ch = wgetch(main_win)))
@@ -1062,20 +1062,19 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 				break;
 				
 			case 'p':
-				if (planet_trig == 1)
+				if (*planet_trig)
 				{
 					del_panel(planet_panel);
 					update_panels();
 					doupdate();
-					wmove(main_win, starty, startx);
-					wclrtoeol(main_win);
+					touchwin(main_win);
 					wrefresh(main_win);
-					planet_trig = 0;
+					*planet_trig = 0;
 				}
 				else
 				{
 					planet_table(main_win, planet_panel, pxx);
-					planet_trig = 1;
+					*planet_trig = 1;
 				}
 				break;
 				
@@ -1107,7 +1106,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 						break;
 						
@@ -1131,7 +1130,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1151,7 +1150,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1170,7 +1169,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1181,7 +1180,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1215,7 +1214,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1240,7 +1239,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1260,7 +1259,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1278,7 +1277,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1289,7 +1288,7 @@ int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx)
 						draw_chart(main_win, maxy,
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (planet_trig == 1)
+						if (*planet_trig > 0)
 							planet_table(main_win, planet_panel, pxx);
 	
 						break;
@@ -1453,7 +1452,7 @@ int main()
 			{
 				case '\n':
 					animate_chart(main_win, planet_panel, maxy, maxx, io,
-					cdata, loc, pxx);
+					cdata, loc, pxx, &planet_trig);
 					break;
 				case 'q':
 					main_done = 1;
@@ -1468,7 +1467,7 @@ int main()
 					mode = INSERT;
 					break;
 				case 'p':
-					if (planet_trig == 0)
+					if (!planet_trig)
 					{
 						planet_trig = 1;
 						planet_table(main_win, planet_panel, pxx);
@@ -1478,6 +1477,7 @@ int main()
 						del_panel(planet_panel);
 						update_panels();
 						doupdate();
+						touchwin(main_win);
 						wrefresh(main_win);
 						planet_trig = 0;
 					}
