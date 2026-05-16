@@ -16,8 +16,15 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <time.h>
 
+#define M_COLOR 1
+#define FIRE 2
+#define AIR 3
+#define WATER 4
+#define EARTH 5
+
 #define MAXBUF 1024
 #define MAXPATH 2048
+#define MAXPXX 6
 
 #define ERR_EXIT(str) do { \
 	endwin(); \
@@ -32,6 +39,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define LONG_S 3
 #define LAT_S 4
 #define DIST_S 5
+#define RETRO 6
 
 typedef struct {
 	double *dsun;

@@ -178,13 +178,16 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 		width = COLS - 2;
 	if (height > LINES)
 		height = 18;
+	if (height > 18)
+		height = 18;
 		
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
 	
 	city_win = newwin(height, width, starty, startx);
-	if (!city_win)
-		ERR_EXIT("search city_win newwin");
+	city_subwin = derwin(city_win, height - 2, width - 2, 1, 1);
+		
+	wbkgdset(city_win, COLOR_PAIR(M_COLOR));
 		
 	keypad(city_win, TRUE);
 	clearok(city_win, TRUE);
@@ -193,10 +196,10 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	
 	box(city_win, 0, 0);
 	
-	city_subwin = derwin(city_win, height - 2, width - 2, 1, 1);
-	
 	set_menu_win(city_menu, city_win);
 	set_menu_sub(city_menu, city_subwin);
+	set_menu_fore(city_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+	set_menu_back(city_menu, COLOR_PAIR(M_COLOR));
 	menu_opts_off(city_menu, O_NONCYCLIC);
 	
 	int iret = post_menu(city_menu);

@@ -265,59 +265,61 @@ char *citybuffer)
 	noecho();
 	curs_set(1);
 	
-	cdata_form_win = newwin(maxy - 2, maxx - 2, 0, 0);
+	cdata_form_win = newwin(maxy, maxx, 0, 0);
 	
 	keypad(cdata_form_win, TRUE);	
 	clearok(cdata_form_win, TRUE);
+	
+	wbkgdset(cdata_form_win, COLOR_PAIR(M_COLOR));
 	
 	starty = 4;
 	startx = 18;
 	
 	// city search
 	cdata_field[0] = new_field(1, 25, starty, startx, 0, 0);
-	set_field_back(cdata_field[0], A_UNDERLINE);
+	set_field_back(cdata_field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[0], O_STATIC);
 	field_opts_off(cdata_field[0], O_AUTOSKIP);
 	starty += 2;
 	// year
 	cdata_field[1] = new_field(1, 6, starty, startx, 0, 0);
-	set_field_back(cdata_field[1], A_UNDERLINE);
+	set_field_back(cdata_field[1], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[1], O_AUTOSKIP);
 	starty += 2;
 	// month
 	cdata_field[2] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[2], A_UNDERLINE);
+	set_field_back(cdata_field[2], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[2], O_AUTOSKIP);
 	starty += 2;
 	// day
 	cdata_field[3] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[3], A_UNDERLINE);
+	set_field_back(cdata_field[3], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[3], O_AUTOSKIP);
 	starty += 2;
 	// hour
 	cdata_field[4] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[4], A_UNDERLINE);
+	set_field_back(cdata_field[4], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[4], O_AUTOSKIP);
 	starty+= 2;
 	// minute
 	cdata_field[5] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[5], A_UNDERLINE);
+	set_field_back(cdata_field[5], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[5], O_AUTOSKIP);
 	starty+= 2;
 	// timezone
 	cdata_field[6] = new_field(1, 30, starty, startx, 0, 0);
-	set_field_back(cdata_field[6], A_UNDERLINE);
+	set_field_back(cdata_field[6], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[6], O_STATIC);
 	field_opts_off(cdata_field[6], O_AUTOSKIP);
 	starty += 2;
 	// lat. 
 	cdata_field[7] = new_field(1, 11, starty, startx, 0, 0);
-	set_field_back(cdata_field[7], A_UNDERLINE);
+	set_field_back(cdata_field[7], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[7], O_AUTOSKIP);
 	starty+= 2;
 	// long.
 	cdata_field[8] = new_field(1, 11, starty, startx, 0, 0);
-	set_field_back(cdata_field[8], A_UNDERLINE);
+	set_field_back(cdata_field[8], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[8], O_AUTOSKIP);
 	
 	cdata_field[9] = NULL;
@@ -325,7 +327,7 @@ char *citybuffer)
 	cdata_form = new_form(cdata_field);
 	set_form_win(cdata_form, cdata_form_win);
 	set_form_sub(cdata_form,
-	derwin(cdata_form_win, maxy - 6, maxx - 6, 0, 0));
+	derwin(cdata_form_win, maxy, maxx, 0, 0));
 	
 	touchwin(cdata_form_win);
 	post_form(cdata_form);
@@ -938,9 +940,9 @@ struct tm *cdata, Location *loc)
 	wrefresh(main_win);
 }
 
-void planet_table(WINDOW *main_win, PANEL *planet_panel, Pxx *pxx)
+void planet_table(PANEL *planet_panel, Pxx *pxx)
 {
-	static WINDOW *p_table_win = NULL;
+	static WINDOW *planet_win = NULL;
 	
 	char spname[AS_MAXCH];
 	int p_count = 18;
@@ -955,13 +957,20 @@ void planet_table(WINDOW *main_win, PANEL *planet_panel, Pxx *pxx)
 		&pxx->dfor, &pxx->dspir,
 		&pxx->dasc, &pxx->dmc,
 		&pxx->ddsc, &pxx->dic};
+		
+	int maxy = 38;
+	int maxx = 45;
 	
-	
-	if (!p_table_win)
+	if (!planet_win)
 	{
-		p_table_win = newwin(38, 45, 0, 0);
-		planet_panel = new_panel(p_table_win);
+		planet_win = newwin(maxy, maxx, 0, 0);
+		planet_panel = new_panel(planet_win);
 	}
+	
+	wbkgdset(planet_win, COLOR_PAIR(M_COLOR));
+	
+	for (int i = 0; i < maxy; i++) 
+	    mvwhline(planet_win, i, 0, ' ', maxx);
 	
 	int starty = 1, startx = 2;
 	int j = 0;
@@ -987,7 +996,7 @@ void planet_table(WINDOW *main_win, PANEL *planet_panel, Pxx *pxx)
 			snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s %-5.3f",
 			spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos], p_arr[i][LONG_S]);
 			
-			mvwprintw(p_table_win, starty, startx, "%s", buff);
+			mvwprintw(planet_win, starty, startx, "%s", buff);
 			starty += 2;
 		}
 		
@@ -1001,16 +1010,16 @@ void planet_table(WINDOW *main_win, PANEL *planet_panel, Pxx *pxx)
 			
 			if (i == 12) // lots divider
 			{
-				mvwprintw(p_table_win, starty, startx, "------------------------------");
+				mvwprintw(planet_win, starty, startx, "------------------------------");
 				starty += 2;
 			}
 			
 			if (i == 14) // points divider
 			{
-				mvwprintw(p_table_win, starty, startx, "------------------------------");
+				mvwprintw(planet_win, starty, startx, "------------------------------");
 				starty += 2;
 			}
-			mvwprintw(p_table_win, starty, startx, "%s", point_buff);
+			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			starty += 2;
 			++j;
 		}
@@ -1018,7 +1027,7 @@ void planet_table(WINDOW *main_win, PANEL *planet_panel, Pxx *pxx)
 		show_panel(planet_panel);
 		update_panels();
 		doupdate();
-		wrefresh(p_table_win);
+		wrefresh(planet_win);
 }
 
 int months(int month, int year)
@@ -1073,7 +1082,7 @@ int *planet_trig)
 				}
 				else
 				{
-					planet_table(main_win, planet_panel, pxx);
+					planet_table(planet_panel, pxx);
 					*planet_trig = 1;
 				}
 				break;
@@ -1107,7 +1116,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 						break;
 						
 					case 1:
@@ -1131,7 +1140,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 						
@@ -1151,7 +1160,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 						
@@ -1170,7 +1179,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 						
@@ -1181,7 +1190,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 				}
@@ -1215,7 +1224,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 						
@@ -1240,7 +1249,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 						
@@ -1260,7 +1269,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 						
@@ -1278,7 +1287,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 						
@@ -1289,7 +1298,7 @@ int *planet_trig)
 						maxx, cdata, loc, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
-							planet_table(main_win, planet_panel, pxx);
+							planet_table(planet_panel, pxx);
 	
 						break;
 				}
@@ -1345,7 +1354,6 @@ int *planet_trig)
 int main()
 {
 	WINDOW *main_win;
-	PANEL *main_panel;
 
 	struct tm *cdata = calloc(1, sizeof(struct tm));
 	if (!cdata)
@@ -1367,40 +1375,40 @@ int main()
 		ERR_EXIT("main pxx");
 	
 	// xx[] lat, long, dist, lat_s, long_s, dist_s
-	pxx->dsun   = calloc(5, sizeof(double));                                  
+	pxx->dsun   = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dsun)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dmoon  = calloc(5, sizeof(double));                                  
+	pxx->dmoon  = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dmoon)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dmerc  = calloc(5, sizeof(double));                                  
+	pxx->dmerc  = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dmerc)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dven   = calloc(5, sizeof(double));                                  
+	pxx->dven   = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dven)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dmars  = calloc(5, sizeof(double));                                  
+	pxx->dmars  = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dmars)
 		ERR_EXIT("pxx->d calloc");
-	pxx->djup   = calloc(5, sizeof(double));                                  
+	pxx->djup   = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->djup)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dsat   = calloc(5, sizeof(double));                                  
+	pxx->dsat   = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dsat)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dura   = calloc(5, sizeof(double));                                  
+	pxx->dura   = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dura)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dnep   = calloc(5, sizeof(double));                                  
+	pxx->dnep   = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dnep)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dplu   = calloc(5, sizeof(double));                                  
+	pxx->dplu   = calloc(MAXPXX, sizeof(double));                                  
 	if(!pxx->dplu)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dmnod  = calloc(5, sizeof(double));                                 
+	pxx->dmnod  = calloc(MAXPXX, sizeof(double));                                 
 	if(!pxx->dmnod)
 		ERR_EXIT("pxx->d calloc");
-	pxx->dtnod  = calloc(5, sizeof(double)); 
+	pxx->dtnod  = calloc(MAXPXX, sizeof(double)); 
 	if(!pxx->dtnod)
 		ERR_EXIT("pxx->d calloc");
 		
@@ -1431,9 +1439,15 @@ int main()
 	swe_set_ephe_path(fn_buff);
 
 	main_win = newwin(maxy, maxx, 0, 0);
-	main_panel = new_panel(main_win);
 	keypad(main_win, TRUE);
 	keypad(stdscr, TRUE);
+	
+	start_color();
+	init_color(1, 0, 0, 0); //black
+	init_color(2, 1000, 1000, 1000); //white
+	init_pair(M_COLOR, 2, 1);
+	
+	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
 	
 	PANEL *planet_panel = NULL;
 	int main_done = 0;
@@ -1470,7 +1484,7 @@ int main()
 					if (!planet_trig)
 					{
 						planet_trig = 1;
-						planet_table(main_win, planet_panel, pxx);
+						planet_table(planet_panel, pxx);
 					}
 					else
 					{
