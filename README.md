@@ -19,10 +19,10 @@ basically, it should work on most linux distros, it may not work on systems
 using musl, you are welcome to share patches in order to fix that //
 send bug reports.
 in theory astro works on BSD. in theory . . 
+please send issue reports for any and everything, id like this to work smoothly
+and your suggestion may do so not just for you, but all! 
 
 --o-KEYBINDS---o-
-
-**keybindings**
 
 | mode INSERT (i) | mode NORMAL (esc) | CHART VIEW |
 |---|---|---|
@@ -53,8 +53,6 @@ charts, city-db, and the swiss ephemeris
  | window with exact planet stats | [DONE] |
  | add nodes, outers | [DONE] |
  | add lot of spirit + fortune | [DONE] |
- | add ncurses panels to most things |^
- | keep tables open when animating chart |^
  | retrograde, station, speed table | |
  | add elemental colors | |
  | essential dignities table | |
