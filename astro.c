@@ -38,6 +38,13 @@ const char *pl_sym[] = {"(o)", "(()", "(-o<)",
 const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
 "leo", "vir", "lib", "sco", "sag",
 "cap", "aqu", "pis"};
+	
+int iflag, ipl;
+double xx[6];	 // longitude, latitude, distance 
+				// speed in long. speed in lat, speed in dist.
+char serr[AS_MAXCH];
+double cusps[13], ascmc[10]; //houses, asc, mc
+int ihsy = 'W'; // house system
 
 
 void buff_trim(FIELD *current, char *buffer)
@@ -459,93 +466,6 @@ char *citybuffer)
 	}
 	delwin(cdata_form_win);
 }
-void check_dst(struct tm *c_copy)
-{
-	char cmd[MAXBUF] = {0};
-	char buffer[256] = {0};
-	char *tz_name = getenv("TZ");
-	if (!tz_name)
-		tz_name = "UTC";
-	FILE *fp;
-	
-	//calls GNU coreutil date
-	snprintf(cmd, sizeof(cmd), "TZ=%s date -d '%d-%d-%d %d:%d' '+%%Z'", 
-	tz_name, c_copy->tm_year, c_copy->tm_mon, c_copy->tm_mday,
-	c_copy->tm_hour, c_copy->tm_min);
-	
-	fp = popen(cmd, "r");
-	if (!fp)
-		ERR_EXIT("ERR: popen, youre dead mate nya");
-	
-	if (fgets(buffer, sizeof(buffer), fp) == NULL)
-	{
-		fprintf(stderr, "ERR: %s\n", cmd);
-		pclose(fp);
-		return;
-	}
-	
-	buffer[strcspn(buffer, "\n")] = 0;
-	pclose(fp);
-	
-	c_copy->tm_isdst = 
-	(tzname[1] && 
-	tzname[0] != tzname[1] &&
-	strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
-}
-
-void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
-{
-	struct tm *c_copy = cdata;
-	check_dst(c_copy); // save city name
-	//correct tm quirk after GNU date
-	c_copy->tm_year -= 1900;
-	c_copy->tm_mon -= 1;
-	
-	//copy correct isdst and hour before mktime
-	//mktime "corrects" it to system defaults, which can be wrong
-	int isdst = c_copy->tm_isdst;
-	int tm_hour = c_copy->tm_hour;
-	
-	time_t tret = mktime(c_copy);
-	localtime_r(&tret, c_copy);
-	
-	c_copy->tm_isdst = isdst;
-	c_copy->tm_hour = tm_hour;
-
-	long utc_sec = c_copy->tm_gmtoff;
-	
-	//get utc offset in seconds, reverse, and display in hours
-	double utc_offset = (double)-utc_sec / 3600;
-	
-	//convert inputted minutes to decimal
-	double min = (double)c_copy->tm_min / 60;
-	
-	//add inputted hour, utc offset, and minutes to decimal
-	//swe_julday uses 24 hour UTC.
-	double dhour = (double)(c_copy->tm_hour + utc_offset) + min;
-	
-	if((dhour >= 24.0))
-	{
-		dhour -= 24.0;
-		++c_copy->tm_mday;
-		*day_offset -= 1;
-	}
-	else if((dhour <= 0))
-	{
-		dhour += 23.999999;
-		--c_copy->tm_mday;
-		*day_offset += 1;
-	}
-	
-	loc->dhour = dhour; 
-	*cdata = *c_copy;
-}
-
-void reset_struct(struct tm *cdata)
-{
-	cdata->tm_mon += 1;
-	cdata->tm_year += 1900;
-}
 
 void draw_circle(WINDOW *main_win,
 int maxy, int maxx, int radius, chtype ch)
@@ -750,7 +670,7 @@ int radius, double angle, chtype ch)
 	}
 }
 
-int sect(Pxx *pxx, double ascmc[])
+int sect(Pxx *pxx)
 {
 	int sect = 0;
 	
@@ -788,15 +708,98 @@ void lots(int sect, Pxx *pxx)
 		pxx->dspir += 360.0;
 }
 
-void draw_chart(WINDOW *main_win, int maxy, int maxx,
-struct tm *cdata, Location *loc, Pxx *pxx)
+void check_dst(struct tm *c_copy)
 {
-	int iret, iflag, ipl, i;
-	double xx[6];	 // longitude, latitude, distance 
-					// speed in long. speed in lat, speed in dist.
-	char serr[AS_MAXCH];
-	double cusps[13], ascmc[10]; //houses, asc, mc
-	int ihsy = 'W'; // house system
+	char cmd[MAXBUF] = {0};
+	char buffer[256] = {0};
+	char *tz_name = getenv("TZ");
+	if (!tz_name)
+		tz_name = "UTC";
+	FILE *fp;
+	
+	//calls GNU coreutil date
+	snprintf(cmd, sizeof(cmd), "TZ=%s date -d '%d-%d-%d %d:%d' '+%%Z'", 
+	tz_name, c_copy->tm_year, c_copy->tm_mon, c_copy->tm_mday,
+	c_copy->tm_hour, c_copy->tm_min);
+	
+	fp = popen(cmd, "r");
+	if (!fp)
+		ERR_EXIT("ERR: popen, youre dead mate nya");
+	
+	if (fgets(buffer, sizeof(buffer), fp) == NULL)
+	{
+		fprintf(stderr, "ERR: %s\n", cmd);
+		pclose(fp);
+		return;
+	}
+	
+	buffer[strcspn(buffer, "\n")] = 0;
+	pclose(fp);
+	
+	c_copy->tm_isdst = 
+	(tzname[1] && 
+	tzname[0] != tzname[1] &&
+	strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
+}
+
+void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
+{
+	struct tm *c_copy = cdata;
+	check_dst(c_copy); // save city name
+	//correct tm quirk after GNU date
+	c_copy->tm_year -= 1900;
+	c_copy->tm_mon -= 1;
+	
+	//copy correct isdst and hour before mktime
+	//mktime "corrects" it to system defaults, which can be wrong
+	int isdst = c_copy->tm_isdst;
+	int tm_hour = c_copy->tm_hour;
+	
+	time_t tret = mktime(c_copy);
+	localtime_r(&tret, c_copy);
+	
+	c_copy->tm_isdst = isdst;
+	c_copy->tm_hour = tm_hour;
+
+	long utc_sec = c_copy->tm_gmtoff;
+	
+	//get utc offset in seconds, reverse, and display in hours
+	double utc_offset = (double)-utc_sec / 3600;
+	
+	//convert inputted minutes to decimal
+	double min = (double)c_copy->tm_min / 60;
+	
+	//add inputted hour, utc offset, and minutes to decimal
+	//swe_julday uses 24 hour UTC.
+	double dhour = (double)(c_copy->tm_hour + utc_offset) + min;
+	
+	if((dhour >= 24.0))
+	{
+		dhour -= 24.0;
+		++c_copy->tm_mday;
+		*day_offset -= 1;
+	}
+	else if((dhour <= 0))
+	{
+		dhour += 23.999999;
+		--c_copy->tm_mday;
+		*day_offset += 1;
+	}
+	
+	loc->dhour = dhour; 
+	*cdata = *c_copy;
+}
+
+void reset_struct(struct tm *cdata)
+{
+	cdata->tm_mon += 1;
+	cdata->tm_year += 1900;
+}
+
+void pxx_fill(struct tm *cdata, Location *loc, Pxx *pxx)
+{
+	int iret;
+	size_t i;
 	
 	double *pxx_members[] = {
 	pxx->dsun, pxx->dmoon,
@@ -819,8 +822,6 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 	// corrects loc->dhour offset from chart_timeset()
 	cdata->tm_mday += day_offset;
 
-	wclear(main_win);	
-	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
 	{
@@ -857,10 +858,27 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 	pxx->dic = ic;
 	pxx->dmc = mc;
 	
-	int chart_sect = sect(pxx, ascmc);
+	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
+}
+
+void draw_chart(WINDOW *main_win, int maxy, int maxx, Pxx *pxx)
+{
+	double *pxx_members[] = {
+		pxx->dsun, pxx->dmoon,
+		pxx->dmerc, pxx->dven,
+		pxx->dmars, pxx->djup,
+		pxx->dsat, pxx->dura,
+		pxx->dnep, pxx->dplu,
+		pxx->dmnod, pxx->dtnod,
+		&pxx->dasc, &pxx->dmc,
+		&pxx->ddsc, &pxx->dic,
+		&pxx->dfor, &pxx->dspir};
 	
+	int i; 
+
 	curs_set(0);
+	wclear(main_win);
 	int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
 	
 	// zodiac circle
@@ -903,7 +921,6 @@ struct tm *cdata, Location *loc, Pxx *pxx)
 	wrefresh(main_win);
 }
 
-
 void cur_chart_data(WINDOW *main_win, int maxx, Io *io, 
 struct tm *cdata, Location *loc)
 {	
@@ -923,11 +940,13 @@ struct tm *cdata, Location *loc)
 	
 	starty += 1;
 	if(cdata->tm_mon && cdata->tm_mday)
-		mvwprintw(main_win, starty, startx, "%d/%d", cdata->tm_mon, cdata->tm_mday);
+		mvwprintw(main_win, starty, startx, "%d/%d",
+		cdata->tm_mon, cdata->tm_mday);
 	
 	starty += 1;
 	if(cdata->tm_hour >= 0 && cdata->tm_min >= 0)
-		mvwprintw(main_win, starty, startx, "%d:%d", cdata->tm_hour, cdata->tm_min);
+		mvwprintw(main_win, starty, startx, "%d:%d",
+		cdata->tm_hour, cdata->tm_min);
 	
 	starty += 1;
 	if (fabs(loc->dlat) > 1e-6)
@@ -993,8 +1012,11 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 			spname[3] ='\0';
 			
 			char buff[MAXBUF];
-			snprintf(buff, sizeof(buff), "%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s %-5.3f",
-			spname, pl_sym[i], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos], p_arr[i][LONG_S]);
+			
+			snprintf(buff, sizeof(buff),
+			"%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s %-5.3f",
+			spname, pl_sym[i], full_deg, a_full_dec,
+			deg, a_dec, zo_sym[zo_pos], p_arr[i][LONG_S]);
 			
 			mvwprintw(planet_win, starty, startx, "%s", buff);
 			starty += 2;
@@ -1005,18 +1027,21 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 			const char *points[] = {"for", "spi", "asc", "mc", "dsc", "ic"};
 			char point_buff[MAXBUF];
 			
-			snprintf(point_buff, sizeof(point_buff), "%-11s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
+			snprintf(point_buff, sizeof(point_buff),
+			"%-11s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
 			points[j], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
 			
 			if (i == 12) // lots divider
 			{
-				mvwprintw(planet_win, starty, startx, "------------------------------");
+				mvwprintw(planet_win, starty, startx,
+				"------------------------------");
 				starty += 2;
 			}
 			
 			if (i == 14) // points divider
 			{
-				mvwprintw(planet_win, starty, startx, "------------------------------");
+				mvwprintw(planet_win, starty, startx,
+				"------------------------------");
 				starty += 2;
 			}
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
@@ -1028,6 +1053,55 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 		update_panels();
 		doupdate();
 		wrefresh(planet_win);
+}
+
+void retrograde_table(PANEL *retro_panel, Pxx *pxx)
+{
+	WINDOW *retro_win = NULL;
+	
+	double *p_arr[] = {
+		pxx->dsun, pxx->dmoon,
+		pxx->dmerc, pxx->dven,
+		pxx->dmars, pxx->djup,
+		pxx->dsat, pxx->dura,
+		pxx->dnep, pxx->dplu,
+		pxx->dmnod, pxx->dtnod};
+		
+	int p_count = 12;
+		
+	int maxy = 38;
+	int maxx = 45;
+	int starty = LINES - maxy;
+	int startx = COLS - maxx;
+	
+	if (!retro_win)
+	{
+		retro_win = newwin(maxy, maxx, starty, startx);
+		retro_panel = new_panel(retro_win);
+	}
+	
+	wbkgdset(retro_win, COLOR_PAIR(M_COLOR));
+	
+	for (int i = 0; i < maxy; i++) 
+	    mvwhline(retro_win, i, 0, ' ', maxx);
+	
+	for (int i = 0; i < p_count; ++i)
+	{
+		char buff[MAXBUF];
+		
+		if (i != 10) // skip mean node
+		{
+			snprintf(buff, sizeof(buff), "%-6s %-6f",
+			pl_sym[i], p_arr[i][LONG_S]);
+			
+			mvwprintw(retro_win, i, 0, "%s", buff);
+		}
+	}
+	
+	show_panel(retro_panel);
+	update_panels();
+	doupdate();
+	wrefresh(retro_win);
 }
 
 int months(int month, int year)
@@ -1112,8 +1186,8 @@ int *planet_trig)
 								}
 							}
 						}
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1136,8 +1210,8 @@ int *planet_trig)
 								}
 							}
 						}
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1156,8 +1230,8 @@ int *planet_trig)
 								++cdata->tm_year;
 							}
 						}
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1175,8 +1249,8 @@ int *planet_trig)
 						if (cdata->tm_mday > max_day)
 							cdata->tm_mday = max_day;
 							
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1186,8 +1260,8 @@ int *planet_trig)
 					case 4:
 						if ((++cdata->tm_year) > 16799)
 							cdata->tm_year = -12998;
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1220,8 +1294,8 @@ int *planet_trig)
 								}
 							}
 						}
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1245,8 +1319,8 @@ int *planet_trig)
 								cdata->tm_mon, cdata->tm_year);
 							}
 						}
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1265,8 +1339,9 @@ int *planet_trig)
 							cdata->tm_mday = months(
 							cdata->tm_mon, cdata->tm_year);
 						}
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+	
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1283,8 +1358,8 @@ int *planet_trig)
 						cdata->tm_mon, cdata->tm_year);
 						if (cdata->tm_mday > max_day)
 							cdata->tm_mday = max_day;
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1294,8 +1369,8 @@ int *planet_trig)
 					case 4:
 						if ((--cdata->tm_year) < -12998)
 							cdata->tm_year = 16799;
-						draw_chart(main_win, maxy,
-						maxx, cdata, loc, pxx);
+						pxx_fill(cdata, loc, pxx);
+						draw_chart(main_win, maxy, maxx, pxx);
 						cur_chart_data(main_win, maxx, io, cdata, loc);
 						if (*planet_trig > 0)
 							planet_table(planet_panel, pxx);
@@ -1450,15 +1525,18 @@ int main()
 	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
 	
 	PANEL *planet_panel = NULL;
+	PANEL *retro_panel = NULL;
 	int main_done = 0;
 	while (!main_done)
 	{
 		input_chart_data(io, cdata, loc, citybuffer);
 		loc->city = citybuffer;
-		draw_chart(main_win, maxy, maxx, cdata, loc, pxx);
+		pxx_fill(cdata, loc, pxx);
+		draw_chart(main_win, maxy, maxx, pxx);
 		cur_chart_data(main_win, maxx, io,  cdata, loc);
 			
-		int chart_done = 0, ch = 0, planet_trig = 0;
+		int chart_done = 0, ch = 0,
+		planet_trig = 0, retro_trig = 0;
 		while(!chart_done && !main_done &&
 		(ch = wgetch(main_win)))
 		{
@@ -1495,6 +1573,22 @@ int main()
 						wrefresh(main_win);
 						planet_trig = 0;
 					}
+					break;
+				case 'o':
+					if (!retro_trig)
+					{
+						retro_trig = 1;
+						retrograde_table(retro_panel, pxx);
+					}
+					else
+					{
+						del_panel(retro_panel);
+						update_panels();
+						doupdate();
+						touchwin(main_win);
+						wrefresh(main_win);
+						retro_trig = 0;
+					}	
 					break;
 				default:
 					break;
