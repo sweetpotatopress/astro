@@ -511,173 +511,190 @@ int maxy, int maxx, int radius, chtype ch)
 	}
 }
 
-void planet_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double planet, double asc, Pxx *pxx)
+void planet_pos(WINDOW *main_win, int maxy, int maxx,
+int radius, double **planet, double asc, Pxx *pxx)
 {
-	double p_arr[] = {
-		pxx->dsun[LONG], pxx->dmoon[LONG],
-		pxx->dmerc[LONG], pxx->dven[LONG],
-		pxx->dmars[LONG], pxx->djup[LONG],
-		pxx->dsat[LONG], pxx->dura[LONG],
-		pxx->dnep[LONG], pxx->dplu[LONG],
-		pxx->dmnod[LONG], pxx->dtnod[LONG]};
-
-	int center_x = (maxx / 2);
-	int center_y = (maxy / 2);
-	
-	double rad = (planet - asc) * M_PI / 180.0;
-	
-	int x = center_x - (int)(radius * cos(rad));
-	int y = center_y + (int)(radius * sin(rad) * 0.5);
-	
-	int offsety = 0;
-	int offsetx = 0;
-	/* 	cos	1	0	-1	0
-			0	90	180	270
-		sin	0	1	0	-1
-	*/
-	int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
-	int dir_y = ((int)sin(rad) != 0) ? -1 : 1;
-	
-	bool near_horizontal = (fabs(sin(rad)) < 0.8);
-
-	for (int j = 0; j < i; j++)
+	for (int i = 0; i < 12; ++i)
 	{
-		double adj_angle = p_arr[j];
-		double ang_dist = fabs(planet - adj_angle);
+		double p_arr[] = {
+			pxx->dsun[LONG], pxx->dmoon[LONG],
+			pxx->dmerc[LONG], pxx->dven[LONG],
+			pxx->dmars[LONG], pxx->djup[LONG],
+			pxx->dsat[LONG], pxx->dura[LONG],
+			pxx->dnep[LONG], pxx->dplu[LONG],
+			pxx->dmnod[LONG], pxx->dtnod[LONG]};
+
+		int center_x = (maxx / 2);
+		int center_y = (maxy / 2);
 		
-		if (ang_dist <= 8 || ang_dist >= 352)
-		{
-			if (near_horizontal)
-			{
-				offsetx += 7;
-				offsety += 2;
-			}
-			else
-			{
-				offsety -= 4;
-				offsetx -= 3;
-			}
-		}
-	}
-	
-	for (int j = 0; j < i; j++)
-	{
-		double adj_angle = p_arr[j];
-		double ang_dist = fabs(planet - adj_angle);
-		if (ang_dist <= 8 || ang_dist >= 352)
-		{
-			if (near_horizontal)
-			{
-				offsetx += 3;
-				offsety -= 2;
-			}
-			else
-			{
-				offsetx += 5;
-				offsety += 2;
-			}
-		}
-	}
-	
-	if (!near_horizontal)
-		offsety = dir_y * offsety;
-	
-	offsetx = dir_x * offsetx;
-	
-	double decimal  = (((planet - (int)planet) * 60) / 100);
-	
-	char buffer[56];
-	snprintf(buffer, sizeof(buffer), "%.2f", ((int)planet % 30) +
-	decimal);
-	
-	if (i != 10) // skip mean node
-	{
-		mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
-	
-		mvwaddstr(main_win, y + offsety, x + offsetx, pl_sym[i]);
-	}
-}
+		double rad = (*planet[i] - asc) * M_PI / 180.0;
+		
+		int x = center_x - (int)(radius * cos(rad));
+		int y = center_y + (int)(radius * sin(rad) * 0.5);
+		
+		int offsety = 0;
+		int offsetx = 0;
+		/* 	cos	1	0	-1	0
+				0	90	180	270
+			sin	0	1	0	-1
+		*/
+		int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
+		int dir_y = ((int)sin(rad) != 0) ? -1 : 1;
+		
+		bool near_horizontal = (fabs(sin(rad)) < 0.8);
 
-void ascmc_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double angle, double asc)
-{
-	const char *ascmc_sym[] = {"as", "mc"};
-	int center_x = (maxx / 2);
-	int center_y = (maxy / 2);
-	
-	double rad = (angle - asc) * M_PI / 180.0;
-	
-	int x = center_x - (int)(radius * cos(rad));
-	int y = center_y + (int)(radius * sin(rad) * 0.5);
-	
-	if (i == 0) // draw asc line
-	{
-		for (int r = 0; r <= radius; r++)
+		for (int j = 0; j < i; j++)
 		{
-			int line_x = center_x - (int)(r * cos(rad));
-			int line_y = center_y + (int)(r * sin(rad) * 0.5);
+			double adj_angle = p_arr[j];
+			double ang_dist = fabs(*planet[i] - adj_angle);
 			
-			if (line_x >= 0 && line_x < maxx
-			&& line_y >= 0 && line_y < maxy)
-				mvwaddch(main_win, line_y, line_x, '`');
+			if (ang_dist <= 8 || ang_dist >= 352)
+			{
+				if (near_horizontal)
+				{
+					offsetx += 7;
+					offsety += 2;
+				}
+				else
+				{
+					offsety -= 4;
+					offsetx -= 3;
+				}
+			}
+		}
+		
+		for (int j = 0; j < i; j++)
+		{
+			double adj_angle = p_arr[j];
+			double ang_dist = fabs(*planet[i] - adj_angle);
+			if (ang_dist <= 8 || ang_dist >= 352)
+			{
+				if (near_horizontal)
+				{
+					offsetx += 3;
+					offsety -= 2;
+				}
+				else
+				{
+					offsetx += 5;
+					offsety += 2;
+				}
+			}
+		}
+		
+		if (!near_horizontal)
+			offsety = dir_y * offsety;
+		
+		offsetx = dir_x * offsetx;
+		
+		double decimal  = (((*planet[i] - (int)*planet[i]) * 60) / 100);
+		
+		char buffer[56];
+		snprintf(buffer, sizeof(buffer), "%.2f", ((int)*planet[i] % 30) +
+		decimal);
+		
+		if (i != 10) // skip mean node
+		{
+			mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
+		
+			mvwaddstr(main_win, y + offsety, x + offsetx, pl_sym[i]);
 		}
 	}
-	
-	mvwaddstr(main_win, y, x, ascmc_sym[i]);
-	
-	double decimal = (((angle - (int)angle) * 60) / 100);
-	
-	char buffer[56];
-	snprintf(buffer, sizeof(buffer), "%.2f", ((int)angle % 30) + 
-	decimal);
-	
-	mvwaddstr(main_win, y - 1, x, buffer);
 }
 
-void zo_pos(WINDOW *main_win, int i, int maxy, int maxx,
-int radius, double angle, double asc)
+void ascmc_pos(WINDOW *main_win, int maxy, int maxx,
+int radius, double *angle, double asc)
 {
+	for (int i = 0; i < 2; ++i)
+	{
+		const char *ascmc_sym[] = {"as", "mc"};
+		int center_x = (maxx / 2);
+		int center_y = (maxy / 2);
+		
+		double rad = (angle[i] - asc) * M_PI / 180.0;
+		
+		int x = center_x - (int)(radius * cos(rad));
+		int y = center_y + (int)(radius * sin(rad) * 0.5);
+		
+		if (i == 0) // draw asc line
+		{
+			for (int r = 0; r <= radius; r++)
+			{
+				int line_x = center_x - (int)(r * cos(rad));
+				int line_y = center_y + (int)(r * sin(rad) * 0.5);
+				
+				if (line_x >= 0 && line_x < maxx
+				&& line_y >= 0 && line_y < maxy)
+					mvwaddch(main_win, line_y, line_x, '`');
+			}
+		}
+		
+		mvwaddstr(main_win, y, x, ascmc_sym[i]);
+		
+		double decimal = (((angle[i] - (int)angle[i]) * 60) / 100);
+		
+		char buffer[56];
+		snprintf(buffer, sizeof(buffer), "%.2f", ((int)angle[i] % 30) + 
+		decimal);
+		
+		mvwaddstr(main_win, y - 1, x, buffer);
+	}
+}
 
-	int center_x = (maxx / 2);
-	int center_y = (maxy / 2);
-	
-	int sign = (((int)asc / 30) * 30) + 15;
-	
-	double rad = (angle - sign) * M_PI / 180.0;
-	
-	int x = center_x - (int)(radius * cos(rad));
-	int y = center_y + (int)(radius * sin(rad) * 0.5);
-	
-	mvwaddstr(main_win, y, x, zo_sym[i]);
+void zo_pos(WINDOW *main_win, int maxy, int maxx,
+int radius, double *angle, double asc)
+{
+	int asc_sign = (int)(asc / 30);
+	for (int i = 1; i < 13; ++i)
+	{
+			
+		int sign_display = ((i + asc_sign - 1) % 12);
+		if (sign_display == 0)
+			sign_display = 12;
+
+		int center_x = (maxx / 2);
+		int center_y = (maxy / 2);
+		
+		int sign = (((int)asc / 30) * 30) + 15;
+		
+		double rad = (angle[i] - sign) * M_PI / 180.0;
+		
+		int x = center_x - (int)(radius * cos(rad));
+		int y = center_y + (int)(radius * sin(rad) * 0.5);
+		
+		mvwaddstr(main_win, y, x, zo_sym[sign_display]);
+	}
 }
 
 void draw_house(WINDOW *main_win, int maxy, int maxx, 
-int radius, double angle, chtype ch)
+int radius, double *angle, chtype ch)
 {
-	double rad = angle * M_PI / 180.0;
-	
-	int center_x = maxx / 2;
-	int center_y = maxy / 2;
-	
-	int edge_x = center_x - (int)(radius * cos(rad));
-	int edge_y = center_y + (int)(radius * sin(rad) * 0.5);
-	
-	int half_x = center_x - (int)((radius / 2) * cos(rad));
-	int half_y = center_y + (int)((radius / 2)  * sin(rad) * 0.5);
-	
-	int dx = edge_x - half_x;
-	int dy = edge_y - half_y;
-	
-	int distance = (int)sqrt(dx * dx + dy * dy);
-	if (distance == 0)
-		distance = 1;
-	
-	for(int i = 0; i <= distance; i++)
+	for (int i = 0; i < 13; ++i)
 	{
-		int x = half_x + (dx * i) / distance;
-		int y = half_y + (dy * i) / distance;
-		mvwaddch(main_win, y, x, ch);
+		double rad = angle[i] * M_PI / 180.0;
+		
+		int center_x = maxx / 2;
+		int center_y = maxy / 2;
+		
+		int edge_x = center_x - (int)(radius * cos(rad));
+		int edge_y = center_y + (int)(radius * sin(rad) * 0.5);
+		
+		int half_x = center_x - (int)((radius / 2) * cos(rad));
+		int half_y = center_y + (int)((radius / 2)  * sin(rad) * 0.5);
+		
+		int dx = edge_x - half_x;
+		int dy = edge_y - half_y;
+		
+		int distance = (int)sqrt(dx * dx + dy * dy);
+		if (distance == 0)
+			distance = 1;
+		
+		for(int j = 0; j <= distance; j++)
+		{
+			int x = half_x + (dx * j) / distance;
+			int y = half_y + (dy * j) / distance;
+			mvwaddch(main_win, y, x, ch);
+		}
 	}
 }
 
@@ -883,8 +900,6 @@ void draw_chart(WINDOW *main_win, int maxy, int maxx, Pxx *pxx)
 		&pxx->ddsc, &pxx->dic,
 		&pxx->dfor, &pxx->dspir};
 	
-	int i; 
-
 	curs_set(0);
 	wclear(main_win);
 	int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
@@ -896,35 +911,13 @@ void draw_chart(WINDOW *main_win, int maxy, int maxx, Pxx *pxx)
 	// inner circle
 	draw_circle(main_win, maxy, maxx, (radius / 2) - 1, '.');
 	
-	for (i = 0; i < 13; ++i)
-	{
-		draw_house(main_win, maxy, maxx, radius + 4,
-		cusps[i], '`');
-	}
+	draw_house(main_win, maxy, maxx, radius + 4, cusps, '`');
 	
-	int asc_sign = (int)(ascmc[0] / 30);
-	for (i = 1; i < 13; ++i)
-	{
-		
-		int sign_display = ((i + asc_sign - 1) % 12);
-		if (sign_display == 0)
-			sign_display = 12;
-
-		zo_pos(main_win, sign_display, maxy, maxx,
-		radius + 3, cusps[i], ascmc[0]);
-	}
-
-	for (i = 0; i < 12; ++i)
-	{
-		planet_pos(main_win, i, maxy, maxx,
-		radius - 9, *pxx_members[i], cusps[1], pxx);
-	}
+	zo_pos(main_win, maxy, maxx, radius + 3, cusps, ascmc[0]);
 	
-	for (i = 0; i < 2; ++i)
-	{
-		ascmc_pos(main_win, i, maxy, maxx,
-		(radius / 2) + 4 , ascmc[i], cusps[1]);
-	}
+	planet_pos(main_win, maxy, maxx, radius - 9, pxx_members, cusps[1], pxx);
+	
+	ascmc_pos(main_win, maxy, maxx, (radius / 2) + 4 , ascmc, cusps[1]);
 		
 	wrefresh(main_win);
 }
