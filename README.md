@@ -15,8 +15,6 @@ doas/sudo make clean install
 
 - swiss ephemeris (built with the makefile)
 - ncurses
-- GNU coreutil date
-- /etc/localtime symlink to IANA timezone, to autofill.
 
 basically, it should work on most linux distros, it may not work on systems
 using musl, you are welcome to share patches in order to fix that //
