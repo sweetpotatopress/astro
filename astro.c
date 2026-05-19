@@ -47,6 +47,17 @@ double cusps[13], ascmc[10]; //houses, asc, mc
 int ihsy = 'W'; // house system
 
 
+int months(int month, int year)
+{
+	int days[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	
+	if (month == 2)
+		if ((year % 4 == 0 && year % 100 != 0) || 
+		(year % 400 == 0))
+			return 29;
+	return days[month];
+}
+
 void buff_trim(FIELD *current, char *buffer)
 {
 	char *f_buf = field_buffer(current, 0);
@@ -146,7 +157,7 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 			
 		case 6:
 			if (setenv("TZ", buffer, 1) != 0)
-				ERR_EXIT("ERR: TZ setenv fail field_to_membver");
+				ERR_EXIT("ERR: TZ setenv fail field_to_member");
 			tzset();
 			break;
 			
@@ -191,7 +202,7 @@ void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
 }
 
 void set_localtime(FIELD *cdata_field[], struct tm *cdata)
-{
+{	// autofills chart field input with local systemtime 
 	char buff[128] = {0};
 	ssize_t len = readlink("/etc/localtime", buff, sizeof(buff) - 1);
 	if (len != -1)
@@ -788,16 +799,15 @@ void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
 	
 	loc->dhour = dhour; 
 	*cdata = *c_copy;
-}
-
-void reset_struct(struct tm *cdata)
-{
+	
+	// reset struct
 	cdata->tm_mon += 1;
 	cdata->tm_year += 1900;
 }
 
 void pxx_fill(struct tm *cdata, Location *loc, Pxx *pxx)
 {
+	int day_offset = 0;
 	int iret;
 	size_t i;
 	
@@ -812,9 +822,7 @@ void pxx_fill(struct tm *cdata, Location *loc, Pxx *pxx)
 	&pxx->ddsc, &pxx->dic,
 	&pxx->dfor, &pxx->dspir};
 	
-	int day_offset = 0;
 	chart_timeset(cdata, loc, &day_offset); // goes before swe_julday
-	reset_struct(cdata); // ----
 	
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
@@ -1055,7 +1063,27 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 		wrefresh(planet_win);
 }
 
-void retrograde_table(PANEL *retro_panel, Pxx *pxx)
+void parse_hour(struct tm *cdata)
+{
+	if ((++cdata->tm_hour) > 23)
+	{
+		cdata->tm_hour = 0;
+		++cdata->tm_mday;
+		if (cdata->tm_mday > months(
+		cdata->tm_mon, cdata->tm_year))
+		{
+			cdata->tm_mday = 1;
+			++cdata->tm_mon;
+			if (cdata->tm_mon > 12)
+			{
+				cdata->tm_mon = 1;
+				++cdata->tm_year;
+			}
+		}
+	}
+}
+
+void retrograde_table(PANEL *retro_panel, struct tm *cdata, Location *loc, Pxx *pxx)
 {
 	WINDOW *retro_win = NULL;
 	
@@ -1067,7 +1095,7 @@ void retrograde_table(PANEL *retro_panel, Pxx *pxx)
 		pxx->dnep, pxx->dplu,
 		pxx->dmnod, pxx->dtnod};
 		
-	int p_count = 12;
+	size_t p_count = 12;
 		
 	int maxy = 38;
 	int maxx = 45;
@@ -1084,8 +1112,7 @@ void retrograde_table(PANEL *retro_panel, Pxx *pxx)
 	
 	for (int i = 0; i < maxy; i++) 
 	    mvwhline(retro_win, i, 0, ' ', maxx);
-	
-	for (int i = 0; i < p_count; ++i)
+	for (size_t i = 0; i < p_count; ++i)
 	{
 		char buff[MAXBUF];
 		
@@ -1094,7 +1121,7 @@ void retrograde_table(PANEL *retro_panel, Pxx *pxx)
 			snprintf(buff, sizeof(buff), "%-6s %-6f",
 			pl_sym[i], p_arr[i][LONG_S]);
 			
-			mvwprintw(retro_win, i, 0, "%s", buff);
+			mvwprintw(retro_win, (int)i, 0, "%s", buff);
 		}
 	}
 	
@@ -1104,17 +1131,17 @@ void retrograde_table(PANEL *retro_panel, Pxx *pxx)
 	wrefresh(retro_win);
 }
 
-int months(int month, int year)
+void new_chart(WINDOW *main_win, PANEL *planet_panel,
+int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx,
+int *planet_trig)
 {
-	int days[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-	
-	if (month == 2)
-		if ((year % 4 == 0 && year % 100 != 0) || 
-		(year % 400 == 0))
-			return 29;
-	return days[month];
+	pxx_fill(cdata, loc, pxx);
+	draw_chart(main_win, maxy, maxx, pxx);
+	cur_chart_data(main_win, maxx, io, cdata, loc);
+	if (*planet_trig > 0)
+		planet_table(planet_panel, pxx);
 }
-
+	
 void animate_chart(WINDOW *main_win, PANEL *planet_panel,
 int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx,
 int *planet_trig)
@@ -1186,11 +1213,8 @@ int *planet_trig)
 								}
 							}
 						}
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 						
 					case 1:
@@ -1210,12 +1234,8 @@ int *planet_trig)
 								}
 							}
 						}
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 						
 					case 2:
@@ -1230,12 +1250,8 @@ int *planet_trig)
 								++cdata->tm_year;
 							}
 						}
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 						
 					case 3:
@@ -1249,23 +1265,16 @@ int *planet_trig)
 						if (cdata->tm_mday > max_day)
 							cdata->tm_mday = max_day;
 							
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 						
 					case 4:
 						if ((++cdata->tm_year) > 16799)
 							cdata->tm_year = -12998;
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+							
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 				}
 				break;
@@ -1294,12 +1303,8 @@ int *planet_trig)
 								}
 							}
 						}
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 						
 					case 1:
@@ -1319,12 +1324,8 @@ int *planet_trig)
 								cdata->tm_mon, cdata->tm_year);
 							}
 						}
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 						
 					case 2:
@@ -1339,13 +1340,8 @@ int *planet_trig)
 							cdata->tm_mday = months(
 							cdata->tm_mon, cdata->tm_year);
 						}
-	
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 						
 					case 3:
@@ -1358,23 +1354,17 @@ int *planet_trig)
 						cdata->tm_mon, cdata->tm_year);
 						if (cdata->tm_mday > max_day)
 							cdata->tm_mday = max_day;
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+							
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 						
 					case 4:
 						if ((--cdata->tm_year) < -12998)
 							cdata->tm_year = 16799;
-						pxx_fill(cdata, loc, pxx);
-						draw_chart(main_win, maxy, maxx, pxx);
-						cur_chart_data(main_win, maxx, io, cdata, loc);
-						if (*planet_trig > 0)
-							planet_table(planet_panel, pxx);
-	
+							
+						new_chart(main_win, planet_panel, maxy, maxx,
+						io, cdata, loc, pxx, planet_trig);
 						break;
 				}
 				break;
@@ -1578,7 +1568,7 @@ int main()
 					if (!retro_trig)
 					{
 						retro_trig = 1;
-						retrograde_table(retro_panel, pxx);
+						retrograde_table(retro_panel, cdata, loc, pxx);
 					}
 					else
 					{
