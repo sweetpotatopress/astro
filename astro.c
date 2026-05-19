@@ -736,63 +736,14 @@ void lots(int sect, Pxx *pxx)
 		pxx->dspir += 360.0;
 }
 
-void check_dst(struct tm *c_copy)
-{
-	char cmd[MAXBUF] = {0};
-	char buffer[256] = {0};
-	char *tz_name = getenv("TZ");
-	if (!tz_name)
-		tz_name = "UTC";
-	FILE *fp;
-	
-	//calls GNU coreutil date
-	snprintf(cmd, sizeof(cmd), "TZ=%s date -d '%d-%d-%d %d:%d' '+%%Z'", 
-	tz_name, c_copy->tm_year, c_copy->tm_mon, c_copy->tm_mday,
-	c_copy->tm_hour, c_copy->tm_min);
-	
-	fp = popen(cmd, "r");
-	if (!fp)
-		ERR_EXIT("ERR: popen, youre dead mate nya");
-	
-	if (fgets(buffer, sizeof(buffer), fp) == NULL)
-	{
-		fprintf(stderr, "ERR: %s\n", cmd);
-		pclose(fp);
-		return;
-	}
-	
-	buffer[strcspn(buffer, "\n")] = 0;
-	pclose(fp);
-	
-	c_copy->tm_isdst = 
-	(tzname[1] && 
-	tzname[0] != tzname[1] &&
-	strcmp(buffer, tzname[1]) == 0) ? 1 : 0;
-}
-
 void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
 {
 	struct tm *c_copy = cdata;
-	check_dst(c_copy); // save city name
-	//correct tm quirk after GNU date
-	c_copy->tm_year -= 1900;
-	c_copy->tm_mon -= 1;
 	
-	//copy correct isdst and hour before mktime
-	//mktime "corrects" it to system defaults, which can be wrong
-	int isdst = c_copy->tm_isdst;
-	int tm_hour = c_copy->tm_hour;
-	
-	time_t tret = mktime(c_copy);
-	localtime_r(&tret, c_copy);
-	
-	c_copy->tm_isdst = isdst;
-	c_copy->tm_hour = tm_hour;
-
-	long utc_sec = c_copy->tm_gmtoff;
+	long utc_sec = timezone;
 	
 	//get utc offset in seconds, reverse, and display in hours
-	double utc_offset = (double)-utc_sec / 3600;
+	double utc_offset = (double)utc_sec / 3600;
 	
 	//convert inputted minutes to decimal
 	double min = (double)c_copy->tm_min / 60;
@@ -817,9 +768,6 @@ void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
 	loc->dhour = dhour; 
 	*cdata = *c_copy;
 	
-	// reset struct
-	cdata->tm_mon += 1;
-	cdata->tm_year += 1900;
 }
 
 void pxx_fill(struct tm *cdata, Location *loc, Pxx *pxx)
@@ -904,11 +852,11 @@ void draw_chart(WINDOW *main_win, int maxy, int maxx, Pxx *pxx)
 	wclear(main_win);
 	int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
 	
-	// zodiac circle
+	// zodiac
 	draw_circle(main_win, maxy, maxx, radius + 4, '`');
-	// outer circle
+	// out
 	draw_circle(main_win, maxy, maxx, radius, '.');
-	// inner circle
+	// in
 	draw_circle(main_win, maxy, maxx, (radius / 2) - 1, '.');
 	
 	draw_house(main_win, maxy, maxx, radius + 4, cusps, '`');
