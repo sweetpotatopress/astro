@@ -658,6 +658,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
 						wclear(load_win);
+						wrefresh(load_win);
 						menu_done = 1 ;
 						break;
 					}
@@ -698,12 +699,14 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					
 					wclear(load_win);
+					wrefresh(load_win);
 					menu_done = 1;
 					break;
 				case 'q': 
 					load_done = 1;
 					menu_done = 1;
 					wclear(load_win);
+					wrefresh(load_win);
 					break;
 				default:
 					ch = wgetch(load_win);
@@ -713,7 +716,6 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		
 		unpost_menu(load_menu);
 		touchwin(load_win);
-		wrefresh(load_win);
 		free_menu(load_menu);
 		for (size_t j = 0; j < io->file_count; ++j)
 		{
@@ -726,6 +728,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		free(load_files);
 		
 		wclear(load_win);
+		wrefresh(load_win);
 		delwin(load_subwin);
 		delwin(load_win);
 	} // end of load_done loop

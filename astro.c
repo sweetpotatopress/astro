@@ -180,7 +180,7 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 	free(buffer);
 }
 
-void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
+void field_label(WINDOW *cdata_form_win, int starty, int startx)
 {
 	const char *c_labels[] = {
 		"city search:",
@@ -195,6 +195,7 @@ void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
 		NULL
 	};
 	
+	size_t i = 0;
 	for (i = 0, starty = 4; i < 9; ++i, starty+= 2)
 			mvwprintw(cdata_form_win, starty, startx - 12,
 			"%s", c_labels[i]);
@@ -252,15 +253,13 @@ FORM *cdata_form, Cdata *cdata, char *citybuffer)
 {
 	size_t i = 0;
 	
-	while (i == 0)
-	{ // save city name
-		set_current_field(cdata_form, cdata_field[i]);
-		FIELD *current = current_field(cdata_form);
-		char buffer[MAXBUF] = {0};
-		buff_trim(current, buffer);
-		memcpy(citybuffer, buffer, strlen(buffer) + 1);
-		++i;
-	}
+	// save city name
+	set_current_field(cdata_form, cdata_field[i]);
+	FIELD *current = current_field(cdata_form);
+	char buffer[MAXBUF] = {0};
+	buff_trim(current, buffer);
+	memcpy(citybuffer, buffer, strlen(buffer) + 1);
+	++i;
 		
 	for (; i < 9; i++)
 	{
@@ -357,7 +356,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	set_current_field(cdata_form, cdata_field[0]);
 	
 	wrefresh(cdata_form_win);
-	field_label(cdata_form_win, i, starty, startx);
+	field_label(cdata_form_win, starty, startx);
 	pos_form_cursor(cdata_form);
 	
 	int cdata_entry = 0;
@@ -425,7 +424,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 						cdata_form, cdata_field, citybuffer);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						
-						field_label(cdata_form_win, i, starty, startx);
+						field_label(cdata_form_win, starty, startx);
 						
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
@@ -706,10 +705,10 @@ int sect(Pxx *pxx)
 {
 	int sect = 0;
 	
-	if ((pxx->dsun[LONG] - ascmc[0]) <= 180)
+	if ((pxx->dsun[LONG] - pxx->dasc) <= 180)
 		sect = 1; // day
 		
-	else if ((pxx->dsun[LONG] - ascmc[0]) >= 180)
+	else
 		sect = 0; // night
 		
 	return sect;
@@ -718,7 +717,6 @@ int sect(Pxx *pxx)
 void lots(int sect, Pxx *pxx)
 {
 	double diff;
-	
 	
 	if (sect) // day
 	{
@@ -790,7 +788,7 @@ void chart_timeset(Cdata *cdata, int *day_offset)
 	}
 	else if((dhour <= 0))
 	{
-		dhour += 23.999999;
+		dhour += 24.0;
 		--cdata->tm_mday;
 		*day_offset += 1;
 	}
@@ -1034,7 +1032,7 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 
 void retrograde_table(PANEL *retro_panel, Pxx *pxx)
 {
-	WINDOW *retro_win = NULL;
+	static WINDOW *retro_win = NULL;
 	
 	double *p_arr[] = {
 		pxx->dsun, pxx->dmoon,
@@ -1459,8 +1457,8 @@ int main()
 	
 	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
 	
-	PANEL *planet_panel = NULL;
-	PANEL *retro_panel = NULL;
+	static PANEL *planet_panel = NULL;
+	static PANEL *retro_panel = NULL;
 	int main_done = 0;
 	while (!main_done)
 	{
