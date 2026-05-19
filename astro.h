@@ -77,6 +77,8 @@ typedef struct {
 	int tm_mday;
 	int tm_mon;
 	int tm_year;
+	int tm_isdst;
+	int utc_off;
 } Cdata;
 
 typedef struct {

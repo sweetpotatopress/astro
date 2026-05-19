@@ -146,6 +146,8 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		if (!save_win)
 			ERR_EXIT("ERR: save_win newwin");
 			
+		wbkgdset(save_win, COLOR_PAIR(M_COLOR));
+			
 		save_subwin = derwin(save_win, height - 2, width - 2, 1, 1);
 		
 		keypad(save_win, TRUE);
@@ -160,6 +162,8 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		
 		menu_opts_off(save_menu, O_NONCYCLIC);
 		menu_opts_off(save_menu, O_SHOWDESC);
+		set_menu_fore(save_menu, COLOR_PAIR(M_COLOR));
+		set_menu_back(save_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
 		set_menu_win(save_menu, save_win);
 		set_menu_sub(save_menu, save_subwin);
 		
@@ -295,13 +299,15 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 	save_subwin = 
 	derwin(save_win, height - 2, width - 2, 0, 0);
 	
+	wbkgdset(save_win, COLOR_PAIR(M_COLOR));
+	
 	cbreak();
 	keypad(save_win, TRUE);
 	clearok(save_win, TRUE);
 	wclear(save_win);
 	
 	save_field[0] = new_field(1, 25, 2, 2, 0, 0);
-	set_field_back(save_field[0], A_UNDERLINE);
+	set_field_back(save_field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(save_field[0], O_STATIC);
 	field_opts_off(save_field[0], O_AUTOSKIP);
 	
@@ -582,6 +588,8 @@ void load_chart(FIELD *cdata_field[], Io *io)
 			
 		load_subwin = derwin(load_win, height - 2, width - 2, 1, 1);
 		
+		wbkgdset(load_win, COLOR_PAIR(M_COLOR));
+		
 		keypad(load_win, TRUE);
 		clearok(load_win, TRUE);
 		wclear(load_win);
@@ -592,10 +600,13 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		if (!load_menu)
 			ERR_EXIT("ERR: load_menu new_menu");
 		
-		menu_opts_off(load_menu, O_NONCYCLIC);
-		menu_opts_off(load_menu, O_SHOWDESC);
 		set_menu_win(load_menu, load_win);
 		set_menu_sub(load_menu, load_subwin);
+		set_menu_back(load_menu, COLOR_PAIR(M_COLOR));
+		set_menu_fore(load_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+		menu_opts_off(load_menu, O_NONCYCLIC);
+		menu_opts_off(load_menu, O_SHOWDESC);
+	
 		
 		int iret = post_menu(load_menu);
 		if (iret != E_OK)

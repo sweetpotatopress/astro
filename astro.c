@@ -719,6 +719,7 @@ void lots(int sect, Pxx *pxx)
 {
 	double diff;
 	
+	
 	if (sect) // day
 	{
 		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
@@ -740,35 +741,61 @@ void lots(int sect, Pxx *pxx)
 		pxx->dspir += 360.0;
 }
 
+void check_dst(Cdata *cdata)
+{
+	struct tm tm_in = {0};
+	tm_in.tm_year = cdata->tm_year - 1900;
+	tm_in.tm_mon = cdata->tm_mon - 1;
+	tm_in.tm_mday = cdata->tm_mday;
+	tm_in.tm_hour = cdata->tm_hour;
+	tm_in.tm_min = cdata->tm_min;
+	tm_in.tm_sec = 0;
+	tm_in.tm_isdst = -1;
+	
+	time_t t = mktime(&tm_in);
+	struct tm *result = localtime(&t);
+	
+	cdata->tm_isdst = result->tm_isdst;
+	
+	struct tm *utc_tm = gmtime(&t);
+	
+	int offset_hours = tm_in.tm_hour - utc_tm->tm_hour;
+	
+	if (tm_in.tm_mday != utc_tm->tm_mday)
+	{
+		if (tm_in.tm_mday > utc_tm->tm_mday)
+			offset_hours += 24;
+		else
+			offset_hours -= 24;
+	}
+	
+	cdata->utc_off = offset_hours;
+}
+
 void chart_timeset(Cdata *cdata, int *day_offset)
 {
-	Cdata *c_copy = cdata;
+	check_dst(cdata);
 	
-	long utc_sec = timezone;
+	double utc_offset = (double)cdata->utc_off;
 	
-	double utc_offset = (double)utc_sec / 3600;
-	if (daylight != 0)
-		--utc_offset;
+	double min = (double)cdata->tm_min / 60;
 	
-	double min = (double)c_copy->tm_min / 60;
-	
-	double dhour = (double)(c_copy->tm_hour + utc_offset) + min;
+	double dhour = (double)(cdata->tm_hour - utc_offset) + min;
 	
 	if((dhour >= 24.0))
 	{
 		dhour -= 24.0;
-		++c_copy->tm_mday;
+		++cdata->tm_mday;
 		*day_offset -= 1;
 	}
 	else if((dhour <= 0))
 	{
 		dhour += 23.999999;
-		--c_copy->tm_mday;
+		--cdata->tm_mday;
 		*day_offset += 1;
 	}
 	
 	cdata->dhour = dhour; 
-	*cdata = *c_copy;
 }
 
 void pxx_fill(Cdata *cdata, Pxx *pxx)
@@ -928,7 +955,7 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 		&pxx->ddsc, &pxx->dic};
 		
 	int maxy = 38;
-	int maxx = 45;
+	int maxx = 43;
 	
 	if (!planet_win)
 	{
@@ -959,12 +986,12 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 		if ( i != 10 && i < 12) // sun -> node (skipping mean node)
 		{
 			swe_get_planet_name(i, spname);
-			spname[3] ='\0';
+			spname[2] ='\0';
 			
 			char buff[MAXBUF];
 			
 			snprintf(buff, sizeof(buff),
-			"%-4s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-5s %-5.3f",
+			"%-3s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-4s %-5.2f",
 			spname, pl_sym[i], full_deg, a_full_dec,
 			deg, a_dec, zo_sym[zo_pos], p_arr[i][LONG_S]);
 			
@@ -1513,4 +1540,3 @@ int main()
 	
 	return 0;
 }
-
