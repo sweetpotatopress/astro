@@ -1,6 +1,6 @@
 fast astrology charts in the terminal/tty
 
-![picture of the chart with the planet table open](https://i.postimg.cc/gjz4c9Xm/screenshot.png)
+![picture of the chart with the planet table open](https://sweetpotato.press/astro.png)
 
 
 in-development program with no stable version  
