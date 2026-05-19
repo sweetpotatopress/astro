@@ -244,6 +244,7 @@ void set_localtime(FIELD *cdata_field[])
 	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
 	set_field_buffer(cdata_field[5], 0, buff);
 	
+	free(gettime);
 }
 
 void validate_fields(WINDOW *cdata_form_win, FIELD *cdata_field[],
@@ -399,12 +400,12 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 					case 'w':
 						validate_fields(cdata_form_win, cdata_field,
 						cdata_form, cdata, citybuffer);
-						main_io(io, cdata_field, cdata, 'w');
+						main_io(io, cdata_field, cdata, citybuffer, 'w');
 						mode = NORMAL;
 						break;
 						
 					case 'e':
-						main_io(io, cdata_field, cdata, 'e');
+						main_io(io, cdata_field, cdata, citybuffer, 'e');
 						mode = NORMAL;
 						break;
 						

@@ -23,7 +23,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <menu.h>
 #include "astro.h"
 
-void save_chart(Cdata *cdata, Io *io)
+void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 {
 
 	MENU *save_menu;
@@ -436,7 +436,7 @@ void save_chart(Cdata *cdata, Io *io)
 
 	// copy data to file, \n delimited
 	fprintf(ifp, "%s\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
-		cdata->city,
+		citybuffer,
 		cdata->tm_year,
 		cdata->tm_mon,
 		cdata->tm_mday,
@@ -720,7 +720,8 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	free(homepath);
 }
 
-void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata, const char ch)
+void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata,
+char *citybuffer, const char ch)
 {
 	struct passwd *pw = getpwuid(getuid());
 	if (!pw) 
@@ -730,7 +731,7 @@ void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata, const char ch)
 	"%s/.local/share/astro/charts/", pw->pw_dir);
 	
 	if (ch == 'w')
-		save_chart(cdata, io);
+		save_chart(cdata, io, citybuffer);
 	if (ch == 'e')
 		load_chart(cdata_field, io);
 		

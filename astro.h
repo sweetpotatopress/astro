@@ -88,5 +88,6 @@ typedef struct {
 typedef enum { NORMAL, INSERT } Mode;
 
 int main_search(FIELD *cdata_field[], char *argv);
-void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata, const char ch);
+void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata,
+char *citybuffer, const char ch);
 
