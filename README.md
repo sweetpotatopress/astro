@@ -3,11 +3,12 @@ fast astrology charts in the terminal/tty
 ![picture of the chart with the planet table open](https://i.postimg.cc/gjz4c9Xm/screenshot.png)
 
 
-in-development program with no stable version
+in-development program with no stable version  
+
 --xo-INSTALL--o-
 
 ```bash
-sudo make clean install
+doas/sudo make clean install
 ```
 
 --o-DEPENDENCIES---
