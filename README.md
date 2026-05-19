@@ -39,12 +39,14 @@ in theory astro works on BSD. in theory . .
 
 **DATA**
 
-charts, city-db, and the swiss ephemeris
- are saved in `$XDG_DATA_HOME`
+ charts, city-db, swiss ephemeris $XDG_DATA_HOME  
+
+ swiss ephemeris header files /usr/local/include  
  
- swiss ephemeris header files in /usr/local/bin
- swiss ephemeris library /usr/local/lib
- astro binary to /usr/local/bin
+ swiss ephemeris library /usr/local/lib  
+ 
+ astro binary /usr/local/bin  
+ 
  
  **TODO**
  
