@@ -162,8 +162,8 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		
 		menu_opts_off(save_menu, O_NONCYCLIC);
 		menu_opts_off(save_menu, O_SHOWDESC);
-		set_menu_fore(save_menu, COLOR_PAIR(M_COLOR));
-		set_menu_back(save_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+		set_menu_fore(save_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+		set_menu_back(save_menu, COLOR_PAIR(M_COLOR));
 		set_menu_win(save_menu, save_win);
 		set_menu_sub(save_menu, save_subwin);
 		
@@ -208,6 +208,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
 						wclear(save_win);
+						wrefresh(save_win);
 						menu_done = 1;
 						break;
 					}
@@ -233,13 +234,14 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 					
 					echo();
 					wclear(save_win);
+					wrefresh(save_win);
 					box(save_win, 0, 0);
 					wprintw(save_win, "dir name?");
 					mvwgetnstr(save_win, 2, 2, mdir, 127);
 					noecho();
 					
 					snprintf(newpath, MAXPATH,
-					"%s/%s", io->filepath, mdir);
+					"%s/%s/", io->filepath, mdir);
 					
 					if (mkdir(newpath, 0755) == -1)
 						ERR_EXIT("save_menu mkdir fail");
