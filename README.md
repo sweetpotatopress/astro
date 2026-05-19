@@ -2,6 +2,8 @@ fast astrology charts in the terminal/tty
 
 ![picture of the chart with the planet table open](https://i.postimg.cc/gjz4c9Xm/screenshot.png)
 
+
+in-development program with no stable version
 --xo-INSTALL--o-
 
 ```bash
@@ -19,8 +21,6 @@ basically, it should work on most linux distros, it may not work on systems
 using musl, you are welcome to share patches in order to fix that //
 send bug reports.
 in theory astro works on BSD. in theory . . 
-please send issue reports for any and everything, id like this to work smoothly
-and your suggestion may do so not just for you, but all! 
 
 --o-KEYBINDS---o-
 
@@ -41,6 +41,10 @@ and your suggestion may do so not just for you, but all!
 
 charts, city-db, and the swiss ephemeris
  are saved in `$XDG_DATA_HOME`
+ 
+ swiss ephemeris header files in /usr/local/bin
+ swiss ephemeris library /usr/local/lib
+ astro binary to /usr/local/bin
  
  **TODO**
  
@@ -71,4 +75,4 @@ charts, city-db, and the swiss ephemeris
  
  geonames - (city-db)
  CC BY 4.0
- https://creativecommons.org/licenses/by/4.0/
+
