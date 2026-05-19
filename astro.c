@@ -84,7 +84,7 @@ void buff_trim(FIELD *current, char *buffer)
 }
 
 void field_to_member
-(WINDOW *cdata_form_win, struct tm *cdata, Location *loc, 
+(WINDOW *cdata_form_win, Cdata *cdata, 
 FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 {
 	FIELD *current = current_field(cdata_form);
@@ -164,17 +164,17 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 		case 7:
 			dret = strtod(buffer, &endptr);
 			if (errno != ERANGE)
-				loc->dlat = dret;
+				cdata->dlat = dret;
 			else
-				loc->dlat = 0.0;
+				cdata->dlat = 0.0;
 			break;
 			
 		case 8:
 			dret = strtod(buffer, &endptr);
 			if (errno != ERANGE)
-				loc->dlon = dret;
+				cdata->dlon = dret;
 			else
-				loc->dlon = 0.0;
+				cdata->dlon = 0.0;
 			break;
 	}
 	free(buffer);
@@ -201,7 +201,7 @@ void field_label(WINDOW *cdata_form_win, size_t i, int starty, int startx)
 	wrefresh(cdata_form_win);
 }
 
-void set_localtime(FIELD *cdata_field[], struct tm *cdata)
+void set_localtime(FIELD *cdata_field[])
 {	// autofills chart field input with local systemtime 
 	char buff[128] = {0};
 	ssize_t len = readlink("/etc/localtime", buff, sizeof(buff) - 1);
@@ -216,34 +216,38 @@ void set_localtime(FIELD *cdata_field[], struct tm *cdata)
 	setenv("TZ", buff, 1);
 	tzset();
 	
+	struct tm *gettime = malloc(sizeof(struct tm));
+	if (!gettime)
+		ERR_EXIT("set_locatime() gettime malloc");
+		
 	time_t now = time(NULL);
-	localtime_r(&now, cdata);
+	localtime_r(&now, gettime);
 	set_field_buffer(cdata_field[6], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", cdata->tm_year+1900);
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_year+1900);
 	set_field_buffer(cdata_field[1], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", cdata->tm_mon + 1);
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_mon + 1);
 	set_field_buffer(cdata_field[2], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", cdata->tm_mday);
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_mday);
 	set_field_buffer(cdata_field[3], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", cdata->tm_hour);
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_hour);
 	set_field_buffer(cdata_field[4], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", cdata->tm_min);
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
 	set_field_buffer(cdata_field[5], 0, buff);
 	
 }
 
 void validate_fields(WINDOW *cdata_form_win, FIELD *cdata_field[],
-FORM *cdata_form, struct tm *cdata, Location *loc, char *citybuffer)
+FORM *cdata_form, Cdata *cdata, char *citybuffer)
 {
 	size_t i = 0;
 	
@@ -261,13 +265,12 @@ FORM *cdata_form, struct tm *cdata, Location *loc, char *citybuffer)
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
-		field_to_member(cdata_form_win, cdata, loc, 
+		field_to_member(cdata_form_win, cdata, 
 		cdata_form, cdata_field, citybuffer);
 	}
 }
 	
-void input_chart_data(Io *io, struct tm *cdata, Location *loc,
-char *citybuffer)
+void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 {
 	WINDOW *cdata_form_win;
 	FIELD *cdata_field[10];
@@ -390,18 +393,18 @@ char *citybuffer)
 						break;
 						
 					case 9: // tab
-						set_localtime(cdata_field, cdata);
+						set_localtime(cdata_field);
 						break;
 						
 					case 'w':
 						validate_fields(cdata_form_win, cdata_field,
-						cdata_form, cdata, loc, citybuffer);
-						main_io(io, cdata_field, cdata, loc, 'w');
+						cdata_form, cdata, citybuffer);
+						main_io(io, cdata_field, cdata, 'w');
 						mode = NORMAL;
 						break;
 						
 					case 'e':
-						main_io(io, cdata_field, cdata, loc, 'e');
+						main_io(io, cdata_field, cdata, 'e');
 						mode = NORMAL;
 						break;
 						
@@ -417,7 +420,7 @@ char *citybuffer)
 				{
 					 case '\n':
 						form_driver(cdata_form, REQ_VALIDATION);
-						field_to_member(cdata_form_win, cdata, loc,
+						field_to_member(cdata_form_win, cdata,
 						cdata_form, cdata_field, citybuffer);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						
@@ -463,7 +466,7 @@ char *citybuffer)
 	}
 	
 	validate_fields(cdata_form_win, cdata_field,
-	cdata_form, cdata, loc, citybuffer);
+	cdata_form, cdata, citybuffer);
 
 	unpost_form(cdata_form);
 	wclear(cdata_form_win);
@@ -736,20 +739,18 @@ void lots(int sect, Pxx *pxx)
 		pxx->dspir += 360.0;
 }
 
-void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
+void chart_timeset(Cdata *cdata, int *day_offset)
 {
-	struct tm *c_copy = cdata;
+	Cdata *c_copy = cdata;
 	
 	long utc_sec = timezone;
 	
-	//get utc offset in seconds, reverse, and display in hours
 	double utc_offset = (double)utc_sec / 3600;
+	if (daylight != 0)
+		--utc_offset;
 	
-	//convert inputted minutes to decimal
 	double min = (double)c_copy->tm_min / 60;
 	
-	//add inputted hour, utc offset, and minutes to decimal
-	//swe_julday uses 24 hour UTC.
 	double dhour = (double)(c_copy->tm_hour + utc_offset) + min;
 	
 	if((dhour >= 24.0))
@@ -765,12 +766,11 @@ void chart_timeset(struct tm *cdata, Location *loc, int *day_offset)
 		*day_offset += 1;
 	}
 	
-	loc->dhour = dhour; 
+	cdata->dhour = dhour; 
 	*cdata = *c_copy;
-	
 }
 
-void pxx_fill(struct tm *cdata, Location *loc, Pxx *pxx)
+void pxx_fill(Cdata *cdata, Pxx *pxx)
 {
 	int day_offset = 0;
 	int iret;
@@ -787,12 +787,12 @@ void pxx_fill(struct tm *cdata, Location *loc, Pxx *pxx)
 	&pxx->ddsc, &pxx->dic,
 	&pxx->dfor, &pxx->dspir};
 	
-	chart_timeset(cdata, loc, &day_offset); // goes before swe_julday
+	chart_timeset(cdata, &day_offset); // goes before swe_julday
 	
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
-	cdata->tm_mday, loc->dhour, SE_GREG_CAL);
+	cdata->tm_mday, cdata->dhour, SE_GREG_CAL);
 	
-	// corrects loc->dhour offset from chart_timeset()
+	// corrects cdata->dhour offset from chart_timeset()
 	cdata->tm_mday += day_offset;
 
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
@@ -811,7 +811,7 @@ void pxx_fill(struct tm *cdata, Location *loc, Pxx *pxx)
 		pxx_members[i][DIST_S] = xx[DIST_S];
 	}
 	
-	iret = swe_houses_ex(jul_day_UT, 0, loc->dlat, loc->dlon,
+	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,
 	ihsy, cusps, ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
@@ -871,7 +871,7 @@ void draw_chart(WINDOW *main_win, int maxy, int maxx, Pxx *pxx)
 }
 
 void cur_chart_data(WINDOW *main_win, int maxx, Io *io, 
-struct tm *cdata, Location *loc)
+Cdata *cdata)
 {	
 	int starty = 3;
 	int startx = maxx - 22;
@@ -880,8 +880,8 @@ struct tm *cdata, Location *loc)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
 	
 	starty += 1;
-	if(loc->city)
-		mvwprintw(main_win, starty, startx, "%s", loc->city);
+	if(cdata->city)
+		mvwprintw(main_win, starty, startx, "%s", cdata->city);
 	
 	starty += 1;
 	if(cdata->tm_year)
@@ -898,12 +898,12 @@ struct tm *cdata, Location *loc)
 		cdata->tm_hour, cdata->tm_min);
 	
 	starty += 1;
-	if (fabs(loc->dlat) > 1e-6)
-		mvwprintw(main_win, starty, startx, "lat.%f", loc->dlat);
+	if (fabs(cdata->dlat) > 1e-6)
+		mvwprintw(main_win, starty, startx, "lat.%f", cdata->dlat);
 	
 	starty += 1;
-	if (fabs(loc->dlon) > 1e-6)
-		mvwprintw(main_win, starty, startx, "lon.%f", loc->dlon);
+	if (fabs(cdata->dlon) > 1e-6)
+		mvwprintw(main_win, starty, startx, "lon.%f", cdata->dlon);
 	
 	wrefresh(main_win);
 }
@@ -1004,27 +1004,7 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 		wrefresh(planet_win);
 }
 
-void parse_hour(struct tm *cdata)
-{
-	if ((++cdata->tm_hour) > 23)
-	{
-		cdata->tm_hour = 0;
-		++cdata->tm_mday;
-		if (cdata->tm_mday > months(
-		cdata->tm_mon, cdata->tm_year))
-		{
-			cdata->tm_mday = 1;
-			++cdata->tm_mon;
-			if (cdata->tm_mon > 12)
-			{
-				cdata->tm_mon = 1;
-				++cdata->tm_year;
-			}
-		}
-	}
-}
-
-void retrograde_table(PANEL *retro_panel, struct tm *cdata, Location *loc, Pxx *pxx)
+void retrograde_table(PANEL *retro_panel, Pxx *pxx)
 {
 	WINDOW *retro_win = NULL;
 	
@@ -1073,18 +1053,18 @@ void retrograde_table(PANEL *retro_panel, struct tm *cdata, Location *loc, Pxx *
 }
 
 void new_chart(WINDOW *main_win, PANEL *planet_panel,
-int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx,
+int maxy, int maxx, Io *io, Cdata *cdata, Pxx *pxx,
 int *planet_trig)
 {
-	pxx_fill(cdata, loc, pxx);
+	pxx_fill(cdata, pxx);
 	draw_chart(main_win, maxy, maxx, pxx);
-	cur_chart_data(main_win, maxx, io, cdata, loc);
+	cur_chart_data(main_win, maxx, io, cdata);
 	if (*planet_trig > 0)
 		planet_table(planet_panel, pxx);
 }
 	
 void animate_chart(WINDOW *main_win, PANEL *planet_panel,
-int maxy, int maxx, Io *io, struct tm *cdata, Location *loc, Pxx *pxx,
+int maxy, int maxx, Io *io, Cdata *cdata, Pxx *pxx,
 int *planet_trig)
 {
 	int starty = 11;
@@ -1155,7 +1135,7 @@ int *planet_trig)
 							}
 						}
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 						
 					case 1:
@@ -1176,7 +1156,7 @@ int *planet_trig)
 							}
 						}
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 						
 					case 2:
@@ -1192,7 +1172,7 @@ int *planet_trig)
 							}
 						}
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 						
 					case 3:
@@ -1207,7 +1187,7 @@ int *planet_trig)
 							cdata->tm_mday = max_day;
 							
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 						
 					case 4:
@@ -1215,7 +1195,7 @@ int *planet_trig)
 							cdata->tm_year = -12998;
 							
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 				}
 				break;
@@ -1245,7 +1225,7 @@ int *planet_trig)
 							}
 						}
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 						
 					case 1:
@@ -1266,7 +1246,7 @@ int *planet_trig)
 							}
 						}
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 						
 					case 2:
@@ -1282,7 +1262,7 @@ int *planet_trig)
 							cdata->tm_mon, cdata->tm_year);
 						}
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 						
 					case 3:
@@ -1297,7 +1277,7 @@ int *planet_trig)
 							cdata->tm_mday = max_day;
 							
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 						
 					case 4:
@@ -1305,7 +1285,7 @@ int *planet_trig)
 							cdata->tm_year = 16799;
 							
 						new_chart(main_win, planet_panel, maxy, maxx,
-						io, cdata, loc, pxx, planet_trig);
+						io, cdata, pxx, planet_trig);
 						break;
 				}
 				break;
@@ -1361,17 +1341,13 @@ int main()
 {
 	WINDOW *main_win;
 
-	struct tm *cdata = calloc(1, sizeof(struct tm));
+	Cdata *cdata = calloc(1, sizeof(Cdata));
 	if (!cdata)
-		ERR_EXIT("main cdata calloc");
-		
-	Location *loc = calloc(1, sizeof(Location));
-	if (!loc)
 		ERR_EXIT("main Location calloc");
+	cdata->city = malloc(MAXBUF);
+	if (!cdata->city)
+		ERR_EXIT("ERR: main cdata->city malloc");
 		
-	loc->city = malloc(MAXBUF);
-	if (!loc->city)
-		ERR_EXIT("ERR: main loc->city malloc");
 	char *citybuffer = malloc(MAXBUF);
 	if (!citybuffer)
 		ERR_EXIT("ERR: main citybuffer alloc fail");
@@ -1460,11 +1436,11 @@ int main()
 	int main_done = 0;
 	while (!main_done)
 	{
-		input_chart_data(io, cdata, loc, citybuffer);
-		loc->city = citybuffer;
-		pxx_fill(cdata, loc, pxx);
+		input_chart_data(io, cdata, citybuffer);
+		cdata->city = citybuffer;
+		pxx_fill(cdata, pxx);
 		draw_chart(main_win, maxy, maxx, pxx);
-		cur_chart_data(main_win, maxx, io,  cdata, loc);
+		cur_chart_data(main_win, maxx, io, cdata);
 			
 		int chart_done = 0, ch = 0,
 		planet_trig = 0, retro_trig = 0;
@@ -1475,7 +1451,7 @@ int main()
 			{
 				case '\n':
 					animate_chart(main_win, planet_panel, maxy, maxx, io,
-					cdata, loc, pxx, &planet_trig);
+					cdata, pxx, &planet_trig);
 					break;
 				case 'q':
 					main_done = 1;
@@ -1509,7 +1485,7 @@ int main()
 					if (!retro_trig)
 					{
 						retro_trig = 1;
-						retrograde_table(retro_panel, cdata, loc, pxx);
+						retrograde_table(retro_panel, pxx);
 					}
 					else
 					{
@@ -1532,7 +1508,6 @@ int main()
 	
 	free(cdata);
 	free(citybuffer);
-	free(loc);
 	free(pxx);
 	
 	return 0;

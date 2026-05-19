@@ -62,8 +62,6 @@ typedef struct {
 	double dspir;
 } Pxx;
 
-// chart data that doesnt fit in struct tm
-
 typedef struct {
 	char *city;
 	char *state;
@@ -74,9 +72,12 @@ typedef struct {
 	double dlat;
 	double dlon;
 	double dhour; //0.0 .. 23.999999;
-} Location;
-
-//io
+	int tm_min;
+	int tm_hour;
+	int tm_mday;
+	int tm_mon;
+	int tm_year;
+} Cdata;
 
 typedef struct {
 	char *filepath;
@@ -87,6 +88,5 @@ typedef struct {
 typedef enum { NORMAL, INSERT } Mode;
 
 int main_search(FIELD *cdata_field[], char *argv);
-void main_io(Io *io, FIELD *cdata_field[], struct tm *cdata,
-Location *loc, const char ch);
+void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata, const char ch);
 

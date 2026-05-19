@@ -56,7 +56,7 @@ char* strtok_E(char *str, const char *delim)
 }
  
 size_t location_parse(FILE *ifp, char *search,
-Location ***choices, size_t *max_search)
+Cdata ***choices, size_t *max_search)
 {
 	size_t i = 0;
 	char buffer[MAXBUF] = {0};
@@ -88,22 +88,22 @@ Location ***choices, size_t *max_search)
 			token = strtok_E(NULL, "\t");
 		}
 		
-		Location *local = NULL;
+		Cdata *local = NULL;
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL &&
 		fields[1] != NULL)
 		{
 			if (i >= *max_search)
 			{
 				*max_search *= 2;
-				Location **temp = reallocarray(
-				*choices, *max_search, sizeof(Location*));
+				Cdata **temp = reallocarray(
+				*choices, *max_search, sizeof(Cdata*));
 				if (!temp)
 					ERR_EXIT("location_parse temp realloc");
 					
 				*choices = temp;
 			}
 			
-			local = calloc(1, sizeof(Location));
+			local = calloc(1, sizeof(Cdata));
 			if (!local)
 				ERR_EXIT("location_parse local calloc");
 				
@@ -122,7 +122,7 @@ Location ***choices, size_t *max_search)
 	return i;
 }
 
-void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
+void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
 {
 	int ch;
 	ITEM **cities;
@@ -208,7 +208,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 	
 	//case '\n'
 	ITEM *selected = NULL;
-	Location *cdata = NULL;
+	Cdata *cdata = NULL;
 	
 	int menu_done = 0;
 	while(!menu_done && (ch = wgetch(city_win)))
@@ -223,7 +223,7 @@ void print_menu(FIELD *cdata_field[], Location **choices, size_t n_choices)
 				break;
 			case '\n':
 				selected = current_item(city_menu);
-				cdata = (Location *)item_userptr(selected);
+				cdata = (Cdata *)item_userptr(selected);
 				
 				set_field_buffer(cdata_field[0], 0, cdata->city);
 				set_field_buffer(cdata_field[6], 0, cdata->timezone);
@@ -263,7 +263,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	size_t n_choices = 0;
 	size_t max_search = MAXBUF;
 	
-	Location **choices = calloc(max_search, sizeof(Location *));
+	Cdata **choices = calloc(max_search, sizeof(Cdata *));
 	if (!choices)
 		ERR_EXIT("main_search choices calloc");
 	
