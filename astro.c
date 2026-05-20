@@ -84,8 +84,8 @@ void buff_trim(FIELD *current, char *buffer)
 }
 
 void field_to_member
-(WINDOW *cdata_form_win, Cdata *cdata, 
-FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
+(Cdata *cdata, FORM *cdata_form,
+FIELD *cdata_field[], char *citybuffer)
 {
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
@@ -106,8 +106,6 @@ FORM *cdata_form, FIELD *cdata_field[], char *citybuffer)
 		case 0:
 			main_search(cdata_field, buffer);
 			form_driver(cdata_form, REQ_VALIDATION);
-			
-			wrefresh(cdata_form_win);
 			
 			buff_trim(current, buffer);
 			
@@ -248,7 +246,7 @@ void set_localtime(FIELD *cdata_field[])
 	free(gettime);
 }
 
-void validate_fields(WINDOW *cdata_form_win, FIELD *cdata_field[],
+void validate_fields(FIELD *cdata_field[],
 FORM *cdata_form, Cdata *cdata, char *citybuffer)
 {
 	size_t i = 0;
@@ -265,8 +263,8 @@ FORM *cdata_form, Cdata *cdata, char *citybuffer)
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
-		field_to_member(cdata_form_win, cdata, 
-		cdata_form, cdata_field, citybuffer);
+		field_to_member(cdata, cdata_form,
+		cdata_field, citybuffer);
 	}
 }
 	
@@ -394,7 +392,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 						break;
 						
 					case 'w':
-						validate_fields(cdata_form_win, cdata_field,
+						validate_fields(cdata_field,
 						cdata_form, cdata, citybuffer);
 						main_io(io, cdata_field, cdata, citybuffer, 'w');
 						mode = NORMAL;
@@ -417,8 +415,8 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 				{
 					 case '\n':
 						form_driver(cdata_form, REQ_VALIDATION);
-						field_to_member(cdata_form_win, cdata,
-						cdata_form, cdata_field, citybuffer);
+						field_to_member(cdata, cdata_form,
+						cdata_field, citybuffer);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						
 						field_label(cdata_form_win, starty, startx);
@@ -462,7 +460,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 		wrefresh(cdata_form_win);
 	}
 	
-	validate_fields(cdata_form_win, cdata_field,
+	validate_fields(cdata_field,
 	cdata_form, cdata, citybuffer);
 
 	unpost_form(cdata_form);
@@ -1057,13 +1055,13 @@ int *planet_trig, int *retro_trig)
 	{
 		planet_table(planet_win, pxx);
 		show_panel(*planet_panel);
-		wrefresh(planet_win);
+		update_panels();
 	}
 	if (*retro_trig > 0)
 	{
 		retrograde_table(retro_win, pxx);
 		show_panel(*retro_panel);
-		wrefresh(retro_win);
+		update_panels();
 	}	
 }
 	
@@ -1119,14 +1117,12 @@ int *planet_trig, int *retro_trig)
 				touchwin(main_win);
 				wrefresh(main_win);
 				update_panels();
-				doupdate();
 				break;
 				
 			case 'o':
 				if (*retro_trig)
 				{
 					hide_panel(*retro_panel);
-					update_panels();
 					*retro_trig = 0;
 				}
 				else
@@ -1144,7 +1140,6 @@ int *planet_trig, int *retro_trig)
 				touchwin(main_win);
 				wrefresh(main_win);
 				update_panels();
-				doupdate();
 				break;
 				
 			case 'j':
@@ -1477,7 +1472,7 @@ int main()
 	
 	initscr();
 	set_escdelay(25);
-	napms(8);
+	napms(32);
 	
 	start_color();
 	init_color(1, 0, 0, 0); //black
@@ -1607,4 +1602,4 @@ int main()
 	free(pxx);
 	
 	return 0;
-}
+} 
