@@ -23,18 +23,33 @@ in theory astro works on BSD. in theory . .
 
 --o-KEYBINDS---o-
 
-| mode INSERT (i) | mode NORMAL (esc) | CHART VIEW |
-|---|---|---|
-| arrowkeys | navigation: hjkl | planet table: p |
-|| draw chart: enter | animate chart: enter |
-|| autofill systime: tab | swap increment: h/l |
-||  save chart: w | ++ and --: j/k |
-||  choose dir: q | exit program: q |
-||  mkdir: m | new chart: i |
-||  cancel save: esc | |
-||  load chart: e | |
-||  choose file: l/enter | |
-||  cancel: q | |
+**mode INSERT ( i )** 
+ 
+navigation: 	arrowkeys  
+
+**mode NORMAL ( esc )**  
+
+navigation:    hjkl  
+draw chart:		enter  
+fill systime:	tab  
+
+save chart:		w  
+	--makedir:	m  
+	--cancel:	esc  
+
+load chart:		e  
+	--choose:	l/enter  
+	--cancel:	q  
+ 
+**CHART VIEW**  
+
+planet table:	p  
+planet speed:	o  
+animate chart:	enter  
+	--increment:	h/l  
+	--up/down:		j/k  
+new chart:		i  
+exit:			q  
 
 **DATA**
 
