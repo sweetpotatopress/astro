@@ -570,8 +570,16 @@ int radius, double **planet, double asc, Pxx *pxx)
 			{
 				if (near_horizontal)
 				{
-					offsetx += 3;
-					offsety -= 2;
+					if ((fabs(p_arr[j] - pxx->dasc)) < 45)
+					{
+						offsetx -= 13;
+						offsety -= 2;
+					}
+					else
+					{
+						offsetx += 3;
+						offsety -= 2;
+					}
 				}
 				else
 				{
