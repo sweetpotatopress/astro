@@ -289,7 +289,6 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	cdata_form_win = newwin(maxy, maxx, 0, 0);
 	
 	keypad(cdata_form_win, TRUE);	
-	clearok(cdata_form_win, TRUE);
 	
 	wbkgdset(cdata_form_win, COLOR_PAIR(M_COLOR));
 	
@@ -350,12 +349,10 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	set_form_sub(cdata_form,
 	derwin(cdata_form_win, maxy, maxx, 0, 0));
 	
-	touchwin(cdata_form_win);
 	post_form(cdata_form);
 	
 	set_current_field(cdata_form, cdata_field[0]);
 	
-	wrefresh(cdata_form_win);
 	field_label(cdata_form_win, starty, startx);
 	pos_form_cursor(cdata_form);
 	
@@ -470,7 +467,6 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 
 	unpost_form(cdata_form);
 	wclear(cdata_form_win);
-	touchwin(cdata_form_win);
 	wrefresh(cdata_form_win);
 	free_form(cdata_form);
 	
@@ -950,8 +946,6 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 	int maxy = 38;
 	int maxx = 36;
 	
-	wbkgdset(planet_win, COLOR_PAIR(M_COLOR));
-	
 	for (int i = 0; i < maxy; i++) 
 	    mvwhline(planet_win, i, 0, ' ', maxx);
 	
@@ -1018,19 +1012,15 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 void retrograde_table(WINDOW *retro_win, Pxx *pxx)
 {
 	double *p_arr[] = {
-		pxx->dsun, pxx->dmoon,
 		pxx->dmerc, pxx->dven,
 		pxx->dmars, pxx->djup,
 		pxx->dsat, pxx->dura,
-		pxx->dnep, pxx->dplu,
-		pxx->dmnod, pxx->dtnod};
+		pxx->dnep, pxx->dplu};
 		
-	size_t p_count = 12;
+	size_t p_count = 8;
 		
-	int maxy = 13;
+	int maxy = 10;
 	int maxx = 20;
-	
-	wbkgdset(retro_win, COLOR_PAIR(M_COLOR));
 	
 	for (int i = 0; i < maxy; i++) 
 	    mvwhline(retro_win, i, 0, ' ', maxx);
@@ -1039,13 +1029,10 @@ void retrograde_table(WINDOW *retro_win, Pxx *pxx)
 	{
 		char buff[MAXBUF];
 		
-		if (i != 10) // skip mean node
-		{
-			snprintf(buff, sizeof(buff), "%-6s %-6f",
-			pl_sym[i], p_arr[i][LONG_S]);
-			
-			mvwprintw(retro_win, (int)i, 0, "%s", buff);
-		}
+		snprintf(buff, sizeof(buff), "%-6s %-6f",
+		pl_sym[i+2], p_arr[i][LONG_S]);
+		
+		mvwprintw(retro_win, (int)i, 0, "%s", buff);
 	}
 	
 }
@@ -1062,14 +1049,14 @@ int *planet_trig, int *retro_trig)
 	{
 		planet_table(planet_win, pxx);
 		show_panel(*planet_panel);
+		wrefresh(planet_win);
 	}
 	if (*retro_trig > 0)
 	{
 		retrograde_table(retro_win, pxx);
 		show_panel(*retro_panel);
+		wrefresh(retro_win);
 	}	
-	update_panels();
-	doupdate();
 }
 	
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
@@ -1115,16 +1102,14 @@ int *planet_trig, int *retro_trig)
 					*planet_trig = 1;
 				}
 				
-				pxx_fill(cdata, pxx);
-				draw_chart(main_win, maxy, maxx, pxx);
-				cur_chart_data(main_win, maxx, io, cdata);
-				
 				if (*retro_trig > 0)
 				{
 					retrograde_table(retro_win, pxx);
 					show_panel(*retro_panel);
 				}
 				
+				touchwin(main_win);
+				wrefresh(main_win);
 				update_panels();
 				doupdate();
 				break;
@@ -1143,15 +1128,13 @@ int *planet_trig, int *retro_trig)
 					*retro_trig = 1;
 				}
 				
-				pxx_fill(cdata, pxx);
-				draw_chart(main_win, maxy, maxx, pxx);
-				cur_chart_data(main_win, maxx, io, cdata);
-				
 				if (*planet_trig > 0)
 				{
 					planet_table(planet_win, pxx);
 					show_panel(*planet_panel);
 				}
+				touchwin(main_win);
+				wrefresh(main_win);
 				update_panels();
 				doupdate();
 				break;
@@ -1411,7 +1394,6 @@ int *planet_trig, int *retro_trig)
 
 int main()
 {
-
 	Cdata *cdata = calloc(1, sizeof(Cdata));
 	if (!cdata)
 		ERR_EXIT("main Location calloc");
@@ -1489,6 +1471,11 @@ int main()
 	set_escdelay(25);
 	napms(8);
 	
+	start_color();
+	init_color(1, 0, 0, 0); //black
+	init_color(2, 1000, 1000, 1000); //white
+	init_pair(M_COLOR, 2, 1);
+	
 	int maxy, maxx;
 	getmaxyx(stdscr, maxy, maxx);
 
@@ -1500,19 +1487,18 @@ int main()
 	planet_panel = new_panel(planet_win);
 	hide_panel(planet_panel);
 	
+	wbkgdset(planet_win, COLOR_PAIR(M_COLOR));
+	
 	PANEL *retro_panel;
-	WINDOW *retro_win = newwin(13, 20, LINES - 13, COLS - 20);
+	WINDOW *retro_win = newwin(13, 20, LINES - 10, COLS - 20);
 	retro_panel = new_panel(retro_win);
 	hide_panel(retro_panel);
 	
+	wbkgdset(retro_win, COLOR_PAIR(M_COLOR));
+	
 	keypad(main_win, TRUE);
 	keypad(stdscr, TRUE);
-	
-	start_color();
-	init_color(1, 0, 0, 0); //black
-	init_color(2, 1000, 1000, 1000); //white
-	init_pair(M_COLOR, 2, 1);
-	
+
 	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
 	
 	int main_done = 0;

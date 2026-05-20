@@ -263,7 +263,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		}
 		
 		unpost_menu(save_menu);
-		touchwin(save_win);
 		free_menu(save_menu);
 		for (size_t j = 0; j < io->file_count; ++j)
 		{
@@ -449,7 +448,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		fclose(ifp);
 		unpost_form(save_form);
 		wclear(save_win);
-		touchwin(save_win);
 		wrefresh(save_win);
 		free_form(save_form);
 		
@@ -700,7 +698,6 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		}
 		
 		unpost_menu(load_menu);
-		touchwin(load_win);
 		free_menu(load_menu);
 		for (size_t j = 0; j < io->file_count; ++j)
 		{
