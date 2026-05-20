@@ -152,8 +152,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		
 		keypad(save_win, TRUE);
 		clearok(save_win, TRUE);
-		wclear(save_win);
-		wrefresh(save_win);
 		
 		box(save_win, 0, 0);
 		save_menu = new_menu(save_files);
@@ -208,7 +206,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
 						wclear(save_win);
-						wrefresh(save_win);
 						menu_done = 1;
 						break;
 					}
@@ -225,7 +222,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					
 					wclear(save_win);
-					wrefresh(save_win);
 					menu_done = 1;
 					break;
 				case 'm':
@@ -268,7 +264,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		
 		unpost_menu(save_menu);
 		touchwin(save_win);
-		wrefresh(save_win);
 		free_menu(save_menu);
 		for (size_t j = 0; j < io->file_count; ++j)
 		{
@@ -281,6 +276,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		free(save_files);
 		
 		wclear(save_win);
+		wrefresh(save_win);
 		delwin(save_subwin);
 		delwin(save_win);
 	} // end of savedir_done loop
@@ -304,8 +300,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 	
 	cbreak();
 	keypad(save_win, TRUE);
-	clearok(save_win, TRUE);
-	wclear(save_win);
 	
 	save_field[0] = new_field(1, 25, 2, 2, 0, 0);
 	set_field_back(save_field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
@@ -318,11 +312,9 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 	set_form_win(save_form, save_win);
 	set_form_sub(save_form, save_subwin);
 	
-	touchwin(save_win);
 	post_form(save_form);
 	box(save_win, 0, 0);
 	mvwaddstr(save_win, 1, 1, "-o--filename?-o");
-	wrefresh(save_win);
 	
 	set_current_field(save_form, save_field[0]);
 	wrefresh(save_win);
@@ -592,9 +584,6 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		wbkgdset(load_win, COLOR_PAIR(M_COLOR));
 		
 		keypad(load_win, TRUE);
-		clearok(load_win, TRUE);
-		wclear(load_win);
-		wrefresh(load_win);
 		
 		box(load_win, 0, 0);
 		load_menu = new_menu(load_files);
@@ -657,7 +646,6 @@ void load_chart(FIELD *cdata_field[], Io *io)
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
 						wclear(load_win);
-						wrefresh(load_win);
 						menu_done = 1 ;
 						break;
 					}
@@ -698,14 +686,12 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					
 					wclear(load_win);
-					wrefresh(load_win);
 					menu_done = 1;
 					break;
 				case 'q': 
 					load_done = 1;
 					menu_done = 1;
 					wclear(load_win);
-					wrefresh(load_win);
 					break;
 				default:
 					ch = wgetch(load_win);

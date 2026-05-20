@@ -191,8 +191,6 @@ void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
 		
 	keypad(city_win, TRUE);
 	clearok(city_win, TRUE);
-	wclear(city_win);
-	wrefresh(city_win);
 	
 	box(city_win, 0, 0);
 	

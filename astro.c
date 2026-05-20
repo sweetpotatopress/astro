@@ -707,10 +707,8 @@ int sect(Pxx *pxx)
 	
 	if ((pxx->dsun[LONG] - pxx->dasc) <= 180)
 		sect = 1; // day
-		
 	else
 		sect = 0; // night
-		
 	return sect;
 }
 
@@ -1051,12 +1049,13 @@ void retrograde_table(PANEL *retro_panel, Pxx *pxx)
 	{
 		retro_win = newwin(maxy, maxx, starty, startx);
 		retro_panel = new_panel(retro_win);
+		wbkgdset(retro_win, COLOR_PAIR(M_COLOR));
+		wclear(retro_win);
 	}
-	
-	wbkgdset(retro_win, COLOR_PAIR(M_COLOR));
 	
 	for (int i = 0; i < maxy; i++) 
 	    mvwhline(retro_win, i, 0, ' ', maxx);
+	    
 	for (size_t i = 0; i < p_count; ++i)
 	{
 		char buff[MAXBUF];
@@ -1073,7 +1072,6 @@ void retrograde_table(PANEL *retro_panel, Pxx *pxx)
 	show_panel(retro_panel);
 	update_panels();
 	doupdate();
-	wrefresh(retro_win);
 }
 
 void new_chart(WINDOW *main_win, PANEL *planet_panel,
@@ -1434,7 +1432,7 @@ int main()
 	
 	initscr();
 	set_escdelay(25);
-	napms(16);
+	napms(8);
 	getmaxyx(stdscr, maxy, maxx);
 	
 	swe_set_ephe_path(fn_buff);
