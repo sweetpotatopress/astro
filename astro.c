@@ -887,13 +887,12 @@ void draw_chart(WINDOW *main_win, int maxy, int maxx, Pxx *pxx)
 	
 	draw_house(main_win, maxy, maxx, radius + 4, cusps, '`');
 	
-	zo_pos(main_win, maxy, maxx, radius + 3, cusps, ascmc[0]);
+	zo_pos(main_win, maxy, maxx, radius + 3, cusps, pxx->dasc);
 	
 	planet_pos(main_win, maxy, maxx, radius - 9, pxx_members, cusps[1], pxx);
 	
 	ascmc_pos(main_win, maxy, maxx, (radius / 2) + 4 , ascmc, cusps[1]);
 		
-	wrefresh(main_win);
 }
 
 void cur_chart_data(WINDOW *main_win, int maxx, Io *io, 
@@ -959,9 +958,9 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 	{
 		planet_win = newwin(maxy, maxx, 0, 0);
 		planet_panel = new_panel(planet_win);
+		wbkgdset(planet_win, COLOR_PAIR(M_COLOR));
+		wclear(planet_win);
 	}
-	
-	wbkgdset(planet_win, COLOR_PAIR(M_COLOR));
 	
 	for (int i = 0; i < maxy; i++) 
 	    mvwhline(planet_win, i, 0, ' ', maxx);
@@ -1027,7 +1026,6 @@ void planet_table(PANEL *planet_panel, Pxx *pxx)
 		show_panel(planet_panel);
 		update_panels();
 		doupdate();
-		wrefresh(planet_win);
 }
 
 void retrograde_table(PANEL *retro_panel, Pxx *pxx)
@@ -1097,7 +1095,6 @@ int *planet_trig)
 	int startx = maxx - 22;
 	
 	mvwprintw(main_win, starty, startx, "(min)");
-	wrefresh(main_win);
 	
 	int max_day = 0; // months() return flag
 	size_t i = 0; // time inc/dec
@@ -1125,7 +1122,6 @@ int *planet_trig)
 					update_panels();
 					doupdate();
 					touchwin(main_win);
-					wrefresh(main_win);
 					*planet_trig = 0;
 				}
 				else
@@ -1326,37 +1322,33 @@ int *planet_trig)
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(min)");
-				wrefresh(main_win);
 				break;
 				
 			case 1:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(hour)");
-				wrefresh(main_win);
 				break;
 				
 			case 2:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(day)");
-				wrefresh(main_win);
 				break;
 				
 			case 3:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(mon)");
-				wrefresh(main_win);
 				break;
 				
 			case 4:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(year)");
-				wrefresh(main_win);
 				break;
 		}
+		wrefresh(main_win);
 	}
 	wmove(main_win, starty, startx);
 	wclrtoeol(main_win);
@@ -1442,6 +1434,7 @@ int main()
 	
 	initscr();
 	set_escdelay(25);
+	napms(16);
 	getmaxyx(stdscr, maxy, maxx);
 	
 	swe_set_ephe_path(fn_buff);

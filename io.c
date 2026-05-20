@@ -225,6 +225,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					
 					wclear(save_win);
+					wrefresh(save_win);
 					menu_done = 1;
 					break;
 				case 'm':
@@ -234,7 +235,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 					
 					echo();
 					wclear(save_win);
-					wrefresh(save_win);
 					box(save_win, 0, 0);
 					wprintw(save_win, "dir name?");
 					mvwgetnstr(save_win, 2, 2, mdir, 127);
@@ -254,7 +254,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 						
 					memcpy(io->filepath, newpath, strlen(newpath) + 1);	
 					
-					wclear(save_win);
 					free(mdir);
 					menu_done = 1;
 					break;
