@@ -1142,7 +1142,7 @@ int *planet_trig, int *retro_trig)
 				update_panels();
 				break;
 				
-			case 'j':
+			case 'k':
 				switch(i)
 				{
 					case 0:
@@ -1246,7 +1246,7 @@ int *planet_trig, int *retro_trig)
 						break;
 				}
 				break;
-			case 'k':
+			case 'j':
 				switch(i)
 				{
 					case 0:
