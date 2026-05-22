@@ -978,8 +978,17 @@ Cdata *cdata)
 	
 	starty += 1;
 	if(cdata->tm_hour >= 0 && cdata->tm_min >= 0)
-		mvwprintw(main_win, starty, startx, "%d:%d",
-		cdata->tm_hour, cdata->tm_min);
+	{
+		if (cdata->tm_min == 0)
+			mvwprintw(main_win, starty, startx, "%d:%d0",
+			cdata->tm_hour, cdata->tm_min);
+		else if (cdata->tm_min <= 9)
+			mvwprintw(main_win, starty, startx, "%d:0%d",
+			cdata->tm_hour, cdata->tm_min);
+		else
+			mvwprintw(main_win, starty, startx, "%d:%d",
+			cdata->tm_hour, cdata->tm_min);
+	}
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)
