@@ -666,7 +666,63 @@ int radius, double *angle, double asc)
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
 		
-		mvwaddstr(main_win, y, x, zo_sym[sign_display]);
+		static int j;
+		
+		if (i == 1)
+		{
+			if (strcmp("ari", zo_sym[sign_display]) == 0)
+				j = FIRE;
+			else if (strcmp("tau", zo_sym[sign_display]) == 0)
+				j = EARTH;
+			else if (strcmp("gem", zo_sym[sign_display]) == 0)
+				j = AIR;
+			else if (strcmp("can", zo_sym[sign_display]) == 0)
+				j = WATER;
+			if (strcmp("leo", zo_sym[sign_display]) == 0)
+				j = FIRE;
+			else if (strcmp("vir", zo_sym[sign_display]) == 0)
+				j = EARTH;
+			else if (strcmp("lib", zo_sym[sign_display]) == 0)
+				j = AIR;
+			else if (strcmp("sco", zo_sym[sign_display]) == 0)
+				j = WATER;
+			if (strcmp("sag", zo_sym[sign_display]) == 0)
+				j = FIRE;
+			else if (strcmp("cap", zo_sym[sign_display]) == 0)
+				j = EARTH;
+			else if (strcmp("aqu", zo_sym[sign_display]) == 0)
+				j = AIR;
+			else if (strcmp("pis", zo_sym[sign_display]) == 0)
+				j = WATER;
+		}
+	
+		switch(j)
+		{
+			case FIRE:
+				wattron(main_win, COLOR_PAIR(FIRE));
+				mvwaddstr(main_win, y, x, zo_sym[sign_display]);
+				wattroff(main_win, COLOR_PAIR(FIRE));
+				++j;
+				break;
+			case EARTH:
+				wattron(main_win, COLOR_PAIR(EARTH));
+				mvwaddstr(main_win, y, x, zo_sym[sign_display]);
+				wattroff(main_win, COLOR_PAIR(EARTH));
+				++j;
+				break;
+			case AIR:
+				wattron(main_win, COLOR_PAIR(AIR));
+				mvwaddstr(main_win, y, x, zo_sym[sign_display]);
+				wattroff(main_win, COLOR_PAIR(AIR));
+				++j;
+				break;
+			case WATER:
+				wattron(main_win, COLOR_PAIR(WATER));
+				mvwaddstr(main_win, y, x, zo_sym[sign_display]);
+				wattroff(main_win, COLOR_PAIR(WATER));
+				j = FIRE;
+				break;
+		}
 	}
 }
 
@@ -1472,7 +1528,16 @@ int main()
 	start_color();
 	init_color(1, 0, 0, 0); //black
 	init_color(2, 800, 800, 1000); //white
+	init_color(3, 1000, 600, 600); //red
+	init_color(4, 600, 1000, 600); //green
+	init_color(5, 1000, 1000, 600); //yellow
+	init_color(6, 500, 500, 1000); //blue
+	
 	init_pair(M_COLOR, 2, 1);
+	init_pair(FIRE, 3, 1);
+	init_pair(EARTH, 4, 1);
+	init_pair(AIR, 5, 1);
+	init_pair(WATER, 6, 1);
 	
 	int maxy, maxx;
 	getmaxyx(stdscr, maxy, maxx);

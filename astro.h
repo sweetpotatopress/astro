@@ -18,9 +18,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define M_COLOR 1
 #define FIRE 2
-#define AIR 3
-#define WATER 4
-#define EARTH 5
+#define EARTH 3
+#define AIR 4
+#define WATER 5
 
 #define MAXBUF 1024
 #define MAXPATH 2048
