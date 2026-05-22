@@ -645,13 +645,73 @@ int radius, double *angle, double asc)
 	}
 }
 
-void zo_pos(WINDOW *main_win, int maxy, int maxx,
-int radius, double *angle, double asc)
+void zo_color(WINDOW *win, int y, int x, int count, int sign_display)
 {
-	int asc_sign = (int)(asc / 30);
+	static int j;
+	
+	if (count == 1)
+	{
+		if (strcmp("ari", zo_sym[sign_display]) == 0)
+			j = FIRE;
+		else if (strcmp("tau", zo_sym[sign_display]) == 0)
+			j = EARTH;
+		else if (strcmp("gem", zo_sym[sign_display]) == 0)
+			j = AIR;
+		else if (strcmp("can", zo_sym[sign_display]) == 0)
+			j = WATER;
+		if (strcmp("leo", zo_sym[sign_display]) == 0)
+			j = FIRE;
+		else if (strcmp("vir", zo_sym[sign_display]) == 0)
+			j = EARTH;
+		else if (strcmp("lib", zo_sym[sign_display]) == 0)
+			j = AIR;
+		else if (strcmp("sco", zo_sym[sign_display]) == 0)
+			j = WATER;
+		if (strcmp("sag", zo_sym[sign_display]) == 0)
+			j = FIRE;
+		else if (strcmp("cap", zo_sym[sign_display]) == 0)
+			j = EARTH;
+		else if (strcmp("aqu", zo_sym[sign_display]) == 0)
+			j = AIR;
+		else if (strcmp("pis", zo_sym[sign_display]) == 0)
+			j = WATER;
+	}
+
+	switch(j)
+	{
+		case FIRE:
+			wattron(win, COLOR_PAIR(FIRE));
+			mvwaddstr(win, y, x, zo_sym[sign_display]);
+			wattroff(win, COLOR_PAIR(FIRE));
+			++j;
+			break;
+		case EARTH:
+			wattron(win, COLOR_PAIR(EARTH));
+			mvwaddstr(win, y, x, zo_sym[sign_display]);
+			wattroff(win, COLOR_PAIR(EARTH));
+			++j;
+			break;
+		case AIR:
+			wattron(win, COLOR_PAIR(AIR));
+			mvwaddstr(win, y, x, zo_sym[sign_display]);
+			wattroff(win, COLOR_PAIR(AIR));
+			++j;
+			break;
+		case WATER:
+			wattron(win, COLOR_PAIR(WATER));
+			mvwaddstr(win, y, x, zo_sym[sign_display]);
+			wattroff(win, COLOR_PAIR(WATER));
+			j = FIRE;
+			break;
+	}
+}
+
+void zo_pos(WINDOW *main_win, int maxy, int maxx,
+int radius, double *angle, Pxx *pxx)
+{
+	int asc_sign = (int)(pxx->dasc / 30);
 	for (int i = 1; i < 13; ++i)
 	{
-			
 		int sign_display = ((i + asc_sign - 1) % 12);
 		if (sign_display == 0)
 			sign_display = 12;
@@ -659,70 +719,14 @@ int radius, double *angle, double asc)
 		int center_x = (maxx / 2);
 		int center_y = (maxy / 2);
 		
-		int sign = (((int)asc / 30) * 30) + 15;
+		int sign = (((int)pxx->dasc / 30) * 30) + 15;
 		
 		double rad = (angle[i] - sign) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
 		
-		static int j;
-		
-		if (i == 1)
-		{
-			if (strcmp("ari", zo_sym[sign_display]) == 0)
-				j = FIRE;
-			else if (strcmp("tau", zo_sym[sign_display]) == 0)
-				j = EARTH;
-			else if (strcmp("gem", zo_sym[sign_display]) == 0)
-				j = AIR;
-			else if (strcmp("can", zo_sym[sign_display]) == 0)
-				j = WATER;
-			if (strcmp("leo", zo_sym[sign_display]) == 0)
-				j = FIRE;
-			else if (strcmp("vir", zo_sym[sign_display]) == 0)
-				j = EARTH;
-			else if (strcmp("lib", zo_sym[sign_display]) == 0)
-				j = AIR;
-			else if (strcmp("sco", zo_sym[sign_display]) == 0)
-				j = WATER;
-			if (strcmp("sag", zo_sym[sign_display]) == 0)
-				j = FIRE;
-			else if (strcmp("cap", zo_sym[sign_display]) == 0)
-				j = EARTH;
-			else if (strcmp("aqu", zo_sym[sign_display]) == 0)
-				j = AIR;
-			else if (strcmp("pis", zo_sym[sign_display]) == 0)
-				j = WATER;
-		}
-	
-		switch(j)
-		{
-			case FIRE:
-				wattron(main_win, COLOR_PAIR(FIRE));
-				mvwaddstr(main_win, y, x, zo_sym[sign_display]);
-				wattroff(main_win, COLOR_PAIR(FIRE));
-				++j;
-				break;
-			case EARTH:
-				wattron(main_win, COLOR_PAIR(EARTH));
-				mvwaddstr(main_win, y, x, zo_sym[sign_display]);
-				wattroff(main_win, COLOR_PAIR(EARTH));
-				++j;
-				break;
-			case AIR:
-				wattron(main_win, COLOR_PAIR(AIR));
-				mvwaddstr(main_win, y, x, zo_sym[sign_display]);
-				wattroff(main_win, COLOR_PAIR(AIR));
-				++j;
-				break;
-			case WATER:
-				wattron(main_win, COLOR_PAIR(WATER));
-				mvwaddstr(main_win, y, x, zo_sym[sign_display]);
-				wattroff(main_win, COLOR_PAIR(WATER));
-				j = FIRE;
-				break;
-		}
+		zo_color(main_win, y, x, i, sign_display);
 	}
 }
 
@@ -942,7 +946,7 @@ void draw_chart(WINDOW *main_win, int maxy, int maxx, Pxx *pxx)
 	
 	draw_house(main_win, maxy, maxx, radius + 4, cusps, '`');
 	
-	zo_pos(main_win, maxy, maxx, radius + 3, cusps, pxx->dasc);
+	zo_pos(main_win, maxy, maxx, radius + 3, cusps, pxx);
 	
 	planet_pos(main_win, maxy, maxx, radius - 9, pxx_members, cusps[1], pxx);
 	
@@ -1031,11 +1035,16 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			char buff[MAXBUF];
 			
 			snprintf(buff, sizeof(buff),
-			"%-3s %3d.%-2d : %6s %2d\xc2\xb0%d` %-4s",
+			"%-3s %3d.%-2d : %6s %2d\xc2\xb0%d`",
 			spname, full_deg, a_full_dec,
-			pl_sym[i], deg, a_dec, zo_sym[zo_pos]);
+			pl_sym[i], deg, a_dec);
 			
-			mvwprintw(planet_win, starty, startx, "%s", buff);
+			mvwprintw(planet_win, starty, startx, "%s ", buff);
+			
+			startx += (int)strlen(buff);
+			zo_color(planet_win, starty, startx + 1, 1, zo_pos);
+			startx -= (int)strlen(buff);
+			
 			starty += 2;
 		}
 		
@@ -1045,8 +1054,8 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			char point_buff[MAXBUF];
 			
 			snprintf(point_buff, sizeof(point_buff),
-			"%-11s %3d.%-2d : %2d\xc2\xb0%d` %-5s",
-			points[j], full_deg, a_full_dec, deg, a_dec, zo_sym[zo_pos]);
+			"%-11s %3d.%-2d : %2d\xc2\xb0%d` ",
+			points[j], full_deg, a_full_dec, deg, a_dec);
 			
 			if (i == 12) // lots divider
 			{
@@ -1062,6 +1071,11 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 				starty += 2;
 			}
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
+			
+			startx += (int)strlen(point_buff);
+			zo_color(planet_win, starty, startx + 1, 1, zo_pos);
+			startx -= (int)strlen(point_buff);
+	
 			starty += 2;
 			++j;
 		}
