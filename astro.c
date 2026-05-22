@@ -406,7 +406,6 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 					case '\n':
 						cdata_entry = 1;
 						break;
-						
 				}
 				break;
 				
@@ -568,7 +567,7 @@ int radius, double **planet, double asc, Pxx *pxx)
 			{
 				if (near_horizontal)
 				{
-					if ((fabs(p_arr[j] - pxx->dasc)) < 45)
+					if ((fabs(p_arr[j] - pxx->dasc)) < 30)
 					{
 						offsetx -= 13;
 						offsety -= 2;
@@ -929,8 +928,6 @@ Cdata *cdata)
 	starty += 1;
 	if (fabs(cdata->dlon) > 1e-6)
 		mvwprintw(main_win, starty, startx, "lon.%f", cdata->dlon);
-	
-	wrefresh(main_win);
 }
 
 void planet_table(WINDOW *planet_win, Pxx *pxx)
@@ -978,9 +975,9 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			char buff[MAXBUF];
 			
 			snprintf(buff, sizeof(buff),
-			"%-3s %-6s %3d.%-2d : %2d\xc2\xb0%d` %-4s",
-			spname, pl_sym[i], full_deg, a_full_dec,
-			deg, a_dec, zo_sym[zo_pos]);
+			"%-3s %3d.%-2d : %6s %2d\xc2\xb0%d` %-4s",
+			spname, full_deg, a_full_dec,
+			pl_sym[i], deg, a_dec, zo_sym[zo_pos]);
 			
 			mvwprintw(planet_win, starty, startx, "%s", buff);
 			starty += 2;
@@ -1040,7 +1037,6 @@ void retrograde_table(WINDOW *retro_win, Pxx *pxx)
 		
 		mvwprintw(retro_win, (int)i, 0, "%s", buff);
 	}
-	
 }
 
 void new_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
@@ -1051,6 +1047,8 @@ int *planet_trig, int *retro_trig)
 	pxx_fill(cdata, pxx);
 	draw_chart(main_win, maxy, maxx, pxx);
 	cur_chart_data(main_win, maxx, io, cdata);
+	wrefresh(main_win);
+	
 	if (*planet_trig > 0)
 	{
 		planet_table(planet_win, pxx);
@@ -1084,12 +1082,12 @@ int *planet_trig, int *retro_trig)
 	{
 		switch(ch)
 		{
-			case 'h':
+			case 'h': case KEY_LEFT:
 				if (i != 0)
 					--i;
 				break;
 				
-			case 'l':
+			case 'l': case KEY_RIGHT:
 				if (i != 4) // time inc/dec
 					++i;
 				break;
@@ -1098,7 +1096,6 @@ int *planet_trig, int *retro_trig)
 				if (*planet_trig)
 				{
 					hide_panel(*planet_panel);
-					update_panels();
 					*planet_trig = 0;
 				}
 				else
@@ -1142,7 +1139,7 @@ int *planet_trig, int *retro_trig)
 				update_panels();
 				break;
 				
-			case 'k':
+			case 'k': case KEY_UP:
 				switch(i)
 				{
 					case 0:
@@ -1246,7 +1243,7 @@ int *planet_trig, int *retro_trig)
 						break;
 				}
 				break;
-			case 'j':
+			case 'j': case KEY_DOWN:
 				switch(i)
 				{
 					case 0:
@@ -1388,7 +1385,6 @@ int *planet_trig, int *retro_trig)
 				mvwprintw(main_win, starty, startx, "(year)");
 				break;
 		}
-		wrefresh(main_win);
 	}
 	wmove(main_win, starty, startx);
 	wclrtoeol(main_win);
@@ -1472,11 +1468,10 @@ int main()
 	
 	initscr();
 	set_escdelay(25);
-	napms(32);
 	
 	start_color();
 	init_color(1, 0, 0, 0); //black
-	init_color(2, 1000, 1000, 1000); //white
+	init_color(2, 800, 800, 1000); //white
 	init_pair(M_COLOR, 2, 1);
 	
 	int maxy, maxx;
@@ -1548,7 +1543,6 @@ int main()
 					else
 					{
 						hide_panel(planet_panel);
-						update_panels();
 						planet_trig = 0;
 					}
 					
@@ -1573,7 +1567,6 @@ int main()
 					else
 					{
 						hide_panel(retro_panel);
-						update_panels();
 						retro_trig = 0;
 					}	
 					
