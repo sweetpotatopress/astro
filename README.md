@@ -21,6 +21,13 @@ using musl, you are welcome to share patches in order to fix that //
 send bug reports.
 in theory astro works on BSD. in theory . . 
 
+FOUNDATION--0-  
+  
+built on the IANA time zone database, which has correct historical accuracy that many paid proprietary software do not.  
+thats right, spend 360 dollars that has poor DST accuracy or pay 0 for free beautiful accuracy in all your charts~  
+made with love, nyaa :3  
+
+
 --o-KEYBINDS---o-
 
 **mode INSERT ( i )** 
