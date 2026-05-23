@@ -23,10 +23,11 @@ in theory astro works on BSD. in theory . .
 
 FOUNDATION--0-  
   
-built on the IANA time zone database, which has correct historical accuracy that many paid proprietary software do not.  
-thats right, spend 360 dollars that has poor DST accuracy or pay 0 for free beautiful accuracy in all your charts~  
-made with love, nyaa :3  
-
+built on the IANA time zone database, which has correct historical DST accuracy.
+the choice: spend over 300 dollars on "professional" proprietary software with poor DST accuracy  
+or pay 0 for free beautiful accuracy in all your charts by using astro~  ;3
+  
+made with love, nyaa  
 
 --o-KEYBINDS---o-
 
@@ -81,12 +82,13 @@ exit:			q
  | add nodes, outers | [DONE] |
  | add lot of spirit + fortune | [DONE] |
  | retrograde, station, speed table | |
- | add elemental colors | |
+ | add elemental colors | [DONE] |
  | essential dignities table | |
  | aspects | |
  | eclipse calender | |
  | declination/out of bounds table | |
  | terminal window autoresize | |
+ | user default config file | |
  | zodiacal releasing | |
  
  feel free to suggest additions.
