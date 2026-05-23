@@ -53,6 +53,7 @@ load chart:		e
 
 planet table:	p  
 planet speed:	o  
+realtime chart: tab  
 animate chart:	enter  
 	--increment:	h/l  
 	--up/down:		j/k  
