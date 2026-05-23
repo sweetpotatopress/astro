@@ -221,27 +221,27 @@ void set_localtime(FIELD *cdata_field[])
 		
 	time_t now = time(NULL);
 	localtime_r(&now, gettime);
-	set_field_buffer(cdata_field[6], 0, buff);
+	set_field_buffer(cdata_field[TIMEZONE], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
 	snprintf(buff, sizeof(buff), "%d", gettime->tm_year+1900);
-	set_field_buffer(cdata_field[1], 0, buff);
+	set_field_buffer(cdata_field[YEAR], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
 	snprintf(buff, sizeof(buff), "%d", gettime->tm_mon + 1);
-	set_field_buffer(cdata_field[2], 0, buff);
+	set_field_buffer(cdata_field[MONTH], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
 	snprintf(buff, sizeof(buff), "%d", gettime->tm_mday);
-	set_field_buffer(cdata_field[3], 0, buff);
+	set_field_buffer(cdata_field[DAY], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
 	snprintf(buff, sizeof(buff), "%d", gettime->tm_hour);
-	set_field_buffer(cdata_field[4], 0, buff);
+	set_field_buffer(cdata_field[HOUR], 0, buff);
 	
 	memset(buff, 0, sizeof(buff));
 	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
-	set_field_buffer(cdata_field[5], 0, buff);
+	set_field_buffer(cdata_field[MINUTE], 0, buff);
 	
 	free(gettime);
 }
@@ -293,52 +293,51 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	starty = 4;
 	startx = 18;
 	
-	// city search
-	cdata_field[0] = new_field(1, 25, starty, startx, 0, 0);
-	set_field_back(cdata_field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[0], O_STATIC);
-	field_opts_off(cdata_field[0], O_AUTOSKIP);
+	cdata_field[CITY] = new_field(1, 25, starty, startx, 0, 0);
+	set_field_back(cdata_field[CITY], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[CITY], O_STATIC);
+	field_opts_off(cdata_field[CITY], O_AUTOSKIP);
 	starty += 2;
-	// year
-	cdata_field[1] = new_field(1, 6, starty, startx, 0, 0);
-	set_field_back(cdata_field[1], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[1], O_AUTOSKIP);
+	
+	cdata_field[YEAR] = new_field(1, 6, starty, startx, 0, 0);
+	set_field_back(cdata_field[YEAR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[YEAR], O_AUTOSKIP);
 	starty += 2;
-	// month
-	cdata_field[2] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[2], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[2], O_AUTOSKIP);
+	
+	cdata_field[MONTH] = new_field(1, 3, starty, startx, 0, 0);
+	set_field_back(cdata_field[MONTH], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[MONTH], O_AUTOSKIP);
 	starty += 2;
-	// day
-	cdata_field[3] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[3], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[3], O_AUTOSKIP);
+	
+	cdata_field[DAY] = new_field(1, 3, starty, startx, 0, 0);
+	set_field_back(cdata_field[DAY], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[DAY], O_AUTOSKIP);
 	starty += 2;
-	// hour
-	cdata_field[4] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[4], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[4], O_AUTOSKIP);
+	
+	cdata_field[HOUR] = new_field(1, 3, starty, startx, 0, 0);
+	set_field_back(cdata_field[HOUR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[HOUR], O_AUTOSKIP);
 	starty+= 2;
-	// minute
-	cdata_field[5] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[5], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[5], O_AUTOSKIP);
+	
+	cdata_field[MINUTE] = new_field(1, 3, starty, startx, 0, 0);
+	set_field_back(cdata_field[MINUTE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[MINUTE], O_AUTOSKIP);
 	starty+= 2;
-	// timezone
-	cdata_field[6] = new_field(1, 30, starty, startx, 0, 0);
-	set_field_back(cdata_field[6], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[6], O_STATIC);
-	field_opts_off(cdata_field[6], O_AUTOSKIP);
+	
+	cdata_field[TIMEZONE] = new_field(1, 30, starty, startx, 0, 0);
+	set_field_back(cdata_field[TIMEZONE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[TIMEZONE], O_STATIC);
+	field_opts_off(cdata_field[TIMEZONE], O_AUTOSKIP);
 	starty += 2;
-	// lat. 
-	cdata_field[7] = new_field(1, 11, starty, startx, 0, 0);
-	set_field_back(cdata_field[7], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[7], O_AUTOSKIP);
+	
+	cdata_field[LATITUDE] = new_field(1, 11, starty, startx, 0, 0);
+	set_field_back(cdata_field[LATITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[LATITUDE], O_AUTOSKIP);
 	starty+= 2;
-	// long.
-	cdata_field[8] = new_field(1, 11, starty, startx, 0, 0);
-	set_field_back(cdata_field[8], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[8], O_AUTOSKIP);
+	
+	cdata_field[LONGITUDE] = new_field(1, 11, starty, startx, 0, 0);
+	set_field_back(cdata_field[LONGITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[LONGITUDE], O_AUTOSKIP);
 	
 	cdata_field[9] = NULL;
 
@@ -349,7 +348,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	
 	post_form(cdata_form);
 	
-	set_current_field(cdata_form, cdata_field[0]);
+	set_current_field(cdata_form, cdata_field[CITY]);
 	
 	field_label(cdata_form_win, starty, startx);
 	pos_form_cursor(cdata_form);
@@ -472,6 +471,67 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 		free_field(cdata_field[i]);
 	}
 	delwin(cdata_form_win);
+}
+
+void zo_color(WINDOW *win, int y, int x, int count, int sign_display)
+{
+	static int j;
+	
+	if (count == 1)
+	{
+		if (strcmp("ari", zo_sym[sign_display]) == 0)
+			j = FIRE;
+		else if (strcmp("tau", zo_sym[sign_display]) == 0)
+			j = EARTH;
+		else if (strcmp("gem", zo_sym[sign_display]) == 0)
+			j = AIR;
+		else if (strcmp("can", zo_sym[sign_display]) == 0)
+			j = WATER;
+		else if (strcmp("leo", zo_sym[sign_display]) == 0)
+			j = FIRE;
+		else if (strcmp("vir", zo_sym[sign_display]) == 0)
+			j = EARTH;
+		else if (strcmp("lib", zo_sym[sign_display]) == 0)
+			j = AIR;
+		else if (strcmp("sco", zo_sym[sign_display]) == 0)
+			j = WATER;
+		else if (strcmp("sag", zo_sym[sign_display]) == 0)
+			j = FIRE;
+		else if (strcmp("cap", zo_sym[sign_display]) == 0)
+			j = EARTH;
+		else if (strcmp("aqu", zo_sym[sign_display]) == 0)
+			j = AIR;
+		else if (strcmp("pis", zo_sym[sign_display]) == 0)
+			j = WATER;
+	}
+
+	switch(j)
+	{
+		case FIRE:
+			wattron(win, COLOR_PAIR(FIRE));
+			mvwaddstr(win, y, x, zo_sym[sign_display]);
+			wattroff(win, COLOR_PAIR(FIRE));
+			++j;
+			break;
+		case EARTH:
+			wattron(win, COLOR_PAIR(EARTH));
+			mvwaddstr(win, y, x, zo_sym[sign_display]);
+			wattroff(win, COLOR_PAIR(EARTH));
+			++j;
+			break;
+		case AIR:
+			wattron(win, COLOR_PAIR(AIR));
+			mvwaddstr(win, y, x, zo_sym[sign_display]);
+			wattroff(win, COLOR_PAIR(AIR));
+			++j;
+			break;
+		case WATER:
+			wattron(win, COLOR_PAIR(WATER));
+			mvwaddstr(win, y, x, zo_sym[sign_display]);
+			wattroff(win, COLOR_PAIR(WATER));
+			j = FIRE;
+			break;
+	}
 }
 
 void draw_circle(WINDOW *main_win,
@@ -645,66 +705,6 @@ int radius, double *angle, double asc)
 	}
 }
 
-void zo_color(WINDOW *win, int y, int x, int count, int sign_display)
-{
-	static int j;
-	
-	if (count == 1)
-	{
-		if (strcmp("ari", zo_sym[sign_display]) == 0)
-			j = FIRE;
-		else if (strcmp("tau", zo_sym[sign_display]) == 0)
-			j = EARTH;
-		else if (strcmp("gem", zo_sym[sign_display]) == 0)
-			j = AIR;
-		else if (strcmp("can", zo_sym[sign_display]) == 0)
-			j = WATER;
-		if (strcmp("leo", zo_sym[sign_display]) == 0)
-			j = FIRE;
-		else if (strcmp("vir", zo_sym[sign_display]) == 0)
-			j = EARTH;
-		else if (strcmp("lib", zo_sym[sign_display]) == 0)
-			j = AIR;
-		else if (strcmp("sco", zo_sym[sign_display]) == 0)
-			j = WATER;
-		if (strcmp("sag", zo_sym[sign_display]) == 0)
-			j = FIRE;
-		else if (strcmp("cap", zo_sym[sign_display]) == 0)
-			j = EARTH;
-		else if (strcmp("aqu", zo_sym[sign_display]) == 0)
-			j = AIR;
-		else if (strcmp("pis", zo_sym[sign_display]) == 0)
-			j = WATER;
-	}
-
-	switch(j)
-	{
-		case FIRE:
-			wattron(win, COLOR_PAIR(FIRE));
-			mvwaddstr(win, y, x, zo_sym[sign_display]);
-			wattroff(win, COLOR_PAIR(FIRE));
-			++j;
-			break;
-		case EARTH:
-			wattron(win, COLOR_PAIR(EARTH));
-			mvwaddstr(win, y, x, zo_sym[sign_display]);
-			wattroff(win, COLOR_PAIR(EARTH));
-			++j;
-			break;
-		case AIR:
-			wattron(win, COLOR_PAIR(AIR));
-			mvwaddstr(win, y, x, zo_sym[sign_display]);
-			wattroff(win, COLOR_PAIR(AIR));
-			++j;
-			break;
-		case WATER:
-			wattron(win, COLOR_PAIR(WATER));
-			mvwaddstr(win, y, x, zo_sym[sign_display]);
-			wattroff(win, COLOR_PAIR(WATER));
-			j = FIRE;
-			break;
-	}
-}
 
 void zo_pos(WINDOW *main_win, int maxy, int maxx,
 int radius, double *angle, Pxx *pxx)
@@ -1026,7 +1026,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 	
 	for (int i = 0; i < p_count; ++i)
 	{
-		int zo_pos = ((int)p_arr[i][LONG] / 30) + 1;
+		int sign = ((int)p_arr[i][LONG] / 30) + 1;
 		
 		int deg = (int)p_arr[i][LONG] % 30;
 		double dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
@@ -1051,7 +1051,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
 			
 			startx += (int)strlen(buff);
-			zo_color(planet_win, starty, startx + 1, 1, zo_pos);
+			zo_color(planet_win, starty, startx + 1, 1, sign);
 			startx -= (int)strlen(buff);
 			
 			starty += 2;
@@ -1082,7 +1082,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
 			startx += (int)strlen(point_buff);
-			zo_color(planet_win, starty, startx + 1, 1, zo_pos);
+			zo_color(planet_win, starty, startx + 1, 1, sign);
 			startx -= (int)strlen(point_buff);
 	
 			starty += 2;

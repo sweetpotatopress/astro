@@ -223,10 +223,10 @@ void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
 				selected = current_item(city_menu);
 				cdata = (Cdata *)item_userptr(selected);
 				
-				set_field_buffer(cdata_field[0], 0, cdata->city);
-				set_field_buffer(cdata_field[6], 0, cdata->timezone);
-				set_field_buffer(cdata_field[7], 0, cdata->latitude);
-				set_field_buffer(cdata_field[8], 0, cdata->longitude);
+				set_field_buffer(cdata_field[CITY], 0, cdata->city);
+				set_field_buffer(cdata_field[TIMEZONE], 0, cdata->timezone);
+				set_field_buffer(cdata_field[LATITUDE], 0, cdata->latitude);
+				set_field_buffer(cdata_field[LONGITUDE], 0, cdata->longitude);
 				
 				menu_done = 1;
 				break;

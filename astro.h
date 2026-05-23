@@ -33,6 +33,16 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 	exit(EXIT_FAILURE); \
 } while (0)
 
+#define CITY 0
+#define YEAR 1
+#define MONTH 2
+#define DAY 3
+#define HOUR 4
+#define MINUTE 5
+#define TIMEZONE 6
+#define LATITUDE 7
+#define LONGITUDE 8
+
 #define LONG 0
 #define LAT 1
 #define DIST 2
