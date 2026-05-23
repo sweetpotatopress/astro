@@ -470,63 +470,103 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	delwin(cdata_form_win);
 }
 
-void zo_color(WINDOW *win, int y, int x, int count, int sign_display)
+void element_color(WINDOW *win, int y, int x, int count,
+int sign, Pxx *pxx, char ch)
 {
+	double *p_arr[] = {
+			pxx->dsun, pxx->dmoon,
+			pxx->dmerc, pxx->dven,
+			pxx->dmars, pxx->djup,
+			pxx->dsat, pxx->dura,
+			pxx->dnep, pxx->dplu,
+			pxx->dmnod, pxx->dtnod};
+			
 	static int j;
 	
-	if (count == 1)
-	{
-		if (strcmp("ari", zo_sym[sign_display]) == 0)
-			j = FIRE;
-		else if (strcmp("tau", zo_sym[sign_display]) == 0)
-			j = EARTH;
-		else if (strcmp("gem", zo_sym[sign_display]) == 0)
-			j = AIR;
-		else if (strcmp("can", zo_sym[sign_display]) == 0)
-			j = WATER;
-		else if (strcmp("leo", zo_sym[sign_display]) == 0)
-			j = FIRE;
-		else if (strcmp("vir", zo_sym[sign_display]) == 0)
-			j = EARTH;
-		else if (strcmp("lib", zo_sym[sign_display]) == 0)
-			j = AIR;
-		else if (strcmp("sco", zo_sym[sign_display]) == 0)
-			j = WATER;
-		else if (strcmp("sag", zo_sym[sign_display]) == 0)
-			j = FIRE;
-		else if (strcmp("cap", zo_sym[sign_display]) == 0)
-			j = EARTH;
-		else if (strcmp("aqu", zo_sym[sign_display]) == 0)
-			j = AIR;
-		else if (strcmp("pis", zo_sym[sign_display]) == 0)
-			j = WATER;
-	}
+	if (strcmp("ari", zo_sym[sign]) == 0)
+		j = FIRE;
+	else if (strcmp("tau", zo_sym[sign]) == 0)
+		j = EARTH;
+	else if (strcmp("gem", zo_sym[sign]) == 0)
+		j = AIR;
+	else if (strcmp("can", zo_sym[sign]) == 0)
+		j = WATER;
+	else if (strcmp("leo", zo_sym[sign]) == 0)
+		j = FIRE;
+	else if (strcmp("vir", zo_sym[sign]) == 0)
+		j = EARTH;
+	else if (strcmp("lib", zo_sym[sign]) == 0)
+		j = AIR;
+	else if (strcmp("sco", zo_sym[sign]) == 0)
+		j = WATER;
+	else if (strcmp("sag", zo_sym[sign]) == 0)
+		j = FIRE;
+	else if (strcmp("cap", zo_sym[sign]) == 0)
+		j = EARTH;
+	else if (strcmp("aqu", zo_sym[sign]) == 0)
+		j = AIR;
+	else if (strcmp("pis", zo_sym[sign]) == 0)
+		j = WATER;
 
-	switch(j)
+	switch(ch)
 	{
-		case FIRE:
-			wattron(win, COLOR_PAIR(FIRE));
-			mvwaddstr(win, y, x, zo_sym[sign_display]);
-			wattroff(win, COLOR_PAIR(FIRE));
-			++j;
+		case 'z':
+			switch(j)
+			{
+				case FIRE:
+					wattron(win, COLOR_PAIR(FIRE));
+					mvwaddstr(win, y, x, zo_sym[sign]);
+					wattroff(win, COLOR_PAIR(FIRE));
+					++j;
+					break;
+				case EARTH:
+					wattron(win, COLOR_PAIR(EARTH));
+					mvwaddstr(win, y, x, zo_sym[sign]);
+					wattroff(win, COLOR_PAIR(EARTH));
+					++j;
+					break;
+				case AIR:
+					wattron(win, COLOR_PAIR(AIR));
+					mvwaddstr(win, y, x, zo_sym[sign]);
+					wattroff(win, COLOR_PAIR(AIR));
+					++j;
+					break;
+				case WATER:
+					wattron(win, COLOR_PAIR(WATER));
+					mvwaddstr(win, y, x, zo_sym[sign]);
+					wattroff(win, COLOR_PAIR(WATER));
+					j = FIRE;
+					break;
+			}
 			break;
-		case EARTH:
-			wattron(win, COLOR_PAIR(EARTH));
-			mvwaddstr(win, y, x, zo_sym[sign_display]);
-			wattroff(win, COLOR_PAIR(EARTH));
-			++j;
-			break;
-		case AIR:
-			wattron(win, COLOR_PAIR(AIR));
-			mvwaddstr(win, y, x, zo_sym[sign_display]);
-			wattroff(win, COLOR_PAIR(AIR));
-			++j;
-			break;
-		case WATER:
-			wattron(win, COLOR_PAIR(WATER));
-			mvwaddstr(win, y, x, zo_sym[sign_display]);
-			wattroff(win, COLOR_PAIR(WATER));
-			j = FIRE;
+		case 'd':
+			switch(j)
+			{
+					case FIRE:
+					wattron(win, COLOR_PAIR(FIRE));
+					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
+					wattroff(win, COLOR_PAIR(FIRE));
+					++j;
+					break;
+				case EARTH:
+					wattron(win, COLOR_PAIR(EARTH));
+					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
+					wattroff(win, COLOR_PAIR(EARTH));
+					++j;
+					break;
+				case AIR:
+					wattron(win, COLOR_PAIR(AIR));
+					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
+					wattroff(win, COLOR_PAIR(AIR));
+					++j;
+					break;
+				case WATER:
+					wattron(win, COLOR_PAIR(WATER));
+					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
+					wattroff(win, COLOR_PAIR(WATER));
+					j = FIRE;
+					break;
+			}
 			break;
 	}
 }
@@ -564,23 +604,23 @@ void draw_circle(WINDOW *main_win, int radius, chtype ch)
 }
 
 void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
-{
+{ // help wanted: structured, cleanly, planet collission offset
 	double asc = cusps[1];
 	
-	double p_arr[] = {
-		pxx->dsun[LONG], pxx->dmoon[LONG],
-		pxx->dmerc[LONG], pxx->dven[LONG],
-		pxx->dmars[LONG], pxx->djup[LONG],
-		pxx->dsat[LONG], pxx->dura[LONG],
-		pxx->dnep[LONG], pxx->dplu[LONG],
-		pxx->dmnod[LONG], pxx->dtnod[LONG]};
+	double *p_arr[] = {
+		pxx->dsun, pxx->dmoon,
+		pxx->dmerc, pxx->dven,
+		pxx->dmars, pxx->djup,
+		pxx->dsat, pxx->dura,
+		pxx->dnep, pxx->dplu,
+		pxx->dmnod, pxx->dtnod};
+		
+	int center_x = (COLS / 2);
+	int center_y = (LINES / 2);
 
 	for (int i = 0; i < 12; ++i)
 	{
-		int center_x = (COLS / 2);
-		int center_y = (LINES / 2);
-		
-		double rad = (p_arr[i] - asc) * M_PI / 180.0;
+		double rad = (p_arr[i][LONG] - asc) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -598,8 +638,8 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 
 		for (int j = 0; j < i; j++)
 		{
-			double adj_angle = p_arr[j];
-			double ang_dist = fabs(p_arr[i] - adj_angle);
+			double adj_angle = p_arr[j][LONG];
+			double ang_dist = fabs(p_arr[i][LONG] - adj_angle);
 			
 			if (ang_dist <= 8 || ang_dist >= 352)
 			{
@@ -618,13 +658,13 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		
 		for (int j = 0; j < i; j++)
 		{
-			double adj_angle = p_arr[j];
-			double ang_dist = fabs(p_arr[i] - adj_angle);
+			double adj_angle = p_arr[j][LONG];
+			double ang_dist = fabs(p_arr[i][LONG] - adj_angle);
 			if (ang_dist <= 8 || ang_dist >= 352)
 			{
 				if (near_horizontal)
 				{
-					if ((fabs(p_arr[j] - pxx->dasc)) < 30)
+					if ((fabs(p_arr[j][LONG] - pxx->dasc)) < 30)
 					{
 						offsetx -= 13;
 						offsety -= 2;
@@ -648,15 +688,14 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		
 		offsetx = dir_x * offsetx;
 		
-		double decimal  = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
+		double decimal  = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
 		
-		char buffer[56];
-		snprintf(buffer, sizeof(buffer), "%.2f", ((int)p_arr[i] % 30) +
-		decimal);
+		p_arr[i][MWIN] = ((int)p_arr[i][LONG] % 30) + decimal;
 		
+		int sign = ((int)p_arr[i][LONG] / 30) + 1;
 		if (i != SE_MEAN_NODE)
 		{
-			mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
+			element_color(main_win, (y + offsety) -1, (x + offsetx), i, sign, pxx, 'd');
 		
 			mvwaddstr(main_win, y + offsety, x + offsetx, pl_sym[i]);
 		}
@@ -706,21 +745,21 @@ void zo_pos(WINDOW *main_win, int radius, Pxx *pxx)
 	int asc_sign = (int)(pxx->dasc / 30);
 	for (int i = 1; i < 13; ++i)
 	{
-		int sign_display = ((i + asc_sign - 1) % 12);
-		if (sign_display == 0)
-			sign_display = 12;
+		int sign = ((i + asc_sign - 1) % 12);
+		if (sign == 0)
+			sign = 12;
 
 		int center_x = (COLS / 2);
 		int center_y = (LINES / 2);
 		
-		int sign = (((int)pxx->dasc / 30) * 30) + 15;
+		int sign_inc = (((int)pxx->dasc / 30) * 30) + 15;
 		
-		double rad = (cusps[i] - sign) * M_PI / 180.0;
+		double rad = (cusps[i] - sign_inc) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
 		
-		zo_color(main_win, y, x, i, sign_display);
+		element_color(main_win, y, x, i, sign, pxx, 'z');
 	}
 }
 
@@ -1031,7 +1070,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
 			
 			startx += (int)strlen(buff);
-			zo_color(planet_win, starty, startx + 1, 1, sign);
+			element_color(planet_win, starty, startx + 1, 1, sign, pxx, 'z');
 			startx -= (int)strlen(buff);
 			
 			starty += 2;
@@ -1062,7 +1101,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
 			startx += (int)strlen(point_buff);
-			zo_color(planet_win, starty, startx + 1, 1, sign);
+			element_color(planet_win, starty, startx + 1, 1, sign, pxx, 'z');
 			startx -= (int)strlen(point_buff);
 	
 			starty += 2;

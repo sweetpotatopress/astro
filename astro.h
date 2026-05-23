@@ -18,7 +18,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define MAXBUF 1024
 #define MAXPATH 2048
-#define MAXPXX 6
+#define MAXPXX 7
 
 #define PWINY 38
 #define PWINX 36
@@ -64,6 +64,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define LAT_S 4
 #define DIST_S 5
 #define RETRO 6
+#define MWIN 7
 
 typedef struct {
 	double *dsun;
