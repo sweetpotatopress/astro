@@ -16,7 +16,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <time.h>
 
-
 #define MAXBUF 1024
 #define MAXPATH 2048
 #define MAXPXX 6
@@ -29,13 +28,16 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define RWINY 13
 #define RWINX 20
 #define RWIN_Y (LINES - 10)
-#define RWIN_X (COLS - 20)
+#define RWIN_X (COLS - 22)
 
 #define M_COLOR 1
 #define FIRE 2
 #define EARTH 3
 #define AIR 4
 #define WATER 5
+
+#define NIGHT_SECT 0
+#define DAY_SECT 1
 
 #define ERR_EXIT(str) do { \
 	endwin(); \
@@ -53,6 +55,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define TIMEZONE 6
 #define LATITUDE 7
 #define LONGITUDE 8
+#define FIELDMAX 9
 
 #define LONG 0
 #define LAT 1
@@ -111,6 +114,4 @@ typedef struct {
 typedef enum { NORMAL, INSERT } Mode;
 
 int main_search(FIELD *cdata_field[], char *argv);
-void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata,
-char *citybuffer, const char ch);
-
+void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata, char *citybuffer, const char ch);

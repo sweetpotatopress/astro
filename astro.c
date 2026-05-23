@@ -103,7 +103,7 @@ FIELD *cdata_field[], char *citybuffer)
 	
 	switch(index)
 	{
-		case 0:
+		case CITY:
 			main_search(cdata_field, buffer);
 			form_driver(cdata_form, REQ_VALIDATION);
 			
@@ -113,7 +113,7 @@ FIELD *cdata_field[], char *citybuffer)
 			
 			break;
 			
-		case 1:
+		case YEAR:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE)
 				cdata->tm_year = (int)iret;
@@ -121,7 +121,7 @@ FIELD *cdata_field[], char *citybuffer)
 				cdata->tm_year = 1970;
 			break;
 			
-		case 2:
+		case MONTH:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
 				cdata->tm_mon = (int)iret;
@@ -129,7 +129,7 @@ FIELD *cdata_field[], char *citybuffer)
 				cdata->tm_mon = 1;
 			break;
 			
-		case 3: 
+		case DAY: 
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
 				cdata->tm_mday = (int)iret;
@@ -137,7 +137,7 @@ FIELD *cdata_field[], char *citybuffer)
 				cdata->tm_mday = 1;
 			break;
 			
-		case 4:
+		case HOUR:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1) 
 				cdata->tm_hour = (int)iret;
@@ -145,7 +145,7 @@ FIELD *cdata_field[], char *citybuffer)
 				cdata->tm_hour = 1;
 			break;
 			
-		case 5:
+		case MINUTE:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
 				cdata->tm_min = (int)iret;
@@ -153,13 +153,13 @@ FIELD *cdata_field[], char *citybuffer)
 				cdata->tm_min = 1;
 			break;
 			
-		case 6:
+		case TIMEZONE:
 			if (setenv("TZ", buffer, 1) != 0)
 				ERR_EXIT("ERR: TZ setenv fail field_to_member");
 			tzset();
 			break;
 			
-		case 7:
+		case LATITUDE:
 			dret = strtod(buffer, &endptr);
 			if (errno != ERANGE)
 				cdata->dlat = dret;
@@ -167,7 +167,7 @@ FIELD *cdata_field[], char *citybuffer)
 				cdata->dlat = 0.0;
 			break;
 			
-		case 8:
+		case LONGITUDE:
 			dret = strtod(buffer, &endptr);
 			if (errno != ERANGE)
 				cdata->dlon = dret;
@@ -193,8 +193,8 @@ void field_label(WINDOW *cdata_form_win, int starty, int startx)
 		NULL
 	};
 	
-	size_t i = 0;
-	for (i = 0, starty = 4; i < 9; ++i, starty+= 2)
+	size_t i = CITY;
+	for (starty = 4; i < FIELDMAX; ++i, starty+= 2)
 			mvwprintw(cdata_form_win, starty, startx - 12,
 			"%s", c_labels[i]);
 	wrefresh(cdata_form_win);
@@ -259,7 +259,7 @@ FORM *cdata_form, Cdata *cdata, char *citybuffer)
 	memcpy(citybuffer, buffer, strlen(buffer) + 1);
 	++i;
 		
-	for (; i < 9; i++)
+	for (; i < FIELDMAX; i++)
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
@@ -339,7 +339,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	set_field_back(cdata_field[LONGITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[LONGITUDE], O_AUTOSKIP);
 	
-	cdata_field[9] = NULL;
+	cdata_field[FIELDMAX] = NULL;
 
 	cdata_form = new_form(cdata_field);
 	set_form_win(cdata_form, cdata_form_win);
@@ -466,7 +466,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	wrefresh(cdata_form_win);
 	free_form(cdata_form);
 	
-	for (i = 0; i < 9; ++i)
+	for (i = CITY; i < FIELDMAX; ++i)
 	{
 		free_field(cdata_field[i]);
 	}
@@ -657,7 +657,7 @@ int radius, double **planet, double asc, Pxx *pxx)
 		snprintf(buffer, sizeof(buffer), "%.2f", ((int)*planet[i] % 30) +
 		decimal);
 		
-		if (i != 10) // skip mean node
+		if (i != SE_MEAN_NODE)
 		{
 			mvwaddstr(main_win, (y + offsety) - 1, x + offsetx + 1, buffer);
 		
@@ -704,7 +704,6 @@ int radius, double *angle, double asc)
 		mvwaddstr(main_win, y - 1, x, buffer);
 	}
 }
-
 
 void zo_pos(WINDOW *main_win, int maxy, int maxx,
 int radius, double *angle, Pxx *pxx)
@@ -764,12 +763,12 @@ int radius, double *angle, chtype ch)
 
 int sect(Pxx *pxx)
 {
-	int sect = 0;
+	int sect = NIGHT_SECT;
 	
 	if ((pxx->dsun[LONG] - pxx->dasc) <= 180)
-		sect = 1; // day
+		sect = DAY_SECT;
 	else
-		sect = 0; // night
+		sect = NIGHT_SECT;
 	return sect;
 }
 
@@ -777,7 +776,7 @@ void lots(int sect, Pxx *pxx)
 {
 	double diff;
 	
-	if (sect) // day
+	if (sect == DAY_SECT)
 	{
 		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
 		pxx->dfor = pxx->dasc - diff;
@@ -1015,11 +1014,8 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 		&pxx->dasc, &pxx->dmc,
 		&pxx->ddsc, &pxx->dic};
 		
-	int maxy = 38;
-	int maxx = 36;
-	
-	for (int i = 0; i < maxy; i++) 
-	    mvwhline(planet_win, i, 0, ' ', maxx);
+	for (int i = 0; i < PWINY; i++) 
+	    mvwhline(planet_win, i, 0, ' ', PWINX);
 	
 	int starty = 1, startx = 2;
 	int j = 0;
@@ -1036,7 +1032,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 		double full_dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
 		int a_full_dec = (int)(full_dec * 100) % 100;
 		
-		if ( i != 10 && i < 12) // sun -> node (skipping mean node)
+		if ( i != SE_MEAN_NODE && i < 12) // sun -> node 
 		{
 			swe_get_planet_name(i, spname);
 			spname[2] ='\0';
@@ -1057,7 +1053,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			starty += 2;
 		}
 		
-		else if ( i != 10 && i >= 12) // asc -> ic
+		else if ( i != SE_MEAN_NODE && i >= 12) // asc -> ic
 		{
 			const char *points[] = {"for", "spi", "asc", "mc", "dsc", "ic"};
 			char point_buff[MAXBUF];
@@ -1101,11 +1097,8 @@ void retrograde_table(WINDOW *retro_win, Pxx *pxx)
 		
 	size_t p_count = 8;
 		
-	int maxy = 10;
-	int maxx = 20;
-	
-	for (int i = 0; i < maxy; i++) 
-	    mvwhline(retro_win, i, 0, ' ', maxx);
+	for (int i = 0; i < RWINY; i++) 
+	    mvwhline(retro_win, i, 0, ' ', RWINX);
 	    
 	for (size_t i = 0; i < p_count; ++i)
 	{
