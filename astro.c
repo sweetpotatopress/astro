@@ -596,7 +596,7 @@ void draw_circle(WINDOW *main_win, int radius, chtype ch)
 }
 
 void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
-{ // help wanted: structured, cleanly, planet collission offset
+{ // help wanted: structured, cleanly, planet collision offset
 	double asc = cusps[1];
 	
 	double *p_arr[] = {
@@ -638,7 +638,7 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 				if (near_horizontal)
 				{
 					offsetx += 7;
-					offsety += 2;
+					offsety += 1;
 				}
 				else
 				{
@@ -652,14 +652,19 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		{
 			double adj_angle = p_arr[j][LONG];
 			double ang_dist = fabs(p_arr[i][LONG] - adj_angle);
-			if (ang_dist <= 8 || ang_dist >= 352)
+			if (ang_dist <= 5 || ang_dist >= 355)
 			{
 				if (near_horizontal)
 				{
 					if ((fabs(p_arr[j][LONG] - pxx->dasc)) < 30)
 					{
 						offsetx -= 13;
-						offsety -= 2;
+						offsety += 2;
+					}
+					if ((fabs(p_arr[j][LONG] - pxx->ddsc)) < 30)
+					{
+						offsetx += 5;
+						offsety += 2;
 					}
 					else
 					{
@@ -949,7 +954,6 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 
 void draw_chart(WINDOW *main_win, Pxx *pxx)
 {
-	curs_set(0);
 	wclear(main_win);
 	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
 	
@@ -967,7 +971,6 @@ void draw_chart(WINDOW *main_win, Pxx *pxx)
 	planet_pos(main_win, radius - 9, pxx);
 	
 	ascmc_pos(main_win, (radius / 2) + 4);
-		
 }
 
 void cur_chart_data(WINDOW *main_win, Io *io, 
@@ -1162,7 +1165,6 @@ int *planet_trig, int *retro_trig)
 	pxx_fill(cdata, pxx);
 	draw_chart(main_win, pxx);
 	cur_chart_data(main_win, io, cdata);
-	wrefresh(main_win);
 	
 	if (*planet_trig > 0)
 	{
@@ -1176,6 +1178,8 @@ int *planet_trig, int *retro_trig)
 		show_panel(*retro_panel);
 		update_panels();
 	}	
+	
+	touchwin(main_win);
 }
 
 void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
@@ -1246,7 +1250,6 @@ int *planet_trig, int *retro_trig)
 	{
 		switch(ch)
 		{
-	
 			case 'h': case KEY_LEFT:
 				if (i != MINUTE)
 					++i;
@@ -1279,7 +1282,7 @@ int *planet_trig, int *retro_trig)
 				}
 				
 				touchwin(main_win);
-				wrefresh(main_win);
+				wnoutrefresh(main_win);
 				update_panels();
 				doupdate();
 				break;
@@ -1305,7 +1308,7 @@ int *planet_trig, int *retro_trig)
 					show_panel(*planet_panel);
 				}
 				touchwin(main_win);
-				wrefresh(main_win);
+				wnoutrefresh(main_win);
 				update_panels();
 				doupdate();
 				break;
@@ -1556,10 +1559,17 @@ int *planet_trig, int *retro_trig)
 				mvwprintw(main_win, starty, startx, "(year)");
 				break;
 		}
+		touchwin(main_win);
+		wnoutrefresh(main_win);
+		if (*planet_trig > 0 || *retro_trig > 0)
+			update_panels();
+		doupdate();
 	}
 	wmove(main_win, starty, startx);
 	wclrtoeol(main_win);
-	wrefresh(main_win);
+	wnoutrefresh(main_win);
+	update_panels();
+	doupdate();
 }
 
 int main()
@@ -1693,6 +1703,7 @@ int main()
 			switch(ch)
 			{
 				case '\n':
+					curs_set(0);
 					animate_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx, 
@@ -1738,7 +1749,7 @@ int main()
 					}
 					
 					touchwin(main_win);
-					wrefresh(main_win);
+					wnoutrefresh(main_win);
 					update_panels();
 					doupdate();
 					break;
@@ -1764,7 +1775,7 @@ int main()
 					}
 					
 					touchwin(main_win);
-					wrefresh(main_win);
+					wnoutrefresh(main_win);
 					update_panels();
 					doupdate();
 					break;
