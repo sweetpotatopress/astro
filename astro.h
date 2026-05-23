@@ -16,15 +16,26 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <time.h>
 
+
+#define MAXBUF 1024
+#define MAXPATH 2048
+#define MAXPXX 6
+
+#define PWINY 38
+#define PWINX 36
+#define PWIN_Y 0
+#define PWIN_X 0
+
+#define RWINY 13
+#define RWINX 20
+#define RWIN_Y (LINES - 10)
+#define RWIN_X (COLS - 20)
+
 #define M_COLOR 1
 #define FIRE 2
 #define EARTH 3
 #define AIR 4
 #define WATER 5
-
-#define MAXBUF 1024
-#define MAXPATH 2048
-#define MAXPXX 6
 
 #define ERR_EXIT(str) do { \
 	endwin(); \

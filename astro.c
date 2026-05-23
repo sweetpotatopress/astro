@@ -1153,7 +1153,7 @@ int *planet_trig, int *retro_trig)
 	mvwprintw(main_win, starty, startx, "(min)");
 	
 	int max_day = 0; // months() return flag
-	size_t i = 0; // time inc/dec
+	size_t i = MINUTE; // time inc/dec
 	
 	int ch = 0;
 	int anim_done = 0;
@@ -1162,13 +1162,13 @@ int *planet_trig, int *retro_trig)
 		switch(ch)
 		{
 			case 'h': case KEY_LEFT:
-				if (i != 0)
-					--i;
+				if (i != MINUTE)
+					++i;
 				break;
 				
 			case 'l': case KEY_RIGHT:
-				if (i != 4) // time inc/dec
-					++i;
+				if (i != YEAR) // time inc/dec
+					--i;
 				break;
 				
 			case 'p':
@@ -1193,6 +1193,7 @@ int *planet_trig, int *retro_trig)
 				touchwin(main_win);
 				wrefresh(main_win);
 				update_panels();
+				doupdate();
 				break;
 				
 			case 'o':
@@ -1216,12 +1217,13 @@ int *planet_trig, int *retro_trig)
 				touchwin(main_win);
 				wrefresh(main_win);
 				update_panels();
+				doupdate();
 				break;
 				
 			case 'k': case KEY_UP:
 				switch(i)
 				{
-					case 0:
+					case MINUTE:
 						if ((++cdata->tm_min) > 59)
 						{
 							++cdata->tm_hour;
@@ -1249,7 +1251,7 @@ int *planet_trig, int *retro_trig)
 						planet_trig, retro_trig);
 						break;
 						
-					case 1:
+					case HOUR:
 						if ((++cdata->tm_hour) > 23)
 						{
 							cdata->tm_hour = 0;
@@ -1273,7 +1275,7 @@ int *planet_trig, int *retro_trig)
 	
 						break;
 						
-					case 2:
+					case DAY:
 						if ((++cdata->tm_mday) > months(
 						cdata->tm_mon, cdata->tm_year))
 						{
@@ -1292,7 +1294,7 @@ int *planet_trig, int *retro_trig)
 	
 						break;
 						
-					case 3:
+					case MONTH:
 						if ((++cdata->tm_mon) > 12)
 						{
 							cdata->tm_mon = 1;
@@ -1310,7 +1312,7 @@ int *planet_trig, int *retro_trig)
 	
 						break;
 						
-					case 4:
+					case YEAR:
 						if ((++cdata->tm_year) > 16799)
 							cdata->tm_year = -12998;
 							
@@ -1325,7 +1327,7 @@ int *planet_trig, int *retro_trig)
 			case 'j': case KEY_DOWN:
 				switch(i)
 				{
-					case 0:
+					case MINUTE:
 						if ((--cdata->tm_min) < 0)
 						{
 								--cdata->tm_hour;
@@ -1354,7 +1356,7 @@ int *planet_trig, int *retro_trig)
 	
 						break;
 						
-					case 1:
+					case HOUR:
 						if ((--cdata->tm_hour) < 0)
 						{
 							cdata->tm_hour = 23;
@@ -1378,7 +1380,7 @@ int *planet_trig, int *retro_trig)
 	
 						break;
 						
-					case 2:
+					case DAY:
 						if ((--cdata->tm_mday) < 1)
 						{
 							--cdata->tm_mon;
@@ -1397,7 +1399,7 @@ int *planet_trig, int *retro_trig)
 	
 						break;
 						
-					case 3:
+					case MONTH:
 						if (--cdata->tm_mon < 1)
 						{
 							cdata->tm_mon = 12;
@@ -1415,7 +1417,7 @@ int *planet_trig, int *retro_trig)
 							
 						break;
 						
-					case 4:
+					case YEAR:
 						if ((--cdata->tm_year) < -12998)
 							cdata->tm_year = 16799;
 							
@@ -1434,31 +1436,31 @@ int *planet_trig, int *retro_trig)
 		
 		switch(i)
 		{
-			case 0:
+			case MINUTE:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(min)");
 				break;
 				
-			case 1:
+			case HOUR:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(hour)");
 				break;
 				
-			case 2:
+			case DAY:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(day)");
 				break;
 				
-			case 3:
+			case MONTH:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(mon)");
 				break;
 				
-			case 4:
+			case YEAR:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);
 				mvwprintw(main_win, starty, startx, "(year)");
@@ -1569,14 +1571,14 @@ int main()
 	main_win = newwin(maxy, maxx, 0, 0);
 	
 	PANEL *planet_panel;
-	WINDOW *planet_win = newwin(38, 36, 0, 0);
+	WINDOW *planet_win = newwin(PWINY, PWINX, PWIN_Y, PWIN_X);
 	planet_panel = new_panel(planet_win);
 	hide_panel(planet_panel);
 	
 	wbkgdset(planet_win, COLOR_PAIR(M_COLOR));
 	
 	PANEL *retro_panel;
-	WINDOW *retro_win = newwin(13, 20, LINES - 10, COLS - 20);
+	WINDOW *retro_win = newwin(RWINY, RWINX, RWIN_Y, RWIN_X);
 	retro_panel = new_panel(retro_win);
 	hide_panel(retro_panel);
 	
