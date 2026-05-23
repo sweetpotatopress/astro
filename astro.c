@@ -1168,6 +1168,8 @@ int *planet_trig, int *retro_trig)
 				if (*planet_trig)
 				{
 					hide_panel(*planet_panel);
+					clear();
+					refresh();
 					*planet_trig = 0;
 				}
 				else
@@ -1193,6 +1195,8 @@ int *planet_trig, int *retro_trig)
 				if (*retro_trig)
 				{
 					hide_panel(*retro_panel);
+					clear();
+					refresh();
 					*retro_trig = 0;
 				}
 				else
@@ -1626,6 +1630,8 @@ int main()
 					else
 					{
 						hide_panel(planet_panel);
+						clear();
+						refresh();
 						planet_trig = 0;
 					}
 					
@@ -1650,6 +1656,8 @@ int main()
 					else
 					{
 						hide_panel(retro_panel);
+						clear();
+						refresh();
 						retro_trig = 0;
 					}	
 					
