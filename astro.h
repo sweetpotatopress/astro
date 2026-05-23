@@ -97,6 +97,7 @@ typedef struct {
 	double dlat;
 	double dlon;
 	double dhour; //0.0 .. 23.999999;
+	int tm_sec;
 	int tm_min;
 	int tm_hour;
 	int tm_mday;

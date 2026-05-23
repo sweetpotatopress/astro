@@ -517,25 +517,21 @@ int sign, Pxx *pxx, char ch)
 					wattron(win, COLOR_PAIR(FIRE));
 					mvwaddstr(win, y, x, zo_sym[sign]);
 					wattroff(win, COLOR_PAIR(FIRE));
-					++j;
 					break;
 				case EARTH:
 					wattron(win, COLOR_PAIR(EARTH));
 					mvwaddstr(win, y, x, zo_sym[sign]);
 					wattroff(win, COLOR_PAIR(EARTH));
-					++j;
 					break;
 				case AIR:
 					wattron(win, COLOR_PAIR(AIR));
 					mvwaddstr(win, y, x, zo_sym[sign]);
 					wattroff(win, COLOR_PAIR(AIR));
-					++j;
 					break;
 				case WATER:
 					wattron(win, COLOR_PAIR(WATER));
 					mvwaddstr(win, y, x, zo_sym[sign]);
 					wattroff(win, COLOR_PAIR(WATER));
-					j = FIRE;
 					break;
 			}
 			break;
@@ -546,25 +542,21 @@ int sign, Pxx *pxx, char ch)
 					wattron(win, COLOR_PAIR(FIRE));
 					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
 					wattroff(win, COLOR_PAIR(FIRE));
-					++j;
 					break;
 				case EARTH:
 					wattron(win, COLOR_PAIR(EARTH));
 					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
 					wattroff(win, COLOR_PAIR(EARTH));
-					++j;
 					break;
 				case AIR:
 					wattron(win, COLOR_PAIR(AIR));
 					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
 					wattroff(win, COLOR_PAIR(AIR));
-					++j;
 					break;
 				case WATER:
 					wattron(win, COLOR_PAIR(WATER));
 					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
 					wattroff(win, COLOR_PAIR(WATER));
-					j = FIRE;
 					break;
 			}
 			break;
@@ -690,9 +682,10 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		
 		double decimal  = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
 		
+		int sign = ((int)p_arr[i][LONG] / 30) + 1;
+		
 		p_arr[i][MWIN] = ((int)p_arr[i][LONG] % 30) + decimal;
 		
-		int sign = ((int)p_arr[i][LONG] / 30) + 1;
 		if (i != SE_MEAN_NODE)
 		{
 			element_color(main_win, (y + offsety) -1, (x + offsetx), i, sign, pxx, 'd');
@@ -839,7 +832,7 @@ void check_dst(Cdata *cdata)
 	tm_in.tm_mday = cdata->tm_mday;
 	tm_in.tm_hour = cdata->tm_hour;
 	tm_in.tm_min = cdata->tm_min;
-	tm_in.tm_sec = 0;
+	tm_in.tm_sec = cdata->tm_sec;
 	tm_in.tm_isdst = -1;
 	
 	time_t t = mktime(&tm_in);
@@ -869,8 +862,9 @@ void chart_timeset(Cdata *cdata, int *day_offset)
 	double utc_offset = (double)cdata->utc_off;
 	
 	double min = (double)cdata->tm_min / 60;
+	double sec = (double)cdata->tm_sec / 3600.0;
 	
-	double dhour = (double)(cdata->tm_hour - utc_offset) + min;
+	double dhour = ((double)(cdata->tm_hour - utc_offset) + min  ) + sec;
 	
 	if((dhour >= 24.0))
 	{
@@ -997,19 +991,45 @@ Cdata *cdata)
 	if(cdata->tm_mon && cdata->tm_mday)
 		mvwprintw(main_win, starty, startx, "%d/%d",
 		cdata->tm_mon, cdata->tm_mday);
-	
+		
 	starty += 1;
-	if(cdata->tm_hour >= 0 && cdata->tm_min >= 0)
+	if (cdata->tm_hour >= 0)
 	{
-		if (cdata->tm_min == 0)
-			mvwprintw(main_win, starty, startx, "%d:%d0",
-			cdata->tm_hour, cdata->tm_min);
-		else if (cdata->tm_min <= 9)
-			mvwprintw(main_win, starty, startx, "%d:0%d",
-			cdata->tm_hour, cdata->tm_min);
+		if (cdata->tm_hour <= 9)
+			mvwprintw(main_win, starty, startx, "0%d",
+			cdata->tm_hour);
 		else
-			mvwprintw(main_win, starty, startx, "%d:%d",
-			cdata->tm_hour, cdata->tm_min);
+			mvwprintw(main_win, starty, startx, "%d",
+			cdata->tm_hour);
+	}
+	
+	if(cdata->tm_min >= 0)
+	{
+		startx += 2;
+		if (cdata->tm_min == 0)
+			mvwprintw(main_win, starty, startx, ":%d0",
+			cdata->tm_min);
+		else if (cdata->tm_min <= 9)
+			mvwprintw(main_win, starty, startx, ":0%d",
+			cdata->tm_min);
+		else
+			mvwprintw(main_win, starty, startx, ":%d",
+			cdata->tm_min);
+	}
+	
+	if (cdata->tm_sec >= 0)
+	{
+		startx += 3;
+		if (cdata->tm_sec == 0)
+			mvwprintw(main_win, starty, startx, ":%d0",
+			cdata->tm_sec);
+		else if (cdata->tm_sec <= 9)
+			mvwprintw(main_win, starty, startx, ":0%d",
+			cdata->tm_sec);
+		else
+			mvwprintw(main_win, starty, startx, ":%d",
+			cdata->tm_sec);
+		startx -= 5;
 	}
 	
 	starty += 1;
@@ -1157,6 +1177,55 @@ int *planet_trig, int *retro_trig)
 		update_panels();
 	}	
 }
+
+void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
+PANEL **planet_panel, PANEL **retro_panel,
+Io *io, Cdata *cdata, Pxx *pxx,
+int *planet_trig, int *retro_trig)
+{
+	nodelay(main_win, TRUE);
+	struct tm gettime = {0};
+		
+	int ch = 0;
+	while ((ch = wgetch(main_win)) != 9)
+	{
+		wattron(main_win, COLOR_PAIR(FIRE));
+		mvwprintw(main_win, 2, COLS - 22, "*live");
+		wattroff(main_win, COLOR_PAIR(FIRE));
+		wrefresh(main_win);
+		
+		for (int i = 0; i < 10; ++i)
+		{
+			usleep(100000);
+			if ((ch = wgetch(main_win)) == 9)
+				break;
+		}
+		
+		if (ch == 9)
+			break;
+		
+		time_t now = time(NULL);
+		localtime_r(&now, &gettime);
+		
+		cdata->tm_year = gettime.tm_year+1900;
+		cdata->tm_mon = gettime.tm_mon + 1;
+		cdata->tm_mday = gettime.tm_mday;
+		cdata->tm_hour = gettime.tm_hour;
+		cdata->tm_min = gettime.tm_min;
+		cdata->tm_sec = gettime.tm_sec;
+		
+		new_chart(main_win, planet_win, retro_win,
+		planet_panel, retro_panel,
+		io, cdata, pxx,
+		planet_trig, retro_trig);
+		
+		update_panels();
+		doupdate();
+	}
+	wmove(main_win, 2, COLS - 22);
+	wclrtoeol(main_win);
+	nodelay(main_win, FALSE);
+}
 	
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
@@ -1177,6 +1246,7 @@ int *planet_trig, int *retro_trig)
 	{
 		switch(ch)
 		{
+	
 			case 'h': case KEY_LEFT:
 				if (i != MINUTE)
 					++i;
@@ -1239,7 +1309,7 @@ int *planet_trig, int *retro_trig)
 				update_panels();
 				doupdate();
 				break;
-				
+			
 			case 'k': case KEY_UP:
 				switch(i)
 				{
@@ -1626,6 +1696,12 @@ int main()
 					animate_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx, 
+					&planet_trig, &retro_trig);
+					break;
+			case 9: // tab
+					realtime_chart(main_win, planet_win, retro_win,
+					&planet_panel, &retro_panel,
+					io, cdata, pxx,
 					&planet_trig, &retro_trig);
 					break;
 				case 'q':
