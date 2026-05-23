@@ -277,14 +277,11 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	int starty, startx;
 	size_t i = 0;
 	
-	int maxy, maxx;
-	getmaxyx(stdscr, maxy, maxx);
-
 	cbreak();
 	noecho();
 	curs_set(1);
 	
-	cdata_form_win = newwin(maxy, maxx, 0, 0);
+	cdata_form_win = newwin(LINES, COLS, 0, 0);
 	
 	keypad(cdata_form_win, TRUE);	
 	
@@ -344,7 +341,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	cdata_form = new_form(cdata_field);
 	set_form_win(cdata_form, cdata_form_win);
 	set_form_sub(cdata_form,
-	derwin(cdata_form_win, maxy, maxx, 0, 0));
+	derwin(cdata_form_win, LINES, COLS, 0, 0));
 	
 	post_form(cdata_form);
 	
@@ -534,11 +531,10 @@ void zo_color(WINDOW *win, int y, int x, int count, int sign_display)
 	}
 }
 
-void draw_circle(WINDOW *main_win,
-int maxy, int maxx, int radius, chtype ch)
+void draw_circle(WINDOW *main_win, int radius, chtype ch)
 {
-	int center_x = maxx / 2;
-	int center_y = maxy / 2;
+	int center_x = COLS / 2;
+	int center_y = LINES / 2;
 	
 	int x = 0;
 	int y = radius;
@@ -567,23 +563,24 @@ int maxy, int maxx, int radius, chtype ch)
 	}
 }
 
-void planet_pos(WINDOW *main_win, int maxy, int maxx,
-int radius, double **planet, double asc, Pxx *pxx)
+void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 {
+	double asc = cusps[1];
+	
+	double p_arr[] = {
+		pxx->dsun[LONG], pxx->dmoon[LONG],
+		pxx->dmerc[LONG], pxx->dven[LONG],
+		pxx->dmars[LONG], pxx->djup[LONG],
+		pxx->dsat[LONG], pxx->dura[LONG],
+		pxx->dnep[LONG], pxx->dplu[LONG],
+		pxx->dmnod[LONG], pxx->dtnod[LONG]};
+
 	for (int i = 0; i < 12; ++i)
 	{
-		double p_arr[] = {
-			pxx->dsun[LONG], pxx->dmoon[LONG],
-			pxx->dmerc[LONG], pxx->dven[LONG],
-			pxx->dmars[LONG], pxx->djup[LONG],
-			pxx->dsat[LONG], pxx->dura[LONG],
-			pxx->dnep[LONG], pxx->dplu[LONG],
-			pxx->dmnod[LONG], pxx->dtnod[LONG]};
-
-		int center_x = (maxx / 2);
-		int center_y = (maxy / 2);
+		int center_x = (COLS / 2);
+		int center_y = (LINES / 2);
 		
-		double rad = (*planet[i] - asc) * M_PI / 180.0;
+		double rad = (p_arr[i] - asc) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -602,7 +599,7 @@ int radius, double **planet, double asc, Pxx *pxx)
 		for (int j = 0; j < i; j++)
 		{
 			double adj_angle = p_arr[j];
-			double ang_dist = fabs(*planet[i] - adj_angle);
+			double ang_dist = fabs(p_arr[i] - adj_angle);
 			
 			if (ang_dist <= 8 || ang_dist >= 352)
 			{
@@ -622,7 +619,7 @@ int radius, double **planet, double asc, Pxx *pxx)
 		for (int j = 0; j < i; j++)
 		{
 			double adj_angle = p_arr[j];
-			double ang_dist = fabs(*planet[i] - adj_angle);
+			double ang_dist = fabs(p_arr[i] - adj_angle);
 			if (ang_dist <= 8 || ang_dist >= 352)
 			{
 				if (near_horizontal)
@@ -651,10 +648,10 @@ int radius, double **planet, double asc, Pxx *pxx)
 		
 		offsetx = dir_x * offsetx;
 		
-		double decimal  = (((*planet[i] - (int)*planet[i]) * 60) / 100);
+		double decimal  = (((p_arr[i] - (int)p_arr[i]) * 60) / 100);
 		
 		char buffer[56];
-		snprintf(buffer, sizeof(buffer), "%.2f", ((int)*planet[i] % 30) +
+		snprintf(buffer, sizeof(buffer), "%.2f", ((int)p_arr[i] % 30) +
 		decimal);
 		
 		if (i != SE_MEAN_NODE)
@@ -666,16 +663,15 @@ int radius, double **planet, double asc, Pxx *pxx)
 	}
 }
 
-void ascmc_pos(WINDOW *main_win, int maxy, int maxx,
-int radius, double *angle, double asc)
+void ascmc_pos(WINDOW *main_win, int radius)
 {
 	for (int i = 0; i < 2; ++i)
 	{
 		const char *ascmc_sym[] = {"as", "mc"};
-		int center_x = (maxx / 2);
-		int center_y = (maxy / 2);
+		int center_x = (COLS / 2);
+		int center_y = (LINES / 2);
 		
-		double rad = (angle[i] - asc) * M_PI / 180.0;
+		double rad = (ascmc[i] - cusps[1]) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -687,26 +683,25 @@ int radius, double *angle, double asc)
 				int line_x = center_x - (int)(r * cos(rad));
 				int line_y = center_y + (int)(r * sin(rad) * 0.5);
 				
-				if (line_x >= 0 && line_x < maxx
-				&& line_y >= 0 && line_y < maxy)
+				if (line_x >= 0 && line_x < COLS
+				&& line_y >= 0 && line_y < LINES)
 					mvwaddch(main_win, line_y, line_x, '`');
 			}
 		}
 		
 		mvwaddstr(main_win, y, x, ascmc_sym[i]);
 		
-		double decimal = (((angle[i] - (int)angle[i]) * 60) / 100);
+		double decimal = (((ascmc[i] - (int)ascmc[i]) * 60) / 100);
 		
 		char buffer[56];
-		snprintf(buffer, sizeof(buffer), "%.2f", ((int)angle[i] % 30) + 
+		snprintf(buffer, sizeof(buffer), "%.2f", ((int)ascmc[i] % 30) + 
 		decimal);
 		
 		mvwaddstr(main_win, y - 1, x, buffer);
 	}
 }
 
-void zo_pos(WINDOW *main_win, int maxy, int maxx,
-int radius, double *angle, Pxx *pxx)
+void zo_pos(WINDOW *main_win, int radius, Pxx *pxx)
 {
 	int asc_sign = (int)(pxx->dasc / 30);
 	for (int i = 1; i < 13; ++i)
@@ -715,12 +710,12 @@ int radius, double *angle, Pxx *pxx)
 		if (sign_display == 0)
 			sign_display = 12;
 
-		int center_x = (maxx / 2);
-		int center_y = (maxy / 2);
+		int center_x = (COLS / 2);
+		int center_y = (LINES / 2);
 		
 		int sign = (((int)pxx->dasc / 30) * 30) + 15;
 		
-		double rad = (angle[i] - sign) * M_PI / 180.0;
+		double rad = (cusps[i] - sign) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -729,15 +724,15 @@ int radius, double *angle, Pxx *pxx)
 	}
 }
 
-void draw_house(WINDOW *main_win, int maxy, int maxx, 
-int radius, double *angle, chtype ch)
+void draw_house(WINDOW *main_win,
+int radius, chtype ch)
 {
 	for (int i = 0; i < 13; ++i)
 	{
-		double rad = angle[i] * M_PI / 180.0;
+		double rad = cusps[i] * M_PI / 180.0;
 		
-		int center_x = maxx / 2;
-		int center_y = maxy / 2;
+		int center_x = COLS / 2;
+		int center_y = LINES / 2;
 		
 		int edge_x = center_x - (int)(radius * cos(rad));
 		int edge_y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -919,45 +914,34 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 	lots(chart_sect, pxx);
 }
 
-void draw_chart(WINDOW *main_win, int maxy, int maxx, Pxx *pxx)
+void draw_chart(WINDOW *main_win, Pxx *pxx)
 {
-	double *pxx_members[] = {
-		pxx->dsun, pxx->dmoon,
-		pxx->dmerc, pxx->dven,
-		pxx->dmars, pxx->djup,
-		pxx->dsat, pxx->dura,
-		pxx->dnep, pxx->dplu,
-		pxx->dmnod, pxx->dtnod,
-		&pxx->dasc, &pxx->dmc,
-		&pxx->ddsc, &pxx->dic,
-		&pxx->dfor, &pxx->dspir};
-	
 	curs_set(0);
 	wclear(main_win);
-	int radius = ((maxx / 2 < maxy) ? maxx / 2 : maxy) - 5;
+	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
 	
 	// zodiac
-	draw_circle(main_win, maxy, maxx, radius + 4, '`');
+	draw_circle(main_win, radius + 4, '`');
 	// out
-	draw_circle(main_win, maxy, maxx, radius, '.');
+	draw_circle(main_win, radius, '.');
 	// in
-	draw_circle(main_win, maxy, maxx, (radius / 2) - 1, '.');
+	draw_circle(main_win, (radius / 2) - 1, '.');
 	
-	draw_house(main_win, maxy, maxx, radius + 4, cusps, '`');
+	draw_house(main_win, radius + 4, '`');
 	
-	zo_pos(main_win, maxy, maxx, radius + 3, cusps, pxx);
+	zo_pos(main_win, radius + 3, pxx);
 	
-	planet_pos(main_win, maxy, maxx, radius - 9, pxx_members, cusps[1], pxx);
+	planet_pos(main_win, radius - 9, pxx);
 	
-	ascmc_pos(main_win, maxy, maxx, (radius / 2) + 4 , ascmc, cusps[1]);
+	ascmc_pos(main_win, (radius / 2) + 4);
 		
 }
 
-void cur_chart_data(WINDOW *main_win, int maxx, Io *io, 
+void cur_chart_data(WINDOW *main_win, Io *io, 
 Cdata *cdata)
 {	
 	int starty = 3;
-	int startx = maxx - 22;
+	int startx = COLS - 22;
 	
 	if(io->filename)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
@@ -1113,12 +1097,12 @@ void retrograde_table(WINDOW *retro_win, Pxx *pxx)
 
 void new_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
-int maxy, int maxx, Io *io, Cdata *cdata, Pxx *pxx,
+Io *io, Cdata *cdata, Pxx *pxx,
 int *planet_trig, int *retro_trig)
 {
 	pxx_fill(cdata, pxx);
-	draw_chart(main_win, maxy, maxx, pxx);
-	cur_chart_data(main_win, maxx, io, cdata);
+	draw_chart(main_win, pxx);
+	cur_chart_data(main_win, io, cdata);
 	wrefresh(main_win);
 	
 	if (*planet_trig > 0)
@@ -1137,11 +1121,11 @@ int *planet_trig, int *retro_trig)
 	
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
-int maxy, int maxx, Io *io, Cdata *cdata, Pxx *pxx,
+Io *io, Cdata *cdata, Pxx *pxx,
 int *planet_trig, int *retro_trig)
 {
 	int starty = 11;
-	int startx = maxx - 22;
+	int startx = COLS - 22;
 	
 	mvwprintw(main_win, starty, startx, "(min)");
 	
@@ -1244,7 +1228,7 @@ int *planet_trig, int *retro_trig)
 						}
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 						break;
 						
@@ -1267,7 +1251,7 @@ int *planet_trig, int *retro_trig)
 						}
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 	
 						break;
@@ -1286,7 +1270,7 @@ int *planet_trig, int *retro_trig)
 						}
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 	
 						break;
@@ -1304,7 +1288,7 @@ int *planet_trig, int *retro_trig)
 							
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 	
 						break;
@@ -1315,7 +1299,7 @@ int *planet_trig, int *retro_trig)
 							
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 	
 						break;
@@ -1348,7 +1332,7 @@ int *planet_trig, int *retro_trig)
 						}
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 	
 						break;
@@ -1372,7 +1356,7 @@ int *planet_trig, int *retro_trig)
 						}
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 	
 						break;
@@ -1391,7 +1375,7 @@ int *planet_trig, int *retro_trig)
 						}
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 	
 						break;
@@ -1409,7 +1393,7 @@ int *planet_trig, int *retro_trig)
 							
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 							
 						break;
@@ -1420,7 +1404,7 @@ int *planet_trig, int *retro_trig)
 							
 						new_chart(main_win, planet_win, retro_win,
 						planet_panel, retro_panel,
-						maxy, maxx, io, cdata, pxx, 
+						io, cdata, pxx, 
 						planet_trig, retro_trig);
 	
 						break;
@@ -1561,11 +1545,8 @@ int main()
 	init_pair(AIR, 5, 1);
 	init_pair(WATER, 6, 1);
 	
-	int maxy, maxx;
-	getmaxyx(stdscr, maxy, maxx);
-
 	WINDOW *main_win;
-	main_win = newwin(maxy, maxx, 0, 0);
+	main_win = newwin(LINES, COLS, 0, 0);
 	
 	PANEL *planet_panel;
 	WINDOW *planet_win = newwin(PWINY, PWINX, PWIN_Y, PWIN_X);
@@ -1592,8 +1573,8 @@ int main()
 		input_chart_data(io, cdata, citybuffer);
 		cdata->city = citybuffer;
 		pxx_fill(cdata, pxx);
-		draw_chart(main_win, maxy, maxx, pxx);
-		cur_chart_data(main_win, maxx, io, cdata);
+		draw_chart(main_win, pxx);
+		cur_chart_data(main_win, io, cdata);
 			
 		static int retro_trig = 0, planet_trig = 0;
 		int chart_done = 0, ch = 0;
@@ -1605,7 +1586,7 @@ int main()
 				case '\n':
 					animate_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
-					maxy, maxx, io, cdata, pxx, 
+					io, cdata, pxx, 
 					&planet_trig, &retro_trig);
 					break;
 				case 'q':
