@@ -237,6 +237,7 @@ void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
 	
 	unpost_menu(city_menu);
 	touchwin(city_win);
+	werase(city_win);
 	wrefresh(city_win);
 	free_menu(city_menu); //free menu first
 	for (size_t i = 0; i < n_choices; ++i)
@@ -286,7 +287,7 @@ int main_search(FIELD *cdata_field[], char *argv)
 	{
 		printw("no search results\n");
 		getch();
-		werase(stdscr);
+		erase();
 		refresh();
 		fclose(fp);
 		for (size_t j = 0; j < max_search; ++j)
@@ -297,6 +298,8 @@ int main_search(FIELD *cdata_field[], char *argv)
 	
 	print_menu(cdata_field, choices, n_choices);
 	
+	erase();
+	refresh();
 	fclose(fp);
 	for (size_t j = 0; j < n_choices; ++j)
 		free(choices[j]);
