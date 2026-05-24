@@ -129,14 +129,14 @@ void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
 	MENU *city_menu;
 	WINDOW *city_win;
 	WINDOW *city_subwin;
-	//use ** to not lose the pointer after the loop
-	char **strings = calloc(n_choices, sizeof(char *));
-	if (!strings)
-		ERR_EXIT("print_menu strings calloc");
-		
+	
 	char buffer[MAXBUF] = {0};
 	int max_width = 0;
 	
+	char **strings = calloc(n_choices, sizeof(char *));
+	if (!strings)
+		ERR_EXIT("print_menu strings calloc");
+
 	cities = calloc(n_choices + 1, sizeof(ITEM *));
 	if (!cities)
 		ERR_EXIT("print_menu citties calloc");
@@ -190,7 +190,6 @@ void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
 	wbkgdset(city_win, COLOR_PAIR(M_COLOR));
 		
 	keypad(city_win, TRUE);
-	clearok(city_win, TRUE);
 	
 	box(city_win, 0, 0);
 	
@@ -281,15 +280,13 @@ int main_search(FIELD *cdata_field[], char *argv)
 	noecho();
 	cbreak();
 
-	/* sending the address of choices allows the memory assigned by calloc to
-	be realloced, hence ***Location in the function */
 	n_choices = location_parse(fp, search, &choices, &max_search);
 
 	if (n_choices == 0)
 	{
 		printw("no search results\n");
 		getch();
-		clear();
+		werase(stdscr);
 		refresh();
 		fclose(fp);
 		for (size_t j = 0; j < max_search; ++j)
@@ -300,8 +297,6 @@ int main_search(FIELD *cdata_field[], char *argv)
 	
 	print_menu(cdata_field, choices, n_choices);
 	
-	clear();
-	refresh();
 	fclose(fp);
 	for (size_t j = 0; j < n_choices; ++j)
 		free(choices[j]);
