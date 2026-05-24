@@ -691,38 +691,31 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 	}
 }
 
-void ascmc_pos(WINDOW *main_win, int radius)
+void ascmc_pos(WINDOW *main_win, int radius, Pxx *pxx)
 {
-	for (int i = 0; i < 2; ++i)
+	double *asc_arr[] = { 
+		&pxx->dasc, &pxx->dmc,
+		&pxx->ddsc, &pxx->dic
+	};
+	
+	const char *ascmc_sym[] = {"as", "mc", "dsc", "ic"};
+	
+	for (int i = 0; i < 4; ++i)
 	{
-		const char *ascmc_sym[] = {"as", "mc"};
 		int center_x = (COLS / 2);
 		int center_y = (LINES / 2);
 		
-		double rad = (ascmc[i] - cusps[1]) * M_PI / 180.0;
+		double rad = (*asc_arr[i] - cusps[1]) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
 		
-		if (i == 0) // draw asc line
-		{
-			for (int r = 0; r <= radius; r++)
-			{
-				int line_x = center_x - (int)(r * cos(rad));
-				int line_y = center_y + (int)(r * sin(rad) * 0.5);
-				
-				if (line_x >= 0 && line_x < COLS
-				&& line_y >= 0 && line_y < LINES)
-					mvwaddch(main_win, line_y, line_x, '`');
-			}
-		}
-		
 		mvwaddstr(main_win, y, x, ascmc_sym[i]);
 		
-		double decimal = (((ascmc[i] - (int)ascmc[i]) * 60) / 100);
+		double decimal = (((*asc_arr[i] - (int)*asc_arr[i]) * 60) / 100);
 		
 		char buffer[56];
-		snprintf(buffer, sizeof(buffer), "%.2f", ((int)ascmc[i] % 30) + 
+		snprintf(buffer, sizeof(buffer), "%.2f", ((int)*asc_arr[i] % 30) + 
 		decimal);
 		
 		mvwaddstr(main_win, y - 1, x, buffer);
@@ -961,7 +954,7 @@ void draw_chart(WINDOW *main_win, Pxx *pxx)
 	
 	planet_pos(main_win, radius - 6, pxx);
 	
-	ascmc_pos(main_win, (radius / 2) + 4);
+	ascmc_pos(main_win, (radius / 2) + 4, pxx);
 }
 
 void cur_chart_data(WINDOW *main_win, Io *io, 
@@ -1184,7 +1177,6 @@ int *planet_trig, int *retro_trig)
 	int ch = 0;
 	while ((ch = wgetch(main_win)) != 9)
 	{
-		
 		time_t now = time(NULL);
 		localtime_r(&now, &gettime);
 		
@@ -1215,7 +1207,6 @@ int *planet_trig, int *retro_trig)
 		
 		if (ch == 9)
 			break;
-		
 		
 		update_panels();
 		doupdate();
