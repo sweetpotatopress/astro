@@ -596,8 +596,9 @@ void draw_circle(WINDOW *main_win, int radius, chtype ch)
 }
 
 void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
-{ // help wanted: structured, cleanly, planet collision offset
-	double asc = cusps[1];
+{
+	int sign_num = (int)(cusps[1] / 30.0);
+	double asc = sign_num * 30.0;
 	
 	double *p_arr[] = {
 		pxx->dsun, pxx->dmoon,
@@ -609,76 +610,70 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		
 	int center_x = (COLS / 2);
 	int center_y = (LINES / 2);
+	
+	int iter_count = 10;
+	int max_dist = 8;
+	double conv_thresh = 0.1;
 
+	double adj_longs[12];
+	for (int i = 0; i < 12; ++i)
+		adj_longs[i] = p_arr[i][LONG];
+	for (int iter = 0; iter < iter_count; ++iter)
+	{
+		double max_change = 0.0;
+		
+		for (int i = 0; i < 12; ++i)
+		{
+			double current = adj_longs[i];
+			double ang_off = 0.0;
+			
+			for (int j = 0; j < 12; ++j)
+			{
+				if (i != j)
+				{
+					double signed_dist = adj_longs[j] - current;
+					while (signed_dist > 180)
+						signed_dist -= 360;
+					while (signed_dist < -180)
+						signed_dist += 360;
+					double ang_dist = fabs(signed_dist);
+					
+					if (ang_dist < max_dist)
+					{
+						double strength = (max_dist - ang_dist) / max_dist;
+						
+						int place = (current > adj_longs[j]) ? 1 : -1;
+						if (ang_dist > 180)
+							place *= -1;
+							
+						ang_off += 3 * strength * place;
+					}
+				}
+			}
+			double new_long = current + ang_off;
+			
+			while (new_long < 0.0)
+				new_long += 360.0;
+			while (new_long >= 360.0)
+				new_long -= 360.0;
+		
+			double change = fabs(new_long - current);
+			max_change = (change > max_change) ? change : max_change;
+			
+			adj_longs[i] = new_long;
+		}
+		if (max_change < conv_thresh)
+			break;
+	}
+	
 	for (int i = 0; i < 12; ++i)
 	{
-		double rad = (p_arr[i][LONG] - asc) * M_PI / 180.0;
+		double angle_rad = (adj_longs[i] - asc) * M_PI / 180;
+		double cos_rad = cos(angle_rad);
+		double sin_rad = sin(angle_rad);
 		
-		int x = center_x - (int)(radius * cos(rad));
-		int y = center_y + (int)(radius * sin(rad) * 0.5);
-		
-		int offsety = 0;
-		int offsetx = 0;
-		/* 	cos	1	0	-1	0
-				0	90	180	270
-			sin	0	1	0	-1
-		*/
-		int dir_x = ((int)cos(rad) != 0) ? 1 : -1;
-		int dir_y = ((int)sin(rad) != 0) ? -1 : 1;
-		
-		bool near_horizontal = (fabs(sin(rad)) < 0.8);
-
-		for (int j = 0; j < i; j++)
-		{
-			double adj_angle = p_arr[j][LONG];
-			double ang_dist = fabs(p_arr[i][LONG] - adj_angle);
-			
-			if (ang_dist <= 8 || ang_dist >= 352)
-			{
-				if (near_horizontal)
-				{
-					offsetx += 7;
-					offsety += 2;
-				}
-				else
-				{
-					offsety -= 4;
-					offsetx -= 3;
-				}
-			}
-		}
-		
-		for (int j = 0; j < i; j++)
-		{
-			double adj_angle = p_arr[j][LONG];
-			double ang_dist = fabs(p_arr[i][LONG] - adj_angle);
-			if (ang_dist <= 8 || ang_dist >= 352)
-			{
-				if (near_horizontal)
-				{
-					if ((fabs(p_arr[j][LONG] - pxx->dasc)) < 30)
-					{
-						offsetx -= 13;
-						offsety -= 2;
-					}
-					else
-					{
-						offsetx += 3;
-						offsety -= 2;
-					}
-				}
-				else
-				{
-					offsetx += 5;
-					offsety += 2;
-				}
-			}
-		}
-		
-		if (!near_horizontal)
-			offsety = dir_y * offsety;
-		
-		offsetx = dir_x * offsetx;
+		int x = center_x - (int)(radius * cos_rad);
+		int y = center_y + (int)(radius * sin_rad * 0.5);
 		
 		double decimal  = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
 		
@@ -688,9 +683,8 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		
 		if (i != SE_MEAN_NODE)
 		{
-			element_color(main_win, (y + offsety) -1, (x + offsetx), i, sign, pxx, 'd');
-		
-			mvwaddstr(main_win, y + offsety, x + offsetx, pl_sym[i]);
+			element_color(main_win, y-1, x, i, sign, pxx, 'd');
+			mvwaddstr(main_win, y, x, pl_sym[i]);
 		}
 	}
 }
@@ -950,7 +944,7 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 void draw_chart(WINDOW *main_win, Pxx *pxx)
 {
 	curs_set(0);
-	wclear(main_win);
+	werase(main_win);
 	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
 	
 	// zodiac
@@ -964,7 +958,7 @@ void draw_chart(WINDOW *main_win, Pxx *pxx)
 	
 	zo_pos(main_win, radius + 3, pxx);
 	
-	planet_pos(main_win, radius - 9, pxx);
+	planet_pos(main_win, radius - 6, pxx);
 	
 	ascmc_pos(main_win, (radius / 2) + 4);
 }
@@ -1161,7 +1155,7 @@ int *planet_trig, int *retro_trig)
 	pxx_fill(cdata, pxx);
 	draw_chart(main_win, pxx);
 	cur_chart_data(main_win, io, cdata);
-	wrefresh(main_win);
+	wnoutrefresh(main_win);
 	
 	if (*planet_trig > 0)
 	{
@@ -1175,6 +1169,7 @@ int *planet_trig, int *retro_trig)
 		show_panel(*retro_panel);
 		update_panels();
 	}	
+	doupdate();
 }
 
 void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
@@ -1188,20 +1183,6 @@ int *planet_trig, int *retro_trig)
 	int ch = 0;
 	while ((ch = wgetch(main_win)) != 9)
 	{
-		wattron(main_win, COLOR_PAIR(FIRE));
-		mvwprintw(main_win, 2, COLS - 22, "*live");
-		wattroff(main_win, COLOR_PAIR(FIRE));
-		wrefresh(main_win);
-		
-		for (int i = 0; i < 10; ++i)
-		{
-			usleep(100000);
-			if ((ch = wgetch(main_win)) == 9)
-				break;
-		}
-		
-		if (ch == 9)
-			break;
 		
 		time_t now = time(NULL);
 		localtime_r(&now, &gettime);
@@ -1217,6 +1198,23 @@ int *planet_trig, int *retro_trig)
 		planet_panel, retro_panel,
 		io, cdata, pxx,
 		planet_trig, retro_trig);
+		
+		wattron(main_win, COLOR_PAIR(FIRE));
+		mvwprintw(main_win, 2, COLS - 22, "*live");
+		wattroff(main_win, COLOR_PAIR(FIRE));
+		wrefresh(main_win);
+		
+		
+		for (int i = 0; i < 10; ++i)
+		{
+			usleep(100000);
+			if ((ch = wgetch(main_win)) == 9)
+				break;
+		}
+		
+		if (ch == 9)
+			break;
+		
 		
 		update_panels();
 		doupdate();
