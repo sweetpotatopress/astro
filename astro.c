@@ -614,20 +614,22 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 	int iter_count = 10;
 	int max_dist = 8;
 	double conv_thresh = 0.1;
+	int pcount = 12;
 
-	double adj_longs[12];
-	for (int i = 0; i < 12; ++i)
+	double adj_longs[pcount];
+	for (int i = 0; i < pcount; ++i)
 		adj_longs[i] = p_arr[i][LONG];
+		
 	for (int iter = 0; iter < iter_count; ++iter)
 	{
 		double max_change = 0.0;
 		
-		for (int i = 0; i < 12; ++i)
+		for (int i = 0; i < pcount; ++i)
 		{
 			double current = adj_longs[i];
 			double ang_off = 0.0;
 			
-			for (int j = 0; j < 12; ++j)
+			for (int j = 0; j < pcount; ++j)
 			{
 				if (i != j)
 				{
@@ -666,7 +668,7 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 			break;
 	}
 	
-	for (int i = 0; i < 12; ++i)
+	for (int i = 0; i < pcount; ++i)
 	{
 		double angle_rad = (adj_longs[i] - asc) * M_PI / 180;
 		double cos_rad = cos(angle_rad);
@@ -904,7 +906,6 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
 	{
-	
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
 			ERR_EXIT("ERR: swe_calc_ut failure");

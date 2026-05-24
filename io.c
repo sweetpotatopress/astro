@@ -205,7 +205,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 						//copy new file path to open
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
-						wclear(save_win);
+						werase(save_win);
 						menu_done = 1;
 						break;
 					}
@@ -221,7 +221,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 					//return to homepath
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					
-					wclear(save_win);
+					werase(save_win);
 					menu_done = 1;
 					break;
 				case 'm':
@@ -230,7 +230,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 						ERR_EXIT("save_chart mdir case m");
 					
 					echo();
-					wclear(save_win);
+					werase(save_win);
 					box(save_win, 0, 0);
 					wprintw(save_win, "dir name?");
 					mvwgetnstr(save_win, 2, 2, mdir, 127);
@@ -256,7 +256,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 				case 'q': 
 					savedir_done = 1;
 					menu_done = 1;
-					wclear(save_win);
+					werase(save_win);
 					break;
 			}
 			wrefresh(save_win);
@@ -274,7 +274,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		free(i_desc);
 		free(save_files);
 		
-		wclear(save_win);
+		werase(save_win);
 		wrefresh(save_win);
 		delwin(save_subwin);
 		delwin(save_win);
@@ -395,7 +395,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 	// if file exists with same name, ask to overwrite
 	if (stat(fn_buff, &buff) == 0)
 	{
-		wclear(save_win);
+		werase(save_win);
 		mvwprintw(save_win, 1, 1,
 		"overwrite:'%s'?\n -o--(y/n)-o:", filename);
 		box(save_win, 0, 0);
@@ -404,7 +404,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		switch (ch)
 		{
 			case 'y':
-				wclear(save_win);
+				werase(save_win);
 				mvwprintw(save_win, 2, 1,
 				"overwritten!--o-");
 				box(save_win, 0, 0);
@@ -414,7 +414,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 				getch();
 				break;
 			case 'n':
-				wclear(save_win);
+				werase(save_win);
 				mvwprintw(save_win, 2, 1, 
 				"your file is safe >w<");
 				box(save_win, 0, 0);
@@ -447,7 +447,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		
 		fclose(ifp);
 		unpost_form(save_form);
-		wclear(save_win);
+		werase(save_win);
 		wrefresh(save_win);
 		free_form(save_form);
 		
@@ -643,7 +643,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 						// copy new file path to open
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
-						wclear(load_win);
+						werase(load_win);
 						menu_done = 1 ;
 						break;
 					}
@@ -683,13 +683,13 @@ void load_chart(FIELD *cdata_field[], Io *io)
 					//return to homepath
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					
-					wclear(load_win);
+					werase(load_win);
 					menu_done = 1;
 					break;
 				case 'q': 
 					load_done = 1;
 					menu_done = 1;
-					wclear(load_win);
+					werase(load_win);
 					break;
 				default:
 					ch = wgetch(load_win);
@@ -709,7 +709,7 @@ void load_chart(FIELD *cdata_field[], Io *io)
 		free(i_desc);
 		free(load_files);
 		
-		wclear(load_win);
+		werase(load_win);
 		wrefresh(load_win);
 		delwin(load_subwin);
 		delwin(load_win);
