@@ -151,7 +151,6 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		save_subwin = derwin(save_win, height - 2, width - 2, 1, 1);
 		
 		keypad(save_win, TRUE);
-		clearok(save_win, TRUE);
 		
 		box(save_win, 0, 0);
 		save_menu = new_menu(save_files);

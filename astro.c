@@ -562,7 +562,6 @@ int sign, Pxx *pxx, char ch)
 					break;
 			}
 			break;
-		
 	}
 }
 
@@ -1572,6 +1571,8 @@ int main()
 	keypad(stdscr, TRUE);
 
 	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
+	werase(stdscr);
+	wrefresh(stdscr);
 	
 	int main_done = 0;
 	while (!main_done)
@@ -1606,7 +1607,7 @@ int main()
 					chart_done = 1;
 					break;
 				case 'i':
-					wclear(main_win);
+					werase(main_win);
 					wrefresh(main_win);
 					free(io->filename);
 					io->filename = NULL;
