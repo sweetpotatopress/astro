@@ -79,10 +79,10 @@ typedef struct {
 	double *dplu;
 	double *dmnod;
 	double *dtnod;
-	double dasc;
-	double dmc;
-	double ddsc;
-	double dic;
+	double *dasc;
+	double *dmc;
+	double *ddsc;
+	double *dic;
 	double dfor;
 	double dspir;
 } Pxx;

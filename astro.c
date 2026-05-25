@@ -479,7 +479,9 @@ int sign, Pxx *pxx, char ch)
 			pxx->dmars, pxx->djup,
 			pxx->dsat, pxx->dura,
 			pxx->dnep, pxx->dplu,
-			pxx->dmnod, pxx->dtnod};
+			pxx->dmnod, pxx->dtnod,
+			pxx->dasc, pxx->dmc, 
+			pxx->ddsc, pxx->dic};
 			
 	static int j;
 	
@@ -560,6 +562,7 @@ int sign, Pxx *pxx, char ch)
 					break;
 			}
 			break;
+		
 	}
 }
 
@@ -694,8 +697,8 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 void ascmc_pos(WINDOW *main_win, int radius, Pxx *pxx)
 {
 	double *asc_arr[] = { 
-		&pxx->dasc, &pxx->dmc,
-		&pxx->ddsc, &pxx->dic
+		pxx->dasc, pxx->dmc,
+		pxx->ddsc, pxx->dic
 	};
 	
 	const char *ascmc_sym[] = {"as", "mc", "dsc", "ic"};
@@ -705,26 +708,27 @@ void ascmc_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		int center_x = (COLS / 2);
 		int center_y = (LINES / 2);
 		
-		double rad = (*asc_arr[i] - cusps[1]) * M_PI / 180.0;
+		double rad = (asc_arr[i][LONG] - cusps[1]) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
 		
 		mvwaddstr(main_win, y, x, ascmc_sym[i]);
 		
-		double decimal = (((*asc_arr[i] - (int)*asc_arr[i]) * 60) / 100);
+		double decimal = (((asc_arr[i][LONG] - (int)asc_arr[i][LONG]) * 60) / 100);
+		double b60 = (((int)asc_arr[i][LONG] % 30) + decimal);
 		
-		char buffer[56];
-		snprintf(buffer, sizeof(buffer), "%.2f", ((int)*asc_arr[i] % 30) + 
-		decimal);
+		asc_arr[i][MWIN] = b60;
 		
-		mvwaddstr(main_win, y - 1, x, buffer);
+		int sign = ((int)asc_arr[i][LONG] / 30) + 1;
+		
+		element_color(main_win, y-1, x, i + 12, sign, pxx, 'd');
 	}
 }
 
 void zo_pos(WINDOW *main_win, int radius, Pxx *pxx)
 {
-	int asc_sign = (int)(pxx->dasc / 30);
+	int asc_sign = (int)(pxx->dasc[LONG] / 30);
 	for (int i = 1; i < 13; ++i)
 	{
 		int sign = ((i + asc_sign - 1) % 12);
@@ -734,7 +738,7 @@ void zo_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		int center_x = (COLS / 2);
 		int center_y = (LINES / 2);
 		
-		int sign_inc = (((int)pxx->dasc / 30) * 30) + 15;
+		int sign_inc = (((int)pxx->dasc[LONG] / 30) * 30) + 15;
 		
 		double rad = (cusps[i] - sign_inc) * M_PI / 180.0;
 		
@@ -781,7 +785,7 @@ int sect(Pxx *pxx)
 {
 	int sect = NIGHT_SECT;
 	
-	if ((pxx->dsun[LONG] - pxx->dasc) <= 180)
+	if ((pxx->dsun[LONG] - pxx->dasc[LONG]) <= 180)
 		sect = DAY_SECT;
 	else
 		sect = NIGHT_SECT;
@@ -795,14 +799,14 @@ void lots(int sect, Pxx *pxx)
 	if (sect == DAY_SECT)
 	{
 		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
-		pxx->dfor = pxx->dasc - diff;
-		pxx->dspir = pxx->dasc + diff;
+		pxx->dfor = pxx->dasc[LONG] - diff;
+		pxx->dspir = pxx->dasc[LONG] + diff;
 	}
 	else // night
 	{
 		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
-		pxx->dfor = pxx->dasc + diff;
-		pxx->dspir = pxx->dasc - diff;
+		pxx->dfor = pxx->dasc[LONG] + diff;
+		pxx->dspir = pxx->dasc[LONG] - diff;
 	}
 	
 	pxx->dfor = fmod(pxx->dfor, 360.0);
@@ -884,8 +888,8 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 	pxx->dsat, pxx->dura,
 	pxx->dnep, pxx->dplu,
 	pxx->dmnod, pxx->dtnod,
-	&pxx->dasc, &pxx->dmc,
-	&pxx->ddsc, &pxx->dic,
+	pxx->dasc, pxx->dmc,
+	pxx->ddsc, pxx->dic,
 	&pxx->dfor, &pxx->dspir};
 	
 	chart_timeset(cdata, &day_offset); // goes before swe_julday
@@ -926,10 +930,10 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 		ic -= 360;
 	double mc = ascmc[1];
 	
-	pxx->dasc = asc;
-	pxx->ddsc = dsc;
-	pxx->dic = ic;
-	pxx->dmc = mc;
+	pxx->dasc[LONG] = asc;
+	pxx->ddsc[LONG] = dsc;
+	pxx->dic[LONG] = ic;
+	pxx->dmc[LONG] = mc;
 	
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
@@ -1041,8 +1045,8 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 		pxx->dnep, pxx->dplu,
 		pxx->dmnod, pxx->dtnod,
 		&pxx->dfor, &pxx->dspir,
-		&pxx->dasc, &pxx->dmc,
-		&pxx->ddsc, &pxx->dic};
+		pxx->dasc, pxx->dmc,
+		pxx->ddsc, pxx->dic};
 		
 	for (int i = 0; i < PWINY; i++) 
 	    mvwhline(planet_win, i, 0, ' ', PWINX);
@@ -1497,7 +1501,19 @@ int main()
 	pxx->dtnod  = calloc(MAXPXX, sizeof(double)); 
 	if(!pxx->dtnod)
 		ERR_EXIT("pxx->d calloc");
-		
+	pxx->dasc  = calloc(MAXPXX, sizeof(double)); 
+	if(!pxx->dasc)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dmc = calloc(MAXPXX, sizeof(double));
+	if(!pxx->dmc)
+		ERR_EXIT("pxx->d calloc");
+	pxx->ddsc  = calloc(MAXPXX, sizeof(double)); 
+	if(!pxx->ddsc)
+		ERR_EXIT("pxx->d calloc");
+	pxx->dic = calloc(MAXPXX, sizeof(double));
+	if(!pxx->dic)
+		ERR_EXIT("pxx->d calloc");
+	
 	Io *io = calloc(1, sizeof(Io));
 	if (!io)
 		ERR_EXIT("mai io calloc");
