@@ -1057,13 +1057,10 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 	{
 		int sign = ((int)p_arr[i][LONG] / 30) + 1;
 		
-		int deg = (int)p_arr[i][LONG] % 30;
-		double dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
-		int a_dec = (int)(dec * 100) % 100;
-		
 		int full_deg = (int)p_arr[i][LONG];
-		double full_dec = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
-		int a_full_dec = (int)(full_dec * 100) % 100;
+		int deg = (int)p_arr[i][LONG] % 30;
+		int a_dec = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
+		
 		
 		if ( i != SE_MEAN_NODE && i < 12) // sun -> node 
 		{
@@ -1073,8 +1070,8 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			char buff[MAXBUF];
 			
 			snprintf(buff, sizeof(buff),
-			"%-3s %3d.%-2d : %6s %2d\xc2\xb0%d`",
-			spname, full_deg, a_full_dec,
+			"%-3s %3d.%02d : %6s %2d\xc2\xb0%02d`",
+			spname, full_deg, a_dec,
 			pl_sym[i], deg, a_dec);
 			
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
@@ -1092,8 +1089,8 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			char point_buff[MAXBUF];
 			
 			snprintf(point_buff, sizeof(point_buff),
-			"%-11s %3d.%-2d : %2d\xc2\xb0%d` ",
-			points[j], full_deg, a_full_dec, deg, a_dec);
+			"%-9s %3d.%02d : %2d\xc2\xb0%02d` ",
+			points[j], full_deg, a_dec, deg, a_dec);
 			
 			if (i == 12) // lots divider
 			{
