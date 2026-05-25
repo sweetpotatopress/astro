@@ -20,7 +20,7 @@ SWE_LIB   	= /usr/local/lib
 INSTALL_DIR = /usr/local/bin
 
 TARGET    = astro
-SRCS      = astro.c io.c search.c
+SRCS      = $(wildcard *.c)
 
 # Determine the real user and home directory
 REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
