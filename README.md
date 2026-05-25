@@ -13,7 +13,6 @@ doas/sudo make clean install
 
 --o-DEPENDENCIES---
 
-- swiss ephemeris (built with the makefile)
 - ncurses
 
 basically, it should work on most linux distros, it may not work on systems
@@ -24,9 +23,8 @@ in theory astro works on BSD. in theory . .
 FOUNDATION--0-  
   
 built on the IANA time zone database, which has correct historical DST accuracy.
-the choice: spend over 300 dollars on "professional" proprietary software with poor DST accuracy  
-or pay 0 for free beautiful accuracy in all your charts by using astro~  ;3
-  
+the choice: spend over 300 dollars on "professional" proprietary software with poor DST accuracy or pay 0 for free beautiful accuracy in all your charts by using astro~  ;3  
+
 made with love, nyaa  
 
 --o-KEYBINDS---o-
@@ -98,6 +96,9 @@ exit:			q
  
  astro
  AGPLv3
+ 
+ swiss ephemeris 
+ https://github.com/aloistr/swisseph
  
  geonames - (city-db)
  CC BY 4.0
