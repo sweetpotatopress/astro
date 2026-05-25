@@ -1047,8 +1047,9 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 		pxx->dasc, pxx->dmc,
 		pxx->ddsc, pxx->dic};
 		
-	for (int i = 0; i < PWINY; i++) 
-	    mvwhline(planet_win, i, 0, ' ', PWINX);
+	werase(planet_win);
+	wnoutrefresh(planet_win);
+	doupdate();
 	
 	int starty = 1, startx = 2;
 	int j = 0;
@@ -1070,15 +1071,14 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			char buff[MAXBUF];
 			
 			snprintf(buff, sizeof(buff),
-			"%-3s %3d.%02d : %6s %2d\xc2\xb0%02d`",
+			"%-3s %3d.%02d : %6s %02d\xc2\xb0%02d`",
 			spname, full_deg, a_dec,
 			pl_sym[i], deg, a_dec);
 			
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
 			
-			startx += (int)strlen(buff);
-			element_color(planet_win, starty, startx + 1, 1, sign, pxx, 'z');
-			startx -= (int)strlen(buff);
+			int color_x = startx + (int)strlen(buff) + 1;
+			element_color(planet_win, starty, color_x, 1, sign, pxx, 'z');
 			
 			starty += 2;
 		}
@@ -1089,7 +1089,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			char point_buff[MAXBUF];
 			
 			snprintf(point_buff, sizeof(point_buff),
-			"%-9s %3d.%02d : %2d\xc2\xb0%02d` ",
+			"%-9s %3d.%02d : %02d\xc2\xb0%02d`",
 			points[j], full_deg, a_dec, deg, a_dec);
 			
 			if (i == 12) // lots divider
@@ -1107,9 +1107,8 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			}
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
-			startx += (int)strlen(point_buff);
-			element_color(planet_win, starty, startx + 1, 1, sign, pxx, 'z');
-			startx -= (int)strlen(point_buff);
+			int color_x = startx + (int)strlen(point_buff) + 1;
+			element_color(planet_win, starty, color_x, 1, sign, pxx, 'z');
 	
 			starty += 2;
 			++j;
@@ -1163,7 +1162,6 @@ int *planet_trig, int *retro_trig)
 		show_panel(*retro_panel);
 		update_panels();
 	}	
-	doupdate();
 }
 
 void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
