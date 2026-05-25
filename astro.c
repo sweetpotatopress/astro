@@ -1085,11 +1085,11 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 		
 		else if ( i != SE_MEAN_NODE && i >= 12) // asc -> ic
 		{
-			const char *points[] = {"for", "spi", "asc", "mc", "dsc", "ic"};
+			const char *points[] = {"fortune", "spirit", "asc", "mc", "dsc", "ic"};
 			char point_buff[MAXBUF];
 			
 			snprintf(point_buff, sizeof(point_buff),
-			"%-9s %3d.%02d : %02d\xc2\xb0%02d`",
+			"%-10s %3d.%02d : %02d\xc2\xb0%02d`",
 			points[j], full_deg, a_dec, deg, a_dec);
 			
 			if (i == 12) // lots divider
