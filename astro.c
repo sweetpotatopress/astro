@@ -49,11 +49,11 @@ int ihsy = 'W'; // house system
 
 int months(int month, int year)
 {
-	int days[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	
 	if (month == 2)
-		if ((year % 4 == 0 && year % 100 != 0) || 
-		(year % 400 == 0))
+		if (((year + 1900) % 4 == 0 && (year + 1900) % 100 != 0) || 
+		((year + 1900) % 400 == 0))
 			return 29;
 	return days[month];
 }
@@ -1229,6 +1229,19 @@ int *planet_trig, int *retro_trig)
 	int max_day = 0; // months() return flag
 	size_t i = MINUTE; // time inc/dec
 	
+	struct tm temp = {0};
+	struct tm *result = NULL;
+	
+	temp.tm_year = cdata->tm_year - 1900;
+	temp.tm_mon = cdata->tm_mon - 1;
+	temp.tm_mday = cdata->tm_mday;
+	temp.tm_hour = cdata->tm_hour;
+	temp.tm_min = cdata->tm_min;
+	temp.tm_sec = cdata->tm_sec;
+	temp.tm_isdst = -1;
+	
+	time_t t = mktime(&temp);
+	
 	int ch = 0;
 	int anim_done = 0;
 	while(!anim_done && (ch = wgetch(main_win)))
@@ -1302,210 +1315,90 @@ int *planet_trig, int *retro_trig)
 				switch(i)
 				{
 					case MINUTE:
-						if ((++cdata->tm_min) > 59)
-						{
-							++cdata->tm_hour;
-							cdata->tm_min = 0;
-							if ((cdata->tm_hour) > 23)
-							{
-								cdata->tm_hour = 0;
-								++cdata->tm_mday;
-								if (cdata->tm_mday > months(
-								cdata->tm_mon, cdata->tm_year))
-								{
-									cdata->tm_mday = 1;
-									++cdata->tm_mon;
-									if (cdata->tm_mon > 12)
-									{
-										cdata->tm_mon = 1;
-										++cdata->tm_year;
-									}
-								}
-							}
-						}
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
+						t += 60;
 						break;
-						
 					case HOUR:
-						if ((++cdata->tm_hour) > 23)
-						{
-							cdata->tm_hour = 0;
-							++cdata->tm_mday;
-							if (cdata->tm_mday > months(
-							cdata->tm_mon, cdata->tm_year))
-							{
-								cdata->tm_mday = 1;
-								++cdata->tm_mon;
-								if (cdata->tm_mon > 12)
-								{
-									cdata->tm_mon = 1;
-									++cdata->tm_year;
-								}
-							}
-						}
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-	
+						t += 3600;
 						break;
-						
 					case DAY:
-						if ((++cdata->tm_mday) > months(
-						cdata->tm_mon, cdata->tm_year))
-						{
-							cdata->tm_mday = 1;
-							++cdata->tm_mon;
-							if (cdata->tm_mon > 12)
-							{
-								cdata->tm_mon = 1;
-								++cdata->tm_year;
-							}
-						}
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-	
+						t += 86400;
 						break;
-						
 					case MONTH:
-						if ((++cdata->tm_mon) > 12)
+						if ((++temp.tm_mon) > 11)
 						{
-							cdata->tm_mon = 1;
-							++cdata->tm_year;
+							temp.tm_mon = 0;
+							++temp.tm_year;
 						}
-						max_day = months(
-						cdata->tm_mon, cdata->tm_year);
-						if (cdata->tm_mday > max_day)
-							cdata->tm_mday = max_day;
-							
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-	
+						max_day = months(temp.tm_mon, temp.tm_year);
+						if (temp.tm_mday > max_day)
+							temp.tm_mday = max_day;
+						t = mktime(&temp);
 						break;
-						
 					case YEAR:
-						if ((++cdata->tm_year) > 16799)
-							cdata->tm_year = -12998;
-							
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-	
-						break;
+						temp.tm_year++;
+						if (temp.tm_year > 16799)
+							temp.tm_year = -12998;
+						t = mktime(&temp);
+					break;
 				}
+				result = localtime(&t);
+				
+				cdata->tm_year = result->tm_year + 1900;
+				cdata->tm_mon = result->tm_mon + 1;
+				cdata->tm_mday = result->tm_mday;
+				cdata->tm_hour = result->tm_hour;
+				cdata->tm_min = result->tm_min;
+				cdata->tm_sec = result->tm_sec;
+				
+				new_chart(main_win, planet_win, retro_win,
+				planet_panel, retro_panel,
+				io, cdata, pxx,
+				planet_trig, retro_trig);
 				break;
 			case 'j': case KEY_DOWN:
 				switch(i)
 				{
 					case MINUTE:
-						if ((--cdata->tm_min) < 0)
-						{
-								--cdata->tm_hour;
-							cdata->tm_min = 59;
-							if ((cdata->tm_hour) < 0)
-							{
-								cdata->tm_hour = 23;
-								--cdata->tm_mday;
-								if (cdata->tm_mday < 1)
-								{
-									--cdata->tm_mon;
-									if (cdata->tm_mon < 1)
-									{
-										cdata->tm_mon = 12;
-										--cdata->tm_year;
-									}
-									cdata->tm_mday = months(
-									cdata->tm_mon, cdata->tm_year);
-								}
-							}
-						}
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-	
+						t -= 60;
 						break;
-						
 					case HOUR:
-						if ((--cdata->tm_hour) < 0)
-						{
-							cdata->tm_hour = 23;
-							--cdata->tm_mday;
-							if (cdata->tm_mday < 1)
-							{
-								--cdata->tm_mon;
-								if (cdata->tm_mon < 1)
-								{
-									cdata->tm_mon = 12;
-									--cdata->tm_year;
-								}
-								cdata->tm_mday = months(
-								cdata->tm_mon, cdata->tm_year);
-							}
-						}
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-	
+						t -= 3600;
 						break;
-						
 					case DAY:
-						if ((--cdata->tm_mday) < 1)
-						{
-							--cdata->tm_mon;
-							if (cdata->tm_mon < 1)
-							{
-								cdata->tm_mon = 12;
-								--cdata->tm_year;
-							}
-							cdata->tm_mday = months(
-							cdata->tm_mon, cdata->tm_year);
-						}
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-	
+						t -= 86400;
 						break;
-						
 					case MONTH:
-						if (--cdata->tm_mon < 1)
+						if ((--temp.tm_mon) < 0)
 						{
-							cdata->tm_mon = 12;
-							--cdata->tm_year;
+							temp.tm_mon = 11;
+							--temp.tm_year;
 						}
-						max_day = months(
-						cdata->tm_mon, cdata->tm_year);
-						if (cdata->tm_mday > max_day)
-							cdata->tm_mday = max_day;
-							
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-							
+						max_day = months(temp.tm_mon, temp.tm_year);
+						if (temp.tm_mday > max_day)
+							temp.tm_mday = max_day;
+						t = mktime(&temp);
 						break;
-						
 					case YEAR:
-						if ((--cdata->tm_year) < -12998)
-							cdata->tm_year = 16799;
-							
-						new_chart(main_win, planet_win, retro_win,
-						planet_panel, retro_panel,
-						io, cdata, pxx, 
-						planet_trig, retro_trig);
-	
-						break;
+						--temp.tm_year;
+						if (temp.tm_year < -12998)
+							temp.tm_year = 16799;
+						t = mktime(&temp);
+					break;
 				}
+				result = localtime(&t);
+				
+				cdata->tm_year = result->tm_year + 1900;
+				cdata->tm_mon = result->tm_mon + 1;
+				cdata->tm_mday = result->tm_mday;
+				cdata->tm_hour = result->tm_hour;
+				cdata->tm_min = result->tm_min;
+				cdata->tm_sec = result->tm_sec;
+				
+				new_chart(main_win, planet_win, retro_win,
+				planet_panel, retro_panel,
+				io, cdata, pxx,
+				planet_trig, retro_trig);
+	
 				break;
 			case '\n':
 				anim_done = 1;
