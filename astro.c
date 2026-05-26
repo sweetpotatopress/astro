@@ -459,7 +459,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 	cdata_form, cdata, citybuffer);
 
 	unpost_form(cdata_form);
-	wclear(cdata_form_win);
+	werase(cdata_form_win);
 	wrefresh(cdata_form_win);
 	free_form(cdata_form);
 	
@@ -512,7 +512,7 @@ int sign, Pxx *pxx, char ch)
 
 	switch(ch)
 	{
-		case 'z':
+		case 'z': // zodiac
 			switch(j)
 			{
 				case FIRE:
@@ -537,7 +537,7 @@ int sign, Pxx *pxx, char ch)
 					break;
 			}
 			break;
-		case 'd':
+		case 'd': // decimals
 			switch(j)
 			{
 					case FIRE:
@@ -693,12 +693,12 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 
 void ascmc_pos(WINDOW *main_win, int radius, Pxx *pxx)
 {
+	const char *ascmc_sym[] = {"as", "mc", "dsc", "ic"};
+	
 	double *asc_arr[] = { 
 		pxx->dasc, pxx->dmc,
 		pxx->ddsc, pxx->dic
 	};
-	
-	const char *ascmc_sym[] = {"as", "mc", "dsc", "ic"};
 	
 	for (int i = 0; i < 4; ++i)
 	{
@@ -962,7 +962,7 @@ void cur_chart_data(WINDOW *main_win, Io *io,
 Cdata *cdata)
 {	
 	int starty = 3;
-	int startx = COLS - 22;
+	int startx = RWIN_X;
 	
 	if(io->filename)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
@@ -977,48 +977,21 @@ Cdata *cdata)
 	
 	starty += 1;
 	if(cdata->tm_mon && cdata->tm_mday)
-		mvwprintw(main_win, starty, startx, "%d/%d",
+		mvwprintw(main_win, starty, startx, "%02d/%02d",
 		cdata->tm_mon, cdata->tm_mday);
 		
 	starty += 1;
 	if (cdata->tm_hour >= 0)
-	{
-		if (cdata->tm_hour <= 9)
-			mvwprintw(main_win, starty, startx, "0%d",
-			cdata->tm_hour);
-		else
-			mvwprintw(main_win, starty, startx, "%d",
-			cdata->tm_hour);
-	}
+		mvwprintw(main_win, starty, startx, "%02d", cdata->tm_hour);
 	
+	startx += 2;
 	if(cdata->tm_min >= 0)
-	{
-		startx += 2;
-		if (cdata->tm_min == 0)
-			mvwprintw(main_win, starty, startx, ":%d0",
-			cdata->tm_min);
-		else if (cdata->tm_min <= 9)
-			mvwprintw(main_win, starty, startx, ":0%d",
-			cdata->tm_min);
-		else
-			mvwprintw(main_win, starty, startx, ":%d",
-			cdata->tm_min);
-	}
+		mvwprintw(main_win, starty, startx, ":%02d", cdata->tm_min);
 	
+	startx += 3;
 	if (cdata->tm_sec >= 0)
-	{
-		startx += 3;
-		if (cdata->tm_sec == 0)
-			mvwprintw(main_win, starty, startx, ":%d0",
-			cdata->tm_sec);
-		else if (cdata->tm_sec <= 9)
-			mvwprintw(main_win, starty, startx, ":0%d",
-			cdata->tm_sec);
-		else
-			mvwprintw(main_win, starty, startx, ":%d",
-			cdata->tm_sec);
-		startx -= 5;
-	}
+		mvwprintw(main_win, starty, startx, ":%02d", cdata->tm_sec);
+	startx -= 5;
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)
