@@ -921,6 +921,8 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 		pxx_members[i][DIST_S] = xx[DIST_S];
 		if (pxx_members[i][LONG_S] < 0)
 			pxx_members[i][RETRO] = 1;
+		else
+			pxx_members[i][RETRO] = 0;
 	}
 	
 	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,
