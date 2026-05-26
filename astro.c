@@ -1123,9 +1123,10 @@ void retrograde_table(WINDOW *retro_win, Pxx *pxx)
 		pxx->dnep, pxx->dplu};
 		
 	size_t p_count = 8;
-		
-	for (int i = 0; i < RWINY; i++) 
-	    mvwhline(retro_win, i, 0, ' ', RWINX);
+	
+	werase(retro_win);
+	wnoutrefresh(retro_win);
+	doupdate();
 	    
 	for (size_t i = 0; i < p_count; ++i)
 	{
@@ -1191,9 +1192,11 @@ int *planet_trig, int *retro_trig)
 		wattron(main_win, COLOR_PAIR(FIRE));
 		mvwprintw(main_win, 2, COLS - 22, "*live");
 		wattroff(main_win, COLOR_PAIR(FIRE));
-		wrefresh(main_win);
 		
-		
+		wnoutrefresh(main_win);
+		update_panels();
+		doupdate();
+	
 		for (int i = 0; i < 10; ++i)
 		{
 			usleep(100000);
@@ -1203,9 +1206,6 @@ int *planet_trig, int *retro_trig)
 		
 		if (ch == 9)
 			break;
-		
-		update_panels();
-		doupdate();
 	}
 	wmove(main_win, 2, COLS - 22);
 	wclrtoeol(main_win);
@@ -1276,7 +1276,7 @@ int *planet_trig, int *retro_trig)
 				}
 				
 				touchwin(main_win);
-				wrefresh(main_win);
+				wnoutrefresh(main_win);
 				update_panels();
 				doupdate();
 				break;
@@ -1302,7 +1302,7 @@ int *planet_trig, int *retro_trig)
 					show_panel(*planet_panel);
 				}
 				touchwin(main_win);
-				wrefresh(main_win);
+				wnoutrefresh(main_win);
 				update_panels();
 				doupdate();
 				break;
@@ -1436,7 +1436,7 @@ int *planet_trig, int *retro_trig)
 	}
 	wmove(main_win, starty, startx);
 	wclrtoeol(main_win);
-	wrefresh(main_win);
+	wnoutrefresh(main_win);
 }
 
 int main()
@@ -1588,12 +1588,14 @@ int main()
 					&planet_panel, &retro_panel,
 					io, cdata, pxx, 
 					&planet_trig, &retro_trig);
+					doupdate();
 					break;
 			case 9: // tab
 					realtime_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
 					&planet_trig, &retro_trig);
+					doupdate();
 					break;
 				case 'q':
 					main_done = 1;
@@ -1629,7 +1631,7 @@ int main()
 					}
 					
 					touchwin(main_win);
-					wrefresh(main_win);
+					wnoutrefresh(main_win);
 					update_panels();
 					doupdate();
 					break;
@@ -1655,7 +1657,7 @@ int main()
 					}
 					
 					touchwin(main_win);
-					wrefresh(main_win);
+					wnoutrefresh(main_win);
 					update_panels();
 					doupdate();
 					break;
