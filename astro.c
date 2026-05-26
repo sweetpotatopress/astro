@@ -537,7 +537,13 @@ int sign, Pxx *pxx, char ch)
 					break;
 			}
 			break;
-		case 'd': // decimals
+		case 'd': // decimal
+			if (p_arr[count][RETRO] > 0)
+			{
+				wattron(win, COLOR_PAIR(FIRE));
+				mvwprintw(win, y + 2 , x + 1, "r");
+				wattroff(win, COLOR_PAIR(FIRE));
+			}
 			switch(j)
 			{
 					case FIRE:
@@ -644,7 +650,8 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 					
 					if (angle_distance < max_distance)
 					{
-						double strength = (max_distance - angle_distance) / max_distance;
+						double strength = 
+						(max_distance - angle_distance) / max_distance;
 						
 						int place = (signed_distance > 0) ? -1 : 1;
 						
@@ -677,7 +684,8 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		int x = center_x - (int)(radius * cos_rad);
 		int y = center_y + (int)(radius * sin_rad * 0.5);
 		
-		double decimal  = (((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
+		double decimal  = 
+		(((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
 		
 		int sign = ((int)p_arr[i][LONG] / 30) + 1;
 		
@@ -712,7 +720,8 @@ void ascmc_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		
 		mvwaddstr(main_win, y, x, ascmc_sym[i]);
 		
-		double decimal = (((asc_arr[i][LONG] - (int)asc_arr[i][LONG]) * 60) / 100);
+		double decimal = 
+		(((asc_arr[i][LONG] - (int)asc_arr[i][LONG]) * 60) / 100);
 		double b60 = (((int)asc_arr[i][LONG] % 30) + decimal);
 		
 		asc_arr[i][MWIN] = b60;
@@ -910,6 +919,8 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 		pxx_members[i][LONG_S] = xx[LONG_S];
 		pxx_members[i][LAT_S] = xx[LAT_S];
 		pxx_members[i][DIST_S] = xx[DIST_S];
+		if (pxx_members[i][LONG_S] < 0)
+			pxx_members[i][RETRO] = 1;
 	}
 	
 	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,
@@ -1056,7 +1067,9 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 		
 		else if ( i != SE_MEAN_NODE && i >= 12) // asc -> ic
 		{
-			const char *points[] = {"fortune", "spirit", "asc", "mc", "dsc", "ic"};
+			const char *points[] = {
+			"fortune", "spirit", "asc", "mc", "dsc", "ic"};
+			
 			char point_buff[MAXBUF];
 			
 			snprintf(point_buff, sizeof(point_buff),
