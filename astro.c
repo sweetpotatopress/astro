@@ -547,6 +547,14 @@ int sign, Pxx *pxx, char ch)
 				mvwprintw(win, y + 2 , x + 1, "r");
 				wattroff(win, COLOR_PAIR(FIRE));
 			}
+			if (p_arr[count][LONG_S] > -0.005 &&
+			p_arr[count][LONG_S] < 0.005 && count < 12)
+			{
+				wattron(win, COLOR_PAIR(EARTH));
+				mvwaddstr(win, y + 2, x + 1, "s");
+				wattroff(win, COLOR_PAIR(EARTH));
+			}
+				
 			switch(j)
 			{
 					case FIRE:
@@ -922,7 +930,7 @@ void pxx_fill(Cdata *cdata, Pxx *pxx)
 		pxx_members[i][LONG_S] = xx[LONG_S];
 		pxx_members[i][LAT_S] = xx[LAT_S];
 		pxx_members[i][DIST_S] = xx[DIST_S];
-		if (pxx_members[i][LONG_S] < 0)
+		if (pxx_members[i][LONG_S] < -0.005)
 			pxx_members[i][RETRO] = 1;
 		else
 			pxx_members[i][RETRO] = 0;
@@ -1020,14 +1028,14 @@ Cdata *cdata)
 
 int moon_phase(Pxx *pxx)
 {
-	double arc = pxx->dmoon[LONG] - pxx->dsun[LONG];
+	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
 	
-	while (arc < 0)
-		arc += 360;
-	while (arc >= 360)
-		arc -= 360;
+	while (elongation < 0)
+		elongation += 360;
+	while (elongation >= 360)
+		elongation -= 360;
 		
-	int phase = (int)(arc / 45);
+	int phase = (int)(elongation / 45);
 	if (phase > 7)
 		phase = 7;
 		
