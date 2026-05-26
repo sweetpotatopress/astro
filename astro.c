@@ -541,7 +541,6 @@ int sign, Pxx *pxx, char ch)
 			}
 			break;
 		case 'd': // decimal
-			
 			switch(j)
 			{
 					case FIRE:
@@ -618,7 +617,7 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 	int center_y = (LINES / 2);
 	
 	int iter_count = 10;
-	int max_distance = 12;
+	int max_distance = 10;
 	double convergence_thresh = 0.1;
 	int pcount = 12;
 
@@ -697,7 +696,7 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 			if (p_arr[i][RETRO] > 0)
 			{
 				wattron(main_win, COLOR_PAIR(FIRE));
-				mvwprintw(main_win, y + 1 , x + 1, "r");
+				mvwprintw(main_win, y, x-1, "r");
 				wattroff(main_win, COLOR_PAIR(FIRE));
 			}
 				
@@ -705,7 +704,7 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 			p_arr[i][LONG_S] < 0.005)
 			{
 				wattron(main_win, COLOR_PAIR(EARTH));
-				mvwaddstr(main_win, y + 1, x + 1, "s");
+				mvwaddstr(main_win, y, x-1, "s");
 				wattroff(main_win, COLOR_PAIR(EARTH));
 			}
 		}
@@ -979,7 +978,7 @@ void draw_chart(WINDOW *main_win, Pxx *pxx)
 	
 	zo_pos(main_win, radius + 3, pxx);
 	
-	planet_pos(main_win, radius - 6, pxx);
+	planet_pos(main_win, radius - 5, pxx);
 	
 	ascmc_pos(main_win, (radius / 2) + 4, pxx);
 }
