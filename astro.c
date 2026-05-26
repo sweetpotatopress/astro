@@ -614,13 +614,13 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 	int center_y = (LINES / 2);
 	
 	int iter_count = 10;
-	int max_dist = 8;
-	double conv_thresh = 0.1;
+	int max_distance = 8;
+	double convergence_thresh = 0.1;
 	int pcount = 12;
 
-	double adj_longs[pcount];
+	double adjusted_long[pcount];
 	for (int i = 0; i < pcount; ++i)
-		adj_longs[i] = p_arr[i][LONG];
+		adjusted_long[i] = p_arr[i][LONG];
 		
 	for (int iter = 0; iter < iter_count; ++iter)
 	{
@@ -628,31 +628,31 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		
 		for (int i = 0; i < pcount; ++i)
 		{
-			double current = adj_longs[i];
-			double ang_off = 0.0;
+			double current = adjusted_long[i];
+			double angle_offset = 0.0;
 			
 			for (int j = 0; j < pcount; ++j)
 			{
 				if (i != j)
 				{
-					double signed_dist = adj_longs[j] - current;
-					while (signed_dist > 180)
-						signed_dist -= 360;
-					while (signed_dist < -180)
-						signed_dist += 360;
-					double ang_dist = fabs(signed_dist);
+					double signed_distance = adjusted_long[j] - current;
+					while (signed_distance > 180)
+						signed_distance -= 360;
+					while (signed_distance < -180)
+						signed_distance += 360;
+					double angle_distance = fabs(signed_distance);
 					
-					if (ang_dist < max_dist)
+					if (angle_distance < max_distance)
 					{
-						double strength = (max_dist - ang_dist) / max_dist;
+						double strength = (max_distance - angle_distance) / max_distance;
 						
-						int place = (signed_dist > 0) ? -1 : 1;
+						int place = (signed_distance > 0) ? -1 : 1;
 						
-						ang_off += 3 * strength * place;
+						angle_offset += 3 * strength * place;
 					}
 				}
 			}
-			double new_long = current + ang_off;
+			double new_long = current + angle_offset;
 			
 			while (new_long < 0.0)
 				new_long += 360.0;
@@ -662,15 +662,15 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 			double change = fabs(new_long - current);
 			max_change = (change > max_change) ? change : max_change;
 			
-			adj_longs[i] = new_long;
+			adjusted_long[i] = new_long;
 		}
-		if (max_change < conv_thresh)
+		if (max_change < convergence_thresh)
 			break;
 	}
 	
 	for (int i = 0; i < pcount; ++i)
 	{
-		double angle_rad = (adj_longs[i] - asc) * M_PI / 180;
+		double angle_rad = (adjusted_long[i] - asc) * M_PI / 180;
 		double cos_rad = cos(angle_rad);
 		double sin_rad = sin(angle_rad);
 		
