@@ -646,10 +646,8 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 					{
 						double strength = (max_dist - ang_dist) / max_dist;
 						
-						int place = (current > adj_longs[j]) ? 1 : -1;
-						if (ang_dist > 180)
-							place *= -1;
-							
+						int place = (signed_dist > 0) ? -1 : 1;
+						
 						ang_off += 3 * strength * place;
 					}
 				}
