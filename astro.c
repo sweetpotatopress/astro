@@ -541,20 +541,7 @@ int sign, Pxx *pxx, char ch)
 			}
 			break;
 		case 'd': // decimal
-			if (p_arr[count][RETRO] > 0)
-			{
-				wattron(win, COLOR_PAIR(FIRE));
-				mvwprintw(win, y + 2 , x + 1, "r");
-				wattroff(win, COLOR_PAIR(FIRE));
-			}
-			if (p_arr[count][LONG_S] > -0.005 &&
-			p_arr[count][LONG_S] < 0.005 && count < 12)
-			{
-				wattron(win, COLOR_PAIR(EARTH));
-				mvwaddstr(win, y + 2, x + 1, "s");
-				wattroff(win, COLOR_PAIR(EARTH));
-			}
-				
+			
 			switch(j)
 			{
 					case FIRE:
@@ -706,6 +693,21 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 		{
 			element_color(main_win, y-1, x, i, sign, pxx, 'd');
 			mvwaddstr(main_win, y, x, pl_sym[i]);
+		
+			if (p_arr[i][RETRO] > 0)
+			{
+				wattron(main_win, COLOR_PAIR(FIRE));
+				mvwprintw(main_win, y + 1 , x + 1, "r");
+				wattroff(main_win, COLOR_PAIR(FIRE));
+			}
+				
+			else if (p_arr[i][LONG_S] > -0.005 &&
+			p_arr[i][LONG_S] < 0.005)
+			{
+				wattron(main_win, COLOR_PAIR(EARTH));
+				mvwaddstr(main_win, y + 1, x + 1, "s");
+				wattroff(main_win, COLOR_PAIR(EARTH));
+			}
 		}
 	}
 }
