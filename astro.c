@@ -631,7 +631,7 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 	int center_y = (LINES / 2);
 	
 	int iter_count = 10;
-	int max_distance = 8;
+	int max_distance = 12;
 	double convergence_thresh = 0.1;
 	int pcount = 12;
 
@@ -666,7 +666,7 @@ void planet_pos(WINDOW *main_win, int radius, Pxx *pxx)
 						
 						int place = (signed_distance > 0) ? -1 : 1;
 						
-						angle_offset += 3 * strength * place;
+						angle_offset += 2.5 * strength * place;
 					}
 				}
 			}
