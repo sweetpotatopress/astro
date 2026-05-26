@@ -19,8 +19,14 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define MAXBUF 1024
 #define MAXPATH 2048
 #define MAXPXX 7
+#define ERR_EXIT(str) do { \
+	endwin(); \
+	perror(str); \
+	swe_close(); \
+	exit(EXIT_FAILURE); \
+} while (0)
 
-#define PWINY 38
+#define PWINY 40
 #define PWINX 36
 #define PWIN_Y 0
 #define PWIN_X 0
@@ -38,13 +44,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define NIGHT_SECT 0
 #define DAY_SECT 1
-
-#define ERR_EXIT(str) do { \
-	endwin(); \
-	perror(str); \
-	swe_close(); \
-	exit(EXIT_FAILURE); \
-} while (0)
 
 #define CITY 0
 #define YEAR 1

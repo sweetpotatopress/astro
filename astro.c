@@ -38,6 +38,9 @@ const char *pl_sym[] = {"(o)", "(()", "(-o<)",
 const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
 "leo", "vir", "lib", "sco", "sag",
 "cap", "aqu", "pis"};
+
+const char *moon[] = {"new", "crescent", "1st quarter", "gibbous", "full",
+"dissem.", "4th quarter", "balsamic"};
 	
 int iflag, ipl;
 double xx[6];	 // longitude, latitude, distance 
@@ -1015,6 +1018,22 @@ Cdata *cdata)
 		mvwprintw(main_win, starty, startx, "lon.%f", cdata->dlon);
 }
 
+int moon_phase(Pxx *pxx)
+{
+	double arc = pxx->dmoon[LONG] - pxx->dsun[LONG];
+	
+	while (arc < 0)
+		arc += 360;
+	while (arc >= 360)
+		arc -= 360;
+		
+	int phase = (int)(arc / 45);
+	if (phase > 7)
+		phase = 7;
+		
+	return phase;
+}
+
 void planet_table(WINDOW *planet_win, Pxx *pxx)
 {
 	char spname[AS_MAXCH];
@@ -1097,6 +1116,8 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 			element_color(planet_win, starty, color_x, 1, sign, pxx, 'z');
 	
 			starty += 2;
+			mvwprintw(planet_win, starty, startx, 
+			"moon phase: %s", moon[moon_phase(pxx)]);
 			++j;
 		}
 	}
