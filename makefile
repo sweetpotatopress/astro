@@ -1,5 +1,5 @@
 CC        ?= gcc
-CFLAGS    ?= -Wall -Wextra -Wpedantic \
+CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc \
              -Wconversion -Wsign-conversion \
              -Wdouble-promotion -Wtype-limits \
              -Wold-style-declaration \
@@ -44,7 +44,7 @@ endif
 all: $(SWE_DEPS)
 	@echo "-o--o-Building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
-	    -L$(SWE_LIB) -lswe -lm -Isrc \
+	    -L$(SWE_LIB) -lswe -lm \
 	    -lpanel -lmenu -lform -lncurses -ltinfo
 
 install: all
