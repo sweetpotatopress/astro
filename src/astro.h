@@ -15,6 +15,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <swephexp.h>
 #include <time.h>
+#include <form.h>
 
 #define MAXBUF 1024
 #define MAXPATH 2048

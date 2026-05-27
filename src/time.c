@@ -12,13 +12,11 @@ See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 
-#include <stdio.h>
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
 #include <swephexp.h>
 #include <ncurses.h>
-#include <form.h>
 #include "astro.h"
 
 int months(int month, int year)
