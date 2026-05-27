@@ -457,55 +457,22 @@ int main()
 	if (!pxx)
 		ERR_EXIT("main pxx");
 	
-	// xx[] lat, long, dist, lat_s, long_s, dist_s
-	pxx->dsun   = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dsun)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dmoon  = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dmoon)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dmerc  = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dmerc)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dven   = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dven)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dmars  = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dmars)
-		ERR_EXIT("pxx->d calloc");
-	pxx->djup   = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->djup)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dsat   = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dsat)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dura   = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dura)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dnep   = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dnep)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dplu   = calloc(MAXPXX, sizeof(double));                                  
-	if(!pxx->dplu)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dmnod  = calloc(MAXPXX, sizeof(double));                                 
-	if(!pxx->dmnod)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dtnod  = calloc(MAXPXX, sizeof(double)); 
-	if(!pxx->dtnod)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dasc  = calloc(MAXPXX, sizeof(double)); 
-	if(!pxx->dasc)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dmc = calloc(MAXPXX, sizeof(double));
-	if(!pxx->dmc)
-		ERR_EXIT("pxx->d calloc");
-	pxx->ddsc  = calloc(MAXPXX, sizeof(double)); 
-	if(!pxx->ddsc)
-		ERR_EXIT("pxx->d calloc");
-	pxx->dic = calloc(MAXPXX, sizeof(double));
-	if(!pxx->dic)
-		ERR_EXIT("pxx->d calloc");
+	ALLOC_PLANET(dsun);
+	ALLOC_PLANET(dmoon);
+	ALLOC_PLANET(dmerc);
+	ALLOC_PLANET(dven);
+	ALLOC_PLANET(dmars);
+	ALLOC_PLANET(djup);
+	ALLOC_PLANET(dsat);
+	ALLOC_PLANET(dura);
+	ALLOC_PLANET(dnep);
+	ALLOC_PLANET(dplu);
+	ALLOC_PLANET(dmnod);
+	ALLOC_PLANET(dtnod);
+	ALLOC_PLANET(dasc);
+	ALLOC_PLANET(dmc);
+	ALLOC_PLANET(ddsc);
+	ALLOC_PLANET(dic);
 	
 	Io *io = calloc(1, sizeof(Io));
 	if (!io)

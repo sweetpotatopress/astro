@@ -20,11 +20,18 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define MAXBUF 1024
 #define MAXPATH 2048
 #define MAXPXX 7
+
 #define ERR_EXIT(str) do { \
 	endwin(); \
 	perror(str); \
 	swe_close(); \
 	exit(EXIT_FAILURE); \
+} while (0)
+
+#define ALLOC_PLANET(field) do { \
+	pxx->field = calloc(MAXPXX, sizeof(double)); \
+	if(!pxx->field) \
+	ERR_EXIT(#field " calloc faled"); \
 } while (0)
 
 #define PWINY 40
