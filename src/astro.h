@@ -116,3 +116,7 @@ typedef enum { NORMAL, INSERT } Mode;
 
 int main_search(FIELD *cdata_field[], char *argv);
 void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata, char *citybuffer, const char ch);
+
+int months(int month, int year);
+void chart_timeset(Cdata *cdata, int *day_offset);
+void pxx_fill(double cusps[], Cdata *cdata, Pxx *pxx);

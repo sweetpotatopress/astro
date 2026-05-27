@@ -20,7 +20,7 @@ SWE_LIB   	= /usr/local/lib
 INSTALL_DIR = /usr/local/bin
 
 TARGET    = astro
-SRCS      = $(wildcard *.c)
+SRCS      = $(wildcard src/*.c)
 
 # Determine the real user and home directory
 REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
@@ -44,7 +44,7 @@ endif
 all: $(SWE_DEPS)
 	@echo "-o--o-Building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
-	    -L$(SWE_LIB) -lswe -lm \
+	    -L$(SWE_LIB) -lswe -lm -Isrc \
 	    -lpanel -lmenu -lform -lncurses -ltinfo
 
 install: all
