@@ -20,8 +20,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "draw.h"
 
-#define VERSION 0.56
-
 // sun, moon, mercury, venus, mars, jupiter,
 // saturn, uranus, neptune, pluto, mean node, true node
 const char *pl_sym[] = {"(o)", "(()", "(-o<)",
@@ -35,7 +33,6 @@ const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
 
 const char *moon[] = {"new", "crescent", "1st quarter", "gibbous", "full",
 "dissem.", "4th quarter", "balsamic"};
-	
 
 void element_color(WINDOW *win, int y, int x, int count,
 int sign, Pxx *pxx, char ch)
