@@ -18,6 +18,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <swephexp.h>
 #include <ncurses.h>
 #include "astro.h"
+#include "chronos.h"
 
 int months(int month, int year)
 {

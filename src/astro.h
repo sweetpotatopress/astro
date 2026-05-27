@@ -50,9 +50,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define AIR 4
 #define WATER 5
 
-#define NIGHT_SECT 0
-#define DAY_SECT 1
-
 #define CITY 0
 #define YEAR 1
 #define MONTH 2
@@ -124,7 +121,3 @@ typedef enum { NORMAL, INSERT } Mode;
 
 int main_search(FIELD *cdata_field[], char *argv);
 void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata, char *citybuffer, const char ch);
-
-int months(int month, int year);
-void chart_timeset(Cdata *cdata, int *day_offset);
-void pxx_fill(double cusps[], Cdata *cdata, Pxx *pxx);

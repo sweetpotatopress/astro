@@ -23,6 +23,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <panel.h>
 #include "astro.h"
 #include "draw.h"
+#include "chronos.h"
 
 #define VERSION 0.56
 

@@ -19,6 +19,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <panel.h>
 #include "astro.h"
 #include "draw.h"
+#include "chronos.h"
 
 // sun, moon, mercury, venus, mars, jupiter,
 // saturn, uranus, neptune, pluto, mean node, true node
