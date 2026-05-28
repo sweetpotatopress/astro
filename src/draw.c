@@ -477,7 +477,6 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 		int deg = (int)p_arr[i][LONG] % 30;
 		int a_dec = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
 		
-		
 		if ( i != SE_MEAN_NODE && i < 12) // sun -> node 
 		{
 			swe_get_planet_name(i, spname);

@@ -237,6 +237,16 @@ FORM *cdata_form, struct cdata *cdata, char *citybuffer)
 		cdata_field, citybuffer);
 	}
 }
+
+void clear_fields(FIELD *cdata_field[], FORM *cdata_form)
+{
+	for (int i = 0; i < FIELDMAX; i++)
+	{
+		set_current_field(cdata_form, cdata_field[i]);
+		form_driver(cdata_form, REQ_CLR_FIELD);
+	}
+	set_current_field(cdata_form, cdata_field[CITY]);
+}
 	
 void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 {
@@ -369,6 +379,10 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 						mode = NORMAL;
 						break;
 						
+					case KEY_F(1):
+						clear_fields(cdata_field, cdata_form);
+						break;
+						
 					case '\n':
 						cdata_entry = 1;
 						break;
@@ -409,6 +423,10 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 						
 					case KEY_BACKSPACE:
 						form_driver(cdata_form, REQ_DEL_PREV);
+						break;
+					
+					case KEY_F(1):
+						clear_fields(cdata_field, cdata_form);
 						break;
 						
 					case 27: // esc
