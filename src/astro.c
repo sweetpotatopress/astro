@@ -514,8 +514,12 @@ int main()
 	init_pair(AIR, 5, 1);
 	init_pair(WATER, 6, 1);
 	
-	WINDOW *main_win;
-	main_win = newwin(LINES, COLS, 0, 0);
+	PANEL *main_panel;
+	WINDOW *main_win = newwin(LINES, COLS, 0, 0);
+	main_panel = new_panel(main_win);
+	hide_panel(main_panel);
+	
+	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
 	
 	PANEL *planet_panel;
 	WINDOW *planet_win = newwin(PWINY, PWINX, PWIN_Y, PWIN_X);
@@ -534,7 +538,6 @@ int main()
 	keypad(main_win, TRUE);
 	keypad(stdscr, TRUE);
 
-	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
 	werase(stdscr);
 	wrefresh(stdscr);
 	
@@ -546,6 +549,7 @@ int main()
 		pxx_fill(cusps, cdata, pxx);
 		draw_chart(main_win, cusps, pxx);
 		cur_chart_data(main_win, io, cdata);
+		show_panel(main_panel);
 			
 		static int retro_trig = 0, planet_trig = 0;
 		int chart_done = 0, ch = 0;

@@ -463,8 +463,6 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 		pxx->ddsc, pxx->dic};
 		
 	werase(planet_win);
-	wnoutrefresh(planet_win);
-	doupdate();
 	
 	int starty = 1, startx = 2;
 	int j = 0;
@@ -485,7 +483,7 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			char buff[MAXBUF];
 			
 			snprintf(buff, sizeof(buff),
-			"%-3s %3d.%02d : %6s %02d\xc2\xb0%02d`",
+			"%-3s %3d.%02d : %6s %02d*%02d`",
 			spname, full_deg, a_dec,
 			pl_sym[i], deg, a_dec);
 			
@@ -505,7 +503,7 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			char point_buff[MAXBUF];
 			
 			snprintf(point_buff, sizeof(point_buff),
-			"%-10s %3d.%02d : %02d\xc2\xb0%02d`",
+			"%-10s %3d.%02d : %02d*%02d`",
 			points[j], full_deg, a_dec, deg, a_dec);
 			
 			if (i == 12) // lots divider
@@ -545,8 +543,6 @@ void retrograde_table(WINDOW *retro_win, struct pxx *pxx)
 	size_t p_count = 8;
 	
 	werase(retro_win);
-	wnoutrefresh(retro_win);
-	doupdate();
 	    
 	for (size_t i = 0; i < p_count; ++i)
 	{
@@ -567,20 +563,18 @@ int *planet_trig, int *retro_trig, double cusps[])
 	pxx_fill(cusps, cdata, pxx);
 	draw_chart(main_win, cusps, pxx);
 	cur_chart_data(main_win, io, cdata);
-	wnoutrefresh(main_win);
 	
 	if (*planet_trig > 0)
 	{
 		planet_table(planet_win, pxx);
 		show_panel(*planet_panel);
-		update_panels();
 	}
 	if (*retro_trig > 0)
 	{
 		retrograde_table(retro_win, pxx);
 		show_panel(*retro_panel);
-		update_panels();
 	}	
+	update_panels();
 }
 
 void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
@@ -678,8 +672,6 @@ int *planet_trig, int *retro_trig, double cusps[])
 				if (*planet_trig)
 				{
 					hide_panel(*planet_panel);
-					clear();
-					refresh();
 					*planet_trig = 0;
 				}
 				else
@@ -705,8 +697,6 @@ int *planet_trig, int *retro_trig, double cusps[])
 				if (*retro_trig)
 				{
 					hide_panel(*retro_panel);
-					clear();
-					refresh();
 					*retro_trig = 0;
 				}
 				else
