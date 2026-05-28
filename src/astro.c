@@ -16,7 +16,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
-#include <pwd.h>
 #include <errno.h>
 #include <ncurses.h>
 #include <form.h>
@@ -487,13 +486,13 @@ int main()
 		
 	double cusps[13];
 	
-	struct passwd *pw = getpwuid(getuid());
-	if (!pw)
-		ERR_EXIT("getpwuid main");
+	const char *home_dir = getenv("HOME");
+	if (!home_dir)
+		ERR_EXIT("HOME environment not set");
 		
 	char fn_buff[MAXBUF] = {0};
 	snprintf(fn_buff, MAXBUF, 
-	"%s/.local/share/astro/ephe", pw->pw_dir);
+	"%s/.local/share/astro/ephe", home_dir);
 	
 	swe_set_ephe_path(fn_buff);
 	
