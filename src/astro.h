@@ -28,12 +28,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 	exit(EXIT_FAILURE); \
 } while (0)
 
-#define ALLOC_PLANET(field) do { \
-	pxx->field = calloc(MAXPXX, sizeof(double)); \
-	if(!pxx->field) \
-	ERR_EXIT(#field " calloc faled"); \
-} while (0)
-
 #define PWINY 40
 #define PWINX 36
 #define PWIN_Y 0
