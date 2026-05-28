@@ -14,6 +14,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <string.h>
 #include <stdlib.h>
+#include <pwd.h>
 #include <ncurses.h>
 #include <form.h>
 #include <menu.h>
@@ -52,6 +53,66 @@ char* strtok_E(char *str, const char *delim)
 	}
 	
 	return token_start;
+}
+ 
+size_t location_parse(FILE *ifp, char *search,
+struct cdata ***search_result, size_t *search_max)
+{
+	size_t i = 0;
+	
+	while (fgets(buffer, sizeof(buffer), ifp) != NULL)
+	{
+		char buffer[MAXBUF] = {0};
+		size_t len = strlen(buffer);
+		if (buffer[len - 1] == '\n')
+			buffer[len - 1] = '\0';
+		
+		char *token = strtok_E(buffer, "\t");
+		int field_count = 0;
+		char *fields[19] = {NULL};
+		
+		while (token != NULL && field_count < 19)
+		{
+			fields[field_count] = calloc(1, strlen(token) + 1);
+			if (!fields[field_count])
+				ERR_EXIT("location_parse fields[field_count] calloc");
+			
+			memcpy(fields[field_count], token, strlen(token) + 1);
+			field_count++;
+			token = strtok_E(NULL, "\t");
+		}
+		
+		struct cdata *local = NULL;
+		if (field_count > 1 && strcasestr(fields[1], search) != NULL &&
+		fields[1] != NULL)
+		{
+			if (i >= *search_max)
+			{
+				*search_max *= 2;
+				struct cdata **temp = reallocarray(
+				*search_result, *search_max, sizeof(struct cdata *));
+				if (!temp)
+					ERR_EXIT("location_parse temp realloc");
+					
+				*search_result = temp;
+			}
+			
+			local = calloc(1, sizeof(struct cdata));
+			if (!local)
+				ERR_EXIT("location_parse local calloc");
+				
+			local->city = 		fields[2];	fields[2] = NULL;
+			local->state = 		fields[10];	fields[10] = NULL;
+			local->country =	fields[8];	fields[8] = NULL;
+			local->timezone = 	fields[17]; fields[17] = NULL;
+			local->latitude =	fields[4]; 	fields[4] = NULL;
+			local->longitude = 	fields[5];	fields[5] = NULL;
+			(*search_result)[i++] = local;
+		}
+		for (int j = 0; j < field_count; j++)
+			free(fields[j]);
+	}
+	return i;
 }
 
 void print_menu(FIELD *cdata_field[], struct cdata **search_result, size_t search_count)
@@ -182,9 +243,15 @@ void print_menu(FIELD *cdata_field[], struct cdata **search_result, size_t searc
 	delwin(city_subwin);
 	delwin(city_win);
 }
-	
-void city_search(FIELD *cdata_field[], char *search)
+		
+int main_search(FIELD *cdata_field[], char *argv)
 {
+	if (!argv || argv[0] == '\0')
+		return 0;
+		
+	FILE *fp;
+	char *search = argv;
+	size_t search_count = 0;
 	size_t search_max = MAXBUF;
 	
 	struct cdata **search_result = calloc(search_max, sizeof(struct cdata *));
@@ -195,83 +262,40 @@ void city_search(FIELD *cdata_field[], char *search)
 	if (!home_dir)
 		ERR_EXIT("main search home_dir getenv");
 		
-	char fn_buff[MAXPATH] = {0};
-	snprintf(fn_buff, MAXPATH,
+	char fn_buff[MAXBUF] = {0};
+	
+	snprintf(fn_buff, MAXBUF,
 	"%s/.local/share/astro/city-db", home_dir);
 	
-	FILE *fp = fopen(fn_buff, "r");
+	fp = fopen(fn_buff, "r");
 	if (fp == NULL)
 		ERR_EXIT("main_search fopen");
 	
-	size_t i = 0;
-	char buffer[MAXBUF] = {0};
-	
-	while (fgets(buffer, sizeof(buffer), fp) != NULL)
-	{
-		size_t len = strlen(buffer);
-		if (buffer[len - 1] == '\n')
-			buffer[len - 1] = '\0';
-		
-		char *token = strtok_E(buffer, "\t");
-		int field_count = 0;
-		char *field[19] = {NULL};
-		/* 	
-			[0]geonameid, [1]name, [2]asciiname, [3]alternatename, 
-			[4]latitude, [5]longitude, [6]feature class, [7]feature code,
-			[8]country code, [9]cc2, [10]admin1 code, [11]admin2 code,
-			[12]admin3 code, [13]admin4 code, [14]population, 
-			[15]elevation, [16]dem, [17]timezone, [18]modification date
-		*/
-		while (token != NULL && field_count < 19)
-		{
-			field[field_count] = calloc(1, strlen(token) + 1);
-			if (!field[field_count])
-				ERR_EXIT("location_parse fields[field_count] calloc");
-			
-			memcpy(field[field_count], token, strlen(token) + 1);
-			field_count++;
-			token = strtok_E(NULL, "\t");
-		}
-		
-		struct cdata *local = NULL;
-		if (field_count > 1 && strcasestr(field[1], search) != NULL &&
-		field[1] != NULL)
-		{
-			if (i >= search_max)
-			{
-				search_max *= 2;
-				struct cdata **temp = reallocarray(
-				search_result, search_max, sizeof(struct cdata *));
-				if (!temp)
-					ERR_EXIT("location_parse temp realloc");
-					
-				search_result = temp;
-			}
-			
-			local = calloc(1, sizeof(struct cdata));
-			if (!local)
-				ERR_EXIT("location_parse local calloc");
-				
-			local->city = 		field[2];	field[2] = NULL;
-			local->state = 		field[10];	field[10] = NULL;
-			local->country =	field[8];	field[8] = NULL;
-			local->timezone = 	field[17]; field[17] = NULL;
-			local->latitude =	field[4]; 	field[4] = NULL;
-			local->longitude = 	field[5];	field[5] = NULL;
-			search_result[i++] = local;
-		}
-		for (int j = 0; j < field_count; j++)
-			free(field[j]);
-	}
-	if (i == 0)
+	noecho();
+	cbreak();
+
+	search_count = location_parse(fp, search, &search_result, &search_max);
+
+	if (search_count == 0)
 	{
 		printw("no search results\n");
 		getch();
 		erase();
 		refresh();
 		fclose(fp);
-		return;
+		for (size_t j = 0; j < search_max; ++j)
+			free(search_result[j]);
+		free(search_result);
+		return 0;
 	}
+	
+	print_menu(cdata_field, search_result, search_count);
+	
+	erase();
+	refresh();
 	fclose(fp);
-	print_menu(cdata_field, search_result, i);
+	for (size_t j = 0; j < search_count; ++j)
+		free(search_result[j]);
+	free(search_result);
+	return 0;
 }

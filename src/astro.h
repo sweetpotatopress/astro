@@ -113,6 +113,6 @@ struct io {
 
 enum mode { NORMAL, INSERT };
 
-int main_search(FIELD *cdata_field[], char *argv);
+void city_search(FIELD *cdata_field[], char *search);
 void main_io(struct io *io, struct cdata *cdata,
 FIELD *cdata_field[], char *citybuffer, const char ch);
