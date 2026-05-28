@@ -22,7 +22,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <menu.h>
 #include "astro.h"
 
-void save_chart(Cdata *cdata, Io *io, char *citybuffer)
+void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 {
 
 	MENU *save_menu;
@@ -457,7 +457,7 @@ void save_chart(Cdata *cdata, Io *io, char *citybuffer)
 		free(fn_copy);
 }
 
-void load_chart(FIELD *cdata_field[], Io *io)
+void load_chart(FIELD *cdata_field[], struct io *io)
 {
 	MENU *load_menu;
 	WINDOW *load_win;
@@ -716,8 +716,8 @@ void load_chart(FIELD *cdata_field[], Io *io)
 	free(homepath);
 }
 
-void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata,
-char *citybuffer, const char ch)
+void main_io(struct io *io, struct cdata *cdata,
+FIELD *cdata_field[], char *citybuffer, const char ch)
 {
 	char *home_dir = getenv("HOME");
 	if (!home_dir)

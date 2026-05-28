@@ -26,7 +26,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define VERSION 0.56
 
-Mode mode = INSERT;
+enum mode mode = INSERT;
 
 void buff_trim(FIELD *current, char *buffer)
 {
@@ -54,7 +54,7 @@ void buff_trim(FIELD *current, char *buffer)
 }
 
 void field_to_member
-(Cdata *cdata, FORM *cdata_form,
+(struct cdata *cdata, FORM *cdata_form,
 FIELD *cdata_field[], char *citybuffer)
 {
 	FIELD *current = current_field(cdata_form);
@@ -217,7 +217,7 @@ void set_localtime(FIELD *cdata_field[])
 }
 
 void validate_fields(FIELD *cdata_field[],
-FORM *cdata_form, Cdata *cdata, char *citybuffer)
+FORM *cdata_form, struct cdata *cdata, char *citybuffer)
 {
 	size_t i = 0;
 	
@@ -238,7 +238,7 @@ FORM *cdata_form, Cdata *cdata, char *citybuffer)
 	}
 }
 	
-void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
+void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 {
 	WINDOW *cdata_form_win;
 	FIELD *cdata_field[10];
@@ -360,12 +360,12 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 					case 'w':
 						validate_fields(cdata_field,
 						cdata_form, cdata, citybuffer);
-						main_io(io, cdata_field, cdata, citybuffer, 'w');
+						main_io(io, cdata, cdata_field, citybuffer, 'w');
 						mode = NORMAL;
 						break;
 						
 					case 'e':
-						main_io(io, cdata_field, cdata, citybuffer, 'e');
+						main_io(io, cdata, cdata_field, citybuffer, 'e');
 						mode = NORMAL;
 						break;
 						
@@ -442,7 +442,7 @@ void input_chart_data(Io *io, Cdata *cdata, char *citybuffer)
 
 int main()
 {
-	Cdata *cdata = calloc(1, sizeof(Cdata));
+	struct cdata *cdata = calloc(1, sizeof(*cdata));
 	if (!cdata)
 		ERR_EXIT("main Location calloc");
 	cdata->city = malloc(MAXBUF);
@@ -453,7 +453,7 @@ int main()
 	if (!citybuffer)
 		ERR_EXIT("ERR: main citybuffer alloc fail");
 	
-	Pxx *pxx = calloc(1, sizeof(Pxx));
+	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
 	
@@ -474,7 +474,7 @@ int main()
 	ALLOC_PLANET(ddsc);
 	ALLOC_PLANET(dic);
 	
-	Io *io = calloc(1, sizeof(Io));
+	struct io *io = calloc(1, sizeof(*io));
 	if (!io)
 		ERR_EXIT("mai io calloc");
 	io->filepath = malloc(MAXBUF);
@@ -576,6 +576,8 @@ int main()
 					wrefresh(main_win);
 					free(io->filename);
 					io->filename = NULL;
+					planet_trig = 0;
+					retro_trig = 0;
 					chart_done = 1;
 					mode = INSERT;
 					break;

@@ -70,7 +70,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define RETRO 6
 #define MWIN 7
 
-typedef struct {
+struct pxx {
 	double *dsun;
 	double *dmoon;
 	double *dmerc;
@@ -89,9 +89,9 @@ typedef struct {
 	double *dic;
 	double dfor;
 	double dspir;
-} Pxx;
+};
 
-typedef struct {
+struct cdata {
 	char *city;
 	char *state;
 	char *country;
@@ -109,15 +109,16 @@ typedef struct {
 	int tm_year;
 	int tm_isdst;
 	int utc_off;
-} Cdata;
+};
 
-typedef struct {
+struct io {
 	char *filepath;
 	char *filename;
 	size_t file_count;
-} Io;
+};
 
-typedef enum { NORMAL, INSERT } Mode;
+enum mode { NORMAL, INSERT };
 
 int main_search(FIELD *cdata_field[], char *argv);
-void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata, char *citybuffer, const char ch);
+void main_io(struct io *io, struct cdata *cdata,
+FIELD *cdata_field[], char *citybuffer, const char ch);

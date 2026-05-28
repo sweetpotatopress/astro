@@ -56,7 +56,7 @@ char* strtok_E(char *str, const char *delim)
 }
  
 size_t location_parse(FILE *ifp, char *search,
-Cdata ***choices, size_t *max_search)
+struct cdata ***choices, size_t *max_search)
 {
 	size_t i = 0;
 	char buffer[MAXBUF] = {0};
@@ -88,22 +88,22 @@ Cdata ***choices, size_t *max_search)
 			token = strtok_E(NULL, "\t");
 		}
 		
-		Cdata *local = NULL;
+		struct cdata *local = NULL;
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL &&
 		fields[1] != NULL)
 		{
 			if (i >= *max_search)
 			{
 				*max_search *= 2;
-				Cdata **temp = reallocarray(
-				*choices, *max_search, sizeof(Cdata*));
+				struct cdata **temp = reallocarray(
+				*choices, *max_search, sizeof(struct cdata *));
 				if (!temp)
 					ERR_EXIT("location_parse temp realloc");
 					
 				*choices = temp;
 			}
 			
-			local = calloc(1, sizeof(Cdata));
+			local = calloc(1, sizeof(struct cdata));
 			if (!local)
 				ERR_EXIT("location_parse local calloc");
 				
@@ -122,7 +122,7 @@ Cdata ***choices, size_t *max_search)
 	return i;
 }
 
-void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
+void print_menu(FIELD *cdata_field[], struct cdata **choices, size_t n_choices)
 {
 	int ch;
 	ITEM **cities;
@@ -205,7 +205,7 @@ void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
 	
 	//case '\n'
 	ITEM *selected = NULL;
-	Cdata *cdata = NULL;
+	struct cdata *cdata = NULL;
 	
 	int menu_done = 0;
 	while(!menu_done && (ch = wgetch(city_win)))
@@ -220,7 +220,7 @@ void print_menu(FIELD *cdata_field[], Cdata **choices, size_t n_choices)
 				break;
 			case '\n':
 				selected = current_item(city_menu);
-				cdata = (Cdata *)item_userptr(selected);
+				cdata = (struct cdata *)item_userptr(selected);
 				
 				set_field_buffer(cdata_field[CITY], 0, cdata->city);
 				set_field_buffer(cdata_field[TIMEZONE], 0, cdata->timezone);
@@ -261,18 +261,18 @@ int main_search(FIELD *cdata_field[], char *argv)
 	size_t n_choices = 0;
 	size_t max_search = MAXBUF;
 	
-	Cdata **choices = calloc(max_search, sizeof(Cdata *));
+	struct cdata **choices = calloc(max_search, sizeof(struct cdata *));
 	if (!choices)
 		ERR_EXIT("main_search choices calloc");
 	
-	struct passwd *pw = getpwuid(getuid());
-	if (!pw)
-		ERR_EXIT("main_search getpwuid");
-	
+	char *home_dir = getenv("HOME");
+	if (!home_dir)
+		ERR_EXIT("main search home_dir getenv");
+		
 	char fn_buff[MAXBUF] = {0};
 	
 	snprintf(fn_buff, MAXBUF,
-	"%s/.local/share/astro/city-db", pw->pw_dir);
+	"%s/.local/share/astro/city-db", home_dir);
 	
 	fp = fopen(fn_buff, "r");
 	if (fp == NULL)

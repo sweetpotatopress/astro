@@ -19,17 +19,17 @@ extern const char *pl_sym[];
 extern const char *zo_sym[];
 extern const char *moon[];
 
-void draw_chart(WINDOW *main_win, double cusps[], Pxx *pxx);
-void cur_chart_data(WINDOW *main_win, Io *io, Cdata *cdata);
-void planet_table(WINDOW *planet_win, Pxx *pxx);
-void retrograde_table(WINDOW *retro_win, Pxx *pxx);
+void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx);
+void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata);
+void planet_table(WINDOW *planet_win, struct pxx *pxx);
+void retrograde_table(WINDOW *retro_win, struct pxx *pxx);
 
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
-Io *io, Cdata *cdata, Pxx *pxx,
+struct io *io, struct cdata *cdata, struct pxx *pxx,
 int *planet_trig, int *retro_trig, double cusps[]);
 
 void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
-Io *io, Cdata *cdata, Pxx *pxx,
+struct io *io, struct cdata *cdata, struct pxx *pxx,
 int *planet_trig, int *retro_trig, double cusps[]);

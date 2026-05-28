@@ -36,7 +36,7 @@ const char *moon[] = {"new", "crescent", "1st quarter", "gibbous", "full",
 "dissem.", "4th quarter", "balsamic"};
 
 void element_color(WINDOW *win, int y, int x, int count,
-int sign, Pxx *pxx, char ch)
+int sign, struct pxx *pxx, char ch)
 {
 	double *p_arr[] = {
 			pxx->dsun, pxx->dmoon,
@@ -163,7 +163,7 @@ void draw_circle(WINDOW *main_win, int radius, chtype ch)
 }
 
 void planet_pos(WINDOW *main_win,
-double cusps[], int radius, Pxx *pxx)
+double cusps[], int radius, struct pxx *pxx)
 {
 	int sign_num = (int)(cusps[1] / 30.0);
 	double asc = sign_num * 30.0;
@@ -275,7 +275,7 @@ double cusps[], int radius, Pxx *pxx)
 }
 
 void ascmc_pos(WINDOW *main_win,
-double cusps[], int radius, Pxx *pxx)
+double cusps[], int radius, struct pxx *pxx)
 {
 	const char *ascmc_sym[] = {"as", "mc", "dsc", "ic"};
 	
@@ -309,7 +309,7 @@ double cusps[], int radius, Pxx *pxx)
 }
 
 void zo_pos(WINDOW *main_win,
-double cusps[], int radius, Pxx *pxx)
+double cusps[], int radius, struct pxx *pxx)
 {
 	int asc_sign = (int)(pxx->dasc[LONG] / 30);
 	for (int i = 1; i < 13; ++i)
@@ -364,7 +364,7 @@ double cusps[], int radius, chtype ch)
 	}
 }
 
-void draw_chart(WINDOW *main_win, double cusps[],  Pxx *pxx)
+void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx)
 {
 	curs_set(0);
 	werase(main_win);
@@ -386,8 +386,8 @@ void draw_chart(WINDOW *main_win, double cusps[],  Pxx *pxx)
 	ascmc_pos(main_win, cusps, (radius / 2) + 4, pxx);
 }
 
-void cur_chart_data(WINDOW *main_win, Io *io, 
-Cdata *cdata)
+void cur_chart_data(WINDOW *main_win, struct io *io,
+struct cdata *cdata)
 {	
 	int starty = 3;
 	int startx = RWIN_X;
@@ -430,7 +430,7 @@ Cdata *cdata)
 		mvwprintw(main_win, starty, startx, "lon.%f", cdata->dlon);
 }
 
-int moon_phase(Pxx *pxx)
+int moon_phase(struct pxx *pxx)
 {
 	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
 	
@@ -446,7 +446,7 @@ int moon_phase(Pxx *pxx)
 	return phase;
 }
 
-void planet_table(WINDOW *planet_win, Pxx *pxx)
+void planet_table(WINDOW *planet_win, struct pxx *pxx)
 {
 	char spname[AS_MAXCH];
 	int p_count = 18;
@@ -535,7 +535,7 @@ void planet_table(WINDOW *planet_win, Pxx *pxx)
 	}
 }
 
-void retrograde_table(WINDOW *retro_win, Pxx *pxx)
+void retrograde_table(WINDOW *retro_win, struct pxx *pxx)
 {
 	double *p_arr[] = {
 		pxx->dmerc, pxx->dven,
@@ -562,7 +562,7 @@ void retrograde_table(WINDOW *retro_win, Pxx *pxx)
 
 void new_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
-Io *io, Cdata *cdata, Pxx *pxx,
+struct io *io, struct cdata *cdata, struct pxx *pxx,
 int *planet_trig, int *retro_trig, double cusps[])
 {
 	pxx_fill(cusps, cdata, pxx);
@@ -586,7 +586,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 
 void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
-Io *io, Cdata *cdata, Pxx *pxx,
+struct io *io, struct cdata *cdata, struct pxx *pxx,
 int *planet_trig, int *retro_trig, double cusps[])
 {
 	nodelay(main_win, TRUE);
@@ -635,7 +635,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 	
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
-Io *io, Cdata *cdata, Pxx *pxx,
+struct io *io, struct cdata *cdata, struct pxx *pxx,
 int *planet_trig, int *retro_trig, double cusps[])
 {
 	int starty = 11;

@@ -9,8 +9,8 @@ CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc \
              -Wunused-variable -Wunused-function -Wunused-parameter \
              -Wshadow -Wno-implicit-fallthrough \
              -Wredundant-decls -Wfloat-equal \
-             -Winline -Waddress \
-             -Wimplicit-function-declaration \
+             -Wnull-dereference \
+             -Waddress -Wimplicit-function-declaration \
              -fanalyzer -O3
 
 SWE_DIR   	= swisseph

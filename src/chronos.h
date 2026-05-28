@@ -16,5 +16,5 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define DAY_SECT 1
 
 int months(int month, int year);
-void chart_timeset(Cdata *cdata, int *day_offset);
-void pxx_fill(double cusps[], Cdata *cdata, Pxx *pxx);
+void chart_timeset(struct cdata *cdata,int *day_offset);
+void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx);

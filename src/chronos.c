@@ -31,7 +31,7 @@ int months(int month, int year)
 	return days[month];
 }
 
-int sect(Pxx *pxx)
+int sect(struct pxx *pxx)
 {
 	int sect = NIGHT_SECT;
 	
@@ -42,7 +42,7 @@ int sect(Pxx *pxx)
 	return sect;
 }
 
-void lots(int sect, Pxx *pxx)
+void lots(int sect, struct pxx *pxx)
 {
 	double diff;
 	
@@ -67,7 +67,7 @@ void lots(int sect, Pxx *pxx)
 		pxx->dspir += 360.0;
 }
 
-void check_dst(Cdata *cdata)
+void check_dst(struct cdata *cdata)
 {
 	struct tm tm_in = {0};
 	tm_in.tm_year = cdata->tm_year - 1900;
@@ -98,7 +98,7 @@ void check_dst(Cdata *cdata)
 	cdata->utc_off = offset_hours;
 }
 
-void chart_timeset(Cdata *cdata, int *day_offset)
+void chart_timeset(struct cdata *cdata, int *day_offset)
 {
 
 	check_dst(cdata);
@@ -126,7 +126,7 @@ void chart_timeset(Cdata *cdata, int *day_offset)
 	cdata->dhour = dhour; 
 }
 
-void pxx_fill(double cusps[], Cdata *cdata, Pxx *pxx)
+void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl;
 	double xx[6];
