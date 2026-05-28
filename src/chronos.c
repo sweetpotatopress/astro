@@ -49,22 +49,22 @@ void lots(int sect, struct pxx *pxx)
 	if (sect == DAY_SECT)
 	{
 		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
-		pxx->dfor = pxx->dasc[LONG] - diff;
-		pxx->dspir = pxx->dasc[LONG] + diff;
+		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
+		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
 	}
 	else // night
 	{
 		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
-		pxx->dfor = pxx->dasc[LONG] + diff;
-		pxx->dspir = pxx->dasc[LONG] - diff;
+		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
+		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
 	}
 	
-	pxx->dfor = fmod(pxx->dfor, 360.0);
-	if (pxx->dfor < 0.0)
-		pxx->dfor += 360.0;
-	pxx->dspir = fmod(pxx->dspir, 360.0);
-	if (pxx->dspir < 0.0)
-		pxx->dspir += 360.0;
+	pxx->dfor[LONG] = fmod(pxx->dfor[LONG], 360.0);
+	if (pxx->dfor[LONG] < 0.0)
+		pxx->dfor[LONG]+= 360.0;
+	pxx->dspir[LONG] = fmod(pxx->dspir[LONG], 360.0);
+	if (pxx->dspir[LONG] < 0.0)
+		pxx->dspir[LONG] += 360.0;
 }
 
 void check_dst(struct cdata *cdata)
@@ -147,7 +147,7 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	pxx->dmnod, pxx->dtnod,
 	pxx->dasc, pxx->dmc,
 	pxx->ddsc, pxx->dic,
-	&pxx->dfor, &pxx->dspir};
+	pxx->dfor, pxx->dspir};
 	
 	chart_timeset(cdata, &day_offset); // goes before swe_julday
 	

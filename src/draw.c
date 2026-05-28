@@ -458,7 +458,7 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 		pxx->dsat, pxx->dura,
 		pxx->dnep, pxx->dplu,
 		pxx->dmnod, pxx->dtnod,
-		&pxx->dfor, &pxx->dspir,
+		pxx->dfor, pxx->dspir,
 		pxx->dasc, pxx->dmc,
 		pxx->ddsc, pxx->dic};
 		

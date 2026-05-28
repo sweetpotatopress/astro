@@ -456,24 +456,7 @@ int main()
 	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
-	
-	ALLOC_PLANET(dsun);
-	ALLOC_PLANET(dmoon);
-	ALLOC_PLANET(dmerc);
-	ALLOC_PLANET(dven);
-	ALLOC_PLANET(dmars);
-	ALLOC_PLANET(djup);
-	ALLOC_PLANET(dsat);
-	ALLOC_PLANET(dura);
-	ALLOC_PLANET(dnep);
-	ALLOC_PLANET(dplu);
-	ALLOC_PLANET(dmnod);
-	ALLOC_PLANET(dtnod);
-	ALLOC_PLANET(dasc);
-	ALLOC_PLANET(dmc);
-	ALLOC_PLANET(ddsc);
-	ALLOC_PLANET(dic);
-	
+
 	struct io *io = calloc(1, sizeof(*io));
 	if (!io)
 		ERR_EXIT("mai io calloc");

@@ -19,7 +19,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define MAXBUF 1024
 #define MAXPATH 2048
-#define MAXPXX 7
+#define MAXPXX 8
 
 #define ERR_EXIT(str) do { \
 	endwin(); \
@@ -71,24 +71,24 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define MWIN 7
 
 struct pxx {
-	double *dsun;
-	double *dmoon;
-	double *dmerc;
-	double *dven;
-	double *dmars;
-	double *djup;
-	double *dsat;
-	double *dura;
-	double *dnep;
-	double *dplu;
-	double *dmnod;
-	double *dtnod;
-	double *dasc;
-	double *dmc;
-	double *ddsc;
-	double *dic;
-	double dfor;
-	double dspir;
+	double dsun[MAXPXX];
+	double dmoon[MAXPXX];
+	double dmerc[MAXPXX];
+	double dven[MAXPXX];
+	double dmars[MAXPXX];
+	double djup[MAXPXX];
+	double dsat[MAXPXX];
+	double dura[MAXPXX];
+	double dnep[MAXPXX];
+	double dplu[MAXPXX];
+	double dmnod[MAXPXX];
+	double dtnod[MAXPXX];
+	double dasc[MAXPXX];
+	double dmc[MAXPXX];
+	double ddsc[MAXPXX];
+	double dic[MAXPXX];
+	double dfor[MAXPXX];
+	double dspir[MAXPXX];
 };
 
 struct cdata {
