@@ -8,6 +8,7 @@ in-development program with no stable version
 --xo-INSTALL--o-
 
 ```bash
+git clone https://codeberg.org/yamlynn/astro.git  
 doas/sudo make clean install
 ```
 
@@ -15,7 +16,9 @@ doas/sudo make clean install
 
 - ncurses
 
-it should just work on most linux/bsd systems.
+works on all linux/bsd systems, if not, tell me!  
+not interested in other OS at this time.  
+
 
 FOUNDATION--0-  
   
@@ -55,15 +58,15 @@ animate chart:	enter
 new chart:		i  
 exit:			q  
 
-**DATA**
+**MANUAL INSTALL**
 
- charts, city-db, swiss ephemeris $XDG_DATA_HOME  
+ make a 'charts' directory, move city-db and swisseph 'ephe' directory to $XDG_DATA_HOME  
 
  swiss ephemeris header files /usr/local/include  
  
- swiss ephemeris library /usr/local/lib  
+ swiss ephemeris library 'libswe.a' /usr/local/lib  
  
- astro binary /usr/local/bin  
+ compiled astro binary /usr/local/bin  
  
  
  **TODO**
@@ -88,7 +91,7 @@ exit:			q
  | user default config file | |
  | zodiacal releasing | |
  
- feel free to suggest additions.
+ feel free to suggest additions, big or small!
  
  --license--
  
