@@ -54,7 +54,7 @@ char* strtok_E(char *str, const char *delim)
 	return token_start;
 }
 
-void print_menu(FIELD *cdata_field[],
+void print_menu(FIELD *cdata_field[], FORM *cdata_form,
 struct cdata **search_result, size_t search_count)
 {
 	MENU *city_menu;
@@ -106,8 +106,6 @@ struct cdata **search_result, size_t search_count)
 	
 	if (width > COLS)
 		width = COLS - 2;
-	if (height > LINES)
-		height = 18;
 	if (height > 18)
 		height = 18;
 		
@@ -131,7 +129,7 @@ struct cdata **search_result, size_t search_count)
 	
 	int iret = post_menu(city_menu);
 	if (iret != E_OK)
-		ERR_EXIT("searcg post_menu(city_menu)");
+		ERR_EXIT("search post_menu(city_menu)");
 	
 	ITEM *selected = NULL;
 	
@@ -161,6 +159,10 @@ struct cdata **search_result, size_t search_count)
 				
 				menu_done = 1;
 				break;
+			case 'q':
+				form_driver(cdata_form, REQ_CLR_FIELD);
+				menu_done = 1;
+				break;
 			default:
 				break;
 		}	
@@ -168,10 +170,7 @@ struct cdata **search_result, size_t search_count)
 	}
 	
 	unpost_menu(city_menu);
-	touchwin(city_win);
-	werase(city_win);
-	wrefresh(city_win);
-	free_menu(city_menu); //free menu first
+	free_menu(city_menu);
 	for (size_t j = 0; j < search_count; ++j)
 	{
 		free_item(result_item[j]);
@@ -181,16 +180,15 @@ struct cdata **search_result, size_t search_count)
 		free(search_result[j]);
 	
 	free(full_result);
-	//always delwin subwin first
+	free(search_result);
 	delwin(city_subwin);
 	delwin(city_win);
 }
 	
-void city_search(FIELD *cdata_field[], char *search)
+void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
 {
-	size_t search_max = MAXBUF;
 	
-	struct cdata **search_result = calloc(search_max, sizeof(struct cdata *));
+	struct cdata **search_result = calloc(MAXBUF, sizeof(struct cdata *));
 	if (!search_result)
 		ERR_EXIT("city_search search_result calloc");
 	
@@ -239,6 +237,7 @@ void city_search(FIELD *cdata_field[], char *search)
 		if (field_count > 1 && strcasestr(field[1], search) != NULL &&
 		field[1] != NULL)
 		{
+			size_t search_max = MAXBUF;
 			if (i >= search_max)
 			{
 				search_max *= 2;
@@ -265,16 +264,15 @@ void city_search(FIELD *cdata_field[], char *search)
 		for (int j = 0; j < field_count; j++)
 			free(field[j]);
 	}
+	fclose(fp);
 	if (i == 0)
 	{
 		printw("no search results\n");
 		getch();
-		fclose(fp);
 		for (size_t j = 0; j < i; ++j)
 			free(search_result[i]);
 		free(search_result);
 		return;
 	}
-	fclose(fp);
-	print_menu(cdata_field, search_result, i);
+	print_menu(cdata_field, cdata_form, search_result, i);
 }

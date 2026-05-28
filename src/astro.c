@@ -74,7 +74,7 @@ FIELD *cdata_field[], char *citybuffer)
 	switch(index)
 	{
 		case CITY:
-			city_search(cdata_field, buffer);
+			city_search(cdata_field, cdata_form, buffer);
 			form_driver(cdata_form, REQ_VALIDATION);
 			
 			buff_trim(current, buffer);
