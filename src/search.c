@@ -56,7 +56,7 @@ char* strtok_E(char *str, const char *delim)
 }
  
 size_t location_parse(FILE *ifp, char *search,
-struct cdata ***choices, size_t *max_search)
+struct cdata ***search_result, size_t *search_max)
 {
 	size_t i = 0;
 	char buffer[MAXBUF] = {0};
@@ -92,15 +92,15 @@ struct cdata ***choices, size_t *max_search)
 		if (field_count > 1 && strcasestr(fields[1], search) != NULL &&
 		fields[1] != NULL)
 		{
-			if (i >= *max_search)
+			if (i >= *search_max)
 			{
-				*max_search *= 2;
+				*search_max *= 2;
 				struct cdata **temp = reallocarray(
-				*choices, *max_search, sizeof(struct cdata *));
+				*search_result, *search_max, sizeof(struct cdata *));
 				if (!temp)
 					ERR_EXIT("location_parse temp realloc");
 					
-				*choices = temp;
+				*search_result = temp;
 			}
 			
 			local = calloc(1, sizeof(struct cdata));
@@ -113,7 +113,7 @@ struct cdata ***choices, size_t *max_search)
 			local->timezone = 	fields[17]; fields[17] = NULL;
 			local->latitude =	fields[4]; 	fields[4] = NULL;
 			local->longitude = 	fields[5];	fields[5] = NULL;
-			(*choices)[i++] = local;
+			(*search_result)[i++] = local;
 		}
 		free(copy);
 		for (int j = 0; j < field_count; j++)
@@ -122,10 +122,10 @@ struct cdata ***choices, size_t *max_search)
 	return i;
 }
 
-void print_menu(FIELD *cdata_field[], struct cdata **choices, size_t n_choices)
+void print_menu(FIELD *cdata_field[], struct cdata **search_result, size_t search_count)
 {
 	int ch;
-	ITEM **cities;
+	ITEM **result_item;
 	MENU *city_menu;
 	WINDOW *city_win;
 	WINDOW *city_subwin;
@@ -133,46 +133,46 @@ void print_menu(FIELD *cdata_field[], struct cdata **choices, size_t n_choices)
 	char buffer[MAXBUF] = {0};
 	int max_width = 0;
 	
-	char **strings = calloc(n_choices, sizeof(char *));
-	if (!strings)
-		ERR_EXIT("print_menu strings calloc");
+	char **full_result = calloc(search_count, sizeof(char *));
+	if (!full_result)
+		ERR_EXIT("print_menu full_result calloc");
 
-	cities = calloc(n_choices + 1, sizeof(ITEM *));
-	if (!cities)
+	result_item = calloc(search_count + 1, sizeof(ITEM *));
+	if (!result_item)
 		ERR_EXIT("print_menu citties calloc");
 
-	for (size_t i = 0; i < n_choices; ++i)
+	for (size_t i = 0; i < search_count; ++i)
 	{
-		strings[i] = malloc(sizeof(buffer));
-		if(!strings[i])
-			ERR_EXIT("print_menu strings[i] malloc");
+		full_result[i] = malloc(sizeof(buffer));
+		if(!full_result[i])
+			ERR_EXIT("print_menu full_result[i] malloc");
 	
 		snprintf(buffer, sizeof(buffer),
 		"%-25.25s %.2s %.2s %-15s %-5s %s",
-			choices[i]->city,
-			choices[i]->state,
-			choices[i]->country,
-			choices[i]->timezone,
-			choices[i]->latitude,
-			choices[i]->longitude);
+			search_result[i]->city,
+			search_result[i]->state,
+			search_result[i]->country,
+			search_result[i]->timezone,
+			search_result[i]->latitude,
+			search_result[i]->longitude);
 			
-		memcpy(strings[i], buffer, strlen(buffer) + 1);
+		memcpy(full_result[i], buffer, strlen(buffer) + 1);
 		
 		int len = (int)strlen(buffer) + 1;
 		if (len > max_width)
 			max_width = len;
 
-		cities[i] = new_item(strings[i], NULL);
-		set_item_userptr(cities[i], (void *)choices[i]);
+		result_item[i] = new_item(full_result[i], NULL);
+		set_item_userptr(result_item[i], (void *)search_result[i]);
 	}
-	cities[n_choices] = NULL;
+	result_item[search_count] = NULL;
 	
-	city_menu = new_menu((ITEM **)cities);	
+	city_menu = new_menu((ITEM **)result_item);	
 		if (!city_menu) 
 			ERR_EXIT("search city_menu new_menu");
 	
 	int width = max_width + 4;
-	int height = (int)n_choices + 2;
+	int height = (int)search_count + 2;
 	
 	if (width > COLS)
 		width = COLS - 2;
@@ -240,12 +240,12 @@ void print_menu(FIELD *cdata_field[], struct cdata **choices, size_t n_choices)
 	werase(city_win);
 	wrefresh(city_win);
 	free_menu(city_menu); //free menu first
-	for (size_t i = 0; i < n_choices; ++i)
+	for (size_t i = 0; i < search_count; ++i)
 	{
-		free_item(cities[i]);
-		free(strings[i]);
+		free_item(result_item[i]);
+		free(full_result[i]);
 	}
-	free(strings);
+	free(full_result);
 	//always delwin subwin first
 	delwin(city_subwin);
 	delwin(city_win);
@@ -258,12 +258,12 @@ int main_search(FIELD *cdata_field[], char *argv)
 		
 	FILE *fp;
 	char *search = argv;
-	size_t n_choices = 0;
-	size_t max_search = MAXBUF;
+	size_t search_count = 0;
+	size_t search_max = MAXBUF;
 	
-	struct cdata **choices = calloc(max_search, sizeof(struct cdata *));
-	if (!choices)
-		ERR_EXIT("main_search choices calloc");
+	struct cdata **search_result = calloc(search_max, sizeof(struct cdata *));
+	if (!search_result)
+		ERR_EXIT("main_search search_result calloc");
 	
 	char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -281,28 +281,28 @@ int main_search(FIELD *cdata_field[], char *argv)
 	noecho();
 	cbreak();
 
-	n_choices = location_parse(fp, search, &choices, &max_search);
+	search_count = location_parse(fp, search, &search_result, &search_max);
 
-	if (n_choices == 0)
+	if (search_count == 0)
 	{
 		printw("no search results\n");
 		getch();
 		erase();
 		refresh();
 		fclose(fp);
-		for (size_t j = 0; j < max_search; ++j)
-			free(choices[j]);
-		free(choices);
+		for (size_t j = 0; j < search_max; ++j)
+			free(search_result[j]);
+		free(search_result);
 		return 0;
 	}
 	
-	print_menu(cdata_field, choices, n_choices);
+	print_menu(cdata_field, search_result, search_count);
 	
 	erase();
 	refresh();
 	fclose(fp);
-	for (size_t j = 0; j < n_choices; ++j)
-		free(choices[j]);
-	free(choices);
+	for (size_t j = 0; j < search_count; ++j)
+		free(search_result[j]);
+	free(search_result);
 	return 0;
 }
