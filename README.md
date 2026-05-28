@@ -15,10 +15,7 @@ doas/sudo make clean install
 
 - ncurses
 
-basically, it should work on most linux distros, it may not work on systems
-using musl, you are welcome to share patches in order to fix that //
-send bug reports.
-in theory astro works on BSD. in theory . . 
+it should just work on most linux/bsd systems.
 
 FOUNDATION--0-  
   
@@ -80,9 +77,10 @@ exit:			q
  | window with exact planet stats | [DONE] |
  | add nodes, outers | [DONE] |
  | add lot of spirit + fortune | [DONE] |
- | retrograde, station, speed table | |
+ | next/last retrograde and station | |
  | add elemental colors | [DONE] |
  | essential dignities table | |
+ | synastry/ transit view | |
  | aspects | |
  | eclipse calender | |
  | declination/out of bounds table | |
