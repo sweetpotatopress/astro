@@ -187,7 +187,6 @@ struct cdata **search_result, size_t search_count)
 	
 void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
 {
-	
 	struct cdata **search_result = calloc(MAXBUF, sizeof(struct cdata *));
 	if (!search_result)
 		ERR_EXIT("city_search search_result calloc");
@@ -204,6 +203,7 @@ void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
 	if (fp == NULL)
 		ERR_EXIT("city_search fopen");
 	
+	size_t search_max = MAXBUF;
 	size_t i = 0;
 	char buffer[MAXBUF] = {0};
 	
@@ -237,10 +237,10 @@ void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
 		if (field_count > 1 && strcasestr(field[1], search) != NULL &&
 		field[1] != NULL)
 		{
-			size_t search_max = MAXBUF;
 			if (i >= search_max)
 			{
-				search_max *= 2;
+				while(i >= search_max)
+					search_max *= 2;
 				struct cdata **temp = reallocarray(
 				search_result, search_max, sizeof(struct cdata *));
 				if (!temp)
@@ -269,8 +269,8 @@ void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
 	{
 		printw("no search results\n");
 		getch();
-		for (size_t j = 0; j < i; ++j)
-			free(search_result[i]);
+		for (size_t j = 0; j < search_max; ++j)
+			free(search_result[j]);
 		free(search_result);
 		return;
 	}
