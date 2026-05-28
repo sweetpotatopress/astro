@@ -10,9 +10,8 @@ CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc \
              -Wshadow -Wno-implicit-fallthrough \
              -Wredundant-decls -Wfloat-equal \
              -Winline -Waddress \
-             -Wno-long-long \
              -Wimplicit-function-declaration \
-             -Wno-null-dereference -fanalyzer
+             -fanalyzer -O3
 
 SWE_DIR   	= swisseph
 SWE_INC   	= /usr/local/include
