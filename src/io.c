@@ -14,7 +14,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <unistd.h>
 #include <stdlib.h>
-#include <pwd.h>
 #include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -720,12 +719,12 @@ void load_chart(FIELD *cdata_field[], Io *io)
 void main_io(Io *io, FIELD *cdata_field[], Cdata *cdata,
 char *citybuffer, const char ch)
 {
-	struct passwd *pw = getpwuid(getuid());
-	if (!pw) 
-		ERR_EXIT("main_io getpwuid");
+	char *home_dir = getenv("HOME");
+	if (!home_dir)
+		ERR_EXIT("main_io home_dir getenv");
 	
 	snprintf(io->filepath, MAXBUF,
-	"%s/.local/share/astro/charts/", pw->pw_dir);
+	"%s/.local/share/astro/charts/", home_dir);
 	
 	if (ch == 'w')
 		save_chart(cdata, io, citybuffer);
