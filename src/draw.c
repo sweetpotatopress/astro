@@ -482,12 +482,28 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			
 			char buff[MAXBUF];
 			
+			
 			snprintf(buff, sizeof(buff),
 			"%-3s %3d.%02d : %6s %02d*%02d`",
 			spname, full_deg, a_dec,
 			pl_sym[i], deg, a_dec);
 			
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
+			
+			if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
+			{
+				wattron(planet_win, COLOR_PAIR(FIRE));
+				mvwprintw(planet_win, starty, startx + 13, "r");
+				wattroff(planet_win, COLOR_PAIR(FIRE));
+			}
+				
+			else if (p_arr[i][LONG_S] > -0.01 &&
+			p_arr[i][LONG_S] < 0.01 && i != SE_TRUE_NODE)
+			{
+				wattron(planet_win, COLOR_PAIR(EARTH));
+				mvwaddstr(planet_win, starty, startx + 13, "s");
+				wattroff(planet_win, COLOR_PAIR(EARTH));
+			}
 			
 			int color_x = startx + (int)strlen(buff) + 1;
 			element_color(planet_win, starty, color_x, 1, sign, pxx, 'z');
