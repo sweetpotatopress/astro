@@ -16,7 +16,7 @@ doas/sudo make clean install
 
 - ncurses
 
-works on all linux/bsd systems, if not, tell me!  
+works on all linux/bsd systems. if not, tell me!  
 not interested in other OS at this time.  
 
 
@@ -32,6 +32,7 @@ made with love, nyaa
 **mode INSERT ( i )** 
  
 navigation: 	arrowkeys  
+clear fields	F1  
 
 **mode NORMAL ( esc )**  
 
@@ -58,15 +59,15 @@ animate chart:	enter
 new chart:		i  
 exit:			q  
 
-**MANUAL INSTALL**
+-)(DATA--DIR_)--o  
 
- make a 'charts' directory, move city-db and swisseph 'ephe' directory to $XDG_DATA_HOME  
+ 'charts' directory, city-db and swisseph 'ephe' directory: $XDG_DATA_HOME  
 
- swiss ephemeris header files /usr/local/include  
+ swiss ephemeris header files: /usr/local/include  
  
- swiss ephemeris library 'libswe.a' /usr/local/lib  
+ swiss ephemeris library 'libswe.a': /usr/local/lib  
  
- compiled astro binary /usr/local/bin  
+ compiled astro binary: /usr/local/bin  
  
  
  **TODO**
@@ -91,7 +92,7 @@ exit:			q
  | user default config file | |
  | zodiacal releasing | |
  
- feel free to suggest additions, big or small!
+ feel free to suggest additions and send pull requests. big or small!
  
  --license--
  
@@ -103,4 +104,7 @@ exit:			q
  
  geonames - (city-db)
  CC BY 4.0
+ 
+ --0o-free and always will be-00o  
+ 
 
