@@ -20,10 +20,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 
 char* strtok_E(char *str, const char *delim)
-{
-	//strtok that doesnt skip repeating delim's.
-	//correctly parses geonames data :3
-	
+{ //strtok that doesnt skip repeating delims :3
 	static char *next_pos = NULL;
 	char *token_start;
 	static char empty_token[] = "E";
@@ -175,10 +172,8 @@ struct cdata **search_result, size_t search_count)
 	{
 		free_item(result_item[j]);
 		free(full_result[j]);
+	    free(search_result[j]);
 	}
-	for (size_t j = 0; j < search_count; ++j)
-		free(search_result[j]);
-	
 	free(full_result);
 	free(search_result);
 	delwin(city_subwin);
@@ -265,6 +260,7 @@ void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
 			free(field[j]);
 	}
 	fclose(fp);
+	
 	if (i == 0)
 	{
 		printw("no search results\n");

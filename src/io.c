@@ -24,7 +24,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 {
-
 	MENU *save_menu;
 	WINDOW *save_win;
 	WINDOW *save_subwin;
@@ -49,7 +48,6 @@ void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 	int savedir_done = 0;
 	while (!savedir_done)
 	{
-	
 		size_t i = 0;
 		size_t max_count = 20480;
 		
