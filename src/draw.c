@@ -256,7 +256,7 @@ double cusps[], int radius, struct pxx *pxx)
 			element_color(main_win, y-1, x, i, sign, pxx, 'd');
 			mvwaddstr(main_win, y, x, pl_sym[i]);
 		
-			if (p_arr[i][RETRO] > 0)
+			if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
 			{
 				wattron(main_win, COLOR_PAIR(FIRE));
 				mvwprintw(main_win, y, x-1, "r");
@@ -264,7 +264,7 @@ double cusps[], int radius, struct pxx *pxx)
 			}
 				
 			else if (p_arr[i][LONG_S] > -0.005 &&
-			p_arr[i][LONG_S] < 0.005)
+			p_arr[i][LONG_S] < 0.005 && i != SE_TRUE_NODE)
 			{
 				wattron(main_win, COLOR_PAIR(EARTH));
 				mvwaddstr(main_win, y, x-1, "s");
