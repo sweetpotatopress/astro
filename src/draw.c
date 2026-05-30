@@ -33,7 +33,7 @@ const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
 "cap", "aqu", "pis"};
 
 const char *moon[] = {"new", "crescent", "1st quarter", "gibbous", "full",
-"dissem.", "4th quarter", "balsamic"};
+"dissem.", "3rd quarter", "balsamic"};
 
 void element_color(WINDOW *win, int y, int x, int count,
 int sign, struct pxx *pxx, char ch)
