@@ -98,9 +98,8 @@ void check_dst(struct cdata *cdata)
 	cdata->utc_off = offset_hours;
 }
 
-void chart_timeset(struct cdata *cdata, int *day_offset)
+void calculate_utc(struct cdata *cdata, int *day_offset)
 {
-
 	check_dst(cdata);
 	
 	double utc_offset = (double)cdata->utc_off;
@@ -108,22 +107,22 @@ void chart_timeset(struct cdata *cdata, int *day_offset)
 	double min = (double)cdata->tm_min / 60;
 	double sec = (double)cdata->tm_sec / 3600.0;
 	
-	double dhour = ((double)(cdata->tm_hour - utc_offset) + min  ) + sec;
+	double utc_hour = ((double)(cdata->tm_hour - utc_offset) + min  ) + sec;
 	
-	if((dhour >= 24.0))
+	if((utc_hour >= 24.0))
 	{
-		dhour -= 24.0;
+		utc_hour -= 24.0;
 		++cdata->tm_mday;
 		*day_offset -= 1;
 	}
-	else if((dhour <= 0))
+	else if((utc_hour <= 0))
 	{
-		dhour += 24.0;
+		utc_hour += 24.0;
 		--cdata->tm_mday;
 		*day_offset += 1;
 	}
 	
-	cdata->dhour = dhour; 
+	cdata->utc_hour = utc_hour; 
 }
 
 void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
@@ -138,7 +137,7 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	int iret;
 	size_t i;
 	
-	double *pxx_members[] = {
+	double *p_arr[] = {
 	pxx->dsun, pxx->dmoon,
 	pxx->dmerc, pxx->dven,
 	pxx->dmars, pxx->djup,
@@ -149,33 +148,55 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	pxx->ddsc, pxx->dic,
 	pxx->dfor, pxx->dspir};
 	
-	chart_timeset(cdata, &day_offset); // goes before swe_julday
+	calculate_utc(cdata, &day_offset);
 	
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
-	cdata->tm_mday, cdata->dhour, SE_GREG_CAL);
+	cdata->tm_mday, cdata->utc_hour, SE_GREG_CAL);
 	
-	// corrects cdata->dhour offset from chart_timeset()
+	// corrects cdata->utc_hour offset from calculate_utc()
 	cdata->tm_mday += day_offset;
 
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
 	{
+		if (ipl > SE_MOON && ipl < SE_MEAN_NODE)
+		{
+			double julday_copy = jul_day_UT;
+			
+			while(p_arr[i][LONG_S] > 0.01)
+			{
+				swe_calc_ut(++julday_copy, ipl, iflag, xx, serr);
+				p_arr[i][LONG_S] = xx[LONG_S];
+				p_arr[i][NEXT_R] = julday_copy - jul_day_UT;
+			}
+			
+			julday_copy = jul_day_UT;
+			
+			while(p_arr[i][LONG_S] < -0.01)
+			{
+				swe_calc_ut(--julday_copy, ipl, iflag, xx, serr);
+				p_arr[i][LONG_S] = xx[LONG_S];
+				p_arr[i][LAST_R] = jul_day_UT - julday_copy;
+			}
+		}
+		
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
 			ERR_EXIT("ERR: swe_calc_ut failure");
 			
-		pxx_members[i][LONG] = xx[LONG];
-		pxx_members[i][LAT] = xx[LAT];
-		pxx_members[i][DIST] = xx[DIST];
-		pxx_members[i][LONG_S] = xx[LONG_S];
-		pxx_members[i][LAT_S] = xx[LAT_S];
-		pxx_members[i][DIST_S] = xx[DIST_S];
-		if (pxx_members[i][LONG_S] < -0.005)
-			pxx_members[i][RETRO] = 1;
+		p_arr[i][LONG] = xx[LONG];
+		p_arr[i][LAT] = xx[LAT];
+		p_arr[i][DIST] = xx[DIST];
+		p_arr[i][LONG_S] = xx[LONG_S];
+		p_arr[i][LAT_S] = xx[LAT_S];
+		p_arr[i][DIST_S] = xx[DIST_S];
+		if (p_arr[i][LONG_S] < -0.005)
+			p_arr[i][RETRO] = 1;
 		else
-			pxx_members[i][RETRO] = 0;
+			p_arr[i][RETRO] = 0;
 	}
 	
+
 	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,
 	ihsy, cusps, ascmc);
 	if (iret < 0)
@@ -199,4 +220,8 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
 }
- 
+
+
+	
+		
+	 

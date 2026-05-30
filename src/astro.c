@@ -603,7 +603,7 @@ int main()
 					
 					if (retro_trig > 0)
 					{
-						retrograde_table(retro_win, pxx);
+						retro_table(retro_win, pxx);
 						show_panel(retro_panel);
 					}
 					
@@ -615,7 +615,7 @@ int main()
 				case 'o':
 					if (!retro_trig)
 					{
-						retrograde_table(retro_win, pxx);
+						retro_table(retro_win, pxx);
 						show_panel(retro_panel);
 						retro_trig = 1;
 					}

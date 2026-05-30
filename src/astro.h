@@ -19,7 +19,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define MAXBUF 1024
 #define MAXPATH 2048
-#define MAXPXX 8
+#define MAXPXX 10
 
 #define ERR_EXIT(str) do { \
 	endwin(); \
@@ -33,10 +33,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define PWIN_Y 0
 #define PWIN_X 0
 
-#define RWINY 13
-#define RWINX 20
-#define RWIN_Y (LINES - 10)
-#define RWIN_X (COLS - 22)
+#define RWINY 11
+#define RWINX 30
+#define RWIN_Y (LINES - RWINY)
+#define RWIN_X (COLS - RWINX + 2)
 
 #define M_COLOR 1
 #define FIRE 2
@@ -63,6 +63,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define DIST_S 5
 #define RETRO 6
 #define MWIN 7
+#define LAST_R 8
+#define NEXT_R 9
 
 struct pxx {
 	double dsun[MAXPXX];
@@ -94,7 +96,7 @@ struct cdata {
 	char *longitude;
 	double dlat;
 	double dlon;
-	double dhour; //0.0 .. 23.999999;
+	double utc_hour; //0.0 .. 23.999999;
 	int tm_sec;
 	int tm_min;
 	int tm_hour;

@@ -390,7 +390,7 @@ void cur_chart_data(WINDOW *main_win, struct io *io,
 struct cdata *cdata)
 {	
 	int starty = 3;
-	int startx = RWIN_X;
+	int startx = COLS - 22;
 	
 	if(io->filename)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
@@ -548,7 +548,7 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 	}
 }
 
-void retrograde_table(WINDOW *retro_win, struct pxx *pxx)
+void retro_table(WINDOW *retro_win, struct pxx *pxx)
 {
 	double *p_arr[] = {
 		pxx->dmerc, pxx->dven,
@@ -564,8 +564,8 @@ void retrograde_table(WINDOW *retro_win, struct pxx *pxx)
 	{
 		char buff[MAXBUF];
 		
-		snprintf(buff, sizeof(buff), "%-6s %-6f",
-		pl_sym[i+2], p_arr[i][LONG_S]);
+		snprintf(buff, sizeof(buff), "%-6s %-6f %-3.0f %-3.0f",
+		pl_sym[i+2], p_arr[i][LONG_S], p_arr[i][NEXT_R], p_arr[i][LAST_R]);
 		
 		mvwprintw(retro_win, (int)i, 0, "%s", buff);
 	}
@@ -587,7 +587,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 	}
 	if (*retro_trig > 0)
 	{
-		retrograde_table(retro_win, pxx);
+		retro_table(retro_win, pxx);
 		show_panel(*retro_panel);
 	}	
 	update_panels();
@@ -699,7 +699,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 				
 				if (*retro_trig > 0)
 				{
-					retrograde_table(retro_win, pxx);
+					retro_table(retro_win, pxx);
 					show_panel(*retro_panel);
 				}
 				
@@ -717,7 +717,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 				}
 				else
 				{
-					retrograde_table(retro_win, pxx);
+					retro_table(retro_win, pxx);
 					show_panel(*retro_panel);
 					*retro_trig = 1;
 				}
@@ -826,7 +826,8 @@ int *planet_trig, int *retro_trig, double cusps[])
 				anim_done = 1;
 				break;
 		}
-		
+		flushinp();
+		usleep(8666);
 		switch(i)
 		{
 			case MINUTE:
