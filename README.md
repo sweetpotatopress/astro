@@ -2,9 +2,6 @@ fast astrology charts in the terminal/tty
 
 ![picture of the chart with the planet table open](https://sweetpotato.press/astro.png)
 
-
-in-development program with no stable version  
-
 --xo-INSTALL--o-
 
 ```bash
@@ -107,4 +104,3 @@ exit:			q
  
  --0o-free and always will be-00o  
  
-
