@@ -98,7 +98,7 @@ void check_dst(struct cdata *cdata)
 	cdata->utc_off = offset_hours;
 }
 
-void calculate_utc(struct cdata *cdata, int *day_offset)
+void calculate_utc(struct cdata *cdata)
 {
 	check_dst(cdata);
 	
@@ -108,18 +108,32 @@ void calculate_utc(struct cdata *cdata, int *day_offset)
 	double sec = (double)cdata->tm_sec / 3600.0;
 	
 	double utc_hour = ((double)(cdata->tm_hour - utc_offset) + min  ) + sec;
+	int day_offset = 0;
 	
 	if((utc_hour >= 24.0))
 	{
 		utc_hour -= 24.0;
-		++cdata->tm_mday;
-		*day_offset -= 1;
+		day_offset = 1;
 	}
 	else if((utc_hour <= 0))
 	{
 		utc_hour += 24.0;
-		--cdata->tm_mday;
-		*day_offset += 1;
+		day_offset = -1;
+	}
+	
+	if (day_offset != 0) 
+	{
+		struct tm temp = {0};
+		temp.tm_year = cdata->tm_year - 1900;
+		temp.tm_mon = cdata->tm_mon - 1;
+		temp.tm_mday = cdata->tm_mday + day_offset;
+		temp.tm_isdst = -1;
+		
+		mktime(&temp);
+		
+		cdata->tm_year = temp.tm_year + 1900;
+		cdata->tm_mon = temp.tm_mon + 1;
+		cdata->tm_mday = temp.tm_mday;
 	}
 	
 	cdata->utc_hour = utc_hour; 
@@ -239,7 +253,6 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	double ascmc[10];
 	int ihsy = 'W';
 	
-	int day_offset = 0;
 	int iret;
 	size_t i;
 	
@@ -254,14 +267,11 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	pxx->ddsc, pxx->dic,
 	pxx->dfor, pxx->dspir};
 	
-	calculate_utc(cdata, &day_offset);
+	calculate_utc(cdata);
 	
 	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
 	cdata->tm_mday, cdata->utc_hour, SE_GREG_CAL);
 	
-	// corrects cdata->utc_hour offset from calculate_utc()
-	cdata->tm_mday += day_offset;
-
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 		next_retro_station(pxx, jul_day_UT);
