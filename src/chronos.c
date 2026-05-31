@@ -149,7 +149,8 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		if (p_arr[ipl][NEXT_R] < 100 && iter[ipl] >= 10)
+		if ((p_arr[ipl][NEXT_R] < 100 && iter[ipl] >= 10) ||
+			(p_arr[ipl][NEXT_R] > 90 && iter[ipl] >= 20))
 		{
 			double julday_copy = jul_day_UT;
 			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
@@ -157,7 +158,8 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 			
 			while(p_arr[ipl][LONG_S] > 0.01)
 			{
-				swe_calc_ut(++julday_copy, ipl, iflag, xx, serr);
+				swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+				julday_copy += 3;
 				p_arr[ipl][LONG_S] = xx[LONG_S];
 				p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
 			}
@@ -168,11 +170,11 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 			
 			while(p_arr[ipl][LONG_S] < -0.01)
 			{
-				swe_calc_ut(--julday_copy, ipl, iflag, xx, serr);
+				swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+				julday_copy -= 3;
 				p_arr[ipl][LONG_S] = xx[LONG_S];
 				p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
 			}
-			calc_flag[ipl] = 1;
 			iter[ipl] = 0;
 		}
 			
@@ -217,7 +219,7 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 				p_arr[ipl][NEXT_R] += (int)offset;
 			}
 		}
-		if (p_arr[ipl][NEXT_R] == 1 || p_arr[ipl][NEXT_R] == - 1)
+		if (p_arr[ipl][NEXT_R] > -0.01 && p_arr[ipl][NEXT_R] < 0.01)
 		{
 			double julday_copy = jul_day_UT;
 			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
@@ -240,7 +242,6 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 				p_arr[ipl][LONG_S] = xx[LONG_S];
 				p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
 			}
-			calc_flag[ipl]  = 1;
 		}
 		iter[ipl]++;
 	}
