@@ -149,15 +149,17 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 	while(p_arr[ipl][LONG_S] > 0.01)
 	{
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-		julday_copy += 3;
+		julday_copy += 2;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
 		p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
+		if(p_arr[ipl][NEXT_R] <= 2)
+			p_arr[ipl][NEXT_R] = 0;
 	}
 	
 	while(p_arr[ipl][LONG_S] <= 0.01)
 	{
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-		julday_copy -= 3;
+		julday_copy -= 2;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
 		p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
 	}
@@ -169,19 +171,15 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 	int ipl;
 	
 	static int calc_flag[SE_PLUTO + 1] = {0};
-	static double last_jd = 0;
+	static double last_jd;
 	static int iter[10] = {0};
 	
 	double *p_arr[] = {
-	pxx->dsun, pxx->dmoon,
+	NULL, NULL,
 	pxx->dmerc, pxx->dven,
 	pxx->dmars, pxx->djup,
 	pxx->dsat, pxx->dura,
-	pxx->dnep, pxx->dplu,
-	pxx->dmnod, pxx->dtnod,
-	pxx->dasc, pxx->dmc,
-	pxx->ddsc, pxx->dic,
-	pxx->dfor, pxx->dspir};
+	pxx->dnep, pxx->dplu};
 	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
@@ -193,6 +191,8 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 		else if (fabs(last_jd - jul_day_UT) >= 1)
 		{
 			double offset = fabs(last_jd - jul_day_UT);
+			if (offset > 3)
+				break;
 			
 			if (last_jd < jul_day_UT)
 			{

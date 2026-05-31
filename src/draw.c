@@ -559,15 +559,21 @@ void retro_table(WINDOW *retro_win, struct pxx *pxx)
 	size_t p_count = 8;
 	
 	werase(retro_win);
-	    
+	
+        
 	for (size_t i = 0; i < p_count; ++i)
 	{
+		char header[MAXBUF];
+		snprintf(header, sizeof(header), "%-6s %7s %4s %4s", 
+		"x---x-", "speed", "next", "last");
+		mvwprintw(retro_win, 0, 0, "%s", header);
+	
 		char buff[MAXBUF];
 		
-		snprintf(buff, sizeof(buff), "%-6s %-6f %-3.0f %-3.0f",
+		snprintf(buff, sizeof(buff), "%-6s %7.3f %4.0f %4.0f",
 		pl_sym[i+2], p_arr[i][LONG_S], p_arr[i][NEXT_R], p_arr[i][LAST_R]);
 		
-		mvwprintw(retro_win, (int)i, 0, "%s", buff);
+		mvwprintw(retro_win, (int)i + 1, 0, "%s", buff);
 	}
 }
 
