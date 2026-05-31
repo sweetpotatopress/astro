@@ -31,114 +31,6 @@ int months(int month, int year)
 	return days[month];
 }
 
-int sect(struct pxx *pxx)
-{
-	int sect = NIGHT_SECT;
-	
-	if ((pxx->dsun[LONG] - pxx->dasc[LONG]) <= 180)
-		sect = DAY_SECT;
-	else
-		sect = NIGHT_SECT;
-	return sect;
-}
-
-void lots(int sect, struct pxx *pxx)
-{
-	double diff;
-	
-	if (sect == DAY_SECT)
-	{
-		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
-		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
-		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
-	}
-	else // night
-	{
-		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
-		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
-		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
-	}
-	
-	pxx->dfor[LONG] = fmod(pxx->dfor[LONG], 360.0);
-	if (pxx->dfor[LONG] < 0.0)
-		pxx->dfor[LONG]+= 360.0;
-	pxx->dspir[LONG] = fmod(pxx->dspir[LONG], 360.0);
-	if (pxx->dspir[LONG] < 0.0)
-		pxx->dspir[LONG] += 360.0;
-}
-
-void check_dst(struct cdata *cdata)
-{
-	struct tm tm_in = {0};
-	tm_in.tm_year = cdata->tm_year - 1900;
-	tm_in.tm_mon = cdata->tm_mon - 1;
-	tm_in.tm_mday = cdata->tm_mday;
-	tm_in.tm_hour = cdata->tm_hour;
-	tm_in.tm_min = cdata->tm_min;
-	tm_in.tm_sec = cdata->tm_sec;
-	tm_in.tm_isdst = -1;
-	
-	time_t t = mktime(&tm_in);
-	struct tm *result = localtime(&t);
-	
-	cdata->tm_isdst = result->tm_isdst;
-	
-	struct tm *utc_tm = gmtime(&t);
-	
-	int offset_hours = tm_in.tm_hour - utc_tm->tm_hour;
-	
-	if (tm_in.tm_mday != utc_tm->tm_mday)
-	{
-		if (tm_in.tm_mday > utc_tm->tm_mday)
-			offset_hours += 24;
-		else
-			offset_hours -= 24;
-	}
-	
-	cdata->utc_off = offset_hours;
-}
-
-void calculate_utc(struct cdata *cdata)
-{
-	check_dst(cdata);
-	
-	double utc_offset = (double)cdata->utc_off;
-	
-	double min = (double)cdata->tm_min / 60;
-	double sec = (double)cdata->tm_sec / 3600.0;
-	
-	double utc_hour = ((double)(cdata->tm_hour - utc_offset) + min  ) + sec;
-	int day_offset = 0;
-	
-	if((utc_hour >= 24.0))
-	{
-		utc_hour -= 24.0;
-		day_offset = 1;
-	}
-	else if((utc_hour <= 0))
-	{
-		utc_hour += 24.0;
-		day_offset = -1;
-	}
-	
-	if (day_offset != 0) 
-	{
-		struct tm temp = {0};
-		temp.tm_year = cdata->tm_year - 1900;
-		temp.tm_mon = cdata->tm_mon - 1;
-		temp.tm_mday = cdata->tm_mday + day_offset;
-		temp.tm_isdst = -1;
-		
-		mktime(&temp);
-		
-		cdata->tm_year = temp.tm_year + 1900;
-		cdata->tm_mon = temp.tm_mon + 1;
-		cdata->tm_mday = temp.tm_mday;
-	}
-	
-	cdata->utc_hour = utc_hour; 
-}
-
 void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 {
 	int iflag;
@@ -245,6 +137,68 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 	last_jd = jul_day_UT;
 }
 	
+int sect(struct pxx *pxx)
+{
+	int sect = NIGHT_SECT;
+	
+	if ((pxx->dsun[LONG] - pxx->dasc[LONG]) <= 180)
+		sect = DAY_SECT;
+	else
+		sect = NIGHT_SECT;
+	return sect;
+}
+
+void lots(int sect, struct pxx *pxx)
+{
+	double diff;
+	
+	if (sect == DAY_SECT)
+	{
+		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
+		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
+		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
+	}
+	else // night
+	{
+		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
+		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
+		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
+	}
+	
+	pxx->dfor[LONG] = fmod(pxx->dfor[LONG], 360.0);
+	if (pxx->dfor[LONG] < 0.0)
+		pxx->dfor[LONG]+= 360.0;
+	pxx->dspir[LONG] = fmod(pxx->dspir[LONG], 360.0);
+	if (pxx->dspir[LONG] < 0.0)
+		pxx->dspir[LONG] += 360.0;
+}
+
+void calculate_utc(struct cdata *cdata)
+{
+	struct tm tm_in = {0};
+	tm_in.tm_year = cdata->tm_year - 1900;
+	tm_in.tm_mon = cdata->tm_mon - 1;
+	tm_in.tm_mday = cdata->tm_mday;
+	tm_in.tm_hour = cdata->tm_hour;
+	tm_in.tm_min = cdata->tm_min;
+	tm_in.tm_sec = cdata->tm_sec;
+	tm_in.tm_isdst = -1;
+	
+	time_t t = mktime(&tm_in);
+	struct tm *result = localtime(&t);
+	
+	cdata->tm_isdst = result->tm_isdst;
+	
+	struct tm *tm_utc = gmtime(&t);
+	
+	cdata->utc_hour = tm_utc->tm_hour + tm_utc->tm_min / 60.0 +
+	tm_utc->tm_sec / 3600.0;
+	
+	cdata->utc_year = tm_utc->tm_year + 1900;
+	cdata->utc_mon = tm_utc->tm_mon + 1;
+	cdata->utc_mday = tm_utc->tm_mday;
+}
+
 void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl;
@@ -269,8 +223,8 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	
 	calculate_utc(cdata);
 	
-	double jul_day_UT = swe_julday(cdata->tm_year, cdata->tm_mon, 
-	cdata->tm_mday, cdata->utc_hour, SE_GREG_CAL);
+	double jul_day_UT = swe_julday(cdata->utc_year, cdata->utc_mon, 
+	cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)

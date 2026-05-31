@@ -434,7 +434,6 @@ struct cdata *cdata)
 	starty += 1;
 	if (fabs(cdata->dlon) > 1e-6)
 		mvwprintw(main_win, starty, startx, "lon.%f", cdata->dlon);
-	
 }
 
 int moon_phase(struct pxx *pxx)
@@ -760,18 +759,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 						t += 3600;
 						break;
 					case DAY:
-						temp.tm_mday++;
-						max_day = months(temp.tm_mon, temp.tm_year);
-						if (temp.tm_mday > max_day)
-						{
-							temp.tm_mday = 1;
-							if (++temp.tm_mon > 11)
-							{
-								temp.tm_mon = 0;
-								++temp.tm_year;
-							}
-						}
-						t = mktime(&temp);
+						t += 86400;
 						break;
 					case MONTH:
 						if ((++temp.tm_mon) > 11)
@@ -815,19 +803,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 						t -= 3600;
 						break;
 					case DAY:
-						temp.tm_mday--;
-						max_day = months(temp.tm_mon, temp.tm_year);
-						if (temp.tm_mday > max_day)
-						{
-							temp.tm_mday = 1;
-							--temp.tm_mon;
-							if (--temp.tm_mon < 0)
-							{
-								temp.tm_mon = 11;
-								--temp.tm_year;
-							}
-						}
-						t = mktime(&temp);
+						t -= 86400;
 						break;
 					case MONTH:
 						if ((--temp.tm_mon) < 0)
