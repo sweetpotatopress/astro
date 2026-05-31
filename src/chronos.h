@@ -15,6 +15,12 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NIGHT_SECT 0
 #define DAY_SECT 1
 
+#define IS_RETRO 0.5
+#define ITERMAX 10
+
+#define STATION_R 1
+#define STATION_D 2
+
 int months(int month, int year);
 void chart_timeset(struct cdata *cdata,int *day_offset);
 void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx);
