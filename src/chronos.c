@@ -203,7 +203,7 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 		}
 		
 		if ((p_arr[ipl][NEXT_R] < 100 && iter[ipl] >= 10) ||
-		(p_arr[ipl][NEXT_R] > 90 && iter[ipl] >= 20))
+		(p_arr[ipl][NEXT_R] > 90 && iter[ipl] >= 8))
 			retro_calc(pxx, jul_day_UT, iter, ipl);
 			
 		if (p_arr[ipl][NEXT_R] > -0.01 && p_arr[ipl][NEXT_R] < 0.01)
