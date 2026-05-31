@@ -482,7 +482,6 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			
 			char buff[MAXBUF];
 			
-			
 			snprintf(buff, sizeof(buff),
 			"%-3s %3d.%02d : %6s %02d*%02d`",
 			spname, full_deg, a_dec,

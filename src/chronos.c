@@ -132,15 +132,11 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 	char serr[AS_MAXCH];
 	
 	double *p_arr[] = {
-	pxx->dsun, pxx->dmoon,
+	NULL, NULL,
 	pxx->dmerc, pxx->dven,
 	pxx->dmars, pxx->djup,
 	pxx->dsat, pxx->dura,
-	pxx->dnep, pxx->dplu,
-	pxx->dmnod, pxx->dtnod,
-	pxx->dasc, pxx->dmc,
-	pxx->ddsc, pxx->dic,
-	pxx->dfor, pxx->dspir};
+	pxx->dnep, pxx->dplu};
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	
@@ -152,7 +148,7 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 		julday_copy += 2;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
 		p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
-		if(p_arr[ipl][NEXT_R] <= 2)
+		if (p_arr[ipl][NEXT_R] <= 2)
 			p_arr[ipl][NEXT_R] = 0;
 	}
 	
@@ -166,7 +162,7 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 	iter[ipl] = 0;
 }
 
-void retro_days(struct pxx *pxx, double jul_day_UT)
+void next_retro_station(struct pxx *pxx, double jul_day_UT)
 {
 	int ipl;
 	
@@ -251,7 +247,7 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
-		retro_days(pxx, jul_day_UT);
+		next_retro_station(pxx, jul_day_UT);
 	ipl = 0;
 	
 	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
