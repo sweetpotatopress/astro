@@ -147,8 +147,8 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
 		julday_copy += PARSECOUNT;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
-		p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
-		if (p_arr[ipl][NEXT_R] <= PARSECOUNT)
+		p_arr[ipl][NEXT_R] = (int)julday_copy - jul_day_UT;
+		if (p_arr[ipl][NEXT_R] < STATION_R)
 			p_arr[ipl][NEXT_R] = IS_RETRO;
 	}
 	
@@ -157,7 +157,7 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
 		julday_copy += PARSECOUNT;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
-		p_arr[ipl][NEXT_S] = (jul_day_UT - julday_copy);
+		p_arr[ipl][NEXT_S] = (int)(jul_day_UT - julday_copy);
 	}
 	iter[ipl] = 0;
 }
@@ -183,10 +183,17 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 		{
 			retro_calc(pxx, jul_day_UT, iter, ipl);
 			calc_flag[ipl] = 1;
+			
+			if (p_arr[ipl][LONG_S] < 0.0)
+				p_arr[ipl][NEXT_R] = IS_RETRO;
+				
+			if (ipl == SE_MERCURY &&
+			p_arr[ipl][LONG_S] < 0.1)
+				p_arr[ipl][NEXT_R] = IS_RETRO;
 		}
 		else if (fabs(last_jd - jul_day_UT) >= 1.0)
 		{
-			double offset = fabs(last_jd - jul_day_UT);
+			double offset = (int)fabs(last_jd - jul_day_UT);
 			if (offset > PARSECOUNT)
 				break;
 			
@@ -202,16 +209,21 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 				p_arr[ipl][NEXT_S] += (int)offset;
 				if (p_arr[ipl][NEXT_R] > IS_RETRO)
 					p_arr[ipl][NEXT_R] += (int)offset;
-				if (p_arr[ipl][NEXT_R] <= 0.0)
-					p_arr[ipl][NEXT_R] = IS_RETRO;
 			}
+
+			if (p_arr[ipl][LONG_S] < 0.0)
+				p_arr[ipl][NEXT_R] = IS_RETRO;
+				
+			if (ipl == SE_MERCURY &&
+			p_arr[SE_MERCURY][LONG_S] < 0.1)
+				p_arr[ipl][NEXT_R] = IS_RETRO;
 		}
 		
 		if ((p_arr[ipl][NEXT_R] < 50.0 && iter[ipl] >= ITERMAX) ||
 		(p_arr[ipl][NEXT_R] > 90.0 && iter[ipl] >= ITERMAX))
 			retro_calc(pxx, jul_day_UT, iter, ipl);
 			
-		if (p_arr[ipl][NEXT_R] > -0.01 && p_arr[ipl][NEXT_R] < 0.01)
+		if (p_arr[ipl][NEXT_R] > -0.0001 && p_arr[ipl][NEXT_R] < 0.0001)
 			retro_calc(pxx, jul_day_UT, iter, ipl);
 			
 		iter[ipl]++;
@@ -253,7 +265,6 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 		next_retro_station(pxx, jul_day_UT);
-	ipl = 0;
 	
 	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
 	{
