@@ -141,23 +141,27 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	
 	double julday_copy = jul_day_UT;
+	double jul_offset = 0;
 	
 	while(p_arr[ipl][LONG_S] > 0.00)
 	{
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
 		julday_copy += 2;
+		jul_offset += 1;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
 		p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
 		if (p_arr[ipl][NEXT_R] <= 2)
 			p_arr[ipl][NEXT_R] = 0;
 	}
+	jul_offset = 0;
 	
 	while(p_arr[ipl][LONG_S] <= 0.00)
 	{
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-		julday_copy -= 2;
+		julday_copy += 2;
+		jul_offset += 1;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
-		p_arr[ipl][NEXT_S] = jul_day_UT - julday_copy;
+		p_arr[ipl][NEXT_S] = (jul_day_UT - julday_copy);
 	}
 	iter[ipl] = 0;
 }
@@ -194,16 +198,21 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 			{
 				p_arr[ipl][NEXT_S] += (int)offset;
 				p_arr[ipl][NEXT_R] -= (int)offset;
+				if (p_arr[ipl][NEXT_R] <= 0)
+					p_arr[ipl][NEXT_R] = 0.5;
 			}
 			else if (last_jd > jul_day_UT)
 			{
-				p_arr[ipl][NEXT_S] -= (int)offset;
-				p_arr[ipl][NEXT_R] += (int)offset;
+				p_arr[ipl][NEXT_S] += (int)offset;
+				if (p_arr[ipl][NEXT_R] > 0.5)
+					p_arr[ipl][NEXT_R] += (int)offset;
+				if (p_arr[ipl][NEXT_R] <= 0)
+					p_arr[ipl][NEXT_R] = 0.5;
 			}
 		}
 		
 		if ((p_arr[ipl][NEXT_R] < 100 && iter[ipl] >= 10) ||
-		(p_arr[ipl][NEXT_R] > 90 && iter[ipl] >= 8))
+		(p_arr[ipl][NEXT_R] > 90 && iter[ipl] >= 10))
 			retro_calc(pxx, jul_day_UT, iter, ipl);
 			
 		if (p_arr[ipl][NEXT_R] > -0.01 && p_arr[ipl][NEXT_R] < 0.01)
@@ -262,10 +271,19 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 		p_arr[i][LONG_S] = xx[LONG_S];
 		p_arr[i][LAT_S] = xx[LAT_S];
 		p_arr[i][DIST_S] = xx[DIST_S];
-		if (p_arr[i][LONG_S] < -0.005)
-			p_arr[i][RETRO] = 1;
-		else
-			p_arr[i][RETRO] = 0;
+		if (ipl >= SE_MERCURY && ipl <= SE_PLUTO)
+		{
+			if (p_arr[i][LONG_S] < -0.005)
+				p_arr[i][RETRO] = 1;
+			else
+				p_arr[i][RETRO] = 0;
+			if (fabs(p_arr[i][NEXT_S]) <= 7)
+				p_arr[i][STATION] = 2;
+			else if (p_arr[i][NEXT_R] <= 7 && p_arr[i][NEXT_R] > 0.5)
+				p_arr[i][STATION] = 1;
+			else
+				p_arr[i][STATION] = 0;
+		}
 	}
 	
 	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,

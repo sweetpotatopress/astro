@@ -263,8 +263,7 @@ double cusps[], int radius, struct pxx *pxx)
 				wattroff(main_win, COLOR_PAIR(FIRE));
 			}
 				
-			else if (p_arr[i][LONG_S] > -0.005 &&
-			p_arr[i][LONG_S] < 0.005 && i != SE_TRUE_NODE)
+			if (p_arr[i][STATION] > 0)
 			{
 				wattron(main_win, COLOR_PAIR(EARTH));
 				mvwaddstr(main_win, y, x-1, "s");
@@ -496,11 +495,16 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 				wattroff(planet_win, COLOR_PAIR(FIRE));
 			}
 				
-			else if (p_arr[i][LONG_S] > -0.01 &&
-			p_arr[i][LONG_S] < 0.01 && i != SE_TRUE_NODE)
+			if ((int)p_arr[i][STATION] == 1)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
-				mvwaddstr(planet_win, starty, startx + 13, "s");
+				mvwaddstr(planet_win, starty, startx + 13, "sr");
+				wattroff(planet_win, COLOR_PAIR(EARTH));
+			}
+			else if ((int)p_arr[i][STATION] == 2)
+			{
+				wattron(planet_win, COLOR_PAIR(EARTH));
+				mvwaddstr(planet_win, starty, startx + 13, "sd");
 				wattroff(planet_win, COLOR_PAIR(EARTH));
 			}
 			

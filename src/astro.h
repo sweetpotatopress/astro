@@ -19,7 +19,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define MAXBUF 1024
 #define MAXPATH 2048
-#define MAXPXX 10
+#define MAXPXX 11
 
 #define ERR_EXIT(str) do { \
 	endwin(); \
@@ -62,9 +62,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define LAT_S 4
 #define DIST_S 5
 #define RETRO 6
-#define MWIN 7
-#define NEXT_S 8
-#define NEXT_R 9
+#define STATION 7
+#define MWIN 8
+#define NEXT_S 9
+#define NEXT_R 10
 
 struct pxx {
 	double dsun[MAXPXX];
