@@ -564,13 +564,13 @@ void retro_table(WINDOW *retro_win, struct pxx *pxx)
 	{
 		char header[MAXBUF];
 		snprintf(header, sizeof(header), "%-6s %7s %4s %4s", 
-		"x---x-", "speed", "next", "last");
+		"x---x-", "speed", "n->r", "n->s");
 		mvwprintw(retro_win, 0, 0, "%s", header);
 	
 		char buff[MAXBUF];
 		
 		snprintf(buff, sizeof(buff), "%-6s %7.3f %4.0f %4.0f",
-		pl_sym[i+2], p_arr[i][LONG_S], p_arr[i][NEXT_R], p_arr[i][LAST_R]);
+		pl_sym[i+2], p_arr[i][LONG_S], p_arr[i][NEXT_R], fabs(p_arr[i][NEXT_S]));
 		
 		mvwprintw(retro_win, (int)i + 1, 0, "%s", buff);
 	}

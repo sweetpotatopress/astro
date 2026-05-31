@@ -142,7 +142,7 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 	
 	double julday_copy = jul_day_UT;
 	
-	while(p_arr[ipl][LONG_S] > 0.01)
+	while(p_arr[ipl][LONG_S] > 0.00)
 	{
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
 		julday_copy += 2;
@@ -152,12 +152,12 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 			p_arr[ipl][NEXT_R] = 0;
 	}
 	
-	while(p_arr[ipl][LONG_S] <= 0.01)
+	while(p_arr[ipl][LONG_S] <= 0.00)
 	{
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
 		julday_copy -= 2;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
-		p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
+		p_arr[ipl][NEXT_S] = jul_day_UT - julday_copy;
 	}
 	iter[ipl] = 0;
 }
@@ -192,12 +192,12 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 			
 			if (last_jd < jul_day_UT)
 			{
-				p_arr[ipl][LAST_R] += (int)offset;
+				p_arr[ipl][NEXT_S] += (int)offset;
 				p_arr[ipl][NEXT_R] -= (int)offset;
 			}
 			else if (last_jd > jul_day_UT)
 			{
-				p_arr[ipl][LAST_R] -= (int)offset;
+				p_arr[ipl][NEXT_S] -= (int)offset;
 				p_arr[ipl][NEXT_R] += (int)offset;
 			}
 		}

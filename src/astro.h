@@ -63,7 +63,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define DIST_S 5
 #define RETRO 6
 #define MWIN 7
-#define LAST_R 8
+#define NEXT_S 8
 #define NEXT_R 9
 
 struct pxx {
