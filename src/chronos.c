@@ -124,11 +124,49 @@ void calculate_utc(struct cdata *cdata, int *day_offset)
 	
 	cdata->utc_hour = utc_hour; 
 }
-void retro_days(struct pxx *pxx, double jul_day_UT)
+
+void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 {
-	int iflag, ipl;
+	int iflag;
 	double xx[6];
 	char serr[AS_MAXCH];
+	
+	double *p_arr[] = {
+	pxx->dsun, pxx->dmoon,
+	pxx->dmerc, pxx->dven,
+	pxx->dmars, pxx->djup,
+	pxx->dsat, pxx->dura,
+	pxx->dnep, pxx->dplu,
+	pxx->dmnod, pxx->dtnod,
+	pxx->dasc, pxx->dmc,
+	pxx->ddsc, pxx->dic,
+	pxx->dfor, pxx->dspir};
+	
+	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+	
+	double julday_copy = jul_day_UT;
+	
+	while(p_arr[ipl][LONG_S] > 0.01)
+	{
+		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+		julday_copy += 3;
+		p_arr[ipl][LONG_S] = xx[LONG_S];
+		p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
+	}
+	
+	while(p_arr[ipl][LONG_S] <= 0.01)
+	{
+		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+		julday_copy -= 3;
+		p_arr[ipl][LONG_S] = xx[LONG_S];
+		p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
+	}
+	iter[ipl] = 0;
+}
+
+void retro_days(struct pxx *pxx, double jul_day_UT)
+{
+	int ipl;
 	
 	static int calc_flag[SE_PLUTO + 1] = {0};
 	static double last_jd = 0;
@@ -145,63 +183,11 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 	pxx->ddsc, pxx->dic,
 	pxx->dfor, pxx->dspir};
 	
-	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
-	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		if ((p_arr[ipl][NEXT_R] < 100 && iter[ipl] >= 10) ||
-			(p_arr[ipl][NEXT_R] > 90 && iter[ipl] >= 20))
-		{
-			double julday_copy = jul_day_UT;
-			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-			p_arr[ipl][LONG_S] = xx[LONG_S];
-			
-			while(p_arr[ipl][LONG_S] > 0.01)
-			{
-				swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-				julday_copy += 3;
-				p_arr[ipl][LONG_S] = xx[LONG_S];
-				p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
-			}
-			
-			julday_copy = jul_day_UT;
-			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-			p_arr[ipl][LONG_S] = xx[LONG_S];
-			
-			while(p_arr[ipl][LONG_S] < -0.01)
-			{
-				swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-				julday_copy -= 3;
-				p_arr[ipl][LONG_S] = xx[LONG_S];
-				p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
-			}
-			iter[ipl] = 0;
-		}
-			
 		if (calc_flag[ipl] == 0)
 		{
-		
-			double julday_copy = jul_day_UT;
-			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-			p_arr[ipl][LONG_S] = xx[LONG_S];
-			
-			while(p_arr[ipl][LONG_S] > 0.01)
-			{
-				swe_calc_ut(++julday_copy, ipl, iflag, xx, serr);
-				p_arr[ipl][LONG_S] = xx[LONG_S];
-				p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
-			}
-			
-			julday_copy = jul_day_UT;
-			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-			p_arr[ipl][LONG_S] = xx[LONG_S];
-			
-			while(p_arr[ipl][LONG_S] < -0.01)
-			{
-				swe_calc_ut(--julday_copy, ipl, iflag, xx, serr);
-				p_arr[ipl][LONG_S] = xx[LONG_S];
-				p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
-			}
+			retro_calc(pxx, jul_day_UT, iter, ipl);
 			calc_flag[ipl] = 1;
 		}
 		else if (fabs(last_jd - jul_day_UT) >= 1)
@@ -219,30 +205,14 @@ void retro_days(struct pxx *pxx, double jul_day_UT)
 				p_arr[ipl][NEXT_R] += (int)offset;
 			}
 		}
+		
+		if ((p_arr[ipl][NEXT_R] < 100 && iter[ipl] >= 10) ||
+		(p_arr[ipl][NEXT_R] > 90 && iter[ipl] >= 20))
+			retro_calc(pxx, jul_day_UT, iter, ipl);
+			
 		if (p_arr[ipl][NEXT_R] > -0.01 && p_arr[ipl][NEXT_R] < 0.01)
-		{
-			double julday_copy = jul_day_UT;
-			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-			p_arr[ipl][LONG_S] = xx[LONG_S];
+			retro_calc(pxx, jul_day_UT, iter, ipl);
 			
-			while(p_arr[ipl][LONG_S] > 0.01)
-			{
-				swe_calc_ut(++julday_copy, ipl, iflag, xx, serr);
-				p_arr[ipl][LONG_S] = xx[LONG_S];
-				p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
-			}
-			
-			julday_copy = jul_day_UT;
-			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-			p_arr[ipl][LONG_S] = xx[LONG_S];
-			
-			while(p_arr[ipl][LONG_S] < -0.01)
-			{
-				swe_calc_ut(--julday_copy, ipl, iflag, xx, serr);
-				p_arr[ipl][LONG_S] = xx[LONG_S];
-				p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
-			}
-		}
 		iter[ipl]++;
 	}
 	last_jd = jul_day_UT;
@@ -280,11 +250,12 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	cdata->tm_mday += day_offset;
 
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
+		retro_days(pxx, jul_day_UT);
+	ipl = 0;
+	
 	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
 	{
-		if (ipl > SE_MOON && ipl < SE_MEAN_NODE)
-			retro_days(pxx, jul_day_UT);
-	
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
 			ERR_EXIT("ERR: swe_calc_ut failure");
