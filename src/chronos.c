@@ -142,20 +142,20 @@ void retro_calc(struct pxx *pxx, double jul_day_UT, int iter[], int ipl)
 	
 	double julday_copy = jul_day_UT;
 	
-	while(p_arr[ipl][LONG_S] > 0.00)
+	while(p_arr[ipl][LONG_S] > 0.0)
 	{
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-		julday_copy += 2;
+		julday_copy += PARSECOUNT;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
 		p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
-		if (p_arr[ipl][NEXT_R] <= 2)
-			p_arr[ipl][NEXT_R] = 0;
+		if (p_arr[ipl][NEXT_R] <= PARSECOUNT)
+			p_arr[ipl][NEXT_R] = IS_RETRO;
 	}
 	
-	while(p_arr[ipl][LONG_S] <= 0.00)
+	while(p_arr[ipl][LONG_S] <= 0.0)
 	{
 		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
-		julday_copy += 2;
+		julday_copy += PARSECOUNT;
 		p_arr[ipl][LONG_S] = xx[LONG_S];
 		p_arr[ipl][NEXT_S] = (jul_day_UT - julday_copy);
 	}
@@ -166,9 +166,9 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 {
 	int ipl;
 	
-	static int calc_flag[SE_PLUTO + 1] = {0};
+	static int calc_flag[RETROCOUNT] = {0};
 	static double last_jd;
-	static int iter[10] = {0};
+	static int iter[RETROCOUNT] = {0};
 	
 	double *p_arr[] = {
 	NULL, NULL,
@@ -184,17 +184,17 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 			retro_calc(pxx, jul_day_UT, iter, ipl);
 			calc_flag[ipl] = 1;
 		}
-		else if (fabs(last_jd - jul_day_UT) >= 1)
+		else if (fabs(last_jd - jul_day_UT) >= 1.0)
 		{
 			double offset = fabs(last_jd - jul_day_UT);
-			if (offset > 3)
+			if (offset > PARSECOUNT)
 				break;
 			
 			if (last_jd < jul_day_UT)
 			{
 				p_arr[ipl][NEXT_S] += (int)offset;
 				p_arr[ipl][NEXT_R] -= (int)offset;
-				if (p_arr[ipl][NEXT_R] <= 0)
+				if (p_arr[ipl][NEXT_R] <= 0.0)
 					p_arr[ipl][NEXT_R] = IS_RETRO;
 			}
 			else if (last_jd > jul_day_UT)
@@ -202,13 +202,13 @@ void next_retro_station(struct pxx *pxx, double jul_day_UT)
 				p_arr[ipl][NEXT_S] += (int)offset;
 				if (p_arr[ipl][NEXT_R] > IS_RETRO)
 					p_arr[ipl][NEXT_R] += (int)offset;
-				if (p_arr[ipl][NEXT_R] <= 0)
+				if (p_arr[ipl][NEXT_R] <= 0.0)
 					p_arr[ipl][NEXT_R] = IS_RETRO;
 			}
 		}
 		
-		if ((p_arr[ipl][NEXT_R] < 100 && iter[ipl] >= ITERMAX) ||
-		(p_arr[ipl][NEXT_R] > 90 && iter[ipl] >= ITERMAX))
+		if ((p_arr[ipl][NEXT_R] < 50.0 && iter[ipl] >= ITERMAX) ||
+		(p_arr[ipl][NEXT_R] > 90.0 && iter[ipl] >= ITERMAX))
 			retro_calc(pxx, jul_day_UT, iter, ipl);
 			
 		if (p_arr[ipl][NEXT_R] > -0.01 && p_arr[ipl][NEXT_R] < 0.01)
