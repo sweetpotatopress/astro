@@ -124,7 +124,129 @@ void calculate_utc(struct cdata *cdata, int *day_offset)
 	
 	cdata->utc_hour = utc_hour; 
 }
-
+void retro_days(struct pxx *pxx, double jul_day_UT)
+{
+	int iflag, ipl;
+	double xx[6];
+	char serr[AS_MAXCH];
+	
+	static int calc_flag[SE_PLUTO + 1] = {0};
+	static double last_jd = 0;
+	static int iter[10] = {0};
+	
+	double *p_arr[] = {
+	pxx->dsun, pxx->dmoon,
+	pxx->dmerc, pxx->dven,
+	pxx->dmars, pxx->djup,
+	pxx->dsat, pxx->dura,
+	pxx->dnep, pxx->dplu,
+	pxx->dmnod, pxx->dtnod,
+	pxx->dasc, pxx->dmc,
+	pxx->ddsc, pxx->dic,
+	pxx->dfor, pxx->dspir};
+	
+	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+	
+	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
+	{
+		if (p_arr[ipl][NEXT_R] < 100 && iter[ipl] >= 10)
+		{
+			double julday_copy = jul_day_UT;
+			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+			p_arr[ipl][LONG_S] = xx[LONG_S];
+			
+			while(p_arr[ipl][LONG_S] > 0.01)
+			{
+				swe_calc_ut(++julday_copy, ipl, iflag, xx, serr);
+				p_arr[ipl][LONG_S] = xx[LONG_S];
+				p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
+			}
+			
+			julday_copy = jul_day_UT;
+			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+			p_arr[ipl][LONG_S] = xx[LONG_S];
+			
+			while(p_arr[ipl][LONG_S] < -0.01)
+			{
+				swe_calc_ut(--julday_copy, ipl, iflag, xx, serr);
+				p_arr[ipl][LONG_S] = xx[LONG_S];
+				p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
+			}
+			calc_flag[ipl] = 1;
+			iter[ipl] = 0;
+		}
+			
+		if (calc_flag[ipl] == 0)
+		{
+		
+			double julday_copy = jul_day_UT;
+			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+			p_arr[ipl][LONG_S] = xx[LONG_S];
+			
+			while(p_arr[ipl][LONG_S] > 0.01)
+			{
+				swe_calc_ut(++julday_copy, ipl, iflag, xx, serr);
+				p_arr[ipl][LONG_S] = xx[LONG_S];
+				p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
+			}
+			
+			julday_copy = jul_day_UT;
+			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+			p_arr[ipl][LONG_S] = xx[LONG_S];
+			
+			while(p_arr[ipl][LONG_S] < -0.01)
+			{
+				swe_calc_ut(--julday_copy, ipl, iflag, xx, serr);
+				p_arr[ipl][LONG_S] = xx[LONG_S];
+				p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
+			}
+			calc_flag[ipl] = 1;
+		}
+		else if (fabs(last_jd - jul_day_UT) >= 1)
+		{
+			double offset = fabs(last_jd - jul_day_UT);
+			
+			if (last_jd < jul_day_UT)
+			{
+				p_arr[ipl][LAST_R] += (int)offset;
+				p_arr[ipl][NEXT_R] -= (int)offset;
+			}
+			else if (last_jd > jul_day_UT)
+			{
+				p_arr[ipl][LAST_R] -= (int)offset;
+				p_arr[ipl][NEXT_R] += (int)offset;
+			}
+		}
+		if (p_arr[ipl][NEXT_R] == 1 || p_arr[ipl][NEXT_R] == - 1)
+		{
+			double julday_copy = jul_day_UT;
+			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+			p_arr[ipl][LONG_S] = xx[LONG_S];
+			
+			while(p_arr[ipl][LONG_S] > 0.01)
+			{
+				swe_calc_ut(++julday_copy, ipl, iflag, xx, serr);
+				p_arr[ipl][LONG_S] = xx[LONG_S];
+				p_arr[ipl][NEXT_R] = julday_copy - jul_day_UT;
+			}
+			
+			julday_copy = jul_day_UT;
+			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+			p_arr[ipl][LONG_S] = xx[LONG_S];
+			
+			while(p_arr[ipl][LONG_S] < -0.01)
+			{
+				swe_calc_ut(--julday_copy, ipl, iflag, xx, serr);
+				p_arr[ipl][LONG_S] = xx[LONG_S];
+				p_arr[ipl][LAST_R] = jul_day_UT - julday_copy;
+			}
+			calc_flag[ipl]  = 1;
+		}
+		iter[ipl]++;
+	}
+	last_jd = jul_day_UT;
+}
+	
 void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl;
@@ -160,26 +282,8 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
 	{
 		if (ipl > SE_MOON && ipl < SE_MEAN_NODE)
-		{
-			double julday_copy = jul_day_UT;
-			
-			while(p_arr[i][LONG_S] > 0.01)
-			{
-				swe_calc_ut(++julday_copy, ipl, iflag, xx, serr);
-				p_arr[i][LONG_S] = xx[LONG_S];
-				p_arr[i][NEXT_R] = julday_copy - jul_day_UT;
-			}
-			
-			julday_copy = jul_day_UT;
-			
-			while(p_arr[i][LONG_S] < -0.01)
-			{
-				swe_calc_ut(--julday_copy, ipl, iflag, xx, serr);
-				p_arr[i][LONG_S] = xx[LONG_S];
-				p_arr[i][LAST_R] = jul_day_UT - julday_copy;
-			}
-		}
-		
+			retro_days(pxx, jul_day_UT);
+	
 		iret = swe_calc_ut(jul_day_UT, ipl, iflag, xx, serr);
 		if (iret < 0) 
 			ERR_EXIT("ERR: swe_calc_ut failure");
@@ -196,7 +300,6 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 			p_arr[i][RETRO] = 0;
 	}
 	
-
 	iret = swe_houses_ex(jul_day_UT, 0, cdata->dlat, cdata->dlon,
 	ihsy, cusps, ascmc);
 	if (iret < 0)
