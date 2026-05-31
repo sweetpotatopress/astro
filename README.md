@@ -78,7 +78,7 @@ exit:			q
  | window with exact planet stats | [DONE] |
  | add nodes, outers | [DONE] |
  | add lot of spirit + fortune | [DONE] |
- | next/last retrograde and station | |
+ | next retrograde/ last station | [DONE] |
  | add elemental colors | [DONE] |
  | essential dignities table | |
  | synastry/ transit view | |
@@ -88,8 +88,6 @@ exit:			q
  | terminal window autoresize | |
  | user default config file | |
  | zodiacal releasing | |
- 
- feel free to suggest additions and send pull requests. big or small!
  
  --license--
  
