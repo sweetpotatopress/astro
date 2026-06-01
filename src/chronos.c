@@ -244,7 +244,7 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 		p_arr[i][DIST_S] = xx[DIST_S];
 		if (ipl >= SE_MERCURY && ipl <= SE_PLUTO)
 		{
-			if (p_arr[i][LONG_S] < -0.005)
+			if (p_arr[i][NEXT_R] <= IS_RETRO)
 				p_arr[i][RETRO] = 1;
 			else
 				p_arr[i][RETRO] = 0;
