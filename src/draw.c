@@ -498,20 +498,20 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
 			{
 				wattron(planet_win, COLOR_PAIR(FIRE));
-				mvwprintw(planet_win, starty, startx + 13, "r");
+				mvwprintw(planet_win, starty, startx + 12, "r");
 				wattroff(planet_win, COLOR_PAIR(FIRE));
 			}
 				
 			if ((int)p_arr[i][STATION] == STATION_R)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
-				mvwaddstr(planet_win, starty, startx + 13, "sr");
+				mvwaddstr(planet_win, starty, startx + 12, "sr");
 				wattroff(planet_win, COLOR_PAIR(EARTH));
 			}
 			else if ((int)p_arr[i][STATION] == STATION_D)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
-				mvwaddstr(planet_win, starty, startx + 13, "sd");
+				mvwaddstr(planet_win, starty, startx + 12, "sd");
 				wattroff(planet_win, COLOR_PAIR(EARTH));
 			}
 			
@@ -574,13 +574,13 @@ void retro_table(WINDOW *retro_win, struct pxx *pxx)
 	for (size_t i = 0; i < p_count; ++i)
 	{
 		char header[MAXBUF];
-		snprintf(header, sizeof(header), "%-6s %7s %4s %4s", 
+		snprintf(header, sizeof(header), "%-6s%6s  %4s %4s", 
 		"x---x-", "speed", "n->r", "n->s");
 		mvwprintw(retro_win, 0, 0, "%s", header);
 	
 		char buff[MAXBUF];
 		
-		snprintf(buff, sizeof(buff), "%-6s %7.3f %4.0f %4.0f",
+		snprintf(buff, sizeof(buff), "%-6s%6.3f  %-4.0f %-4.0f",
 		pl_sym[i+2], p_arr[i][LONG_S], p_arr[i][NEXT_R], fabs(p_arr[i][NEXT_S]));
 		
 		mvwprintw(retro_win, (int)i + 1, 0, "%s", buff);

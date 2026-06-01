@@ -544,6 +544,8 @@ int main()
 	int main_done = 0;
 	while (!main_done)
 	{
+		static int retro_trig = 0, planet_trig = 0;
+		
 		input_chart_data(io, cdata, citybuffer);
 		cdata->city = citybuffer;
 		pxx_fill(cusps, cdata, pxx);
@@ -551,7 +553,6 @@ int main()
 		cur_chart_data(main_win, io, cdata);
 		show_panel(main_panel);
 			
-		static int retro_trig = 0, planet_trig = 0;
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
 		(ch = wgetch(main_win)))
