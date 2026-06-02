@@ -107,22 +107,22 @@ int sign, struct pxx *pxx, char ch)
 			{
 					case FIRE:
 					wattron(win, COLOR_PAIR(FIRE));
-					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
+					mvwprintw(win, y, x, "%.0f*%02.0f`", p_arr[count][DEGREE], p_arr[count][MIN]);
 					wattroff(win, COLOR_PAIR(FIRE));
 					break;
 				case EARTH:
 					wattron(win, COLOR_PAIR(EARTH));
-					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
+					mvwprintw(win, y, x, "%.0f*%02.0f`", p_arr[count][DEGREE], p_arr[count][MIN]);
 					wattroff(win, COLOR_PAIR(EARTH));
 					break;
 				case AIR:
 					wattron(win, COLOR_PAIR(AIR));
-					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
+					mvwprintw(win, y, x, "%.0f*%02.0f`", p_arr[count][DEGREE], p_arr[count][MIN]);
 					wattroff(win, COLOR_PAIR(AIR));
 					break;
 				case WATER:
 					wattron(win, COLOR_PAIR(WATER));
-					mvwprintw(win, y, x, "%.2f", p_arr[count][MWIN]);
+					mvwprintw(win, y, x, "%.0f*%02.0f`", p_arr[count][DEGREE], p_arr[count][MIN]);
 					wattroff(win, COLOR_PAIR(WATER));
 					break;
 			}
@@ -244,12 +244,11 @@ double cusps[], int radius, struct pxx *pxx)
 		int x = center_x - (int)(radius * cos_rad);
 		int y = center_y + (int)(radius * sin_rad * 0.5);
 		
-		double decimal  = 
-		(((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60) / 100);
-		
+		p_arr[i][DEGREE] = (int)p_arr[i][LONG] % 30;
+		p_arr[i][MIN] = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
+	
 		int sign = ((int)p_arr[i][LONG] / 30) + 1;
 		
-		p_arr[i][MWIN] = ((int)p_arr[i][LONG] % 30) + decimal;
 		
 		if (i != SE_MEAN_NODE)
 		{
@@ -302,11 +301,8 @@ double cusps[], int radius, struct pxx *pxx)
 		
 		mvwaddstr(main_win, y, x, ascmc_sym[i]);
 		
-		double decimal = 
-		(((asc_arr[i][LONG] - (int)asc_arr[i][LONG]) * 60) / 100);
-		double b60 = (((int)asc_arr[i][LONG] % 30) + decimal);
-		
-		asc_arr[i][MWIN] = b60;
+		asc_arr[i][DEGREE] = (int)asc_arr[i][LONG] % 30;
+		asc_arr[i][MIN]  = (int)((asc_arr[i][LONG] - (int)asc_arr[i][LONG]) * 60);
 		
 		int sign = ((int)asc_arr[i][LONG] / 30) + 1;
 		
@@ -479,7 +475,7 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 		
 		int full_deg = (int)p_arr[i][LONG];
 		int deg = (int)p_arr[i][LONG] % 30;
-		int a_dec = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
+		int minute = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
 		
 		if ( i != SE_MEAN_NODE && i < 12) // sun -> node 
 		{
@@ -490,8 +486,8 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			
 			snprintf(buff, sizeof(buff),
 			"%-3s %3d.%02d : %6s %02d*%02d`",
-			spname, full_deg, a_dec,
-			pl_sym[i], deg, a_dec);
+			spname, full_deg, minute,
+			pl_sym[i], deg, minute);
 			
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
 			
@@ -530,7 +526,7 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			
 			snprintf(point_buff, sizeof(point_buff),
 			"%-10s %3d.%02d : %02d*%02d`",
-			points[j], full_deg, a_dec, deg, a_dec);
+			points[j], full_deg, minute, deg, minute);
 			
 			if (i == 12) // lots divider
 			{
