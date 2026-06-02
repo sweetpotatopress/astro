@@ -48,7 +48,7 @@ int sign, struct pxx *pxx, char ch)
 			pxx->dasc, pxx->dmc, 
 			pxx->ddsc, pxx->dic};
 			
-	static int j;
+	int j = 0;
 	
 	if (strcmp("ari", zo_sym[sign]) == 0)
 		j = FIRE;
