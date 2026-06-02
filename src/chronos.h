@@ -17,7 +17,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define IS_RETRO 0.5
 #define ITERMAX 10
-#define PARSECOUNT 5
+#define PARSEMAX 5
+#define PARSEMIN 0.5
 #define RETROCOUNT (SE_PLUTO + 1)
 
 #define STATION_R 1

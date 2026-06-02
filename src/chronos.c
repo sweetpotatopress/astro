@@ -40,44 +40,44 @@ int ipl, double *p_arr[])
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	
-	double julday_copy = jd_ut;
+	double jd_copy = jd_ut;
 	
 	double speed = p_arr[ipl][LONG_S];
 	int retro_found = 0;
 	while(speed > 0.0 && !retro_found)
 	{
-		julday_copy += PARSECOUNT;
-		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+		jd_copy += PARSEMAX;
+		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 		speed = xx[LONG_S];
 		while (speed < 0.0)
 		{
-			julday_copy -= 0.5;
-			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+			jd_copy -= PARSEMIN;
+			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
-			p_arr[ipl][NEXT_R] = julday_copy - jd_ut;
+			p_arr[ipl][NEXT_R] = jd_copy - jd_ut;
 			retro_found = 1;
 		}
 	}
 	
 	while(speed >= 0.0 && retro_found)
 	{
-		julday_copy += PARSECOUNT;
-		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+		jd_copy += PARSEMAX;
+		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 		speed = xx[LONG_S];
 	}
 	
 	int station_found = 0;
 	while(speed < 0.0 && !station_found)
 	{
-		julday_copy += PARSECOUNT;
-		swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+		jd_copy += PARSEMAX;
+		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 		speed = xx[LONG_S];
 		while (speed > 0.0)
 		{
-			julday_copy -= 0.5;
-			swe_calc_ut(julday_copy, ipl, iflag, xx, serr);
+			jd_copy -= PARSEMIN;
+			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
-			p_arr[ipl][NEXT_S] = julday_copy - jd_ut;
+			p_arr[ipl][NEXT_S] = jd_copy - jd_ut;
 			station_found = 1;
 		}
 	
