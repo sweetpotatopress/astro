@@ -436,7 +436,6 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 					default:
 						form_driver(cdata_form, ch);
 						break;
-						
 					}
 					break;
 		}

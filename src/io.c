@@ -512,7 +512,8 @@ void load_chart(FIELD *cdata_field[], struct io *io)
 				io->filepath,
 				entry->d_name
 				);
-				stat(fn_buff, &st);
+				if (stat(fn_buff, &st) == -1)
+					ERR_EXIT("load_chat stat");
 				
 				i_name[i] = malloc(sizeof(fn_buff));
 				if (!i_name[i])

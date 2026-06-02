@@ -94,7 +94,7 @@ void next_retro_station(struct pxx *pxx, double jd_ut)
 	static int iter[RETROCOUNT] = {0};
 	
 	double *p_arr[] = {
-	NULL, NULL,
+	pxx->dsun, pxx->dmoon,
 	pxx->dmerc, pxx->dven,
 	pxx->dmars, pxx->djup,
 	pxx->dsat, pxx->dura,
