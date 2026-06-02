@@ -85,14 +85,11 @@ int ipl, double *p_arr[])
 	iter[ipl] = 0;
 }
 
-void next_retro_station(struct pxx *pxx, double jd_ut)
+void next_retro_station(struct pxx *pxx, double jd_ut,
+int *calc_flag, int *iter, double *last_jd)
 {
 	int ipl;
-	
-	static int calc_flag[RETROCOUNT] = {0};
-	static double last_jd;
-	static int iter[RETROCOUNT] = {0};
-	
+
 	double *p_arr[] = {
 	pxx->dsun, pxx->dmoon,
 	pxx->dmerc, pxx->dven,
@@ -117,18 +114,18 @@ void next_retro_station(struct pxx *pxx, double jd_ut)
 			if (p_arr[ipl][LONG_S] < 0.0)
 				p_arr[ipl][NEXT_R] = IS_RETRO;
 		}
-		else if (fabs(last_jd - jd_ut) >= 1.0)
+		else if (fabs(*last_jd - jd_ut) >= 1.0)
 		{
-			double offset = fabs(last_jd - jd_ut);
+			double offset = fabs(*last_jd - jd_ut);
 			
-			if (last_jd < jd_ut)
+			if (*last_jd < jd_ut)
 			{
 				p_arr[ipl][NEXT_S] += offset;
 				p_arr[ipl][NEXT_R] -= offset;
 				if (p_arr[ipl][NEXT_R] <= 0.0)
 					p_arr[ipl][NEXT_R] = IS_RETRO;
 			}
-			else if (last_jd > jd_ut)
+			else if (*last_jd > jd_ut)
 			{
 				p_arr[ipl][NEXT_S] += offset;
 				if (p_arr[ipl][NEXT_R] > IS_RETRO)
@@ -141,7 +138,7 @@ void next_retro_station(struct pxx *pxx, double jd_ut)
 		
 		iter[ipl]++;
 	}
-	last_jd = jd_ut;
+	*last_jd = jd_ut;
 }
 	
 int sect(struct pxx *pxx)
@@ -249,9 +246,13 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 		p_arr[i][DIST_S] = xx[DIST_S];
 	}
 	
+	int calc_flag[RETROCOUNT] = {0};
+	int iter[RETROCOUNT] = {0};
+	double last_jd = 0;
+	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		next_retro_station(pxx, jd_ut);
+		next_retro_station(pxx, jd_ut, calc_flag, iter, &last_jd);
 		
 		if (p_arr[ipl][NEXT_R] <= IS_RETRO)
 			p_arr[ipl][RETRO] = 1;
