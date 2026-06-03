@@ -40,10 +40,12 @@ fill systime:	tab
 save chart:		w  
 	--makedir:	m  
 	--cancel:	esc  
+	--choose the directory to save by hitting esc or q
+	--chart saves after writing name and hitting enter
 
 load chart:		e  
 	--choose:	l/enter  
-	--cancel:	q  
+	--cancel:	esc   
  
 **CHART VIEW**  
 
@@ -78,7 +80,7 @@ exit:			q
  | window with exact planet stats | [DONE] |
  | add nodes, outers | [DONE] |
  | add lot of spirit + fortune | [DONE] |
- | next retrograde/ last station | [DONE] |
+ | next retrograde/ next station | [DONE] |
  | add elemental colors | [DONE] |
  | essential dignities table | |
  | synastry/ transit view | |
