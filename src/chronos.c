@@ -205,14 +205,11 @@ void calculate_utc(struct cdata *cdata)
 
 void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 {
-	int iflag, ipl;
+	int iflag, ipl, iret;
 	double xx[6];
 	char serr[AS_MAXCH];
 	double ascmc[10];
 	int ihsy = 'W';
-	
-	int iret;
-	size_t i;
 	
 	double *p_arr[] = {
 	pxx->dsun, pxx->dmoon,
@@ -232,23 +229,23 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 	
 	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	
-	for (ipl = SE_SUN, i = 0; ipl <= SE_TRUE_NODE; ipl++, i++)
+	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
 	{
 		iret = swe_calc_ut(jd_ut, ipl, iflag, xx, serr);
 		if (iret < 0) 
 			ERR_EXIT("ERR: swe_calc_ut failure");
 			
-		p_arr[i][LONG] = xx[LONG];
-		p_arr[i][LAT] = xx[LAT];
-		p_arr[i][DIST] = xx[DIST];
-		p_arr[i][LONG_S] = xx[LONG_S];
-		p_arr[i][LAT_S] = xx[LAT_S];
-		p_arr[i][DIST_S] = xx[DIST_S];
+		p_arr[ipl][LONG] = xx[LONG];
+		p_arr[ipl][LAT] = xx[LAT];
+		p_arr[ipl][DIST] = xx[DIST];
+		p_arr[ipl][LONG_S] = xx[LONG_S];
+		p_arr[ipl][LAT_S] = xx[LAT_S];
+		p_arr[ipl][DIST_S] = xx[DIST_S];
 	}
 	
 	int calc_flag[RETROCOUNT] = {0};
 	int iter[RETROCOUNT] = {0};
-	double last_jd = 0;
+	double last_jd = jd_ut;
 	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
@@ -258,9 +255,10 @@ void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
 			p_arr[ipl][RETRO] = 1;
 		else
 			p_arr[ipl][RETRO] = 0;
-		if (p_arr[ipl][NEXT_S] <= 7)
+		if (p_arr[ipl][NEXT_S] <= STATION_POINT)
 			p_arr[ipl][STATION] = STATION_D;
-		else if (p_arr[ipl][NEXT_R] <= 8 && p_arr[ipl][NEXT_R] > IS_RETRO)
+		else if (p_arr[ipl][NEXT_R] <=
+		STATION_POINT && p_arr[ipl][NEXT_R] > IS_RETRO)
 			p_arr[ipl][STATION] = STATION_R;
 		else
 			p_arr[ipl][STATION] = 0;
