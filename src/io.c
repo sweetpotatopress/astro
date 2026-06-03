@@ -249,7 +249,7 @@ void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 					free(mdir);
 					menu_done = 1;
 					break;
-				case 'q': 
+				case 'q': case 27:
 					savedir_done = 1;
 					menu_done = 1;
 					werase(save_win);
@@ -683,7 +683,7 @@ void load_chart(FIELD *cdata_field[], struct io *io)
 					werase(load_win);
 					menu_done = 1;
 					break;
-				case 'q': 
+				case 'q': case 27:
 					load_done = 1;
 					menu_done = 1;
 					werase(load_win);
