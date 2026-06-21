@@ -179,7 +179,7 @@ double cusps[], int radius, struct pxx *pxx)
 	int center_x = (COLS / 2);
 	int center_y = (LINES / 2);
 	
-	int iter_count = 10;
+	int iter_count = 25;
 	int max_distance = 10;
 	double convergence_thresh = 0.1;
 	int pcount = 12;
@@ -225,7 +225,7 @@ double cusps[], int radius, struct pxx *pxx)
 				new_long += 360.0;
 			while (new_long >= 360.0)
 				new_long -= 360.0;
-		
+				
 			double change = fabs(new_long - current);
 			max_change = (change > max_change) ? change : max_change;
 			
