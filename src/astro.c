@@ -501,10 +501,10 @@ int main()
 	start_color();
 
 	init_pair(M_COLOR, COLOR_WHITE,  COLOR_BLACK);
-    	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
-    	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
-    	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
-    	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
+	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
+	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
+	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
+	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
 
 	PANEL *main_panel;
 	WINDOW *main_win = newwin(LINES, COLS, 0, 0);
