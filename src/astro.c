@@ -498,21 +498,14 @@ int main()
 	
 	initscr();
 	set_escdelay(25);
-	
 	start_color();
-	init_color(1, 0, 0, 0); //black
-	init_color(2, 800, 800, 1000); //white
-	init_color(3, 1000, 600, 600); //red
-	init_color(4, 600, 1000, 600); //green
-	init_color(5, 1000, 1000, 600); //yellow
-	init_color(6, 500, 500, 1000); //blue
-	
-	init_pair(M_COLOR, 2, 1);
-	init_pair(FIRE, 3, 1);
-	init_pair(EARTH, 4, 1);
-	init_pair(AIR, 5, 1);
-	init_pair(WATER, 6, 1);
-	
+
+	init_pair(M_COLOR, COLOR_WHITE,  COLOR_BLACK);
+    	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
+    	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
+    	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
+    	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
+
 	PANEL *main_panel;
 	WINDOW *main_win = newwin(LINES, COLS, 0, 0);
 	main_panel = new_panel(main_win);
