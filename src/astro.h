@@ -29,7 +29,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 } while (0)
 
 #define PWINY 40
-#define PWINX 36
+#define PWINX 33
 #define PWIN_Y 0
 #define PWIN_X 0
 
