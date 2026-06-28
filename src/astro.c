@@ -370,12 +370,12 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 					case 'w':
 						validate_fields(cdata_field,
 						cdata_form, cdata, citybuffer);
-						main_io(io, cdata, cdata_field, citybuffer, 'w');
+						save_chart(cdata, io, citybuffer);
 						mode = NORMAL;
 						break;
 						
 					case 'e':
-						main_io(io, cdata, cdata_field, citybuffer, 'e');
+						load_chart(cdata_field, io);
 						mode = NORMAL;
 						break;
 						

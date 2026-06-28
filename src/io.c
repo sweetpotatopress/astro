@@ -24,6 +24,13 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 {
+	char *home_dir = getenv("HOME");
+	if (!home_dir)
+		ERR_EXIT("main_io home_dir getenv");
+	
+	snprintf(io->filepath, MAXBUF,
+	"%s/.local/share/astro/charts/", home_dir);
+	
 	MENU *save_menu;
 	WINDOW *save_win;
 	WINDOW *save_subwin;
@@ -457,6 +464,13 @@ void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 
 void load_chart(FIELD *cdata_field[], struct io *io)
 {
+	char *home_dir = getenv("HOME");
+	if (!home_dir)
+		ERR_EXIT("main_io home_dir getenv");
+	
+	snprintf(io->filepath, MAXBUF,
+	"%s/.local/share/astro/charts/", home_dir);
+	
 	MENU *load_menu;
 	WINDOW *load_win;
 	WINDOW *load_subwin;
@@ -715,19 +729,3 @@ void load_chart(FIELD *cdata_field[], struct io *io)
 	free(homepath);
 }
 
-void main_io(struct io *io, struct cdata *cdata,
-FIELD *cdata_field[], char *citybuffer, const char ch)
-{
-	char *home_dir = getenv("HOME");
-	if (!home_dir)
-		ERR_EXIT("main_io home_dir getenv");
-	
-	snprintf(io->filepath, MAXBUF,
-	"%s/.local/share/astro/charts/", home_dir);
-	
-	if (ch == 'w')
-		save_chart(cdata, io, citybuffer);
-	if (ch == 'e')
-		load_chart(cdata_field, io);
-		
-}
