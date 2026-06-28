@@ -375,8 +375,9 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 						break;
 						
 					case 'e':
-						load_chart(cdata_field, io);
+						load_chart(cdata, io, citybuffer);
 						mode = NORMAL;
+						cdata_entry = 1;
 						break;
 						
 					case KEY_F(1):
@@ -441,9 +442,9 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 		}
 		wrefresh(cdata_form_win);
 	}
-	
-	validate_fields(cdata_field,
-	cdata_form, cdata, citybuffer);
+	if (ch != 'e')
+		validate_fields(cdata_field,
+		cdata_form, cdata, citybuffer);
 
 	unpost_form(cdata_form);
 	werase(cdata_form_win);
@@ -584,6 +585,12 @@ int main()
 					touchwin(main_win);
 					wnoutrefresh(main_win);
 					doupdate();
+					break;
+				case 'e':
+					load_chart(cdata, io, citybuffer);
+					pxx_fill(cusps, cdata, pxx);
+					draw_chart(main_win, cusps, pxx);
+					cur_chart_data(main_win, io, cdata);
 					break;
 				case 'p':
 					if (!planet_trig)

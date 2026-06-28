@@ -17,6 +17,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <ncurses.h>
 #include <form.h>
 #include <menu.h>
@@ -466,7 +467,7 @@ void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 		free(fn_copy);
 }
 
-void load_chart(FIELD *cdata_field[], struct io *io)
+void load_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 {
 	char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -620,7 +621,12 @@ void load_chart(FIELD *cdata_field[], struct io *io)
 		char *buffer = NULL;
 		
 		FILE *fp;
-		char field[9][562];
+		char field[9][562] = {0};
+		
+		char *endptr = NULL;
+		long lret;
+		double dret;
+		errno = 0;
 		
 		int count = 0;
 		int menu_done = 0;
@@ -679,9 +685,54 @@ void load_chart(FIELD *cdata_field[], struct io *io)
 						memcpy(field[count++], buffer, strlen(buffer) + 1);
 					}
 						
-					for (int j = 0; j < 9; ++j)
-						set_field_buffer(cdata_field[j], 0, field[j]);
-					
+					memcpy(citybuffer, field[CITY], strlen(field[CITY]) + 1);
+								
+					lret = strtol(field[YEAR], &endptr, 10);
+					if (errno != ERANGE)
+						cdata->tm_year = (int)lret;
+					else
+						cdata->tm_year = 1970;
+								
+					lret = strtol(field[MONTH], &endptr, 10);
+					if (errno != ERANGE && iret != -1)
+						cdata->tm_mon = (int)lret;
+					else
+						cdata->tm_mon = 1;
+								
+					lret = strtol(field[DAY], &endptr, 10);
+					if (errno != ERANGE && iret != -1)
+						cdata->tm_mday = (int)lret;
+					else
+						cdata->tm_mday = 1;
+								
+					lret = strtol(field[HOUR], &endptr, 10);
+					if (errno != ERANGE && iret != -1) 
+						cdata->tm_hour = (int)lret;
+					else
+						cdata->tm_hour = 1;
+									
+					lret = strtol(field[MINUTE], &endptr, 10);
+					if (errno != ERANGE && iret != -1)
+						cdata->tm_min = (int)lret;
+					else
+						cdata->tm_min = 1;
+								
+					if (setenv("TZ", field[TIMEZONE], 1) != 0)
+						ERR_EXIT("ERR: TZ setenv fail field_to_member");
+					tzset();
+							
+					dret = strtod(field[LATITUDE], &endptr);
+					if (errno != ERANGE)
+						cdata->dlat = dret;
+					else
+						cdata->dlat = 0.0;
+							
+					dret = strtod(field[LONGITUDE], &endptr);
+					if (errno != ERANGE)
+						cdata->dlon = dret;
+					else
+						cdata->dlon = 0.0;
+							
 					free(buffer);
 					fclose(fp);
 					

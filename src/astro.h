@@ -121,5 +121,5 @@ enum mode { NORMAL, INSERT };
 
 void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search);
 
-void load_chart(FIELD *cdata_field[], struct io *io);
+void load_chart(struct cdata *cdata, struct io *io, char *citybuffer);
 void save_chart(struct cdata *cdata, struct io *io, char *citybuffer);
