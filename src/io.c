@@ -342,6 +342,10 @@ void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 				break;
 			case 27:
 				done = 1;
+				werase(save_subwin);
+				wrefresh(save_subwin);
+				werase(save_win);
+				wrefresh(save_win);
 				delwin(save_subwin);
 				delwin(save_win);
 				return;

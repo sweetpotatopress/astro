@@ -579,6 +579,12 @@ int main()
 					chart_done = 1;
 					mode = INSERT;
 					break;
+				case 'w':
+					save_chart(cdata, io, citybuffer);
+					touchwin(main_win);
+					wnoutrefresh(main_win);
+					doupdate();
+					break;
 				case 'p':
 					if (!planet_trig)
 					{
