@@ -107,22 +107,26 @@ int sign, struct pxx *pxx, char ch)
 			{
 					case FIRE:
 					wattron(win, COLOR_PAIR(FIRE));
-					mvwprintw(win, y, x, "%.0f*%02.0f`", p_arr[count][DEGREE], p_arr[count][MIN]);
+					mvwprintw(win, y, x, "%.0f*%02.0f`",
+					p_arr[count][DEGREE], p_arr[count][MIN]);
 					wattroff(win, COLOR_PAIR(FIRE));
 					break;
 				case EARTH:
 					wattron(win, COLOR_PAIR(EARTH));
-					mvwprintw(win, y, x, "%.0f*%02.0f`", p_arr[count][DEGREE], p_arr[count][MIN]);
+					mvwprintw(win, y, x, "%.0f*%02.0f`",
+					p_arr[count][DEGREE], p_arr[count][MIN]);
 					wattroff(win, COLOR_PAIR(EARTH));
 					break;
 				case AIR:
 					wattron(win, COLOR_PAIR(AIR));
-					mvwprintw(win, y, x, "%.0f*%02.0f`", p_arr[count][DEGREE], p_arr[count][MIN]);
+					mvwprintw(win, y, x, "%.0f*%02.0f`",
+					p_arr[count][DEGREE], p_arr[count][MIN]);
 					wattroff(win, COLOR_PAIR(AIR));
 					break;
 				case WATER:
 					wattron(win, COLOR_PAIR(WATER));
-					mvwprintw(win, y, x, "%.0f*%02.0f`", p_arr[count][DEGREE], p_arr[count][MIN]);
+					mvwprintw(win, y, x, "%.0f*%02.0f`",
+					p_arr[count][DEGREE], p_arr[count][MIN]);
 					wattroff(win, COLOR_PAIR(WATER));
 					break;
 			}
@@ -577,7 +581,8 @@ void retro_table(WINDOW *retro_win, struct pxx *pxx)
 		char buff[MAXBUF];
 		
 		snprintf(buff, sizeof(buff), "%-6s%6.3f  %-4.0f %-4.0f",
-		pl_sym[i+2], p_arr[i][LONG_S], p_arr[i][NEXT_R], fabs(p_arr[i][NEXT_S]));
+		pl_sym[i+2], p_arr[i][LONG_S], 
+		p_arr[i][NEXT_R], fabs(p_arr[i][NEXT_S]));
 		
 		mvwprintw(retro_win, (int)i + 1, 0, "%s", buff);
 	}
@@ -696,6 +701,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 				solar_done = 1;
 				break;
 		}
+		flushinp();
 		
 		pxx_fill(cusps, cdata, pxx);
 		
