@@ -15,6 +15,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <panel.h>
 
+#define NEW_CHART() new_chart(main_win, planet_win, retro_win, \
+	planet_panel, retro_panel, \
+	io, cdata, pxx, \
+	planet_trig, retro_trig, cusps)
+
 extern const char *pl_sym[];
 extern const char *zo_sym[];
 extern const char *moon[];
@@ -34,5 +39,7 @@ PANEL **planet_panel, PANEL **retro_panel,
 struct io *io, struct cdata *cdata, struct pxx *pxx,
 int *planet_trig, int *retro_trig, double cusps[]);
 
-void solar_return(WINDOW *main_win, double cusps[],
-struct io *io, struct cdata *cdata, struct pxx *pxx);
+void solar_return(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
+PANEL **planet_panel, PANEL **retro_panel,
+struct io *io, struct cdata *cdata, struct pxx *pxx,
+int *planet_trig, int *retro_trig, double cusps[]);

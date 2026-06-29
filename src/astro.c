@@ -593,10 +593,10 @@ int main()
 					cur_chart_data(main_win, io, cdata);
 					break;
 				case 's':
-					solar_return(main_win, cusps, io, cdata, pxx);
-					wclrtoeol(main_win);
-					wnoutrefresh(main_win);
-					doupdate();
+					solar_return(main_win, planet_win, retro_win,
+					&planet_panel, &retro_panel,
+					io, cdata, pxx,
+					&planet_trig, &retro_trig, cusps);
 					break;
 				case 'p':
 					if (!planet_trig)

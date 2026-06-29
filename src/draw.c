@@ -626,10 +626,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 		cdata->tm_min = gettime.tm_min;
 		cdata->tm_sec = gettime.tm_sec;
 		
-		new_chart(main_win, planet_win, retro_win,
-		planet_panel, retro_panel,
-		io, cdata, pxx,
-		planet_trig, retro_trig, cusps);
+		NEW_CHART();
 		
 		wattron(main_win, COLOR_PAIR(FIRE));
 		mvwprintw(main_win, 2, COLS - 22, "*live");
@@ -654,8 +651,10 @@ int *planet_trig, int *retro_trig, double cusps[])
 	nodelay(main_win, FALSE);
 }
 
-void solar_return(WINDOW *main_win, double cusps[],
-struct io *io, struct cdata *cdata, struct pxx *pxx)
+void solar_return(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
+PANEL **planet_panel, PANEL **retro_panel,
+struct io *io, struct cdata *cdata, struct pxx *pxx,
+int *planet_trig, int *retro_trig, double cusps[])
 {
 	struct tm gettime = {0};
 	double base_degree = pxx->dsun[LONG];
@@ -717,12 +716,10 @@ struct io *io, struct cdata *cdata, struct pxx *pxx)
 					++cdata->tm_min;
 				else
 					++cdata->tm_sec;
-		
-				pxx_fill(cusps, cdata, pxx);
+					
+				NEW_CHART();
 				temp_degree = pxx->dsun[LONG];
-				draw_chart(main_win, cusps, pxx);
-				cur_chart_data(main_win, io, cdata);
-				
+		
 				wattron(main_win, COLOR_PAIR(AIR));
 				mvwprintw(main_win, 2, COLS - 22, "*solar return");
 				wattroff(main_win, COLOR_PAIR(AIR));
@@ -739,11 +736,9 @@ struct io *io, struct cdata *cdata, struct pxx *pxx)
 				else
 					--cdata->tm_sec;
 					
-				pxx_fill(cusps, cdata, pxx);
+				NEW_CHART();
 				temp_degree = pxx->dsun[LONG];
-				draw_chart(main_win, cusps, pxx);
-				cur_chart_data(main_win, io, cdata);
-			
+				
 				wattron(main_win, COLOR_PAIR(AIR));
 				mvwprintw(main_win, 2, COLS - 22, "*solar return");
 				wattroff(main_win, COLOR_PAIR(AIR));
@@ -906,10 +901,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 				cdata->tm_min = result->tm_min;
 				cdata->tm_sec = result->tm_sec;
 				
-				new_chart(main_win, planet_win, retro_win,
-				planet_panel, retro_panel,
-				io, cdata, pxx,
-				planet_trig, retro_trig, cusps);
+				NEW_CHART();
 				break;
 			case 'j': case KEY_DOWN:
 				switch(i)
@@ -950,10 +942,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 				cdata->tm_min = result->tm_min;
 				cdata->tm_sec = result->tm_sec;
 				
-				new_chart(main_win, planet_win, retro_win,
-				planet_panel, retro_panel,
-				io, cdata, pxx,
-				planet_trig, retro_trig, cusps);
+				NEW_CHART();
 	
 				break;
 			case '\n':
