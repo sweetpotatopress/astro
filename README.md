@@ -56,14 +56,17 @@ solar return: s
 --up/down k/j  
 --exit s/q/esc  
 
-planet table:	p  
-planet speed:	o  
-realtime chart: tab  
 animate chart:	enter  
 	--increment:	h/l  
 	--up/down:		k/j  
+
+planet table:	p  
+retrograde table:	o  
+
+realtime chart: tab  
+
 new chart:		i  
-exit:			q  
+exit program: q  
 
 -)(DATA--DIR_)--o  
 
