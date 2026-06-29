@@ -49,12 +49,19 @@ load chart:		e
  
 **CHART VIEW**  
 
+save chart: w  
+load chart: e  
+  
+solar return: s  
+--up/down k/j  
+--exit s/q/esc  
+
 planet table:	p  
 planet speed:	o  
 realtime chart: tab  
 animate chart:	enter  
 	--increment:	h/l  
-	--up/down:		j/k  
+	--up/down:		k/j  
 new chart:		i  
 exit:			q  
 
