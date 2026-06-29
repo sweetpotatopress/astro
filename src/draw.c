@@ -653,6 +653,128 @@ int *planet_trig, int *retro_trig, double cusps[])
 	wclrtoeol(main_win);
 	nodelay(main_win, FALSE);
 }
+
+void solar_return(WINDOW *main_win, double cusps[],
+struct io *io, struct cdata *cdata, struct pxx *pxx)
+{
+	struct tm gettime = {0};
+	double base_degree = pxx->dsun[LONG];
+	time_t now = time(NULL);
+	localtime_r(&now, &gettime);
+
+	int current_year = gettime.tm_year+1900;
+	int diff = current_year - cdata->tm_year;
+	
+	wattron(main_win, COLOR_PAIR(AIR));
+	mvwprintw(main_win, 2, COLS - 22, "*solar return");
+	wattroff(main_win, COLOR_PAIR(AIR));
+	
+	int solar_done = 0, ch = 'f', first_run = 1;
+	while (!solar_done)
+	{
+		if (!first_run)
+		{
+			ch = wgetch(main_win);
+			if (!ch)
+				break;
+		}
+		else 
+			first_run = 0;
+			
+		switch(ch)
+		{
+			case 'f':
+				cdata->tm_year += diff;
+				ch = 0;
+				break;
+			case 'j': case KEY_DOWN:
+				--cdata->tm_year;
+				break;
+			case 'k': case KEY_UP:
+				++cdata->tm_year;
+				break;
+			case 'q': case 's': case 27:
+				solar_done = 1;
+				break;
+		}
+		
+		pxx_fill(cusps, cdata, pxx);
+		
+		double temp_degree = pxx->dsun[LONG];
+		int iter = 3;
+		
+		while (--iter > 0)
+		{
+			while (temp_degree < base_degree)
+			{
+				if (base_degree - temp_degree > 1.0)
+					++cdata->tm_mday;
+					
+				else if (base_degree - temp_degree > 0.02)
+					++cdata->tm_hour;
+					
+				else if (base_degree - temp_degree > 0.0006)
+					++cdata->tm_min;
+				else
+					++cdata->tm_sec;
+		
+				pxx_fill(cusps, cdata, pxx);
+				temp_degree = pxx->dsun[LONG];
+				draw_chart(main_win, cusps, pxx);
+				cur_chart_data(main_win, io, cdata);
+				
+				wattron(main_win, COLOR_PAIR(AIR));
+				mvwprintw(main_win, 2, COLS - 22, "*solar return");
+				wattroff(main_win, COLOR_PAIR(AIR));
+			}
+			while (temp_degree > base_degree)
+			{
+				if (temp_degree - base_degree > 1.0)
+					--cdata->tm_mday;
+					
+				else if (temp_degree - base_degree > 0.02)
+					--cdata->tm_hour;
+				else if (temp_degree - base_degree > 0.0006)
+					--cdata->tm_min;
+				else
+					--cdata->tm_sec;
+					
+				pxx_fill(cusps, cdata, pxx);
+				temp_degree = pxx->dsun[LONG];
+				draw_chart(main_win, cusps, pxx);
+				cur_chart_data(main_win, io, cdata);
+			
+				wattron(main_win, COLOR_PAIR(AIR));
+				mvwprintw(main_win, 2, COLS - 22, "*solar return");
+				wattroff(main_win, COLOR_PAIR(AIR));
+			}
+			struct tm temp = {0};
+			struct tm *result = NULL;
+	
+			temp.tm_year = cdata->tm_year - 1900;
+			temp.tm_mon = cdata->tm_mon - 1;
+			temp.tm_mday = cdata->tm_mday;
+			temp.tm_hour = cdata->tm_hour;
+			temp.tm_min = cdata->tm_min;
+			temp.tm_sec = cdata->tm_sec;
+			temp.tm_isdst = -1;
+	
+			time_t t = mktime(&temp);
+			result = localtime(&t);
+			
+			cdata->tm_year = result->tm_year + 1900;
+			cdata->tm_mon = result->tm_mon + 1;
+			cdata->tm_mday = result->tm_mday;
+			cdata->tm_hour = result->tm_hour;
+			cdata->tm_min = result->tm_min;
+			cdata->tm_sec = result->tm_sec;
+			
+			pxx_fill(cusps, cdata, pxx);
+			cur_chart_data(main_win, io, cdata);
+		}
+	}
+	mvwprintw(main_win, 2, COLS - 22, "              ");
+}
 	
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,

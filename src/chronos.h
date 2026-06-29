@@ -26,7 +26,5 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define STATION_D 2
 
 int months(int month, int year);
-void solar_return(WINDOW *main_win, double cusps[],
-struct io *io, struct cdata *cdata, struct pxx *pxx);
 void chart_timeset(struct cdata *cdata,int *day_offset);
 void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx);

@@ -33,3 +33,6 @@ void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
 struct io *io, struct cdata *cdata, struct pxx *pxx,
 int *planet_trig, int *retro_trig, double cusps[]);
+
+void solar_return(WINDOW *main_win, double cusps[],
+struct io *io, struct cdata *cdata, struct pxx *pxx);
