@@ -592,6 +592,12 @@ int main()
 					draw_chart(main_win, cusps, pxx);
 					cur_chart_data(main_win, io, cdata);
 					break;
+				case 's':
+					solar_return(main_win, cusps, io, cdata, pxx);
+					wclrtoeol(main_win);
+					wnoutrefresh(main_win);
+					doupdate();
+					break;
 				case 'p':
 					if (!planet_trig)
 					{
