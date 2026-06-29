@@ -29,6 +29,11 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata);
 void planet_table(WINDOW *planet_win, struct pxx *pxx);
 void retro_table(WINDOW *retro_win, struct pxx *pxx);
 
+void new_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
+PANEL **planet_panel, PANEL **retro_panel,
+struct io *io, struct cdata *cdata, struct pxx *pxx,
+int *planet_trig, int *retro_trig, double cusps[]);
+
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
 struct io *io, struct cdata *cdata, struct pxx *pxx,

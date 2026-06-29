@@ -588,9 +588,11 @@ int main()
 					break;
 				case 'e':
 					load_chart(cdata, io, citybuffer);
-					pxx_fill(cusps, cdata, pxx);
-					draw_chart(main_win, cusps, pxx);
-					cur_chart_data(main_win, io, cdata);
+					new_chart(main_win, planet_win, retro_win,
+					&planet_panel, &retro_panel,
+					io, cdata, pxx,
+					&planet_trig, &retro_trig, cusps);
+					doupdate();
 					break;
 				case 's':
 					solar_return(main_win, planet_win, retro_win,
