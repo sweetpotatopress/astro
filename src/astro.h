@@ -119,7 +119,10 @@ struct io {
 
 enum mode { NORMAL, INSERT };
 
-void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search);
+void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
+char *statebuffer, char *countrybuffer);
 
-void load_chart(struct cdata *cdata, struct io *io, char *citybuffer);
-void save_chart(struct cdata *cdata, struct io *io, char *citybuffer);
+void load_chart(struct cdata *cdata, struct io *io,
+char *citybuffer, char *statebuffer, char *countrybuffer);
+void save_chart(struct cdata *cdata, struct io *io,
+char *citybuffer, char *statebuffer, char *countrybuffer);

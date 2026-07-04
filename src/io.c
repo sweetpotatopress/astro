@@ -23,7 +23,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <menu.h>
 #include "astro.h"
 
-void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
+void save_chart(struct cdata *cdata, struct io *io,
+char *citybuffer, char *statebuffer, char *countrybuffer)
 {
 	char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -441,8 +442,10 @@ void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
 	// copy data to file, \n delimited
-	fprintf(ifp, "%s\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
+	fprintf(ifp, "%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
 		citybuffer,
+		statebuffer,
+		countrybuffer,
 		cdata->tm_year,
 		cdata->tm_mon,
 		cdata->tm_mday,
@@ -467,7 +470,8 @@ void save_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 		free(fn_copy);
 }
 
-void load_chart(struct cdata *cdata, struct io *io, char *citybuffer)
+void load_chart(struct cdata *cdata, struct io *io,
+char *citybuffer, char *statebuffer, char *countrybuffer)
 {
 	char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -621,7 +625,7 @@ void load_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 		char *buffer = NULL;
 		
 		FILE *fp;
-		char field[9][562] = {0};
+		char field[11][562] = {0};
 		
 		char *endptr = NULL;
 		long lret;
@@ -679,55 +683,57 @@ void load_chart(struct cdata *cdata, struct io *io, char *citybuffer)
 					if (fp == NULL)
 						ERR_EXIT("load_chart fopen fail");
 					
-					while (fgets(buffer, MAXBUF, fp) != NULL && count < 9)
+					while (fgets(buffer, MAXBUF, fp) != NULL && count < 11)
 					{
 						buffer[strcspn(buffer, "\n")] = 0;
 						memcpy(field[count++], buffer, strlen(buffer) + 1);
 					}
 						
-					memcpy(citybuffer, field[CITY], strlen(field[CITY]) + 1);
+					memcpy(citybuffer, field[0], strlen(field[0]) + 1);
+					memcpy(statebuffer, field[1], strlen(field[1]) + 1);
+					memcpy(countrybuffer, field[2], strlen(field[2]) + 1);
 								
-					lret = strtol(field[YEAR], &endptr, 10);
+					lret = strtol(field[3], &endptr, 10);
 					if (errno != ERANGE)
 						cdata->tm_year = (int)lret;
 					else
 						cdata->tm_year = 1970;
 								
-					lret = strtol(field[MONTH], &endptr, 10);
+					lret = strtol(field[4], &endptr, 10);
 					if (errno != ERANGE && iret != -1)
 						cdata->tm_mon = (int)lret;
 					else
 						cdata->tm_mon = 1;
 								
-					lret = strtol(field[DAY], &endptr, 10);
+					lret = strtol(field[5], &endptr, 10);
 					if (errno != ERANGE && iret != -1)
 						cdata->tm_mday = (int)lret;
 					else
 						cdata->tm_mday = 1;
 								
-					lret = strtol(field[HOUR], &endptr, 10);
+					lret = strtol(field[6], &endptr, 10);
 					if (errno != ERANGE && iret != -1) 
 						cdata->tm_hour = (int)lret;
 					else
 						cdata->tm_hour = 1;
 									
-					lret = strtol(field[MINUTE], &endptr, 10);
+					lret = strtol(field[7], &endptr, 10);
 					if (errno != ERANGE && iret != -1)
 						cdata->tm_min = (int)lret;
 					else
 						cdata->tm_min = 1;
 								
-					if (setenv("TZ", field[TIMEZONE], 1) != 0)
+					if (setenv("TZ", field[8], 1) != 0)
 						ERR_EXIT("ERR: TZ setenv fail field_to_member");
 					tzset();
 							
-					dret = strtod(field[LATITUDE], &endptr);
+					dret = strtod(field[9], &endptr);
 					if (errno != ERANGE)
 						cdata->dlat = dret;
 					else
 						cdata->dlat = 0.0;
 							
-					dret = strtod(field[LONGITUDE], &endptr);
+					dret = strtod(field[10], &endptr);
 					if (errno != ERANGE)
 						cdata->dlon = dret;
 					else

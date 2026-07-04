@@ -404,6 +404,19 @@ struct cdata *cdata)
 	starty += 1;
 	if(cdata->city)
 		mvwprintw(main_win, starty, startx, "%s", cdata->city);
+	if(cdata->state)
+	{
+		if (!isdigit((unsigned char)cdata->state[0]))
+		{
+			startx += (int)strlen(cdata->city);
+			mvwprintw(main_win, starty, startx, ", %s", cdata->state);
+			startx -= (int)strlen(cdata->city);
+		}
+	}
+	
+	starty += 1;
+	if(cdata->country)
+		mvwprintw(main_win, starty, startx, "%s", cdata->country);
 	
 	starty += 1;
 	if(cdata->tm_year)

@@ -55,7 +55,8 @@ void buff_trim(FIELD *current, char *buffer)
 
 void field_to_member
 (struct cdata *cdata, FORM *cdata_form,
-FIELD *cdata_field[], char *citybuffer)
+FIELD *cdata_field[],
+char *citybuffer, char *statebuffer, char *countrybuffer)
 {
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
@@ -74,7 +75,8 @@ FIELD *cdata_field[], char *citybuffer)
 	switch(index)
 	{
 		case CITY:
-			city_search(cdata_field, cdata_form, buffer);
+			city_search(cdata_field, cdata_form, buffer,
+			statebuffer, countrybuffer);
 			form_driver(cdata_form, REQ_VALIDATION);
 			
 			buff_trim(current, buffer);
@@ -217,7 +219,8 @@ void set_localtime(FIELD *cdata_field[])
 }
 
 void validate_fields(FIELD *cdata_field[],
-FORM *cdata_form, struct cdata *cdata, char *citybuffer)
+FORM *cdata_form, struct cdata *cdata,
+char *citybuffer, char *statebuffer, char *countrybuffer)
 {
 	size_t i = 0;
 	
@@ -234,7 +237,8 @@ FORM *cdata_form, struct cdata *cdata, char *citybuffer)
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
 		field_to_member(cdata, cdata_form,
-		cdata_field, citybuffer);
+		cdata_field, citybuffer, statebuffer,
+		countrybuffer);
 	}
 }
 
@@ -248,7 +252,8 @@ void clear_fields(FIELD *cdata_field[], FORM *cdata_form)
 	set_current_field(cdata_form, cdata_field[CITY]);
 }
 	
-void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
+void input_chart_data(struct io *io, struct cdata *cdata,
+char *citybuffer, char *statebuffer, char *countrybuffer)
 {
 	WINDOW *cdata_form_win;
 	FIELD *cdata_field[10];
@@ -369,13 +374,16 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 						
 					case 'w':
 						validate_fields(cdata_field,
-						cdata_form, cdata, citybuffer);
-						save_chart(cdata, io, citybuffer);
+						cdata_form, cdata, citybuffer,
+						statebuffer, countrybuffer);
+						save_chart(cdata, io,
+						citybuffer, statebuffer, countrybuffer);
 						mode = NORMAL;
 						break;
 						
 					case 'e':
-						load_chart(cdata, io, citybuffer);
+						load_chart(cdata, io,
+						citybuffer, statebuffer, countrybuffer);
 						mode = NORMAL;
 						cdata_entry = 1;
 						break;
@@ -396,7 +404,8 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 					 case '\n':
 						form_driver(cdata_form, REQ_VALIDATION);
 						field_to_member(cdata, cdata_form,
-						cdata_field, citybuffer);
+						cdata_field, citybuffer, statebuffer,
+						countrybuffer);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						
 						field_label(cdata_form_win, starty, startx);
@@ -444,7 +453,8 @@ void input_chart_data(struct io *io, struct cdata *cdata, char *citybuffer)
 	}
 	if (ch != 'e')
 		validate_fields(cdata_field,
-		cdata_form, cdata, citybuffer);
+		cdata_form, cdata, citybuffer,
+		statebuffer, countrybuffer);
 
 	unpost_form(cdata_form);
 	werase(cdata_form_win);
@@ -467,10 +477,6 @@ int main()
 	if (!cdata->city)
 		ERR_EXIT("ERR: main cdata->city malloc");
 		
-	char *citybuffer = malloc(MAXBUF);
-	if (!citybuffer)
-		ERR_EXIT("ERR: main citybuffer alloc fail");
-	
 	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
@@ -484,6 +490,16 @@ int main()
 	io->filename = malloc(256);
 	if (!io->filename)
 		ERR_EXIT("main io->filename malloc");
+		
+	char *citybuffer = malloc(MAXBUF);
+	if (!citybuffer)
+		ERR_EXIT("ERR: main citybuffer alloc fail");
+	char *statebuffer = malloc(MAXBUF);
+	if (!statebuffer)
+		ERR_EXIT("ERR: main statebuffer alloc fail");
+	char *countrybuffer = malloc(MAXBUF);
+	if (!countrybuffer)
+		ERR_EXIT("ERR: main countrybuffer alloc fail");
 		
 	double cusps[13];
 	
@@ -539,8 +555,13 @@ int main()
 	{
 		static int retro_trig = 0, planet_trig = 0;
 		
-		input_chart_data(io, cdata, citybuffer);
+		input_chart_data(io, cdata, citybuffer,
+		statebuffer, countrybuffer);
+		
 		cdata->city = citybuffer;
+		cdata->state = statebuffer;
+		cdata->country = countrybuffer;
+		
 		pxx_fill(cusps, cdata, pxx);
 		draw_chart(main_win, cusps, pxx);
 		cur_chart_data(main_win, io, cdata);
@@ -581,13 +602,15 @@ int main()
 					mode = INSERT;
 					break;
 				case 'w':
-					save_chart(cdata, io, citybuffer);
+					save_chart(cdata, io,
+					citybuffer, statebuffer, countrybuffer);
 					touchwin(main_win);
 					wnoutrefresh(main_win);
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata, io, citybuffer);
+					load_chart(cdata, io, 
+					citybuffer, statebuffer, countrybuffer);
 					new_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
@@ -663,6 +686,8 @@ int main()
 	
 	free(cdata);
 	free(citybuffer);
+	free(statebuffer);
+	free(countrybuffer);
 	free(pxx);
 	
 	return 0;

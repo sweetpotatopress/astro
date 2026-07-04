@@ -52,7 +52,8 @@ char* strtok_E(char *str, const char *delim)
 }
 
 void print_menu(FIELD *cdata_field[], FORM *cdata_form,
-struct cdata **search_result, size_t search_count)
+struct cdata **search_result, size_t search_count,
+char *statebuffer, char *countrybuffer)
 {
 	MENU *city_menu;
 	WINDOW *city_win;
@@ -154,6 +155,11 @@ struct cdata **search_result, size_t search_count)
 				set_field_buffer(cdata_field[LONGITUDE], 0,
 				search_result[iret]->longitude);
 				
+				memcpy(statebuffer, search_result[iret]->state,
+				strlen(search_result[iret]->state) + 1);
+				memcpy(countrybuffer, search_result[iret]->country,
+				strlen(search_result[iret]->country) + 1);
+				
 				menu_done = 1;
 				break;
 			case 'q':
@@ -180,7 +186,8 @@ struct cdata **search_result, size_t search_count)
 	delwin(city_win);
 }
 	
-void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
+void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
+char *statebuffer, char *countrybuffer)
 {
 	struct cdata **search_result = calloc(MAXBUF, sizeof(struct cdata *));
 	if (!search_result)
@@ -230,7 +237,7 @@ void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
 		}
 		
 		if (field_count > 1 && strcasestr(field[1], search) != NULL &&
-		field[1] != NULL)
+		field[1] != NULL && field[8] != NULL)
 		{
 			if (i >= search_max)
 			{
@@ -270,5 +277,6 @@ void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search)
 		free(search_result);
 		return;
 	}
-	print_menu(cdata_field, cdata_form, search_result, i);
+	print_menu(cdata_field, cdata_form, search_result, i,
+	statebuffer, countrybuffer);
 }
