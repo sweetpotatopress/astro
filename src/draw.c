@@ -395,8 +395,8 @@ void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx)
 void cur_chart_data(WINDOW *main_win, struct io *io,
 struct cdata *cdata)
 {	
-	int starty = 3;
-	int startx = COLS - 22;
+	int starty = LINES - 8;
+	int startx = 2;
 	
 	if(io->filename)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
@@ -583,7 +583,6 @@ void retro_table(WINDOW *retro_win, struct pxx *pxx)
 	size_t p_count = 8;
 	
 	werase(retro_win);
-	
         
 	for (size_t i = 0; i < p_count; ++i)
 	{
