@@ -51,7 +51,8 @@ load chart:		e
 
 save chart: w  
 load chart: e  
-  
+redraw chart: r  
+
 solar return: s  
 --up/down k/j  
 --exit s/q/esc  
@@ -97,7 +98,7 @@ exit program: q
  | aspects | |
  | eclipse calender | |
  | declination/out of bounds table | |
- | terminal window autoresize | |
+ | terminal window resize refresh | [DONE] |
  | user default config file | |
  | zodiacal releasing | |
  
