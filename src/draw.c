@@ -286,7 +286,7 @@ double cusps[], int radius, struct pxx *pxx)
 void ascmc_pos(WINDOW *main_win,
 double cusps[], int radius, struct pxx *pxx)
 {
-	const char *ascmc_sym[] = {"as", "mc", "dsc", "ic"};
+	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
 	double *asc_arr[] = { 
 		pxx->dasc, pxx->dmc,
@@ -404,6 +404,7 @@ struct cdata *cdata)
 	starty += 1;
 	if(cdata->city)
 		mvwprintw(main_win, starty, startx, "%s", cdata->city);
+		
 	if(cdata->state)
 	{
 		if (!isdigit((unsigned char)cdata->state[0]))
@@ -537,7 +538,7 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 		else if ( i != SE_MEAN_NODE && i >= 12) // asc -> ic
 		{
 			const char *points[] = {
-			"fortune", "spirit", "asc", "mc", "dsc", "ic"};
+			"fortune", "spirit", "as", "mc", "ds", "ic"};
 			
 			char point_buff[MAXBUF];
 			
