@@ -580,8 +580,15 @@ int main()
 					&planet_trig, &retro_trig, cusps);
 					doupdate();
 					break;
-			case 9: // tab
+				case 9: // tab
 					realtime_chart(main_win, planet_win, retro_win,
+					&planet_panel, &retro_panel,
+					io, cdata, pxx,
+					&planet_trig, &retro_trig, cusps);
+					doupdate();
+					break;
+				case 'r':
+					new_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
 					&planet_trig, &retro_trig, cusps);

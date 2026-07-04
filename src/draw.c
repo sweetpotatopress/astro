@@ -482,6 +482,11 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 		pxx->dasc, pxx->dmc,
 		pxx->ddsc, pxx->dic};
 		
+	mvwin(planet_win, 0, 0);
+	if (LINES < 50)
+		wresize(planet_win, 22, 33);
+	else
+		wresize(planet_win, 40, 33);
 	werase(planet_win);
 	
 	int starty = 1, startx = 2;
@@ -532,7 +537,10 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			int color_x = startx + (int)strlen(buff) + 1;
 			element_color(planet_win, starty, color_x, 1, sign, pxx, 'z');
 			
-			starty += 2;
+			if (LINES < 50)
+				starty += 1;
+			else
+				starty += 2;
 		}
 		
 		else if ( i != SE_MEAN_NODE && i >= 12) // asc -> ic
@@ -550,6 +558,9 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			{
 				mvwprintw(planet_win, starty, startx,
 				"------------------------------");
+			if (LINES < 50)
+				starty += 1;
+			else
 				starty += 2;
 			}
 			
@@ -557,14 +568,21 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			{
 				mvwprintw(planet_win, starty, startx,
 				"------------------------------");
-				starty += 2;
+				if (LINES < 50)
+					starty += 1;
+				else
+					starty += 2;
 			}
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
 			element_color(planet_win, starty, color_x, 1, sign, pxx, 'z');
 	
-			starty += 2;
+			if (LINES < 50)
+				starty += 1;
+			else
+				starty += 2;
+				
 			mvwprintw(planet_win, starty, startx, 
 			"moon phase: %s", moon[moon_phase(pxx)]);
 			++j;
@@ -581,6 +599,9 @@ void retro_table(WINDOW *retro_win, struct pxx *pxx)
 		pxx->dnep, pxx->dplu};
 		
 	size_t p_count = 8;
+	
+	mvwin(retro_win, LINES - 9, COLS - 24);
+	wresize(retro_win, 9, 24);
 	
 	werase(retro_win);
         
@@ -831,7 +852,6 @@ int *planet_trig, int *retro_trig, double cusps[])
 				if (i != YEAR) // time inc/dec
 					--i;
 				break;
-				
 			case 'p':
 				if (*planet_trig)
 				{

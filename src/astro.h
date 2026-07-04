@@ -33,10 +33,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define PWIN_Y 0
 #define PWIN_X 0
 
-#define RWINY 11
-#define RWINX 30
-#define RWIN_Y (LINES - RWINY)
-#define RWIN_X (COLS - RWINX + 2)
+#define RWINY 9
+#define RWINX 24
+#define RWIN_Y LINES - 9
+#define RWIN_X COLS - 24
 
 #define M_COLOR 1
 #define FIRE 2
