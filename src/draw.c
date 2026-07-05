@@ -389,6 +389,9 @@ void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx)
 	planet_pos(main_win, cusps, radius - 5, center_y, center_x, pxx);
 	
 	ascmc_pos(main_win, cusps, (radius / 2) + 4, center_y, center_x, pxx);
+	
+	mvwhline(main_win, 1, COLS - 15, '.', COLS);
+	mvwvline(main_win, 0, COLS - 15, '.', 2);
 }
 
 void cur_chart_data(WINDOW *main_win, struct io *io,
@@ -667,7 +670,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 		NEW_CHART();
 		
 		wattron(main_win, COLOR_PAIR(FIRE));
-		mvwprintw(main_win, 2, COLS - 22, "*live");
+		mvwprintw(main_win, 0, COLS - 14, "*live");
 		wattroff(main_win, COLOR_PAIR(FIRE));
 		
 		wnoutrefresh(main_win);
@@ -684,7 +687,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 		if (ch == 9)
 			break;
 	}
-	wmove(main_win, 2, COLS - 22);
+	wmove(main_win, 0, COLS - 14);
 	wclrtoeol(main_win);
 	nodelay(main_win, FALSE);
 }
@@ -703,7 +706,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 	int diff = current_year - cdata->tm_year;
 	
 	wattron(main_win, COLOR_PAIR(AIR));
-	mvwprintw(main_win, 2, COLS - 22, "*solar return");
+	mvwprintw(main_win, 0, COLS - 14, "*solar return");
 	wattroff(main_win, COLOR_PAIR(AIR));
 	
 	int solar_done = 0, ch = 'f', first_run = 1;
@@ -760,7 +763,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 				temp_degree = pxx->dsun[LONG];
 		
 				wattron(main_win, COLOR_PAIR(AIR));
-				mvwprintw(main_win, 2, COLS - 22, "*solar return");
+				mvwprintw(main_win, 0, COLS - 14, "*solar return");
 				wattroff(main_win, COLOR_PAIR(AIR));
 			}
 			while (temp_degree > base_degree)
@@ -779,7 +782,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 				temp_degree = pxx->dsun[LONG];
 				
 				wattron(main_win, COLOR_PAIR(AIR));
-				mvwprintw(main_win, 2, COLS - 22, "*solar return");
+				mvwprintw(main_win, 0, COLS - 14, "*solar return");
 				wattroff(main_win, COLOR_PAIR(AIR));
 			}
 			struct tm temp = {0};
@@ -807,7 +810,7 @@ int *planet_trig, int *retro_trig, double cusps[])
 			cur_chart_data(main_win, io, cdata);
 		}
 	}
-	mvwprintw(main_win, 2, COLS - 22, "              ");
+	mvwprintw(main_win, 0, COLS - 14, "              ");
 }
 	
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
@@ -815,8 +818,8 @@ PANEL **planet_panel, PANEL **retro_panel,
 struct io *io, struct cdata *cdata, struct pxx *pxx,
 int *planet_trig, int *retro_trig, double cusps[])
 {
-	int starty = 11;
-	int startx = COLS - 22;
+	int starty = 0;
+	int startx = COLS - 14;
 	
 	mvwprintw(main_win, starty, startx, "(min)");
 	
