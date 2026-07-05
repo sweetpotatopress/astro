@@ -367,7 +367,7 @@ void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx)
 	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
 	
 	int offsetx = 0;
-	if ((COLS - LINES) > 56)
+	if ((COLS - LINES) > 60)
 		offsetx += 7;
 	else
 		offsetx = 0;
