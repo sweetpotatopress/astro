@@ -134,11 +134,10 @@ int sign, struct pxx *pxx, char ch)
 	}
 }
 
-void draw_circle(WINDOW *main_win, int radius, chtype ch)
+void draw_circle(WINDOW *main_win,
+int radius, int center_y, int center_x,
+chtype ch)
 {
-	int center_x = COLS / 2;
-	int center_y = LINES / 2;
-	
 	int x = 0;
 	int y = radius;
 	int d = 3 -2 * radius;
@@ -166,8 +165,8 @@ void draw_circle(WINDOW *main_win, int radius, chtype ch)
 	}
 }
 
-void planet_pos(WINDOW *main_win,
-double cusps[], int radius, struct pxx *pxx)
+void planet_pos(WINDOW *main_win, double cusps[],
+int radius, int center_y, int center_x, struct pxx *pxx)
 {
 	int sign_num = (int)(cusps[1] / 30.0);
 	double asc = sign_num * 30.0;
@@ -180,9 +179,6 @@ double cusps[], int radius, struct pxx *pxx)
 		pxx->dnep, pxx->dplu,
 		pxx->dmnod, pxx->dtnod};
 		
-	int center_x = (COLS / 2);
-	int center_y = (LINES / 2);
-	
 	int iter_count = 25;
 	int max_distance = 10;
 	double convergence_thresh = 0.1;
@@ -283,8 +279,9 @@ double cusps[], int radius, struct pxx *pxx)
 	}
 }
 
-void ascmc_pos(WINDOW *main_win,
-double cusps[], int radius, struct pxx *pxx)
+void ascmc_pos(WINDOW *main_win, double cusps[],
+int radius, int center_y, int center_x,
+struct pxx *pxx)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
@@ -295,9 +292,6 @@ double cusps[], int radius, struct pxx *pxx)
 	
 	for (int i = 0; i < 4; ++i)
 	{
-		int center_x = (COLS / 2);
-		int center_y = (LINES / 2);
-		
 		double rad = (asc_arr[i][LONG] - cusps[1]) * M_PI / 180.0;
 		
 		int x = center_x - (int)(radius * cos(rad));
@@ -314,8 +308,9 @@ double cusps[], int radius, struct pxx *pxx)
 	}
 }
 
-void zo_pos(WINDOW *main_win,
-double cusps[], int radius, struct pxx *pxx)
+void zo_pos(WINDOW *main_win, double cusps[],
+int radius, int center_y, int center_x,
+struct pxx *pxx)
 {
 	int asc_sign = (int)(pxx->dasc[LONG] / 30);
 	for (int i = 1; i < 13; ++i)
@@ -324,9 +319,6 @@ double cusps[], int radius, struct pxx *pxx)
 		if (sign == 0)
 			sign = 12;
 
-		int center_x = (COLS / 2);
-		int center_y = (LINES / 2);
-		
 		int sign_inc = (((int)pxx->dasc[LONG] / 30) * 30) + 15;
 		
 		double rad = (cusps[i] - sign_inc) * M_PI / 180.0;
@@ -338,15 +330,13 @@ double cusps[], int radius, struct pxx *pxx)
 	}
 }
 
-void draw_house(WINDOW *main_win,
-double cusps[], int radius, chtype ch)
+void draw_house(WINDOW *main_win, double cusps[],
+int radius, int center_y, int center_x,
+chtype ch)
 {
 	for (int i = 0; i < 13; ++i)
 	{
 		double rad = cusps[i] * M_PI / 180.0;
-		
-		int center_x = COLS / 2;
-		int center_y = LINES / 2;
 		
 		int edge_x = center_x - (int)(radius * cos(rad));
 		int edge_y = center_y + (int)(radius * sin(rad) * 0.5);
@@ -376,20 +366,23 @@ void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx)
 	werase(main_win);
 	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
 	
+	int center_y = (LINES / 2);
+	int center_x = (COLS / 2);
+	
 	// zodiac
-	draw_circle(main_win, radius + 4, '`');
+	draw_circle(main_win, radius + 4, center_y, center_x, '`');
 	// out
-	draw_circle(main_win, radius, '.');
+	draw_circle(main_win, radius, center_y, center_x,'.');
 	// in
-	draw_circle(main_win, (radius / 2) - 1, '.');
+	draw_circle(main_win, (radius / 2) - 1, center_y, center_x, '.');
 	
-	draw_house(main_win, cusps, radius + 4, '`');
+	draw_house(main_win, cusps, radius + 4, center_y, center_x, '`');
 	
-	zo_pos(main_win, cusps, radius + 3, pxx);
+	zo_pos(main_win, cusps, radius + 3, center_y, center_x, pxx);
 	
-	planet_pos(main_win, cusps, radius - 5, pxx);
+	planet_pos(main_win, cusps, radius - 5, center_y, center_x, pxx);
 	
-	ascmc_pos(main_win, cusps, (radius / 2) + 4, pxx);
+	ascmc_pos(main_win, cusps, (radius / 2) + 4, center_y, center_x, pxx);
 }
 
 void cur_chart_data(WINDOW *main_win, struct io *io,
