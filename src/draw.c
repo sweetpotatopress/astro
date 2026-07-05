@@ -366,8 +366,14 @@ void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx)
 	werase(main_win);
 	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
 	
+	int offsetx = 0;
+	if ((COLS - LINES) > 56)
+		offsetx += 7;
+	else
+		offsetx = 0;
+		
 	int center_y = (LINES / 2);
-	int center_x = (COLS / 2);
+	int center_x = (COLS / 2) + offsetx;
 	
 	// zodiac
 	draw_circle(main_win, radius + 4, center_y, center_x, '`');
@@ -388,8 +394,8 @@ void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx)
 void cur_chart_data(WINDOW *main_win, struct io *io,
 struct cdata *cdata)
 {	
-	int starty = LINES - 8;
-	int startx = 2;
+	int starty = (LINES / 2) - 4;
+	int startx = (COLS / 2) - 4;
 	
 	if(io->filename)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
