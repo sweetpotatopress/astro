@@ -395,6 +395,11 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					case '\n':
 						cdata_entry = 1;
 						break;
+					case 'q':
+						endwin();
+						swe_close();
+						exit(0);
+						break;
 				}
 				break;
 				
