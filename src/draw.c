@@ -21,21 +21,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "draw.h"
 #include "chronos.h"
 
-// sun, moon, mercury, venus, mars, jupiter,
-// saturn, uranus, neptune, pluto, mean node, true node
-const char *pl_sym[] = {"(o)", "(()", "(-o<)",
-"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
-"(P)", NULL, "(^)"};
-
-// 0 = NULL because the swiss ephemeris skips 0
-const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
-"leo", "vir", "lib", "sco", "sag",
-"cap", "aqu", "pis"};
-
-const char *moon[] = {"new", "crescent", "1st quarter", "gibbous", "full",
-"dissem.", "last quarter", "balsamic"};
-
-int element_color(int sign)
+int element_color(int sign, const char *zo_sym[])
 {
 	if (strcmp("ari", zo_sym[sign]) == 0)
 		return FIRE;
@@ -65,9 +51,10 @@ int element_color(int sign)
 	return FIRE;
 }
 
-void zodiac_color(WINDOW *win, int y, int x, int sign)
+void zodiac_color(WINDOW *win, int y, int x, int sign,
+const char *zo_sym[])
 {
-	int j = element_color(sign);
+	int j = element_color(sign, zo_sym);
 
 	switch(j)
 	{
@@ -95,10 +82,10 @@ void zodiac_color(WINDOW *win, int y, int x, int sign)
 }
 
 void degree_color(WINDOW *win, int y, int x, int count,
-double *p_arr[])
+double *p_arr[], const char *zo_sym[])
 {
 	int sign = (int)(p_arr[count][LONG] / 30) + 1;
-	int j = element_color(sign);
+	int j = element_color(sign, zo_sym);
 	
 	switch(j)
 	{
@@ -161,7 +148,8 @@ chtype ch)
 }
 
 void planet_pos(WINDOW *main_win, double cusps[], double *p_arr[],
-int radius, int center_y, int center_x)
+int radius, int center_y, int center_x, 
+const char *pl_sym[], const char *zo_sym[])
 {
 	int sign_num = (int)(cusps[1] / 30.0);
 	double asc = sign_num * 30.0;
@@ -236,7 +224,7 @@ int radius, int center_y, int center_x)
 	
 		if (i != SE_MEAN_NODE)
 		{
-			degree_color(main_win, y-1, x, i, p_arr);
+			degree_color(main_win, y-1, x, i, p_arr, zo_sym);
 			mvwaddstr(main_win, y, x, pl_sym[i]);
 		
 			if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
@@ -264,7 +252,8 @@ int radius, int center_y, int center_x)
 }
 
 void ascmc_pos(WINDOW *main_win, double cusps[], double *p_arr[],
-int radius, int center_y, int center_x)
+int radius, int center_y, int center_x,
+const char *zo_sym[])
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
@@ -282,13 +271,13 @@ int radius, int center_y, int center_x)
 		p_arr[i][DEGREE] = (int)p_arr[i][LONG] % 30;
 		p_arr[i][MIN]  = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
 		
-		degree_color(main_win, y-1, x, i, p_arr);
+		degree_color(main_win, y-1, x, i, p_arr, zo_sym);
 	}
 }
 
 void zo_pos(WINDOW *main_win, double cusps[],
 int radius, int center_y, int center_x,
-struct pxx *pxx)
+struct pxx *pxx, const char *zo_sym[])
 {
 	int asc_sign = (int)(pxx->dasc[LONG] / 30);
 	for (int i = 1; i < 13; ++i)
@@ -304,7 +293,7 @@ struct pxx *pxx)
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
 		
-		zodiac_color(main_win, y, x, sign);
+		zodiac_color(main_win, y, x, sign, zo_sym);
 	}
 }
 
@@ -339,7 +328,7 @@ chtype ch)
 }
 
 void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[],
-struct pxx *pxx)
+struct pxx *pxx, const char *pl_sym[], const char *zo_sym[])
 {
 	curs_set(0);
 	werase(main_win);
@@ -363,11 +352,14 @@ struct pxx *pxx)
 	
 	draw_house(main_win, cusps, radius + 4, center_y, center_x, '`');
 	
-	zo_pos(main_win, cusps, radius + 3, center_y, center_x, pxx);
+	zo_pos(main_win, cusps, radius + 3, center_y, center_x, pxx,
+	zo_sym);
 	
-	planet_pos(main_win, cusps, p_arr, radius - 5, center_y, center_x);
+	planet_pos(main_win, cusps, p_arr, radius - 5, center_y, center_x,
+	pl_sym, zo_sym);
 	
-	ascmc_pos(main_win, cusps, p_arr, (radius / 2) + 4, center_y, center_x);
+	ascmc_pos(main_win, cusps, p_arr, (radius / 2) + 4, center_y, center_x,
+	zo_sym);
 	
 	mvwhline(main_win, 1, COLS - 15, '.', COLS);
 	mvwvline(main_win, 0, COLS - 15, '.', 2);
@@ -447,7 +439,8 @@ int moon_phase(struct pxx *pxx)
 	return phase;
 }
 
-void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx)
+void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx, 
+const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
 	char spname[AS_MAXCH];
 	int p_count = 18;
@@ -503,7 +496,7 @@ void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx)
 			}
 			
 			int color_x = startx + (int)strlen(buff) + 1;
-			zodiac_color(planet_win, starty, color_x, sign);
+			zodiac_color(planet_win, starty, color_x, sign, zo_sym);
 			
 			starty += 1;
 		}
@@ -535,7 +528,7 @@ void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx)
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
-			zodiac_color(planet_win, starty, color_x, sign);
+			zodiac_color(planet_win, starty, color_x, sign, zo_sym);
 	
 			starty += 1;
 				
@@ -546,7 +539,8 @@ void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx)
 	}
 }
 
-void retro_table(WINDOW *retro_win, double *p_arr[])
+void retro_table(WINDOW *retro_win, double *p_arr[],
+const char *pl_sym[])
 {
 	size_t p_count = 8;
 	
@@ -572,32 +566,28 @@ void retro_table(WINDOW *retro_win, double *p_arr[])
 	}
 }
 
-void new_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
-PANEL **planet_panel, PANEL **retro_panel,
-struct io *io, struct cdata *cdata, struct pxx *pxx,
-int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
+void new_chart(NEW_CHART_PARAM())
 {
 	pxx_fill(cusps, p_arr, cdata, pxx);
-	draw_chart(main_win, cusps, p_arr, pxx);
+	draw_chart(main_win, cusps, p_arr, pxx,
+	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 	
 	if (*planet_trig > 0)
 	{
-		planet_table(planet_win, p_arr, pxx);
+		planet_table(planet_win, p_arr, pxx,
+		pl_sym, zo_sym, moon);
 		show_panel(*planet_panel);
 	}
 	if (*retro_trig > 0)
 	{
-		retro_table(retro_win, p_arr);
+		retro_table(retro_win, p_arr, pl_sym);
 		show_panel(*retro_panel);
 	}	
 	update_panels();
 }
 
-void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
-PANEL **planet_panel, PANEL **retro_panel,
-struct io *io, struct cdata *cdata, struct pxx *pxx,
-int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
+void realtime_chart(NEW_CHART_PARAM())
 {
 	nodelay(main_win, TRUE);
 	struct tm gettime = {0};
@@ -640,10 +630,7 @@ int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
 	nodelay(main_win, FALSE);
 }
 
-void solar_return(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
-PANEL **planet_panel, PANEL **retro_panel,
-struct io *io, struct cdata *cdata, struct pxx *pxx,
-int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
+void solar_return(NEW_CHART_PARAM())
 {
 	struct tm gettime = {0};
 	double base_degree = pxx->dsun[LONG];
@@ -761,10 +748,7 @@ int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
 	mvwprintw(main_win, 0, COLS - 14, "              ");
 }
 	
-void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
-PANEL **planet_panel, PANEL **retro_panel,
-struct io *io, struct cdata *cdata, struct pxx *pxx,
-int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
+void animate_chart(NEW_CHART_PARAM())
 {
 	int starty = 0;
 	int startx = COLS - 14;
@@ -810,14 +794,15 @@ int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
 				}
 				else
 				{
-					planet_table(planet_win, p_arr, pxx);
+					planet_table(planet_win, p_arr, pxx,
+					pl_sym, zo_sym, moon);
 					show_panel(*planet_panel);
 					*planet_trig = 1;
 				}
 				
 				if (*retro_trig > 0)
 				{
-					retro_table(retro_win, p_arr);
+					retro_table(retro_win, p_arr, pl_sym);
 					show_panel(*retro_panel);
 				}
 				
@@ -835,14 +820,15 @@ int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
 				}
 				else
 				{
-					retro_table(retro_win, p_arr);
+					retro_table(retro_win, p_arr, pl_sym);
 					show_panel(*retro_panel);
 					*retro_trig = 1;
 				}
 				
 				if (*planet_trig > 0)
 				{
-					planet_table(planet_win, p_arr, pxx);
+					planet_table(planet_win, p_arr, pxx,
+					pl_sym, zo_sym, moon);
 					show_panel(*planet_panel);
 				}
 				touchwin(main_win);

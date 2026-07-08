@@ -475,6 +475,20 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 
 int main()
 {
+	// sun, moon, mercury, venus, mars, jupiter,
+	// saturn, uranus, neptune, pluto, mean node, true node
+	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
+	"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
+	"(P)", NULL, "(^)"};
+
+	// 0 = NULL because the swiss ephemeris skips 0
+	const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
+	"leo", "vir", "lib", "sco", "sag",
+	"cap", "aqu", "pis"};
+
+	const char *moon[] = {"new", "crescent", "1st quarter", "gibbous", "full",
+	"dissem.", "last quarter", "balsamic"};
+	
 	struct cdata *cdata = calloc(1, sizeof(*cdata));
 	if (!cdata)
 		ERR_EXIT("main Location calloc");
@@ -579,7 +593,8 @@ int main()
 		cdata->country = countrybuffer;
 		
 		pxx_fill(cusps, p_arr, cdata, pxx);
-		draw_chart(main_win, cusps, p_arr, pxx);
+		draw_chart(main_win, cusps, p_arr, pxx,
+		pl_sym, zo_sym);
 		cur_chart_data(main_win, io, cdata);
 		show_panel(main_panel);
 			
@@ -593,21 +608,24 @@ int main()
 					animate_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx, 
-					&planet_trig, &retro_trig, cusps, p_arr);
+					&planet_trig, &retro_trig, cusps, p_arr,
+					pl_sym, zo_sym, moon);
 					doupdate();
 					break;
 				case 9: // tab
 					realtime_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr);
+					&planet_trig, &retro_trig, cusps, p_arr,
+					pl_sym, zo_sym, moon);
 					doupdate();
 					break;
 				case 'r':
 					new_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr);
+					&planet_trig, &retro_trig, cusps, p_arr,
+					pl_sym, zo_sym, moon);
 					doupdate();
 					break;
 				case 'q':
@@ -632,24 +650,27 @@ int main()
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata, io, 
+					load_chart(cdata, io,
 					citybuffer, statebuffer, countrybuffer);
 					new_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr);
+					&planet_trig, &retro_trig, cusps, p_arr,
+					pl_sym, zo_sym, moon);
 					doupdate();
 					break;
 				case 's':
 					solar_return(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr);
+					&planet_trig, &retro_trig, cusps, p_arr,
+					pl_sym, zo_sym, moon);
 					break;
 				case 'p':
 					if (!planet_trig)
 					{
-						planet_table(planet_win, p_arr, pxx);
+						planet_table(planet_win, p_arr, pxx,
+						pl_sym, zo_sym, moon);
 						show_panel(planet_panel);
 						planet_trig = 1;
 					}
@@ -663,7 +684,7 @@ int main()
 					
 					if (retro_trig > 0)
 					{
-						retro_table(retro_win, p_arr);
+						retro_table(retro_win, p_arr, pl_sym);
 						show_panel(retro_panel);
 					}
 					
@@ -675,7 +696,7 @@ int main()
 				case 'o':
 					if (!retro_trig)
 					{
-						retro_table(retro_win, p_arr);
+						retro_table(retro_win, p_arr, pl_sym);
 						show_panel(retro_panel);
 						retro_trig = 1;
 					}
@@ -689,7 +710,8 @@ int main()
 					
 					if (planet_trig > 0)
 					{
-						planet_table(planet_win, p_arr, pxx);
+						planet_table(planet_win, p_arr, pxx,
+						pl_sym, zo_sym, moon);
 						show_panel(planet_panel);
 					}
 					
