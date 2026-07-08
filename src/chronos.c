@@ -85,18 +85,11 @@ int ipl, double *p_arr[])
 	iter[ipl] = 0;
 }
 
-void next_retro_station(struct pxx *pxx, double jd_ut,
+void next_retro_station(double jd_ut, double *p_arr[],
 int *calc_flag, int *iter, double *last_jd)
 {
 	int ipl;
 
-	double *p_arr[] = {
-	pxx->dsun, pxx->dmoon,
-	pxx->dmerc, pxx->dven,
-	pxx->dmars, pxx->djup,
-	pxx->dsat, pxx->dura,
-	pxx->dnep, pxx->dplu};
-	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
 		if ((p_arr[ipl][NEXT_R] < 50.0 && iter[ipl] >= ITERMAX) ||
@@ -239,7 +232,7 @@ struct cdata *cdata, struct pxx *pxx)
 	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		next_retro_station(pxx, jd_ut, calc_flag, iter, &last_jd);
+		next_retro_station(jd_ut, p_arr, calc_flag, iter, &last_jd);
 		
 		if (p_arr[ipl][NEXT_R] <= IS_RETRO)
 			p_arr[ipl][RETRO] = 1;
