@@ -203,24 +203,14 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx)
+void pxx_fill(double cusps[], double *p_arr[],
+struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl, iret;
 	double xx[6];
 	char serr[AS_MAXCH];
 	double ascmc[10];
 	int ihsy = 'W';
-	
-	double *p_arr[] = {
-	pxx->dsun, pxx->dmoon,
-	pxx->dmerc, pxx->dven,
-	pxx->dmars, pxx->djup,
-	pxx->dsat, pxx->dura,
-	pxx->dnep, pxx->dplu,
-	pxx->dmnod, pxx->dtnod,
-	pxx->dasc, pxx->dmc,
-	pxx->ddsc, pxx->dic,
-	pxx->dfor, pxx->dspir};
 	
 	calculate_utc(cdata);
 	

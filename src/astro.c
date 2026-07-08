@@ -485,6 +485,17 @@ int main()
 	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
+		
+	double *p_arr[] = {
+		pxx->dsun, pxx->dmoon,
+		pxx->dmerc, pxx->dven,
+		pxx->dmars, pxx->djup,
+		pxx->dsat, pxx->dura,
+		pxx->dnep, pxx->dplu,
+		pxx->dmnod, pxx->dtnod,
+		pxx->dasc, pxx->dmc,
+		pxx->ddsc, pxx->dic,
+		pxx->dfor, pxx->dspir};
 
 	struct io *io = calloc(1, sizeof(*io));
 	if (!io)
@@ -567,8 +578,8 @@ int main()
 		cdata->state = statebuffer;
 		cdata->country = countrybuffer;
 		
-		pxx_fill(cusps, cdata, pxx);
-		draw_chart(main_win, cusps, pxx);
+		pxx_fill(cusps, p_arr, cdata, pxx);
+		draw_chart(main_win, cusps, p_arr, pxx);
 		cur_chart_data(main_win, io, cdata);
 		show_panel(main_panel);
 			
@@ -582,21 +593,21 @@ int main()
 					animate_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx, 
-					&planet_trig, &retro_trig, cusps);
+					&planet_trig, &retro_trig, cusps, p_arr);
 					doupdate();
 					break;
 				case 9: // tab
 					realtime_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps);
+					&planet_trig, &retro_trig, cusps, p_arr);
 					doupdate();
 					break;
 				case 'r':
 					new_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps);
+					&planet_trig, &retro_trig, cusps, p_arr);
 					doupdate();
 					break;
 				case 'q':
@@ -626,19 +637,19 @@ int main()
 					new_chart(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps);
+					&planet_trig, &retro_trig, cusps, p_arr);
 					doupdate();
 					break;
 				case 's':
 					solar_return(main_win, planet_win, retro_win,
 					&planet_panel, &retro_panel,
 					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps);
+					&planet_trig, &retro_trig, cusps, p_arr);
 					break;
 				case 'p':
 					if (!planet_trig)
 					{
-						planet_table(planet_win, pxx);
+						planet_table(planet_win, p_arr, pxx);
 						show_panel(planet_panel);
 						planet_trig = 1;
 					}
@@ -678,7 +689,7 @@ int main()
 					
 					if (planet_trig > 0)
 					{
-						planet_table(planet_win, pxx);
+						planet_table(planet_win, p_arr, pxx);
 						show_panel(planet_panel);
 					}
 					

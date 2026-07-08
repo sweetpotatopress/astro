@@ -18,33 +18,33 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEW_CHART() new_chart(main_win, planet_win, retro_win, \
 	planet_panel, retro_panel, \
 	io, cdata, pxx, \
-	planet_trig, retro_trig, cusps)
+	planet_trig, retro_trig, cusps, p_arr)
 
 extern const char *pl_sym[];
 extern const char *zo_sym[];
 extern const char *moon[];
 
-void draw_chart(WINDOW *main_win, double cusps[], struct pxx *pxx);
+void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[], struct pxx *pxx);
 void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata);
-void planet_table(WINDOW *planet_win, struct pxx *pxx);
+void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx);
 void retro_table(WINDOW *retro_win, struct pxx *pxx);
 
 void new_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
 struct io *io, struct cdata *cdata, struct pxx *pxx,
-int *planet_trig, int *retro_trig, double cusps[]);
+int *planet_trig, int *retro_trig, double cusps[], double *p_arr[]);
 
 void animate_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
 struct io *io, struct cdata *cdata, struct pxx *pxx,
-int *planet_trig, int *retro_trig, double cusps[]);
+int *planet_trig, int *retro_trig, double cusps[], double *p_arr[]);
 
 void realtime_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
 struct io *io, struct cdata *cdata, struct pxx *pxx,
-int *planet_trig, int *retro_trig, double cusps[]);
+int *planet_trig, int *retro_trig, double cusps[], double *p_arr[]);
 
 void solar_return(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,
 struct io *io, struct cdata *cdata, struct pxx *pxx,
-int *planet_trig, int *retro_trig, double cusps[]);
+int *planet_trig, int *retro_trig, double cusps[], double *p_arr[]);

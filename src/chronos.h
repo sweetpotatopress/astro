@@ -27,4 +27,5 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 int months(int month, int year);
 void chart_timeset(struct cdata *cdata,int *day_offset);
-void pxx_fill(double cusps[], struct cdata *cdata, struct pxx *pxx);
+void pxx_fill(double cusps[], double *p_arr[],
+struct cdata *cdata, struct pxx *pxx);
