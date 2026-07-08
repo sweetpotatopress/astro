@@ -485,10 +485,8 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 		pxx->ddsc, pxx->dic};
 		
 	mvwin(planet_win, 0, 0);
-	if (LINES < 50)
-		wresize(planet_win, 22, 33);
-	else
-		wresize(planet_win, 40, 33);
+	wresize(planet_win, 22, 33);
+	
 	werase(planet_win);
 	
 	int starty = 1, startx = 2;
@@ -539,10 +537,7 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			int color_x = startx + (int)strlen(buff) + 1;
 			element_color(planet_win, starty, color_x, 1, sign, pxx, 'z');
 			
-			if (LINES < 50)
-				starty += 1;
-			else
-				starty += 2;
+			starty += 1;
 		}
 		
 		else if ( i != SE_MEAN_NODE && i >= 12) // asc -> ic
@@ -560,30 +555,21 @@ void planet_table(WINDOW *planet_win, struct pxx *pxx)
 			{
 				mvwprintw(planet_win, starty, startx,
 				"------------------------------");
-			if (LINES < 50)
 				starty += 1;
-			else
-				starty += 2;
 			}
 			
 			if (i == 14) // points divider
 			{
 				mvwprintw(planet_win, starty, startx,
 				"------------------------------");
-				if (LINES < 50)
-					starty += 1;
-				else
-					starty += 2;
+				starty += 1;
 			}
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
 			element_color(planet_win, starty, color_x, 1, sign, pxx, 'z');
 	
-			if (LINES < 50)
-				starty += 1;
-			else
-				starty += 2;
+			starty += 1;
 				
 			mvwprintw(planet_win, starty, startx, 
 			"moon phase: %s", moon[moon_phase(pxx)]);
