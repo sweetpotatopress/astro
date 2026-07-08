@@ -89,7 +89,7 @@ double *p_arr[], const char *zo_sym[])
 	
 	switch(j)
 	{
-			case FIRE:
+		case FIRE:
 			wattron(win, COLOR_PAIR(FIRE));
 			mvwprintw(win, y, x, "%.0f*%02.0f`",
 			p_arr[count][DEGREE], p_arr[count][MIN]);
@@ -605,7 +605,7 @@ void realtime_chart(NEW_CHART_PARAM())
 		cdata->tm_min = gettime.tm_min;
 		cdata->tm_sec = gettime.tm_sec;
 		
-		NEW_CHART();
+		new_chart(NEW_CHART_ARG());
 		
 		wattron(main_win, COLOR_PAIR(FIRE));
 		mvwprintw(main_win, 0, COLS - 14, "*live");
@@ -694,7 +694,7 @@ void solar_return(NEW_CHART_PARAM())
 				else
 					++cdata->tm_sec;
 					
-				NEW_CHART();
+				new_chart(NEW_CHART_ARG());
 				temp_degree = pxx->dsun[LONG];
 		
 				wattron(main_win, COLOR_PAIR(AIR));
@@ -713,7 +713,7 @@ void solar_return(NEW_CHART_PARAM())
 				else
 					--cdata->tm_sec;
 					
-				NEW_CHART();
+				new_chart(NEW_CHART_ARG());
 				temp_degree = pxx->dsun[LONG];
 				
 				wattron(main_win, COLOR_PAIR(AIR));
@@ -876,7 +876,7 @@ void animate_chart(NEW_CHART_PARAM())
 				cdata->tm_min = result->tm_min;
 				cdata->tm_sec = result->tm_sec;
 				
-				NEW_CHART();
+				new_chart(NEW_CHART_ARG());
 				break;
 			case 'j': case KEY_DOWN:
 				switch(i)
@@ -917,8 +917,7 @@ void animate_chart(NEW_CHART_PARAM())
 				cdata->tm_min = result->tm_min;
 				cdata->tm_sec = result->tm_sec;
 				
-				NEW_CHART();
-	
+				new_chart(NEW_CHART_ARG());
 				break;
 			case '\n':
 				anim_done = 1;

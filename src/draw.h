@@ -15,11 +15,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <panel.h>
 
-#define NEW_CHART() new_chart(main_win, planet_win, retro_win, \
+#define NEW_CHART_ARG() main_win, planet_win, retro_win, \
 	planet_panel, retro_panel, \
 	io, cdata, pxx, \
 	planet_trig, retro_trig, cusps, p_arr, \
-	pl_sym, zo_sym, moon)
+	pl_sym, zo_sym, moon
 	
 #define NEW_CHART_PARAM() WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win, \
 PANEL **planet_panel, PANEL **retro_panel, \
