@@ -116,37 +116,6 @@ double *p_arr[], const char *zo_sym[])
 	}
 }
 
-void draw_circle(WINDOW *main_win,
-int radius, int center_y, int center_x,
-chtype ch)
-{
-	int x = 0;
-	int y = radius;
-	int d = 3 -2 * radius;
-	
-	while (x <= y)
-	{
-		mvwaddch(main_win, center_y + y / 2, center_x + x, ch);
-		mvwaddch(main_win, center_y + y / 2, center_x - x, ch);
-		mvwaddch(main_win, center_y - y / 2, center_x + x, ch);
-		mvwaddch(main_win, center_y - y / 2, center_x - x, ch);
-		
-		mvwaddch(main_win, center_y + x / 2, center_x + y, ch);
-		mvwaddch(main_win, center_y + x / 2, center_x - y, ch);
-		mvwaddch(main_win, center_y - x / 2, center_x + y, ch);
-		mvwaddch(main_win, center_y - x / 2, center_x - y, ch);
-	
-		if (d < 0)
-			d = d + 4 * x + 6;
-		else
-		{
-			d = d + 4 * (x - y) + 10;
-			y--;
-		}
-		x++;
-	}
-}
-
 void planet_pos(WINDOW *main_win, double cusps[], double *p_arr[],
 int radius, int center_y, int center_x, 
 const char *pl_sym[], const char *zo_sym[])
@@ -324,6 +293,37 @@ chtype ch)
 			int y = half_y + (dy * j) / distance;
 			mvwaddch(main_win, y, x, ch);
 		}
+	}
+}
+
+void draw_circle(WINDOW *main_win,
+int radius, int center_y, int center_x,
+chtype ch)
+{
+	int x = 0;
+	int y = radius;
+	int d = 3 -2 * radius;
+	
+	while (x <= y)
+	{
+		mvwaddch(main_win, center_y + y / 2, center_x + x, ch);
+		mvwaddch(main_win, center_y + y / 2, center_x - x, ch);
+		mvwaddch(main_win, center_y - y / 2, center_x + x, ch);
+		mvwaddch(main_win, center_y - y / 2, center_x - x, ch);
+		
+		mvwaddch(main_win, center_y + x / 2, center_x + y, ch);
+		mvwaddch(main_win, center_y + x / 2, center_x - y, ch);
+		mvwaddch(main_win, center_y - x / 2, center_x + y, ch);
+		mvwaddch(main_win, center_y - x / 2, center_x - y, ch);
+	
+		if (d < 0)
+			d = d + 4 * x + 6;
+		else
+		{
+			d = d + 4 * (x - y) + 10;
+			y--;
+		}
+		x++;
 	}
 }
 
