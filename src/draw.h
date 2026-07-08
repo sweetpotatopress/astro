@@ -27,7 +27,7 @@ extern const char *moon[];
 void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[], struct pxx *pxx);
 void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata);
 void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx);
-void retro_table(WINDOW *retro_win, struct pxx *pxx);
+void retro_table(WINDOW *retro_win, double *p_arr[]);
 
 void new_chart(WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win,
 PANEL **planet_panel, PANEL **retro_panel,

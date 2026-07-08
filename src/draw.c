@@ -546,14 +546,8 @@ void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx)
 	}
 }
 
-void retro_table(WINDOW *retro_win, struct pxx *pxx)
+void retro_table(WINDOW *retro_win, double *p_arr[])
 {
-	double *p_arr[] = {
-		pxx->dmerc, pxx->dven,
-		pxx->dmars, pxx->djup,
-		pxx->dsat, pxx->dura,
-		pxx->dnep, pxx->dplu};
-		
 	size_t p_count = 8;
 	
 	mvwin(retro_win, LINES - 9, COLS - 24);
@@ -594,7 +588,7 @@ int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
 	}
 	if (*retro_trig > 0)
 	{
-		retro_table(retro_win, pxx);
+		retro_table(retro_win, p_arr);
 		show_panel(*retro_panel);
 	}	
 	update_panels();
@@ -823,7 +817,7 @@ int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
 				
 				if (*retro_trig > 0)
 				{
-					retro_table(retro_win, pxx);
+					retro_table(retro_win, p_arr);
 					show_panel(*retro_panel);
 				}
 				
@@ -841,7 +835,7 @@ int *planet_trig, int *retro_trig, double cusps[], double *p_arr[])
 				}
 				else
 				{
-					retro_table(retro_win, pxx);
+					retro_table(retro_win, p_arr);
 					show_panel(*retro_panel);
 					*retro_trig = 1;
 				}
