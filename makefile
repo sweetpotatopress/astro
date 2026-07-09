@@ -21,11 +21,9 @@ INSTALL_DIR = /usr/local/bin
 TARGET    = astro
 SRCS      = $(wildcard src/*.c)
 
-# Determine the real user and home directory
 REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
 REAL_HOME := $(shell getent passwd $(REAL_USER) | cut -d: -f6)
 
-# Check if Swiss Ephemeris is installed system-wide
 SWE_HEADERS_EXIST := $(shell test -f $(SWE_INC)/swephexp.h && test -f $(SWE_INC)/sweph.h && test -f $(SWE_INC)/sweodef.h && echo 1 || echo 0)
 SWE_LIB_EXISTS := $(shell test -f $(SWE_LIB)/libswe.a && echo 1 || echo 0)
 EPHE_EXISTS := $(shell test -d $(REAL_HOME)/.local/share/astro/ephe && echo 1 || echo 0)
