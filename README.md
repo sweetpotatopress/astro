@@ -1,6 +1,6 @@
 fast astrology charts in the terminal/tty
 
-![picture of the chart with the planet table open](https://sweetpotato.press/astro.png)
+![picture of astro in a small terminal window](https://sweetpotato.press/astro.png)
 
 --xo-INSTALL--o-
 
@@ -24,50 +24,51 @@ the choice: spend over 300 dollars on "professional" proprietary software with p
 
 made with love, nyaa  
 
---o-KEYBINDS---o-
+**--o-KEYBINDS---o-**  
 
-**mode INSERT ( i )** 
+**i - - - insert mode**  
+
+arrowkeys - - - navigate  
  
-navigation: 	arrowkeys  
-clear fields	F1  
+F1 - - - clear fields  
 
-**mode NORMAL ( esc )**  
+**esc - - - normal mode**  
 
-navigation:    hjkl  
-draw chart:		enter  
-fill systime:	tab  
+k/j - - - up/down  
+h/l - - - left/right  
+enter - - - draw chart  
+tab - - - fill systime  
 
-save chart:		w  
-	--makedir:	m  
-	--cancel:	esc  
-	--choose the directory to save by hitting esc or q
-	--chart saves after writing name and hitting enter
+w - - - save chart  
+	m --makedir  
+	esc --cancel  
+	--choose the directory to save by hitting esc or q  
+	--chart saves after writing name and hitting enter  
 
-load chart:		e  
-	--choose:	l/enter  
-	--cancel:	esc   
+e - - - load chart  
+	l/enter --choose  
+	esc --cancel  
  
 **CHART VIEW**  
 
-save chart: w  
-load chart: e  
-redraw chart: r  
+w - - - save chart  
+e - - - load chart  
+r - - - redraw chart  
 
-solar return: s  
---up/down k/j  
---exit s/q/esc  
+s - - - solar return  
+k/j --up/down year  
+s/q/esc --exit mode  
 
-animate chart:	enter  
-	--increment:	h/l  
-	--up/down:		k/j  
+enter - - - animate chart  
+	h/l --time increment  
+	k/j --up/down  
 
-planet table:	p  
-retrograde table:	o  
+p - - - toggle planet/point data  
+o - - - toggle retro/speed data  
+tab - - - realtime live chart  
 
-realtime chart: tab  
-
-new chart:		i  
-exit program: q  
+i - - - new chart  
+q - - - exit astro  
 
 -)(DATA--DIR_)--o  
 
@@ -98,8 +99,10 @@ exit program: q
  | aspects | |
  | eclipse calender | |
  | declination/out of bounds table | |
+ | tabs/multiple charts open | |
  | terminal window resize refresh | [DONE] |
  | user default config file | |
+ | code documentation | |
  | zodiacal releasing | |
  
  --license--
