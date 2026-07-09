@@ -479,7 +479,7 @@ int main()
 	// saturn, uranus, neptune, pluto, mean node, true node
 	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
 	"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
-	"(P)", NULL, "(^)"};
+	"(P)", "(u)", "(^)"};
 
 	// 0 = NULL because the swiss ephemeris skips 0
 	const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",

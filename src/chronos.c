@@ -251,6 +251,11 @@ struct cdata *cdata, struct pxx *pxx)
 	ihsy, cusps, ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
+		
+	// turn mean node into south node
+	p_arr[SE_MEAN_NODE][LONG] = (p_arr[SE_TRUE_NODE][LONG] + 180);
+	if (p_arr[SE_MEAN_NODE][LONG] >= 360)
+		p_arr[SE_MEAN_NODE][LONG] -= 360;
 	
 	// calculates ic/mc and fills struct members
 	double asc = ascmc[0];

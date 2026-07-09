@@ -191,31 +191,27 @@ const char *pl_sym[], const char *zo_sym[])
 		p_arr[i][DEGREE] = (int)p_arr[i][LONG] % 30;
 		p_arr[i][MIN] = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
 	
-		if (i != SE_MEAN_NODE)
-		{
-			degree_color(main_win, y-1, x, i, p_arr, zo_sym);
-			mvwaddstr(main_win, y, x, pl_sym[i]);
-		
-			if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
-			{
-				wattron(main_win, COLOR_PAIR(FIRE));
-				mvwprintw(main_win, y, x-1, "r");
-				wattroff(main_win, COLOR_PAIR(FIRE));
-			}
-				
-			if ((int)p_arr[i][STATION] == STATION_R)
-			{
-				wattron(main_win, COLOR_PAIR(EARTH));
-				mvwaddstr(main_win, y, x-2, "sr");
-				wattroff(main_win, COLOR_PAIR(EARTH));
-			}
-			else if ((int)p_arr[i][STATION] == STATION_D)
-			{
-				wattron(main_win, COLOR_PAIR(EARTH));
-				mvwaddstr(main_win, y, x -2, "sd");
-				wattroff(main_win, COLOR_PAIR(EARTH));
-			}
+		degree_color(main_win, y-1, x, i, p_arr, zo_sym);
+		mvwaddstr(main_win, y, x, pl_sym[i]);
 	
+		if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
+		{
+			wattron(main_win, COLOR_PAIR(FIRE));
+			mvwprintw(main_win, y, x-1, "r");
+			wattroff(main_win, COLOR_PAIR(FIRE));
+		}
+			
+		if ((int)p_arr[i][STATION] == STATION_R)
+		{
+			wattron(main_win, COLOR_PAIR(EARTH));
+			mvwaddstr(main_win, y, x-2, "sr");
+			wattroff(main_win, COLOR_PAIR(EARTH));
+		}
+		else if ((int)p_arr[i][STATION] == STATION_D)
+		{
+			wattron(main_win, COLOR_PAIR(EARTH));
+			mvwaddstr(main_win, y, x -2, "sd");
+			wattroff(main_win, COLOR_PAIR(EARTH));
 		}
 	}
 }
@@ -462,10 +458,20 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		int deg = (int)p_arr[i][LONG] % 30;
 		int minute = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
 		
-		if ( i != SE_MEAN_NODE && i < 12) // sun -> node 
+		if (i < 12) // sun -> north node 
 		{
 			swe_get_planet_name(i, spname);
 			spname[2] ='\0';
+			if (i == SE_MEAN_NODE)
+			{
+				spname[0] = 'S';
+				spname[1] = 'o';
+			}
+			if (i == SE_TRUE_NODE)
+			{
+				spname[0] = 'N';
+				spname[1] = 'o';
+			}
 			
 			char buff[MAXBUF];
 			
@@ -476,7 +482,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
 			
-			if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
+			if (p_arr[i][RETRO] > 0)
 			{
 				wattron(planet_win, COLOR_PAIR(FIRE));
 				mvwprintw(planet_win, starty, startx + 12, "r");
@@ -502,7 +508,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			starty += 1;
 		}
 		
-		else if ( i != SE_MEAN_NODE && i >= 12) // asc -> ic
+		else if (i >= 12) // asc -> ic
 		{
 			const char *points[] = {
 			"fortune", "spirit", "as", "mc", "ds", "ic"};
