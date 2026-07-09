@@ -361,6 +361,7 @@ struct pxx *pxx, const char *pl_sym[], const char *zo_sym[])
 	ascmc_pos(main_win, cusps, p_arr, (radius / 2) + 4, center_y, center_x,
 	zo_sym);
 	
+	// status bar
 	mvwhline(main_win, 1, COLS - 15, '.', COLS);
 	mvwvline(main_win, 0, COLS - 15, '.', 2);
 }
@@ -549,7 +550,8 @@ const char *pl_sym[])
 	
 	werase(retro_win);
         
-	for (size_t i = 0; i < p_count; ++i)
+    size_t i = 0, j = SE_MERCURY;
+	for (; i < p_count; ++i, ++j)
 	{
 		char header[MAXBUF];
 		snprintf(header, sizeof(header), "%-6s%6s  %4s %4s", 
@@ -559,8 +561,8 @@ const char *pl_sym[])
 		char buff[MAXBUF];
 		
 		snprintf(buff, sizeof(buff), "%-6s%6.3f  %-4.0f %-4.0f",
-		pl_sym[i+2], p_arr[i+2][LONG_S], 
-		p_arr[i+2][NEXT_R], fabs(p_arr[i+2][NEXT_S]));
+		pl_sym[j], p_arr[j][LONG_S], 
+		p_arr[j][NEXT_R], fabs(p_arr[j][NEXT_S]));
 		
 		mvwprintw(retro_win, (int)i + 1, 0, "%s", buff);
 	}
