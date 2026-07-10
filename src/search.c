@@ -167,6 +167,8 @@ char *statebuffer, char *countrybuffer)
 				break;
 			case 'q':
 				form_driver(cdata_form, REQ_CLR_FIELD);
+				werase(city_win);
+				wrefresh(city_win);
 				menu_done = 1;
 				break;
 			default:
