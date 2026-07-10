@@ -612,6 +612,7 @@ int main()
 					chart_done = 1;
 					break;
 				case 'i':
+					mode = INSERT;
 					input_chart_data(io, cdata, citybuffer,
 					statebuffer, countrybuffer);
 			
@@ -625,7 +626,6 @@ int main()
 					pl_sym, zo_sym, moon);
 					doupdate();
 					
-					mode = INSERT;
 					break;
 				case 'w':
 					save_chart(cdata, io,
