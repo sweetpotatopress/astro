@@ -561,11 +561,12 @@ int main()
 
 	werase(stdscr);
 	wrefresh(stdscr);
+	show_panel(main_panel);
 	
 	int main_done = 0;
 	while (!main_done)
 	{
-		static int retro_trig = 0, planet_trig = 0;
+		static int retro_trig = 1, planet_trig = 1;
 		
 		set_localtime(cdata);
 		pxx_fill(cusps, p_arr, cdata, pxx);
@@ -576,8 +577,18 @@ int main()
 		cdata->city = citybuffer;
 		cdata->state = statebuffer;
 		cdata->country = countrybuffer;
+		
+		planet_table(planet_win, p_arr, pxx,
+		pl_sym, zo_sym, moon);
+		retro_table(retro_win, p_arr, pl_sym);
 			
-		show_panel(main_panel);
+		show_panel(planet_panel);
+		show_panel(retro_panel);
+		
+		touchwin(main_win);
+		wnoutrefresh(main_win);
+		update_panels();
+		doupdate();
 		
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
