@@ -615,16 +615,16 @@ int main()
 					input_chart_data(io, cdata, citybuffer,
 					statebuffer, countrybuffer);
 			
-					pxx_fill(cusps, p_arr, cdata, pxx);
-					draw_chart(main_win, cusps, p_arr, pxx,
-					pl_sym, zo_sym);
-					cur_chart_data(main_win, io, cdata);
-			
 					free(io->filename);
 					io->filename = NULL;
-					planet_trig = 0;
-					retro_trig = 0;
-					chart_done = 1;
+					
+					new_chart(main_win, planet_win, retro_win,
+					&planet_panel, &retro_panel,
+					io, cdata, pxx,
+					&planet_trig, &retro_trig, cusps, p_arr,
+					pl_sym, zo_sym, moon);
+					doupdate();
+					
 					mode = INSERT;
 					break;
 				case 'w':
