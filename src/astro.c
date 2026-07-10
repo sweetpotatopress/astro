@@ -584,23 +584,15 @@ int main()
 			switch(ch)
 			{
 				case '\n':
-					animate_chart(main_win, planet_win, retro_win,
-					&planet_panel, &retro_panel,
-					io, cdata, pxx, 
-					&planet_trig, &retro_trig, cusps, p_arr,
-					pl_sym, zo_sym, moon);
+					animate_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 9: // tab
-					realtime_chart(main_win, planet_win, retro_win,
-					&planet_panel, &retro_panel,
-					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr,
-					pl_sym, zo_sym, moon);
+					realtime_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'r':
-					NEW_CHART();
+					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'q':
@@ -615,7 +607,7 @@ int main()
 					free(io->filename);
 					io->filename = NULL;
 					
-					NEW_CHART();
+					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					
 					break;
@@ -629,15 +621,11 @@ int main()
 				case 'e':
 					load_chart(cdata, io,
 					citybuffer, statebuffer, countrybuffer);
-					NEW_CHART();
+					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 's':
-					solar_return(main_win, planet_win, retro_win,
-					&planet_panel, &retro_panel,
-					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr,
-					pl_sym, zo_sym, moon);
+					solar_return(NEW_CHART_MAIN());
 					break;
 				case 'p':
 					if (!planet_trig)
