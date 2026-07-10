@@ -44,27 +44,16 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define RWIN_Y LINES - 9
 #define RWIN_X COLS - 24
 
-#define CWINY 20
-#define CWINX 47
-#define CWIN_Y (LINES - CWINY) / 2
-#define CWIN_X (COLS - CWINX) / 2
-
 #define M_COLOR 1
 #define FIRE 2
 #define EARTH 3
 #define AIR 4
 #define WATER 5
 
-#define CITY 0
-#define YEAR 1
-#define MONTH 2
-#define DAY 3
-#define HOUR 4
-#define MINUTE 5
-#define TIMEZONE 6
-#define LATITUDE 7
-#define LONGITUDE 8
-#define FIELDMAX 9
+#define CWINY 20
+#define CWINX 47
+#define CWIN_Y (LINES - CWINY) / 2
+#define CWIN_X (COLS - CWINX) / 2
 
 #define LONG 0
 #define LAT 1
