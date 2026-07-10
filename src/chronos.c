@@ -20,6 +20,21 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "chronos.h"
 
+void set_localtime(struct cdata *cdata)
+{	
+	time_t now = time(NULL);
+	struct tm gettime = {0};
+		
+	localtime_r(&now, &gettime);
+	
+	cdata->tm_year = gettime.tm_year+1900;
+	cdata->tm_mon = gettime.tm_mon + 1;
+	cdata->tm_mday = gettime.tm_mday;
+	cdata->tm_hour = gettime.tm_hour;
+	cdata->tm_min = gettime.tm_min;
+	cdata->tm_sec = gettime.tm_sec;
+}
+
 int months(int month, int year)
 {
 	int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};

@@ -25,6 +25,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define STATION_R 1
 #define STATION_D 2
 
+void set_localtime(struct cdata *cdata);
 int months(int month, int year);
 void chart_timeset(struct cdata *cdata,int *day_offset);
 void pxx_fill(double cusps[], double *p_arr[],

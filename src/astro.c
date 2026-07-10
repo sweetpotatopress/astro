@@ -148,25 +148,6 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	free(buffer);
 }
 
-void set_localtime(struct cdata *cdata)
-{	
-	struct tm *gettime = malloc(sizeof(struct tm));
-	if (!gettime)
-		ERR_EXIT("set_locatime() gettime malloc");
-		
-	time_t now = time(NULL);
-	localtime_r(&now, gettime);
-	
-	cdata->tm_year = gettime->tm_year+1900;
-	cdata->tm_mon = gettime->tm_mon + 1;
-	cdata->tm_mday = gettime->tm_mday;
-	cdata->tm_hour = gettime->tm_hour;
-	cdata->tm_min = gettime->tm_min;
-	cdata->tm_sec = gettime->tm_sec;
-	
-	free(gettime);
-}
-
 void validate_fields(FIELD *cdata_field[],
 FORM *cdata_form, struct cdata *cdata,
 char *citybuffer, char *statebuffer, char *countrybuffer)

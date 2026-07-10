@@ -599,21 +599,11 @@ void new_chart(NEW_CHART_PARAM())
 void realtime_chart(NEW_CHART_PARAM())
 {
 	nodelay(main_win, TRUE);
-	struct tm gettime = {0};
 		
 	int ch = 0;
 	while ((ch = wgetch(main_win)) != 9)
 	{
-		time_t now = time(NULL);
-		localtime_r(&now, &gettime);
-		
-		cdata->tm_year = gettime.tm_year+1900;
-		cdata->tm_mon = gettime.tm_mon + 1;
-		cdata->tm_mday = gettime.tm_mday;
-		cdata->tm_hour = gettime.tm_hour;
-		cdata->tm_min = gettime.tm_min;
-		cdata->tm_sec = gettime.tm_sec;
-		
+		set_localtime(cdata);
 		new_chart(NEW_CHART_ARG());
 		
 		wattron(main_win, COLOR_PAIR(FIRE));
