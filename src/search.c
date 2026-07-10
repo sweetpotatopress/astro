@@ -160,6 +160,9 @@ char *statebuffer, char *countrybuffer)
 				memcpy(countrybuffer, search_result[iret]->country,
 				strlen(search_result[iret]->country) + 1);
 				
+				werase(city_win);
+				wrefresh(city_win);
+				
 				menu_done = 1;
 				break;
 			case 'q':

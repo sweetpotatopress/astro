@@ -150,28 +150,6 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	free(buffer);
 }
 
-void field_label(WINDOW *cdata_form_win, int starty, int startx)
-{
-	const char *c_labels[] = {
-		"city search:",
-		"year:",
-		"month:",
-		"day:",
-		"hour:",
-		"minute:",
-		"timezone:",
-		"lat.",
-		"long.",
-		NULL
-	};
-	
-	size_t i = CITY;
-	for (starty = 4; i < FIELDMAX; ++i, starty+= 2)
-			mvwprintw(cdata_form_win, starty, startx - 12,
-			"%s", c_labels[i]);
-	wrefresh(cdata_form_win);
-}
-
 void set_localtime(struct cdata *cdata)
 {	
 	struct tm *gettime = malloc(sizeof(struct tm));
@@ -224,27 +202,51 @@ void clear_fields(FIELD *cdata_field[], FORM *cdata_form)
 	}
 	set_current_field(cdata_form, cdata_field[CITY]);
 }
+
+void field_label(WINDOW *in_cdata_win)
+{
+	const char *c_labels[] = {
+		"city search:",
+		"year:",
+		"month:",
+		"day:",
+		"hour:",
+		"minute:",
+		"timezone:",
+		"lat.",
+		"long.",
+		NULL
+	};
 	
-void input_chart_data(struct io *io, struct cdata *cdata,
+	int starty = 1;
+	int startx = 1;
+	
+	for (size_t i = CITY; i < FIELDMAX; ++i, starty+= 2)
+			mvwprintw(in_cdata_win, starty, startx,
+			"%s", c_labels[i]);
+	box(in_cdata_win, 0, 0);
+	wrefresh(in_cdata_win);
+}
+	
+void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
+struct io *io, struct cdata *cdata,
 char *citybuffer, char *statebuffer, char *countrybuffer)
 {
-	WINDOW *cdata_form_win;
 	FIELD *cdata_field[10];
 	FORM *cdata_form;
 	int ch;
 	int starty, startx;
 	size_t i = 0;
 	
+	mvwin(in_cdata_win, (LINES - CWINY) / 2, (COLS - CWINX) / 2);
+	wresize(in_cdata_win, 20, 47);
+	
 	curs_set(1);
 	
-	cdata_form_win = newwin(LINES, COLS, LINES/4, COLS/4);
+	keypad(in_cdata_win, TRUE);	
 	
-	keypad(cdata_form_win, TRUE);	
-	
-	wbkgdset(cdata_form_win, COLOR_PAIR(M_COLOR));
-	
-	starty = 4;
-	startx = 18;
+	starty = 0;
+	startx = 13;
 	
 	cdata_field[CITY] = new_field(1, 25, starty, startx, 0, 0);
 	set_field_back(cdata_field[CITY], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
@@ -295,19 +297,18 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	cdata_field[FIELDMAX] = NULL;
 
 	cdata_form = new_form(cdata_field);
-	set_form_win(cdata_form, cdata_form_win);
-	set_form_sub(cdata_form,
-	derwin(cdata_form_win, LINES, COLS, 0, 0));
+	set_form_win(cdata_form, in_cdata_win);
+	set_form_sub(cdata_form, in_cdata_subwin);
 	
 	post_form(cdata_form);
 	
 	set_current_field(cdata_form, cdata_field[CITY]);
 	
-	field_label(cdata_form_win, starty, startx);
+	field_label(in_cdata_win);
 	pos_form_cursor(cdata_form);
 	
 	int cdata_entry = 0;
-	while(!cdata_entry && (ch = wgetch(cdata_form_win)))
+	while(!cdata_entry && (ch = wgetch(in_cdata_win)))
 	{
 		switch(mode)
 		{	
@@ -362,11 +363,6 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					case '\n':
 						cdata_entry = 1;
 						break;
-					case 'q':
-						endwin();
-						swe_close();
-						exit(0);
-						break;
 				}
 				break;
 				
@@ -380,7 +376,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						countrybuffer);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						
-						field_label(cdata_form_win, starty, startx);
+						field_label(in_cdata_win);
 						
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
@@ -421,7 +417,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					}
 					break;
 		}
-		wrefresh(cdata_form_win);
+		wrefresh(in_cdata_win);
 	}
 	if (ch != 'e')
 		validate_fields(cdata_field,
@@ -429,15 +425,15 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 		statebuffer, countrybuffer);
 
 	unpost_form(cdata_form);
-	werase(cdata_form_win);
-	wrefresh(cdata_form_win);
+	werase(in_cdata_win);
+	wrefresh(in_cdata_win);
 	free_form(cdata_form);
 	
 	for (i = CITY; i < FIELDMAX; ++i)
 	{
 		free_field(cdata_field[i]);
 	}
-	delwin(cdata_form_win);
+	delwin(in_cdata_win);
 }
 
 int main()
@@ -529,6 +525,11 @@ int main()
 	
 	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
 	
+	WINDOW *in_cdata_win = newwin(CWINY, CWINX, CWIN_Y, CWIN_X);
+	WINDOW *in_cdata_subwin = derwin(in_cdata_win, CWINY-2, CWINX-2, 1, 1);
+	
+	wbkgdset(in_cdata_win, COLOR_PAIR(M_COLOR));
+	
 	PANEL *planet_panel;
 	WINDOW *planet_win = newwin(PWINY, PWINX, PWIN_Y, PWIN_X);
 	planet_panel = new_panel(planet_win);
@@ -601,15 +602,15 @@ int main()
 					break;
 				case 'i':
 					mode = INSERT;
-					input_chart_data(io, cdata, citybuffer,
-					statebuffer, countrybuffer);
+					in_cdata(in_cdata_win, in_cdata_subwin,
+					io, cdata,
+					citybuffer, statebuffer, countrybuffer);
 			
 					free(io->filename);
 					io->filename = NULL;
 					
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
-					
 					break;
 				case 'w':
 					save_chart(cdata, io,
