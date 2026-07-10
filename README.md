@@ -26,34 +26,14 @@ made with love, nyaa
 
 **--o-KEYBINDS---o-**  
 
-**i - - - insert mode**  
 
-arrowkeys - - - navigate  
- 
-F1 - - - clear fields  
-
-**esc - - - normal mode**  
-
-k/j - - - up/down  
-h/l - - - left/right  
-enter - - - draw chart  
-tab - - - fill systime  
-
-w - - - save chart  
-	m --makedir  
-	esc --cancel  
-	--choose the directory to save by hitting esc or q  
-	--chart saves after writing name and hitting enter  
-
-e - - - load chart  
-	l/enter --choose  
-	esc --cancel  
- 
 **CHART VIEW**  
 
 w - - - save chart  
 e - - - load chart  
 r - - - redraw chart  
+tab - - - live update  
+q - - - exit astro  
 
 s - - - solar return  
 k/j --up/down year  
@@ -65,10 +45,31 @@ enter - - - animate chart
 
 p - - - toggle planet/point data  
 o - - - toggle retro/speed data  
-tab - - - realtime live chart  
 
-i - - - new chart  
-q - - - exit astro  
+i - - - input chart data  
+
+**i - - - insert mode**  
+
+arrowkeys - - - navigate  
+ 
+F1 - - - clear fields  
+
+**esc - - - normal mode**  
+
+k/j - - - up/down  
+h/l - - - left/right  
+enter - - - draw chart  
+
+w - - - save chart  
+	m --makedir  
+	esc --cancel  
+	--choose the directory to save by hitting esc or q  
+	--chart saves after writing name and hitting enter  
+
+e - - - load chart  
+	l/enter --choose  
+	esc --cancel  
+ 
 
 -)(DATA--DIR_)--o  
 
@@ -87,18 +88,15 @@ q - - - exit astro
  |---|---|
  | save and load charts | [DONE] |
  | animate chart | [DONE] |
- | add birth data to chartview | [DONE] |
- | write makefile | [DONE] |
- | window with exact planet stats | [DONE] |
- | add nodes, outers | [DONE] |
- | add lot of spirit + fortune | [DONE] |
+ | lot of spirit + fortune | [DONE] |
  | next retrograde/ next station | [DONE] |
- | add elemental colors | [DONE] |
- | essential dignities table | |
+ | element colors | [DONE] |
+ | solar return | [DONE] |
+ | essential dignities | |
  | synastry/ transit view | |
  | aspects | |
  | eclipse calender | |
- | declination/out of bounds table | |
+ | declination/out of bounds | |
  | tabs/multiple charts open | |
  | terminal window resize refresh | [DONE] |
  | user default config file | |
