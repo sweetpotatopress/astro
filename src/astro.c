@@ -174,19 +174,6 @@ void field_label(WINDOW *cdata_form_win, int starty, int startx)
 
 void set_localtime(struct cdata *cdata)
 {	
-	char buff[128] = {0};
-	ssize_t len = readlink("/etc/localtime", buff, sizeof(buff) - 1);
-	if (len != -1)
-	{
-		buff[len] = 0;
-		
-		char *tz = strstr(buff, "zoneinfo/");
-		if (tz)
-			memmove(buff, tz + 9, strlen(tz + 9) + 1);
-	}
-	setenv("TZ", buff, 1);
-	tzset();
-	
 	struct tm *gettime = malloc(sizeof(struct tm));
 	if (!gettime)
 		ERR_EXIT("set_locatime() gettime malloc");
