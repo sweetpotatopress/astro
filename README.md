@@ -16,7 +16,6 @@ doas/sudo make clean install
 works on all linux/bsd systems. if not, tell me!  
 not interested in other OS at this time.  
 
-
 FOUNDATION--0-  
   
 built on the IANA time zone database, which has correct historical DST accuracy.
@@ -26,11 +25,18 @@ made with love, nyaa
 
 **--o-KEYBINDS---o-**  
 
-
 **CHART VIEW**  
 
 w - - - save chart  
+	m --makedir  
+	esc --cancel  
+	--choose directory by hitting esc or q  
+	--chart saves after writing name and hitting enter  
+	
 e - - - load chart  
+	l/enter --choose  
+	esc --cancel  
+ 
 r - - - redraw chart  
 tab - - - live update  
 q - - - exit astro  
@@ -48,28 +54,22 @@ o - - - toggle retro/speed data
 
 i - - - input chart data  
 
-**i - - - insert mode**  
+**i - - - INSERT mode**  
 
-arrowkeys - - - navigate  
- 
+\ - - - exit data input  
 F1 - - - clear fields  
+arrowkeys - - - navigate  
 
-**esc - - - normal mode**  
+**esc - - - NORMAL mode**  
 
-k/j - - - up/down  
-h/l - - - left/right  
 enter - - - draw chart  
 
 w - - - save chart  
-	m --makedir  
-	esc --cancel  
-	--choose the directory to save by hitting esc or q  
-	--chart saves after writing name and hitting enter  
-
 e - - - load chart  
-	l/enter --choose  
-	esc --cancel  
- 
+q - - - exit data input  
+
+k/j - - - up/down  
+h/l - - - left/right  
 
 -)(DATA--DIR_)--o  
 
@@ -80,7 +80,6 @@ e - - - load chart
  swiss ephemeris library 'libswe.a': /usr/local/lib  
  
  compiled astro binary: /usr/local/bin  
- 
  
  **TODO**
  
@@ -115,4 +114,3 @@ e - - - load chart
  CC BY 4.0
  
  --0o-free and always will be-00o  
- 
