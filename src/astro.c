@@ -427,7 +427,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 int main()
 {
 	// sun, moon, mercury, venus, mars, jupiter,
-	// saturn, uranus, neptune, pluto, mean node, true node
+	// saturn, uranus, neptune, pluto, south, north node
 	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
 	"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
 	"(P)", "(u)", "(^)"};
