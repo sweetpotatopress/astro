@@ -600,11 +600,7 @@ int main()
 					doupdate();
 					break;
 				case 'r':
-					new_chart(main_win, planet_win, retro_win,
-					&planet_panel, &retro_panel,
-					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr,
-					pl_sym, zo_sym, moon);
+					NEW_CHART();
 					doupdate();
 					break;
 				case 'q':
@@ -619,11 +615,7 @@ int main()
 					free(io->filename);
 					io->filename = NULL;
 					
-					new_chart(main_win, planet_win, retro_win,
-					&planet_panel, &retro_panel,
-					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr,
-					pl_sym, zo_sym, moon);
+					NEW_CHART();
 					doupdate();
 					
 					break;
@@ -637,11 +629,7 @@ int main()
 				case 'e':
 					load_chart(cdata, io,
 					citybuffer, statebuffer, countrybuffer);
-					new_chart(main_win, planet_win, retro_win,
-					&planet_panel, &retro_panel,
-					io, cdata, pxx,
-					&planet_trig, &retro_trig, cusps, p_arr,
-					pl_sym, zo_sym, moon);
+					NEW_CHART();
 					doupdate();
 					break;
 				case 's':
