@@ -26,8 +26,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define VERSION 0.60
 
-enum mode mode = INSERT;
-
 void buff_trim(FIELD *current, char *buffer)
 {
 	char *f_buf = field_buffer(current, 0);
@@ -229,7 +227,7 @@ void field_label(WINDOW *in_cdata_win)
 }
 	
 void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
-struct io *io, struct cdata *cdata,
+struct io *io, struct cdata *cdata, enum mode mode,
 char *citybuffer, char *statebuffer, char *countrybuffer)
 {
 	FIELD *cdata_field[10];
@@ -461,6 +459,8 @@ int main()
 	const char *moon[] = {"new", "crescent", "1st quarter", "gibbous", "full",
 	"dissem.", "last quarter", "balsamic"};
 	
+	enum mode mode = INSERT;
+	
 	struct cdata *cdata = calloc(1, sizeof(*cdata));
 	if (!cdata)
 		ERR_EXIT("main Location calloc");
@@ -612,7 +612,7 @@ int main()
 				case 'i':
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,
-					io, cdata,
+					io, cdata, mode,
 					citybuffer, statebuffer, countrybuffer);
 			
 					free(io->filename);
