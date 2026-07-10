@@ -172,8 +172,8 @@ void field_label(WINDOW *cdata_form_win, int starty, int startx)
 	wrefresh(cdata_form_win);
 }
 
-void set_localtime(FIELD *cdata_field[])
-{	// autofills chart field input with local systemtime 
+void set_localtime(struct cdata *cdata)
+{	
 	char buff[128] = {0};
 	ssize_t len = readlink("/etc/localtime", buff, sizeof(buff) - 1);
 	if (len != -1)
@@ -193,27 +193,13 @@ void set_localtime(FIELD *cdata_field[])
 		
 	time_t now = time(NULL);
 	localtime_r(&now, gettime);
-	set_field_buffer(cdata_field[TIMEZONE], 0, buff);
 	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_year+1900);
-	set_field_buffer(cdata_field[YEAR], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_mon + 1);
-	set_field_buffer(cdata_field[MONTH], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_mday);
-	set_field_buffer(cdata_field[DAY], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_hour);
-	set_field_buffer(cdata_field[HOUR], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
-	set_field_buffer(cdata_field[MINUTE], 0, buff);
+	cdata->tm_year = gettime->tm_year+1900;
+	cdata->tm_mon = gettime->tm_mon + 1;
+	cdata->tm_mday = gettime->tm_mday;
+	cdata->tm_hour = gettime->tm_hour;
+	cdata->tm_min = gettime->tm_min;
+	cdata->tm_sec = gettime->tm_sec;
 	
 	free(gettime);
 }
@@ -262,8 +248,6 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	int starty, startx;
 	size_t i = 0;
 	
-	cbreak();
-	noecho();
 	curs_set(1);
 	
 	cdata_form_win = newwin(LINES, COLS, 0, 0);
@@ -366,10 +350,6 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						
 					case 'l': case KEY_RIGHT:
 						form_driver(cdata_form, REQ_RIGHT_CHAR);
-						break;
-						
-					case 9: // tab
-						set_localtime(cdata_field);
 						break;
 						
 					case 'w':
@@ -546,6 +526,8 @@ int main()
 	initscr();
 	set_escdelay(25);
 	start_color();
+	cbreak();
+	noecho();
 
 	init_pair(M_COLOR, COLOR_WHITE,  COLOR_BLACK);
 	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
@@ -585,19 +567,18 @@ int main()
 	{
 		static int retro_trig = 0, planet_trig = 0;
 		
-		input_chart_data(io, cdata, citybuffer,
-		statebuffer, countrybuffer);
-		
-		cdata->city = citybuffer;
-		cdata->state = statebuffer;
-		cdata->country = countrybuffer;
-		
+		set_localtime(cdata);
 		pxx_fill(cusps, p_arr, cdata, pxx);
 		draw_chart(main_win, cusps, p_arr, pxx,
 		pl_sym, zo_sym);
 		cur_chart_data(main_win, io, cdata);
-		show_panel(main_panel);
+	
+		cdata->city = citybuffer;
+		cdata->state = statebuffer;
+		cdata->country = countrybuffer;
 			
+		show_panel(main_panel);
+		
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
 		(ch = wgetch(main_win)))
@@ -633,6 +614,14 @@ int main()
 					chart_done = 1;
 					break;
 				case 'i':
+					input_chart_data(io, cdata, citybuffer,
+					statebuffer, countrybuffer);
+			
+					pxx_fill(cusps, p_arr, cdata, pxx);
+					draw_chart(main_win, cusps, p_arr, pxx,
+					pl_sym, zo_sym);
+					cur_chart_data(main_win, io, cdata);
+			
 					werase(main_win);
 					wrefresh(main_win);
 					free(io->filename);
