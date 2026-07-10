@@ -237,7 +237,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	
 	curs_set(1);
 	
-	cdata_form_win = newwin(LINES, COLS, 0, 0);
+	cdata_form_win = newwin(LINES, COLS, LINES/4, COLS/4);
 	
 	keypad(cdata_form_win, TRUE);	
 	
@@ -550,32 +550,32 @@ int main()
 	wrefresh(stdscr);
 	show_panel(main_panel);
 	
+	set_localtime(cdata);
+	pxx_fill(cusps, p_arr, cdata, pxx);
+	draw_chart(main_win, cusps, p_arr, pxx,
+	pl_sym, zo_sym);
+	cur_chart_data(main_win, io, cdata);
+
+	cdata->city = citybuffer;
+	cdata->state = statebuffer;
+	cdata->country = countrybuffer;
+	
+	planet_table(planet_win, p_arr, pxx,
+	pl_sym, zo_sym, moon);
+	retro_table(retro_win, p_arr, pl_sym);
+		
+	show_panel(planet_panel);
+	show_panel(retro_panel);
+	
+	touchwin(main_win);
+	wnoutrefresh(main_win);
+	update_panels();
+	doupdate();
+	
 	int main_done = 0;
 	while (!main_done)
 	{
 		static int retro_trig = 1, planet_trig = 1;
-		
-		set_localtime(cdata);
-		pxx_fill(cusps, p_arr, cdata, pxx);
-		draw_chart(main_win, cusps, p_arr, pxx,
-		pl_sym, zo_sym);
-		cur_chart_data(main_win, io, cdata);
-	
-		cdata->city = citybuffer;
-		cdata->state = statebuffer;
-		cdata->country = countrybuffer;
-		
-		planet_table(planet_win, p_arr, pxx,
-		pl_sym, zo_sym, moon);
-		retro_table(retro_win, p_arr, pl_sym);
-			
-		show_panel(planet_panel);
-		show_panel(retro_panel);
-		
-		touchwin(main_win);
-		wnoutrefresh(main_win);
-		update_panels();
-		doupdate();
 		
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
@@ -620,8 +620,6 @@ int main()
 					pl_sym, zo_sym);
 					cur_chart_data(main_win, io, cdata);
 			
-					werase(main_win);
-					wrefresh(main_win);
 					free(io->filename);
 					io->filename = NULL;
 					planet_trig = 0;
