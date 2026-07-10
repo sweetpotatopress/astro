@@ -307,7 +307,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	field_label(in_cdata_win);
 	pos_form_cursor(cdata_form);
 	
-	int cdata_entry = 0;
+	int cdata_entry = 0, cancel = 0;
 	while(!cdata_entry && (ch = wgetch(in_cdata_win)))
 	{
 		switch(mode)
@@ -361,6 +361,10 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						break;
 						
 					case '\n':
+						cdata_entry = 1;
+						break;
+					case 'q':
+						cancel = 1;
 						cdata_entry = 1;
 						break;
 				}
@@ -419,7 +423,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 		}
 		wrefresh(in_cdata_win);
 	}
-	if (ch != 'e')
+	if (ch != 'e' && cancel != 1)
 		validate_fields(cdata_field,
 		cdata_form, cdata, citybuffer,
 		statebuffer, countrybuffer);
@@ -553,7 +557,7 @@ int main()
 	
 	set_localtime(cdata);
 	pxx_fill(cusps, p_arr, cdata, pxx);
-	draw_chart(main_win, cusps, p_arr, pxx,
+	draw_chart(main_win, cusps, p_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 

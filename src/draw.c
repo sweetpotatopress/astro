@@ -324,7 +324,7 @@ chtype ch)
 }
 
 void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[],
-struct pxx *pxx, const char *pl_sym[], const char *zo_sym[])
+struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[])
 {
 	curs_set(0);
 	werase(main_win);
@@ -354,7 +354,8 @@ struct pxx *pxx, const char *pl_sym[], const char *zo_sym[])
 	planet_pos(main_win, cusps, p_arr, radius - 5, center_y, center_x,
 	pl_sym, zo_sym);
 	
-	ascmc_pos(main_win, cusps, p_arr, (radius / 2) + 4, center_y, center_x,
+	if (fabs(cdata->dlat) > 1e-6)
+		ascmc_pos(main_win, cusps, p_arr, (radius / 2) + 4, center_y, center_x,
 	zo_sym);
 	
 	// status bar
@@ -577,7 +578,7 @@ const char *pl_sym[])
 void new_chart(NEW_CHART_PARAM())
 {
 	pxx_fill(cusps, p_arr, cdata, pxx);
-	draw_chart(main_win, cusps, p_arr, pxx,
+	draw_chart(main_win, cusps, p_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 	
