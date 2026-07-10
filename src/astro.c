@@ -363,6 +363,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					case '\n':
 						cdata_entry = 1;
 						break;
+						
 					case 'q':
 						cancel = 1;
 						cdata_entry = 1;
@@ -414,6 +415,10 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					case 27: // esc
 						mode = NORMAL;
 						break;
+						
+					case '\\':
+						cdata_entry = 1;
+						break;	
 						
 					default:
 						form_driver(cdata_form, ch);
