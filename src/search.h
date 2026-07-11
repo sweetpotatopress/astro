@@ -12,34 +12,5 @@ See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 
-#define NIGHT_SECT 0
-#define DAY_SECT 1
-
-#define IS_RETRO 0.5
-#define ITERMAX 10
-#define PARSEMAX 5
-#define PARSEMIN 0.5
-#define RETROCOUNT (SE_PLUTO + 1)
-#define STATION_POINT 7
-
-#define STATION_R 1
-#define STATION_D 2
-
-#define LONG 0
-#define LAT 1
-#define DIST 2
-#define LONG_S 3
-#define LAT_S 4
-#define DIST_S 5
-#define RETRO 6
-#define STATION 7
-#define DEGREE 8
-#define MIN 9
-#define NEXT_S 10
-#define NEXT_R 11
-
-void set_localtime(struct cdata *cdata);
-int months(int month, int year);
-void chart_timeset(struct cdata *cdata,int *day_offset);
-void pxx_fill(double cusps[], double *p_arr[],
-struct cdata *cdata, struct pxx *pxx);
+void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
+char *statebuffer, char *countrybuffer);

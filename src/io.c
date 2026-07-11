@@ -22,19 +22,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <form.h>
 #include <menu.h>
 #include "astro.h"
-
-#define FCITY 0
-#define FSTATE 1
-#define FCOUNTRY 2
-#define FYEAR 3
-#define FMONTH 4
-#define FDAY 5
-#define FHOUR 6
-#define FMIN 7
-#define FTZ 8
-#define FLAT 9
-#define FLON 10
-#define FMAX 11
+#include "io.h"
+#include "draw.h"
 
 void save_chart(struct cdata *cdata, struct io *io,
 char *citybuffer, char *statebuffer, char *countrybuffer)

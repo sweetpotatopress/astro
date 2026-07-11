@@ -34,40 +34,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 					&planet_trig, &retro_trig, cusps, p_arr, \
 					pl_sym, zo_sym, moon
 
-#define PWINY 40
-#define PWINX 33
-#define PWIN_Y 0
-#define PWIN_X 0
-
-#define RWINY 9
-#define RWINX 24
-#define RWIN_Y LINES - 9
-#define RWIN_X COLS - 24
-
-#define M_COLOR 1
-#define FIRE 2
-#define EARTH 3
-#define AIR 4
-#define WATER 5
-
-#define CWINY 20
-#define CWINX 47
-#define CWIN_Y (LINES - CWINY) / 2
-#define CWIN_X (COLS - CWINX) / 2
-
-#define LONG 0
-#define LAT 1
-#define DIST 2
-#define LONG_S 3
-#define LAT_S 4
-#define DIST_S 5
-#define RETRO 6
-#define STATION 7
-#define DEGREE 8
-#define MIN 9
-#define NEXT_S 10
-#define NEXT_R 11
-
 struct pxx {
 	double dsun[MAXPXX];
 	double dmoon[MAXPXX];
@@ -111,18 +77,4 @@ struct cdata {
 	int utc_mday;
 };
 
-struct io {
-	char *filepath;
-	char *filename;
-	size_t file_count;
-};
-
 enum mode { NORMAL, INSERT };
-
-void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
-char *statebuffer, char *countrybuffer);
-
-void load_chart(struct cdata *cdata, struct io *io,
-char *citybuffer, char *statebuffer, char *countrybuffer);
-void save_chart(struct cdata *cdata, struct io *io,
-char *citybuffer, char *statebuffer, char *countrybuffer);

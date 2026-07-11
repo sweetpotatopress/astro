@@ -18,7 +18,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <form.h>
 #include <menu.h>
 #include "astro.h"
+#include "io.h"
 #include "cdata.h"
+#include "draw.h"
 
 char* strtok_E(char *str, const char *delim)
 { //strtok that doesnt skip repeating delims :3

@@ -15,6 +15,27 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <panel.h>
 
+#define PWINY 40
+#define PWINX 33
+#define PWIN_Y 0
+#define PWIN_X 0
+
+#define RWINY 9
+#define RWINX 24
+#define RWIN_Y LINES - 9
+#define RWIN_X COLS - 24
+
+#define CWINY 20
+#define CWINX 47
+#define CWIN_Y (LINES - CWINY) / 2
+#define CWIN_X (COLS - CWINX) / 2
+
+#define M_COLOR 1
+#define FIRE 2
+#define EARTH 3
+#define AIR 4
+#define WATER 5
+
 #define NEW_CHART_ARG() main_win, planet_win, retro_win, \
 	planet_panel, retro_panel, \
 	io, cdata, pxx, \

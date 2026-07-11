@@ -16,8 +16,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <form.h>
 #include <errno.h>
 #include "astro.h"
+#include "io.h"
 #include "cdata.h"
 #include "chronos.h"
+#include "draw.h"
+#include "search.h"
 
 void buff_trim(FIELD *current, char *buffer)
 {

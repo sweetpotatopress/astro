@@ -12,34 +12,26 @@ See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 
-#define NIGHT_SECT 0
-#define DAY_SECT 1
+#define FCITY 0
+#define FSTATE 1
+#define FCOUNTRY 2
+#define FYEAR 3
+#define FMONTH 4
+#define FDAY 5
+#define FHOUR 6
+#define FMIN 7
+#define FTZ 8
+#define FLAT 9
+#define FLON 10
+#define FMAX 11
 
-#define IS_RETRO 0.5
-#define ITERMAX 10
-#define PARSEMAX 5
-#define PARSEMIN 0.5
-#define RETROCOUNT (SE_PLUTO + 1)
-#define STATION_POINT 7
+struct io {
+	char *filepath;
+	char *filename;
+	size_t file_count;
+};
 
-#define STATION_R 1
-#define STATION_D 2
-
-#define LONG 0
-#define LAT 1
-#define DIST 2
-#define LONG_S 3
-#define LAT_S 4
-#define DIST_S 5
-#define RETRO 6
-#define STATION 7
-#define DEGREE 8
-#define MIN 9
-#define NEXT_S 10
-#define NEXT_R 11
-
-void set_localtime(struct cdata *cdata);
-int months(int month, int year);
-void chart_timeset(struct cdata *cdata,int *day_offset);
-void pxx_fill(double cusps[], double *p_arr[],
-struct cdata *cdata, struct pxx *pxx);
+void load_chart(struct cdata *cdata, struct io *io,
+char *citybuffer, char *statebuffer, char *countrybuffer);
+void save_chart(struct cdata *cdata, struct io *io,
+char *citybuffer, char *statebuffer, char *countrybuffer);
