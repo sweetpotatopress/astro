@@ -47,6 +47,20 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEXT_R 11
 #define MAXPXX 12
 
+#define ARI 1
+#define TAU 2
+#define GEM 3
+#define CAN 4
+#define LEO 5
+#define VIR 6
+#define LIB 7
+#define SCO 8
+#define SAG 9
+#define CAP 10
+#define AQU 11
+#define PIS 12
+#define ZMAX 13
+
 #define M_COLOR 1
 #define FIRE 2
 #define EARTH 3
@@ -65,17 +79,17 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define ZXXMAX 9
 
 struct zxx {
-	double dari[ZXXMAX][MAXBUF];
-	double dtau[ZXXMAX][MAXBUF];
-	double dgem[ZXXMAX][MAXBUF];
-	double dcan[ZXXMAX][MAXBUF];
-	double dleo[ZXXMAX][MAXBUF];
-	double dvir[ZXXMAX][MAXBUF];
-	double dsco[ZXXMAX][MAXBUF];
-	double dsag[ZXXMAX][MAXBUF];
-	double dcap[ZXXMAX][MAXBUF];
-	double daqu[ZXXMAX][MAXBUF];
-	double dpis[ZXXMAX][MAXBUF];
+	double dari[ZXXMAX];
+	double dtau[ZXXMAX];
+	double dgem[ZXXMAX];
+	double dcan[ZXXMAX];
+	double dleo[ZXXMAX];
+	double dvir[ZXXMAX];
+	double dsco[ZXXMAX];
+	double dsag[ZXXMAX];
+	double dcap[ZXXMAX];
+	double daqu[ZXXMAX];
+	double dpis[ZXXMAX];
 };
 
 struct pxx {

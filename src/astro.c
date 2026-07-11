@@ -47,6 +47,18 @@ int main()
 	if (!cdata->city)
 		ERR_EXIT("ERR: main cdata->city malloc");
 		
+	struct zxx *zxx = calloc(1, sizeof(*zxx));
+	if (!zxx)
+		ERR_EXIT("main zxx");
+		
+	double *z_arr[] = {
+		zxx->dari, zxx->dtau,
+		zxx->dgem, zxx->dcan,
+		zxx->dcan, zxx->dleo,
+		zxx->dvir, zxx->dsco,
+		zxx->dsag, zxx->dcap,
+		zxx->daqu, zxx->dpis};
+		
 	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");

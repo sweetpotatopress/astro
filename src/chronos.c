@@ -290,8 +290,3 @@ struct cdata *cdata, struct pxx *pxx)
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
 }
-
-
-	
-		
-	 

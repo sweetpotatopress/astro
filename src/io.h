@@ -25,12 +25,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define FLON 10
 #define FMAX 11
 
-struct io {
-	char *filepath;
-	char *filename;
-	size_t file_count;
-};
-
 void load_chart(struct cdata *cdata, struct io *io,
 char *citybuffer, char *statebuffer, char *countrybuffer);
 void save_chart(struct cdata *cdata, struct io *io,

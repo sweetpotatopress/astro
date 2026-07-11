@@ -42,12 +42,6 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[]
 #define CWIN_Y (LINES - CWINY) / 2
 #define CWIN_X (COLS - CWINX) / 2
 
-#define M_COLOR 1
-#define FIRE 2
-#define EARTH 3
-#define AIR 4
-#define WATER 5
-
 void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[],
 struct pxx *pxx, struct cdata *cdata,
 const char *pl_sym[], const char *zo_sym[]);

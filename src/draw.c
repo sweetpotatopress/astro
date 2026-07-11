@@ -245,10 +245,10 @@ void zo_pos(WINDOW *main_win, double cusps[],
 int radius, int center_y, int center_x,
 struct pxx *pxx, const char *zo_sym[])
 {
-	int asc_sign = (int)(pxx->dasc[LONG] / 30);
-	for (int i = 1; i < 13; ++i)
+	int asc_sign = (int)(pxx->dasc[LONG] / 30) - 1;
+	for (int i = ARI; i < ZMAX; ++i)
 	{
-		int sign = ((i + asc_sign - 1) % 12);
+		int sign = ((i + asc_sign) % 12);
 		if (sign == 0)
 			sign = 12;
 
