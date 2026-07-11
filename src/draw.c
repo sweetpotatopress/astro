@@ -629,6 +629,36 @@ void realtime_chart(NEW_CHART_PARAM())
 	wclrtoeol(main_win);
 	nodelay(main_win, FALSE);
 }
+void cpt(struct cdata *cdata,
+struct tm *temp, struct tm *result, time_t *t,
+bool x)
+{
+	if (!x)
+	{
+	
+		temp->tm_year = cdata->tm_year - 1900;
+		temp->tm_mon = cdata->tm_mon - 1;
+		temp->tm_mday = cdata->tm_mday;
+		temp->tm_hour = cdata->tm_hour;
+		temp->tm_min = cdata->tm_min;
+		temp->tm_sec = cdata->tm_sec;
+		temp->tm_isdst = -1;
+		
+		*t = mktime(temp);
+	}
+		
+	if (x)
+	{	
+		result = localtime(t);
+		cdata->tm_year = result->tm_year + 1900;
+		cdata->tm_mon = result->tm_mon + 1;
+		cdata->tm_mday = result->tm_mday;
+		cdata->tm_hour = result->tm_hour;
+		cdata->tm_min = result->tm_min;
+		cdata->tm_sec = result->tm_sec;
+	}
+}
+	
 
 void solar_return(NEW_CHART_PARAM())
 {
@@ -722,24 +752,10 @@ void solar_return(NEW_CHART_PARAM())
 			}
 			struct tm temp = {0};
 			struct tm *result = NULL;
+			time_t t = 0;
 	
-			temp.tm_year = cdata->tm_year - 1900;
-			temp.tm_mon = cdata->tm_mon - 1;
-			temp.tm_mday = cdata->tm_mday;
-			temp.tm_hour = cdata->tm_hour;
-			temp.tm_min = cdata->tm_min;
-			temp.tm_sec = cdata->tm_sec;
-			temp.tm_isdst = -1;
-	
-			time_t t = mktime(&temp);
-			result = localtime(&t);
-			
-			cdata->tm_year = result->tm_year + 1900;
-			cdata->tm_mon = result->tm_mon + 1;
-			cdata->tm_mday = result->tm_mday;
-			cdata->tm_hour = result->tm_hour;
-			cdata->tm_min = result->tm_min;
-			cdata->tm_sec = result->tm_sec;
+			cpt(cdata, &temp, result, &t, 0);
+			cpt(cdata, &temp, result, &t, 1);
 			
 			pxx_fill(cusps, p_arr, cdata, pxx);
 			cur_chart_data(main_win, io, cdata);
@@ -747,7 +763,8 @@ void solar_return(NEW_CHART_PARAM())
 	}
 	mvwprintw(main_win, 0, COLS - 14, "              ");
 }
-	
+
+
 void animate_chart(NEW_CHART_PARAM())
 {
 	int starty = 0;
@@ -760,16 +777,9 @@ void animate_chart(NEW_CHART_PARAM())
 	
 	struct tm temp = {0};
 	struct tm *result = NULL;
+	time_t t = 0;
 	
-	temp.tm_year = cdata->tm_year - 1900;
-	temp.tm_mon = cdata->tm_mon - 1;
-	temp.tm_mday = cdata->tm_mday;
-	temp.tm_hour = cdata->tm_hour;
-	temp.tm_min = cdata->tm_min;
-	temp.tm_sec = cdata->tm_sec;
-	temp.tm_isdst = -1;
-	
-	time_t t = mktime(&temp);
+	cpt(cdata, &temp, result, &t, 0);
 	
 	int ch = 0;
 	int anim_done = 0;
@@ -867,14 +877,7 @@ void animate_chart(NEW_CHART_PARAM())
 						t = mktime(&temp);
 					break;
 				}
-				result = localtime(&t);
-				
-				cdata->tm_year = result->tm_year + 1900;
-				cdata->tm_mon = result->tm_mon + 1;
-				cdata->tm_mday = result->tm_mday;
-				cdata->tm_hour = result->tm_hour;
-				cdata->tm_min = result->tm_min;
-				cdata->tm_sec = result->tm_sec;
+				cpt(cdata, &temp, result, &t, 1);
 				
 				new_chart(NEW_CHART_ARG());
 				break;
@@ -908,14 +911,7 @@ void animate_chart(NEW_CHART_PARAM())
 						t = mktime(&temp);
 					break;
 				}
-				result = localtime(&t);
-				
-				cdata->tm_year = result->tm_year + 1900;
-				cdata->tm_mon = result->tm_mon + 1;
-				cdata->tm_mday = result->tm_mday;
-				cdata->tm_hour = result->tm_hour;
-				cdata->tm_min = result->tm_min;
-				cdata->tm_sec = result->tm_sec;
+				cpt(cdata, &temp, result, &t, 1);
 				
 				new_chart(NEW_CHART_ARG());
 				break;
