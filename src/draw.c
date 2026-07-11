@@ -25,29 +25,29 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 int element_color(int sign, const char *zo_sym[])
 {
-	if (strcmp("ari", zo_sym[sign]) == 0)
+	if (strcmp(zo_sym[1], zo_sym[sign]) == 0)
 		return FIRE;
-	else if (strcmp("tau", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[2], zo_sym[sign]) == 0)
 		return EARTH;
-	else if (strcmp("gem", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[3], zo_sym[sign]) == 0)
 		return AIR;
-	else if (strcmp("can", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[4], zo_sym[sign]) == 0)
 		return WATER;
-	else if (strcmp("leo", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[5], zo_sym[sign]) == 0)
 		return FIRE;
-	else if (strcmp("vir", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[6], zo_sym[sign]) == 0)
 		return EARTH;
-	else if (strcmp("lib", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[7], zo_sym[sign]) == 0)
 		return AIR;
-	else if (strcmp("sco", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[8], zo_sym[sign]) == 0)
 		return WATER;
-	else if (strcmp("sag", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[9], zo_sym[sign]) == 0)
 		return FIRE;
-	else if (strcmp("cap", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[10], zo_sym[sign]) == 0)
 		return EARTH;
-	else if (strcmp("aqu", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[11], zo_sym[sign]) == 0)
 		return AIR;
-	else if (strcmp("pis", zo_sym[sign]) == 0)
+	else if (strcmp(zo_sym[12], zo_sym[sign]) == 0)
 		return WATER;
 		
 	return FIRE;
