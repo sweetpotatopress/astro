@@ -25,19 +25,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define STATION_R 1
 #define STATION_D 2
 
-#define LONG 0
-#define LAT 1
-#define DIST 2
-#define LONG_S 3
-#define LAT_S 4
-#define DIST_S 5
-#define RETRO 6
-#define STATION 7
-#define DEGREE 8
-#define MIN 9
-#define NEXT_S 10
-#define NEXT_R 11
-
 void set_localtime(struct cdata *cdata);
 int months(int month, int year);
 void chart_timeset(struct cdata *cdata,int *day_offset);

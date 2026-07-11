@@ -18,7 +18,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <panel.h>
 #include "astro.h"
-#include "io.h"
 #include "cdata.h"
 #include "draw.h"
 #include "chronos.h"

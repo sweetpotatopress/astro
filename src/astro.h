@@ -19,7 +19,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define MAXBUF 1024
 #define MAXPATH 2048
-#define MAXPXX 12
 
 #define ERR_EXIT(str) do { \
 	endwin(); \
@@ -33,6 +32,51 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 					io, cdata, pxx,\
 					&planet_trig, &retro_trig, cusps, p_arr, \
 					pl_sym, zo_sym, moon
+
+#define LONG 0
+#define LAT 1
+#define DIST 2
+#define LONG_S 3
+#define LAT_S 4
+#define DIST_S 5
+#define RETRO 6
+#define STATION 7
+#define DEGREE 8
+#define MIN 9
+#define NEXT_S 10
+#define NEXT_R 11
+#define MAXPXX 12
+
+#define M_COLOR 1
+#define FIRE 2
+#define EARTH 3
+#define AIR 4
+#define WATER 5
+
+#define ELEMENT 0
+#define RULER 1
+#define EXALT 2
+#define TRIPL 3
+#define BOUND 4
+#define DECAN 5
+#define DETRI 6
+#define FALL 7
+#define JOY 8
+#define ZXXMAX 9
+
+struct zxx {
+	double dari[ZXXMAX][MAXBUF];
+	double dtau[ZXXMAX][MAXBUF];
+	double dgem[ZXXMAX][MAXBUF];
+	double dcan[ZXXMAX][MAXBUF];
+	double dleo[ZXXMAX][MAXBUF];
+	double dvir[ZXXMAX][MAXBUF];
+	double dsco[ZXXMAX][MAXBUF];
+	double dsag[ZXXMAX][MAXBUF];
+	double dcap[ZXXMAX][MAXBUF];
+	double daqu[ZXXMAX][MAXBUF];
+	double dpis[ZXXMAX][MAXBUF];
+};
 
 struct pxx {
 	double dsun[MAXPXX];
@@ -75,6 +119,12 @@ struct cdata {
 	int utc_year;
 	int utc_mon;
 	int utc_mday;
+};
+
+struct io {
+	char *filepath;
+	char *filename;
+	size_t file_count;
 };
 
 enum mode { NORMAL, INSERT };

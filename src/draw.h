@@ -15,6 +15,18 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <panel.h>
 
+#define NEW_CHART_ARG() main_win, planet_win, retro_win, \
+	planet_panel, retro_panel, \
+	io, cdata, pxx, \
+	planet_trig, retro_trig, cusps, p_arr, \
+	pl_sym, zo_sym, moon
+	
+#define NEW_CHART_PARAM() WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win, \
+PANEL **planet_panel, PANEL **retro_panel, \
+struct io *io, struct cdata *cdata, struct pxx *pxx, \
+int *planet_trig, int *retro_trig, double cusps[], double *p_arr[], \
+const char *pl_sym[], const char *zo_sym[], const char *moon[] 
+
 #define PWINY 40
 #define PWINX 33
 #define PWIN_Y 0
@@ -35,18 +47,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define EARTH 3
 #define AIR 4
 #define WATER 5
-
-#define NEW_CHART_ARG() main_win, planet_win, retro_win, \
-	planet_panel, retro_panel, \
-	io, cdata, pxx, \
-	planet_trig, retro_trig, cusps, p_arr, \
-	pl_sym, zo_sym, moon
-	
-#define NEW_CHART_PARAM() WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win, \
-PANEL **planet_panel, PANEL **retro_panel, \
-struct io *io, struct cdata *cdata, struct pxx *pxx, \
-int *planet_trig, int *retro_trig, double cusps[], double *p_arr[], \
-const char *pl_sym[], const char *zo_sym[], const char *moon[] 
 
 void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[],
 struct pxx *pxx, struct cdata *cdata,
