@@ -14,7 +14,7 @@ doas/sudo make clean install
 - ncurses
 
 works on all linux/bsd systems. if not, tell me!  
-not interested in other OS at this time.  
+stable version - https://codeberg.org/yamlynn/astro/tags  
 
 FOUNDATION--0-  
   
