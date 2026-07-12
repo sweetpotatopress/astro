@@ -53,13 +53,12 @@ int main()
 		
 	int *z_arr[] = {
 		0,
-		zxx->dari, zxx->dtau,
-		zxx->dgem, zxx->dcan,
-		zxx->dcan, zxx->dleo,
-		zxx->dvir, zxx->dsco,
-		zxx->dsag, zxx->dcap,
-		zxx->daqu, zxx->dpis,
-		0};
+		zxx->iari, zxx->itau,
+		zxx->igem, zxx->ican,
+		zxx->ileo, zxx->ivir,
+		zxx->ilib, zxx->isco,
+		zxx->isag, zxx->icap,
+		zxx->iaqu, zxx->ipis};
 		
 	zxx_fill(z_arr); // fills essential dignities
 		

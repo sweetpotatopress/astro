@@ -87,17 +87,18 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define MAXZXX 17
 
 struct zxx {
-	int dari[MAXZXX];
-	int dtau[MAXZXX];
-	int dgem[MAXZXX];
-	int dcan[MAXZXX];
-	int dleo[MAXZXX];
-	int dvir[MAXZXX];
-	int dsco[MAXZXX];
-	int dsag[MAXZXX];
-	int dcap[MAXZXX];
-	int daqu[MAXZXX];
-	int dpis[MAXZXX];
+	int iari[MAXZXX];
+	int itau[MAXZXX];
+	int igem[MAXZXX];
+	int ican[MAXZXX];
+	int ileo[MAXZXX];
+	int ivir[MAXZXX];
+	int ilib[MAXZXX];
+	int isco[MAXZXX];
+	int isag[MAXZXX];
+	int icap[MAXZXX];
+	int iaqu[MAXZXX];
+	int ipis[MAXZXX];
 };
 
 struct pxx {
