@@ -52,6 +52,7 @@ int main()
 		ERR_EXIT("main zxx");
 		
 	double *z_arr[] = {
+		0,
 		zxx->dari, zxx->dtau,
 		zxx->dgem, zxx->dcan,
 		zxx->dcan, zxx->dleo,
