@@ -214,6 +214,208 @@ void calculate_utc(struct cdata *cdata)
 void zxx_fill(double *z_arr[])
 {
 	z_arr[ARI][ELEMENT] = FIRE;
+	z_arr[ARI][RULER] = SE_MARS;
+	z_arr[ARI][EXALT] = SE_SUN;
+	z_arr[ARI][TRIPLD] = SE_SUN;
+	z_arr[ARI][TRIPLN] = SE_JUPITER;
+	z_arr[ARI][TRIPLC] = SE_SATURN;
+	z_arr[ARI][BOUND0] = SE_JUPITER;
+	z_arr[ARI][BOUND1] = SE_VENUS;
+	z_arr[ARI][BOUND2] = SE_MERCURY;
+	z_arr[ARI][BOUND3] = SE_MARS;
+	z_arr[ARI][BOUND4] = SE_SATURN;
+	z_arr[ARI][DECAN0] = SE_MARS;
+	z_arr[ARI][DECAN1] = SE_SUN;
+	z_arr[ARI][DECAN2] = SE_VENUS;
+	z_arr[ARI][DETRI] = SE_VENUS;
+	z_arr[ARI][FALL] = SE_SATURN;
+	
+	z_arr[TAU][ELEMENT] = EARTH;
+	z_arr[TAU][RULER] = SE_VENUS;
+	z_arr[TAU][EXALT] = SE_MOON;
+	z_arr[TAU][TRIPLD] = SE_VENUS;
+	z_arr[TAU][TRIPLN] = SE_MOON;
+	z_arr[TAU][TRIPLC] = SE_MARS;
+	z_arr[TAU][BOUND0] = SE_VENUS;
+	z_arr[TAU][BOUND1] = SE_MERCURY;
+	z_arr[TAU][BOUND2] = SE_JUPITER;
+	z_arr[TAU][BOUND3] = SE_SATURN;
+	z_arr[TAU][BOUND4] = SE_MARS;
+	z_arr[TAU][DECAN0] = SE_MERCURY;
+	z_arr[TAU][DECAN1] = SE_MOON;
+	z_arr[TAU][DECAN2] = SE_SATURN;
+	z_arr[TAU][DETRI] = SE_MARS;
+	z_arr[TAU][FALL] = -1.0;
+	
+	z_arr[GEM][ELEMENT] = AIR;
+	z_arr[GEM][RULER] = SE_MERCURY;
+	z_arr[GEM][EXALT] = -1.0;
+	z_arr[GEM][TRIPLD] = SE_SATURN;
+	z_arr[GEM][TRIPLN] = SE_MERCURY;
+	z_arr[GEM][TRIPLC] = SE_JUPITER;
+	z_arr[GEM][BOUND0] = SE_MERCURY;
+	z_arr[GEM][BOUND1] = SE_JUPITER;
+	z_arr[GEM][BOUND2] = SE_VENUS;
+	z_arr[GEM][BOUND3] = SE_MARS;
+	z_arr[GEM][BOUND4] = SE_SATURN;
+	z_arr[GEM][DECAN0] = SE_JUPITER;
+	z_arr[GEM][DECAN1] = SE_MARS;
+	z_arr[GEM][DECAN2] = SE_SUN;
+	z_arr[GEM][DETRI] = SE_JUPITER;
+	z_arr[GEM][FALL] = -1.0;
+	
+	z_arr[CAN][ELEMENT] = WATER;
+	z_arr[CAN][RULER] = SE_MOON;
+	z_arr[CAN][EXALT] = SE_JUPITER;
+	z_arr[CAN][TRIPLD] = SE_VENUS;
+	z_arr[CAN][TRIPLN] = SE_MARS;
+	z_arr[CAN][TRIPLC] = SE_MOON;
+	z_arr[CAN][BOUND0] = SE_MARS;
+	z_arr[CAN][BOUND1] = SE_VENUS;
+	z_arr[CAN][BOUND2] = SE_MERCURY;
+	z_arr[CAN][BOUND3] = SE_JUPITER;
+	z_arr[CAN][BOUND4] = SE_SATURN;
+	z_arr[CAN][DECAN0] = SE_VENUS;
+	z_arr[CAN][DECAN1] = SE_MERCURY;
+	z_arr[CAN][DECAN2] = SE_MOON;
+	z_arr[CAN][DETRI] = SE_SATURN;
+	z_arr[CAN][FALL] = SE_MARS;
+	
+	z_arr[LEO][ELEMENT] = FIRE;
+	z_arr[LEO][RULER] = SE_SUN;
+	z_arr[LEO][EXALT] = -1.0;
+	z_arr[LEO][TRIPLD] = SE_SUN;
+	z_arr[LEO][TRIPLN] = SE_JUPITER;
+	z_arr[LEO][TRIPLC] = SE_SATURN;
+	z_arr[LEO][BOUND0] = SE_JUPITER;
+	z_arr[LEO][BOUND1] = SE_VENUS;
+	z_arr[LEO][BOUND2] = SE_SATURN;
+	z_arr[LEO][BOUND3] = SE_MERCURY;
+	z_arr[LEO][BOUND4] = SE_MARS;
+	z_arr[LEO][DECAN0] = SE_SATURN;
+	z_arr[LEO][DECAN1] = SE_JUPITER;
+	z_arr[LEO][DECAN2] = SE_MARS;
+	z_arr[LEO][DETRI] = SE_SATURN;
+	z_arr[LEO][FALL] = -1.0;
+	
+	z_arr[VIR][ELEMENT] = EARTH;
+	z_arr[VIR][RULER] = SE_MERCURY;
+	z_arr[VIR][EXALT] = SE_MERCURY;
+	z_arr[VIR][TRIPLD] = SE_VENUS;
+	z_arr[VIR][TRIPLN] = SE_MOON;
+	z_arr[VIR][TRIPLC] = SE_MARS;
+	z_arr[VIR][BOUND0] = SE_MERCURY;
+	z_arr[VIR][BOUND1] = SE_VENUS;
+	z_arr[VIR][BOUND2] = SE_JUPITER;
+	z_arr[VIR][BOUND3] = SE_MARS;
+	z_arr[VIR][BOUND4] = SE_SATURN;
+	z_arr[VIR][DECAN0] = SE_SUN;
+	z_arr[VIR][DECAN1] = SE_VENUS;
+	z_arr[VIR][DECAN2] = SE_MERCURY;
+	z_arr[VIR][DETRI] = SE_JUPITER;
+	z_arr[VIR][FALL] = SE_VENUS;
+	
+	z_arr[LIB][ELEMENT] = AIR;
+	z_arr[LIB][RULER] = SE_VENUS;
+	z_arr[LIB][EXALT] = SE_SATURN;
+	z_arr[LIB][TRIPLD] = SE_SATURN;
+	z_arr[LIB][TRIPLN] = SE_MERCURY;
+	z_arr[LIB][TRIPLC] = SE_JUPITER;
+	z_arr[LIB][BOUND0] = SE_SATURN;
+	z_arr[LIB][BOUND1] = SE_MERCURY;
+	z_arr[LIB][BOUND2] = SE_JUPITER;
+	z_arr[LIB][BOUND3] = SE_VENUS;
+	z_arr[LIB][BOUND4] = SE_MARS;
+	z_arr[LIB][DECAN0] = SE_MOON;
+	z_arr[LIB][DECAN1] = SE_SATURN;
+	z_arr[LIB][DECAN2] = SE_JUPITER;
+	z_arr[LIB][DETRI] = SE_MARS;
+	z_arr[LIB][FALL] = SE_SUN;
+	
+	z_arr[SCO][ELEMENT] = WATER;
+	z_arr[SCO][RULER] = SE_MARS;
+	z_arr[SCO][EXALT] = -1.0;
+	z_arr[SCO][TRIPLD] = SE_VENUS;
+	z_arr[SCO][TRIPLN] = SE_MARS;
+	z_arr[SCO][TRIPLC] = SE_MOON;
+	z_arr[SCO][BOUND0] = SE_MARS;
+	z_arr[SCO][BOUND1] = SE_VENUS;
+	z_arr[SCO][BOUND2] = SE_MERCURY;
+	z_arr[SCO][BOUND3] = SE_JUPITER;
+	z_arr[SCO][BOUND4] = SE_SATURN;
+	z_arr[SCO][DECAN0] = SE_MARS;
+	z_arr[SCO][DECAN1] = SE_SUN;
+	z_arr[SCO][DECAN2] = SE_VENUS;
+	z_arr[SCO][DETRI] = SE_VENUS;
+	z_arr[SCO][FALL] = SE_MOON;
+	
+	z_arr[SAG][ELEMENT] = FIRE;
+	z_arr[SAG][RULER] = SE_JUPITER;
+	z_arr[SAG][EXALT] = -1.0;
+	z_arr[SAG][TRIPLD] = SE_SUN;
+	z_arr[SAG][TRIPLN] = SE_JUPITER;
+	z_arr[SAG][TRIPLC] = SE_SATURN;
+	z_arr[SAG][BOUND0] = SE_JUPITER;
+	z_arr[SAG][BOUND1] = SE_VENUS;
+	z_arr[SAG][BOUND2] = SE_MERCURY;
+	z_arr[SAG][BOUND3] = SE_SATURN;
+	z_arr[SAG][BOUND4] = SE_MARS;
+	z_arr[SAG][DECAN0] = SE_MERCURY;
+	z_arr[SAG][DECAN1] = SE_MOON;
+	z_arr[SAG][DECAN2] = SE_SATURN;
+	z_arr[SAG][DETRI] = SE_MERCURY;
+	z_arr[SAG][FALL] = -1.0;
+	
+	z_arr[CAP][ELEMENT] = EARTH;
+	z_arr[CAP][RULER] = SE_SATURN;
+	z_arr[CAP][EXALT] = SE_MARS;
+	z_arr[CAP][TRIPLD] = SE_VENUS;
+	z_arr[CAP][TRIPLN] = SE_MOON;
+	z_arr[CAP][TRIPLC] = SE_MARS;
+	z_arr[CAP][BOUND0] = SE_MERCURY;
+	z_arr[CAP][BOUND1] = SE_JUPITER;
+	z_arr[CAP][BOUND2] = SE_VENUS;
+	z_arr[CAP][BOUND3] = SE_SATURN;
+	z_arr[CAP][BOUND4] = SE_MARS;
+	z_arr[CAP][DECAN0] = SE_JUPITER;
+	z_arr[CAP][DECAN1] = SE_MARS;
+	z_arr[CAP][DECAN2] = SE_SUN;
+	z_arr[CAP][DETRI] = SE_MOON;
+	z_arr[CAP][FALL] = SE_JUPITER;
+	
+	z_arr[AQU][ELEMENT] = AIR;
+	z_arr[AQU][RULER] = SE_SATURN;
+	z_arr[AQU][EXALT] = -1.0;
+	z_arr[AQU][TRIPLD] = SE_SATURN;
+	z_arr[AQU][TRIPLN] = SE_MERCURY;
+	z_arr[AQU][TRIPLC] = SE_JUPITER;
+	z_arr[AQU][BOUND0] = SE_MERCURY;
+	z_arr[AQU][BOUND1] = SE_VENUS;
+	z_arr[AQU][BOUND2] = SE_JUPITER;
+	z_arr[AQU][BOUND3] = SE_MARS;
+	z_arr[AQU][BOUND4] = SE_SATURN;
+	z_arr[AQU][DECAN0] = SE_VENUS;
+	z_arr[AQU][DECAN1] = SE_MERCURY;
+	z_arr[AQU][DECAN2] = SE_MOON;
+	z_arr[AQU][DETRI] = SE_SUN;
+	z_arr[AQU][FALL] = -1.0;
+	
+	z_arr[PIS][ELEMENT] = WATER;
+	z_arr[PIS][RULER] = SE_JUPITER;
+	z_arr[PIS][EXALT] = SE_VENUS;
+	z_arr[PIS][TRIPLD] = SE_VENUS;
+	z_arr[PIS][TRIPLN] = SE_MARS;
+	z_arr[PIS][TRIPLC] = SE_MOON;
+	z_arr[PIS][BOUND0] = SE_VENUS;
+	z_arr[PIS][BOUND1] = SE_JUPITER;
+	z_arr[PIS][BOUND2] = SE_MERCURY;
+	z_arr[PIS][BOUND3] = SE_MARS;
+	z_arr[PIS][BOUND4] = SE_SATURN;
+	z_arr[PIS][DECAN0] = SE_SATURN;
+	z_arr[PIS][DECAN1] = SE_JUPITER;
+	z_arr[PIS][DECAN2] = SE_MARS;
+	z_arr[PIS][DETRI] = SE_MERCURY;
+	z_arr[PIS][FALL] = SE_MERCURY;
 }
 
 void pxx_fill(double cusps[], double *p_arr[], double *z_arr[],
@@ -294,7 +496,7 @@ struct cdata *cdata, struct pxx *pxx)
 	
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
-	zxx_fill(z_arr);
+	z_arr[ARI][JOY] = 0; // temp placeholder
 }
 
 

@@ -21,17 +21,17 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define MAXPATH 2048
 
 #define ERR_EXIT(str) do { \
-	endwin(); \
-	perror(str); \
-	swe_close(); \
-	exit(EXIT_FAILURE); \
+		endwin(); \
+		perror(str); \
+		swe_close(); \
+		exit(EXIT_FAILURE); \
 } while (0)
 
 #define NEW_CHART_MAIN() main_win, planet_win, retro_win, \
-					&planet_panel, &retro_panel,\
-					io, cdata, pxx,\
-					&planet_trig, &retro_trig, cusps, p_arr, z_arr, \
-					pl_sym, zo_sym, moon
+		&planet_panel, &retro_panel,\
+		io, cdata, pxx,\
+		&planet_trig, &retro_trig, cusps, p_arr, z_arr, \
+		pl_sym, zo_sym, moon
 
 #define LONG 0
 #define LAT 1
@@ -70,13 +70,21 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define ELEMENT 0
 #define RULER 1
 #define EXALT 2
-#define TRIPL 3
-#define BOUND 4
-#define DECAN 5
-#define DETRI 6
-#define FALL 7
-#define JOY 8
-#define MAXZXX 9
+#define TRIPLD 3
+#define TRIPLN 4
+#define TRIPLC 5
+#define BOUND0 6
+#define BOUND1 7
+#define BOUND2 8
+#define BOUND3 9
+#define BOUND4 10
+#define DECAN0 11
+#define DECAN1 12
+#define DECAN2 13
+#define DETRI 14
+#define FALL 15
+#define JOY 16
+#define MAXZXX 17
 
 struct zxx {
 	double dari[MAXZXX];

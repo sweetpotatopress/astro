@@ -59,6 +59,8 @@ int main()
 		zxx->dsag, zxx->dcap,
 		zxx->daqu, zxx->dpis};
 		
+	zxx_fill(z_arr);
+		
 	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
