@@ -28,5 +28,5 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 void set_localtime(struct cdata *cdata);
 int months(int month, int year);
 void chart_timeset(struct cdata *cdata,int *day_offset);
-void pxx_fill(double cusps[], double *p_arr[],
+void pxx_fill(double cusps[], double *p_arr[], double *z_arr[],
 struct cdata *cdata, struct pxx *pxx);

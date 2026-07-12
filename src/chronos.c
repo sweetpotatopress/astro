@@ -211,7 +211,12 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-void pxx_fill(double cusps[], double *p_arr[],
+void zxx_fill(double *z_arr[])
+{
+	z_arr[ARI][ELEMENT] = FIRE;
+}
+
+void pxx_fill(double cusps[], double *p_arr[], double *z_arr[],
 struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl, iret;
@@ -289,4 +294,7 @@ struct cdata *cdata, struct pxx *pxx)
 	
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
+	zxx_fill(z_arr);
 }
+
+

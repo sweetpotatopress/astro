@@ -30,7 +30,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEW_CHART_MAIN() main_win, planet_win, retro_win, \
 					&planet_panel, &retro_panel,\
 					io, cdata, pxx,\
-					&planet_trig, &retro_trig, cusps, p_arr, \
+					&planet_trig, &retro_trig, cusps, p_arr, z_arr, \
 					pl_sym, zo_sym, moon
 
 #define LONG 0

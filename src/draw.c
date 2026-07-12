@@ -267,7 +267,7 @@ void draw_house(WINDOW *main_win, double cusps[],
 int radius, int center_y, int center_x,
 chtype ch)
 {
-	for (int i = 0; i < 13; ++i)
+	for (int i = ARI; i < ZMAX; ++i)
 	{
 		double rad = cusps[i] * M_PI / 180.0;
 		
@@ -578,7 +578,7 @@ const char *pl_sym[])
 
 void new_chart(NEW_CHART_PARAM())
 {
-	pxx_fill(cusps, p_arr, cdata, pxx);
+	pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
 	draw_chart(main_win, cusps, p_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
@@ -635,7 +635,6 @@ bool x)
 {
 	if (!x)
 	{
-	
 		temp->tm_year = cdata->tm_year - 1900;
 		temp->tm_mon = cdata->tm_mon - 1;
 		temp->tm_mday = cdata->tm_mday;
@@ -658,7 +657,6 @@ bool x)
 		cdata->tm_sec = result->tm_sec;
 	}
 }
-	
 
 void solar_return(NEW_CHART_PARAM())
 {
@@ -704,7 +702,7 @@ void solar_return(NEW_CHART_PARAM())
 		}
 		flushinp();
 		
-		pxx_fill(cusps, p_arr, cdata, pxx);
+		pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
 		
 		double temp_degree = pxx->dsun[LONG];
 		int iter = 3;
@@ -757,7 +755,7 @@ void solar_return(NEW_CHART_PARAM())
 			cpt(cdata, &temp, result, &t, 0);
 			cpt(cdata, &temp, result, &t, 1);
 			
-			pxx_fill(cusps, p_arr, cdata, pxx);
+			pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
 			cur_chart_data(main_win, io, cdata);
 		}
 	}

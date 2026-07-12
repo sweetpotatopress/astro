@@ -152,7 +152,7 @@ int main()
 	show_panel(main_panel);
 	
 	set_localtime(cdata);
-	pxx_fill(cusps, p_arr, cdata, pxx);
+	pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
 	draw_chart(main_win, cusps, p_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
