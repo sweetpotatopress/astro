@@ -211,7 +211,7 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-void zxx_fill(double *z_arr[])
+void zxx_fill(int *z_arr[])
 {
 	z_arr[ARI][ELEMENT] = FIRE;
 	z_arr[ARI][RULER] = SE_MARS;
@@ -418,7 +418,7 @@ void zxx_fill(double *z_arr[])
 	z_arr[PIS][FALL] = SE_MERCURY;
 }
 
-void pxx_fill(double cusps[], double *p_arr[], double *z_arr[],
+void pxx_fill(double cusps[], double *p_arr[], int *z_arr[],
 struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl, iret;
@@ -496,7 +496,6 @@ struct cdata *cdata, struct pxx *pxx)
 	
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
-	z_arr[ARI][JOY] = 0; // temp placeholder
 }
 
 

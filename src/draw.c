@@ -22,42 +22,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "draw.h"
 #include "chronos.h"
 
-int element_color(int sign, const char *zo_sym[])
-{
-	if (strcmp(zo_sym[1], zo_sym[sign]) == 0)
-		return FIRE;
-	else if (strcmp(zo_sym[2], zo_sym[sign]) == 0)
-		return EARTH;
-	else if (strcmp(zo_sym[3], zo_sym[sign]) == 0)
-		return AIR;
-	else if (strcmp(zo_sym[4], zo_sym[sign]) == 0)
-		return WATER;
-	else if (strcmp(zo_sym[5], zo_sym[sign]) == 0)
-		return FIRE;
-	else if (strcmp(zo_sym[6], zo_sym[sign]) == 0)
-		return EARTH;
-	else if (strcmp(zo_sym[7], zo_sym[sign]) == 0)
-		return AIR;
-	else if (strcmp(zo_sym[8], zo_sym[sign]) == 0)
-		return WATER;
-	else if (strcmp(zo_sym[9], zo_sym[sign]) == 0)
-		return FIRE;
-	else if (strcmp(zo_sym[10], zo_sym[sign]) == 0)
-		return EARTH;
-	else if (strcmp(zo_sym[11], zo_sym[sign]) == 0)
-		return AIR;
-	else if (strcmp(zo_sym[12], zo_sym[sign]) == 0)
-		return WATER;
-		
-	return FIRE;
-}
-
 void zodiac_color(WINDOW *win, int y, int x, int sign,
-const char *zo_sym[])
+const char *zo_sym[], int *z_arr[])
 {
-	int j = element_color(sign, zo_sym);
-
-	switch(j)
+	switch(z_arr[sign][ELEMENT])
 	{
 		case FIRE:
 			wattron(win, COLOR_PAIR(FIRE));
@@ -83,12 +51,11 @@ const char *zo_sym[])
 }
 
 void degree_color(WINDOW *win, int y, int x, int count,
-double *p_arr[], const char *zo_sym[])
+double *p_arr[], int *z_arr[])
 {
 	int sign = (int)(p_arr[count][LONG] / 30) + 1;
-	int j = element_color(sign, zo_sym);
 	
-	switch(j)
+	switch(z_arr[sign][ELEMENT])
 	{
 		case FIRE:
 			wattron(win, COLOR_PAIR(FIRE));
@@ -117,7 +84,7 @@ double *p_arr[], const char *zo_sym[])
 	}
 }
 
-void planet_pos(WINDOW *main_win, double cusps[], double *p_arr[],
+void planet_pos(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
 int radius, int center_y, int center_x, 
 const char *pl_sym[], const char *zo_sym[])
 {
@@ -192,7 +159,7 @@ const char *pl_sym[], const char *zo_sym[])
 		p_arr[i][DEGREE] = (int)p_arr[i][LONG] % 30;
 		p_arr[i][MIN] = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
 	
-		degree_color(main_win, y-1, x, i, p_arr, zo_sym);
+		degree_color(main_win, y-1, x, i, p_arr, z_arr);
 		mvwaddstr(main_win, y, x, pl_sym[i]);
 	
 		if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
@@ -217,7 +184,7 @@ const char *pl_sym[], const char *zo_sym[])
 	}
 }
 
-void ascmc_pos(WINDOW *main_win, double cusps[], double *p_arr[],
+void ascmc_pos(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
 int radius, int center_y, int center_x,
 const char *zo_sym[])
 {
@@ -237,13 +204,13 @@ const char *zo_sym[])
 		p_arr[i][DEGREE] = (int)p_arr[i][LONG] % 30;
 		p_arr[i][MIN]  = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
 		
-		degree_color(main_win, y-1, x, i, p_arr, zo_sym);
+		degree_color(main_win, y-1, x, i, p_arr, z_arr);
 	}
 }
 
 void zo_pos(WINDOW *main_win, double cusps[],
 int radius, int center_y, int center_x,
-struct pxx *pxx, const char *zo_sym[])
+struct pxx *pxx, const char *zo_sym[], int *z_arr[])
 {
 	int asc_sign = (int)(pxx->dasc[LONG] / 30) - 1;
 	for (int i = ARI; i < ZMAX; ++i)
@@ -259,7 +226,7 @@ struct pxx *pxx, const char *zo_sym[])
 		int x = center_x - (int)(radius * cos(rad));
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
 		
-		zodiac_color(main_win, y, x, sign, zo_sym);
+		zodiac_color(main_win, y, x, sign, zo_sym, z_arr);
 	}
 }
 
@@ -324,7 +291,7 @@ chtype ch)
 	}
 }
 
-void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[],
+void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
 struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[])
 {
 	curs_set(0);
@@ -350,13 +317,13 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	draw_house(main_win, cusps, radius + 4, center_y, center_x, '`');
 	
 	zo_pos(main_win, cusps, radius + 3, center_y, center_x, pxx,
-	zo_sym);
+	zo_sym, z_arr);
 	
-	planet_pos(main_win, cusps, p_arr, radius - 5, center_y, center_x,
+	planet_pos(main_win, cusps, p_arr, z_arr, radius - 5, center_y, center_x,
 	pl_sym, zo_sym);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(main_win, cusps, p_arr, (radius / 2) + 4, center_y, center_x,
+		ascmc_pos(main_win, cusps, p_arr, z_arr, (radius / 2) + 4, center_y, center_x,
 	zo_sym);
 	
 	// status bar
@@ -438,7 +405,7 @@ int moon_phase(struct pxx *pxx)
 	return phase;
 }
 
-void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx, 
+void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx, 
 const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
 	char spname[AS_MAXCH];
@@ -505,7 +472,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			}
 			
 			int color_x = startx + (int)strlen(buff) + 1;
-			zodiac_color(planet_win, starty, color_x, sign, zo_sym);
+			zodiac_color(planet_win, starty, color_x, sign, zo_sym, z_arr);
 			
 			starty += 1;
 		}
@@ -537,7 +504,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
-			zodiac_color(planet_win, starty, color_x, sign, zo_sym);
+			zodiac_color(planet_win, starty, color_x, sign, zo_sym, z_arr);
 	
 			starty += 1;
 				
@@ -579,13 +546,13 @@ const char *pl_sym[])
 void new_chart(NEW_CHART_PARAM())
 {
 	pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
-	draw_chart(main_win, cusps, p_arr, pxx, cdata,
+	draw_chart(main_win, cusps, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 	
 	if (*planet_trig > 0)
 	{
-		planet_table(planet_win, p_arr, pxx,
+		planet_table(planet_win, p_arr, z_arr, pxx,
 		pl_sym, zo_sym, moon);
 		show_panel(*planet_panel);
 	}
@@ -802,7 +769,7 @@ void animate_chart(NEW_CHART_PARAM())
 				}
 				else
 				{
-					planet_table(planet_win, p_arr, pxx,
+					planet_table(planet_win, p_arr, z_arr, pxx,
 					pl_sym, zo_sym, moon);
 					show_panel(*planet_panel);
 					*planet_trig = 1;
@@ -835,7 +802,7 @@ void animate_chart(NEW_CHART_PARAM())
 				
 				if (*planet_trig > 0)
 				{
-					planet_table(planet_win, p_arr, pxx,
+					planet_table(planet_win, p_arr, z_arr, pxx,
 					pl_sym, zo_sym, moon);
 					show_panel(*planet_panel);
 				}

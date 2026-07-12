@@ -49,18 +49,19 @@ int main()
 		
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)
-		ERR_EXIT("main zxx");
+		ERR_EXIT("main zxx calloc");
 		
-	double *z_arr[] = {
+	int *z_arr[] = {
 		0,
 		zxx->dari, zxx->dtau,
 		zxx->dgem, zxx->dcan,
 		zxx->dcan, zxx->dleo,
 		zxx->dvir, zxx->dsco,
 		zxx->dsag, zxx->dcap,
-		zxx->daqu, zxx->dpis};
+		zxx->daqu, zxx->dpis,
+		0};
 		
-	zxx_fill(z_arr);
+	zxx_fill(z_arr); // fills essential dignities
 		
 	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
@@ -156,7 +157,7 @@ int main()
 	
 	set_localtime(cdata);
 	pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
-	draw_chart(main_win, cusps, p_arr, pxx, cdata,
+	draw_chart(main_win, cusps, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 
@@ -164,7 +165,7 @@ int main()
 	cdata->state = statebuffer;
 	cdata->country = countrybuffer;
 	
-	planet_table(planet_win, p_arr, pxx,
+	planet_table(planet_win, p_arr, z_arr, pxx,
 	pl_sym, zo_sym, moon);
 	retro_table(retro_win, p_arr, pl_sym);
 		
@@ -234,7 +235,7 @@ int main()
 				case 'p':
 					if (!planet_trig)
 					{
-						planet_table(planet_win, p_arr, pxx,
+						planet_table(planet_win, p_arr, z_arr, pxx,
 						pl_sym, zo_sym, moon);
 						show_panel(planet_panel);
 						planet_trig = 1;
@@ -275,7 +276,7 @@ int main()
 					
 					if (planet_trig > 0)
 					{
-						planet_table(planet_win, p_arr, pxx,
+						planet_table(planet_win, p_arr, z_arr, pxx,
 						pl_sym, zo_sym, moon);
 						show_panel(planet_panel);
 					}

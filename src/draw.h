@@ -24,7 +24,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEW_CHART_PARAM() WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win, \
 PANEL **planet_panel, PANEL **retro_panel, \
 struct io *io, struct cdata *cdata, struct pxx *pxx, \
-int *planet_trig, int *retro_trig, double cusps[], double *p_arr[], double *z_arr[], \
+int *planet_trig, int *retro_trig, double cusps[], double *p_arr[], int *z_arr[], \
 const char *pl_sym[], const char *zo_sym[], const char *moon[] 
 
 #define PWINY 40
@@ -42,12 +42,12 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[]
 #define CWIN_Y (LINES - CWINY) / 2
 #define CWIN_X (COLS - CWINX) / 2
 
-void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[],
+void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
 struct pxx *pxx, struct cdata *cdata,
 const char *pl_sym[], const char *zo_sym[]);
 void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata);
 
-void planet_table(WINDOW *planet_win, double *p_arr[], struct pxx *pxx,
+void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx,
 const char *pl_sym[], const char *zo_sym[], const char *moon[]);
 void retro_table(WINDOW *retro_win, double *p_arr[], 
 const char *pl_sym[]);
