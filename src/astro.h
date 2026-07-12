@@ -76,20 +76,20 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define DETRI 6
 #define FALL 7
 #define JOY 8
-#define ZXXMAX 9
+#define MAXZXX 9
 
 struct zxx {
-	double dari[ZXXMAX];
-	double dtau[ZXXMAX];
-	double dgem[ZXXMAX];
-	double dcan[ZXXMAX];
-	double dleo[ZXXMAX];
-	double dvir[ZXXMAX];
-	double dsco[ZXXMAX];
-	double dsag[ZXXMAX];
-	double dcap[ZXXMAX];
-	double daqu[ZXXMAX];
-	double dpis[ZXXMAX];
+	double dari[MAXZXX];
+	double dtau[MAXZXX];
+	double dgem[MAXZXX];
+	double dcan[MAXZXX];
+	double dleo[MAXZXX];
+	double dvir[MAXZXX];
+	double dsco[MAXZXX];
+	double dsag[MAXZXX];
+	double dcap[MAXZXX];
+	double daqu[MAXZXX];
+	double dpis[MAXZXX];
 };
 
 struct pxx {
