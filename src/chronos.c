@@ -418,7 +418,7 @@ void zxx_fill(int *z_arr[])
 	z_arr[PIS][FALL] = SE_MERCURY;
 }
 
-void pxx_fill(double cusps[], double *p_arr[], int *z_arr[],
+void pxx_fill(double cusps[], double *p_arr[],
 struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl, iret;

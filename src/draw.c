@@ -86,7 +86,7 @@ double *p_arr[], int *z_arr[])
 
 void planet_pos(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
 int radius, int center_y, int center_x, 
-const char *pl_sym[], const char *zo_sym[])
+const char *pl_sym[])
 {
 	int sign_num = (int)(cusps[1] / 30.0);
 	double asc = sign_num * 30.0;
@@ -185,8 +185,7 @@ const char *pl_sym[], const char *zo_sym[])
 }
 
 void ascmc_pos(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
-int radius, int center_y, int center_x,
-const char *zo_sym[])
+int radius, int center_y, int center_x)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
@@ -320,11 +319,10 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	zo_sym, z_arr);
 	
 	planet_pos(main_win, cusps, p_arr, z_arr, radius - 5, center_y, center_x,
-	pl_sym, zo_sym);
+	pl_sym);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(main_win, cusps, p_arr, z_arr, (radius / 2) + 4, center_y, center_x,
-	zo_sym);
+		ascmc_pos(main_win, cusps, p_arr, z_arr, (radius / 2) + 4, center_y, center_x);
 	
 	// status bar
 	mvwhline(main_win, 1, COLS - 15, '.', COLS);
@@ -545,7 +543,7 @@ const char *pl_sym[])
 
 void new_chart(NEW_CHART_PARAM())
 {
-	pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
+	pxx_fill(cusps, p_arr, cdata, pxx);
 	draw_chart(main_win, cusps, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
@@ -669,7 +667,7 @@ void solar_return(NEW_CHART_PARAM())
 		}
 		flushinp();
 		
-		pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
+		pxx_fill(cusps, p_arr, cdata, pxx);
 		
 		double temp_degree = pxx->dsun[LONG];
 		int iter = 3;
@@ -722,7 +720,7 @@ void solar_return(NEW_CHART_PARAM())
 			cpt(cdata, &temp, result, &t, 0);
 			cpt(cdata, &temp, result, &t, 1);
 			
-			pxx_fill(cusps, p_arr, z_arr, cdata, pxx);
+			pxx_fill(cusps, p_arr, cdata, pxx);
 			cur_chart_data(main_win, io, cdata);
 		}
 	}
