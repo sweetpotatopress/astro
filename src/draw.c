@@ -478,7 +478,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	int p_count = 18;
 	
 	mvwin(planet_win, 0, 0);
-	wresize(planet_win, 53, 33);
+	wresize(planet_win, 40, 33);
 	
 	werase(planet_win);
 	
