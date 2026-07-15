@@ -387,6 +387,69 @@ struct cdata *cdata)
 		mvwprintw(main_win, starty, startx, "lon.%f", cdata->dlon);
 }
 
+int bound_check(int sign, int degree)
+{
+	int ari[] =
+	{ 0, 5, 11, 19, 24, 29 };
+	int tau[] =
+	{ 0, 7, 13, 21, 26, 29 };
+	int gem[] =
+	{ 0, 5, 11, 16, 24, 29 };
+	int can[] =
+	{ 0, 6, 12, 18, 25, 29 };
+	int leo[] =
+	{ 0, 5, 10, 17, 23, 29 };
+	int vir[] =
+	{ 0, 6, 16, 20, 27, 29 };
+	int lib[] =
+	{ 0, 5, 10, 18, 25, 29 };
+	int sco[] =
+	{ 0, 6, 10, 18, 23, 29 };
+	int sag[] =
+	{ 0, 11, 16, 20, 25, 29 };
+	int cap[] =
+	{ 0, 6, 13, 21, 25, 29 };
+	int aqu[] = 
+	{ 0, 6, 12, 19, 24, 29 };
+	int pis[] = 
+	{ 0, 11, 15, 18, 27, 29 };
+	
+	int *zodia[] = { 0,
+	ari, tau, gem, can,
+	leo, vir, lib, sco,
+	sag, cap, aqu, pis };
+	
+	int i = 1;
+	for (; i < 6; ++i)
+		if (degree <= zodia[sign][i])
+			return i + 5;
+	return -1;
+}
+
+void dignity_check(int *z_arr[], double *p_arr[], int planet, int result[],
+struct pxx *pxx)
+{
+	int sign = (int)(p_arr[planet][LONG] / 30) + 1;
+	int degree = (int)p_arr[planet][DEGREE];
+	
+	result[RULER] = z_arr[sign][RULER];
+	result[EXALT] = z_arr[sign][EXALT];
+	
+	if (sect(pxx) == DAY)
+		result[TRIPLD] = z_arr[sign][TRIPLD];
+	else
+		result[TRIPLD] = z_arr[sign][TRIPLN];
+		
+	result[BOUND0] = z_arr[sign][bound_check(sign, degree)];
+	
+	if (degree <= 9)
+		result[DECAN0] = z_arr[sign][DECAN0];
+	if (degree > 9 && degree <= 19)
+		result[DECAN0] = z_arr[sign][DECAN1];
+	else
+		result[DECAN0] = z_arr[sign][DECAN2];
+}
+
 int moon_phase(struct pxx *pxx)
 {
 	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
@@ -406,11 +469,16 @@ int moon_phase(struct pxx *pxx)
 void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx, 
 const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
-	char spname[AS_MAXCH];
+	char *name[13] = { 
+	"su", "mo", "me", "ve",
+	"ma", "ju", "sa", "ur",
+	"ne", "pl", "so", "no",
+	"  "};
+	
 	int p_count = 18;
 	
 	mvwin(planet_win, 0, 0);
-	wresize(planet_win, 22, 33);
+	wresize(planet_win, 53, 33);
 	
 	werase(planet_win);
 	
@@ -427,24 +495,11 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		
 		if (i < 12) // sun -> north node 
 		{
-			swe_get_planet_name(i, spname);
-			spname[2] ='\0';
-			if (i == SE_MEAN_NODE)
-			{
-				spname[0] = 'S';
-				spname[1] = 'o';
-			}
-			if (i == SE_TRUE_NODE)
-			{
-				spname[0] = 'N';
-				spname[1] = 'o';
-			}
-			
 			char buff[MAXBUF];
 			
 			snprintf(buff, sizeof(buff),
 			"%-3s %3d.%02d : %6s %02d*%02d`",
-			spname, full_deg, minute,
+			name[i], full_deg, minute,
 			pl_sym[i], deg, minute);
 			
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
@@ -505,12 +560,39 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			zodiac_color(planet_win, starty, color_x, sign, zo_sym, z_arr);
 	
 			starty += 1;
-				
-			mvwprintw(planet_win, starty, startx, 
-			"moon phase: %s", moon[moon_phase(pxx)]);
-			++j;
+		++j;
 		}
 	}
+	int planet = 0;
+	
+	mvwprintw(planet_win, starty, startx,
+	"------------------------------");
+	++starty;
+			
+	mvwprintw(planet_win, starty, startx, "p  : ru : ex : tr : bo : de ");
+	++starty;
+	mvwprintw(planet_win, starty, startx,
+	"...........................");
+	++starty;
+	do
+	{
+		char buf[MAXBUF] = {0};
+		int result[MAXZXX] = {0};
+		dignity_check(z_arr, p_arr, planet, result, pxx);
+	
+		j = ARI;
+		snprintf(buf, sizeof(buf),
+		"%-2s : %-2s : %-2s : %-2s : %-2s : %-2s ",
+		name[planet], name[result[RULER]], name[result[EXALT]],
+		name[result[TRIPLD]], name[result[BOUND0]], name[result[DECAN0]]);
+		mvwprintw(planet_win, starty, startx, "%s", buf);
+		starty += 1;
+	}
+	while (planet++ < 11);
+			
+	++starty;
+	mvwprintw(planet_win, starty, startx, 
+	"moon phase: %s", moon[moon_phase(pxx)]);
 }
 
 void retro_table(WINDOW *retro_win, double *p_arr[],

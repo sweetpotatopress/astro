@@ -31,3 +31,4 @@ void chart_timeset(struct cdata *cdata,int *day_offset);
 void zxx_fill(int *z_arr[]);
 void pxx_fill(double cusps[], double *p_arr[],
 struct cdata *cdata, struct pxx *pxx);
+int sect(struct pxx *pxx);

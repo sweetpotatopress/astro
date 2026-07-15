@@ -212,8 +212,7 @@ void calculate_utc(struct cdata *cdata)
 }
 
 void zxx_fill(int *z_arr[])
-{
-	/* element, ruler, exalt, triplicity d,n,c,
+{ /* element, ruler, exalt, triplicity d,n,c,
 	bound 0-4, decan 0-2, detri, fall */
 	
 	int ari[] = 
@@ -226,13 +225,13 @@ void zxx_fill(int *z_arr[])
 	{ EARTH, SE_VENUS, SE_MOON, SE_VENUS,
 	SE_MOON, SE_MARS, SE_VENUS, SE_MERCURY,
 	SE_JUPITER, SE_SATURN, SE_MARS, SE_MERCURY,
-	SE_MOON, SE_SATURN, SE_MARS, -1 };
+	SE_MOON, SE_SATURN, SE_MARS, 12 };
 	
 	int gem[] =
-	{ AIR, SE_MERCURY, -1, SE_SATURN,
+	{ AIR, SE_MERCURY, 12, SE_SATURN,
 	SE_MERCURY, SE_JUPITER, SE_MERCURY, SE_JUPITER,
 	SE_VENUS, SE_MARS, SE_SATURN, SE_JUPITER,
-	SE_MARS, SE_SUN, SE_JUPITER, -1 };
+	SE_MARS, SE_SUN, SE_JUPITER, 12 };
 
 	int can[] = 
 	{ WATER, SE_MOON, SE_JUPITER, SE_VENUS,
@@ -241,10 +240,10 @@ void zxx_fill(int *z_arr[])
 	SE_MERCURY, SE_MOON, SE_SATURN, SE_MARS };
 	
 	int leo[] =
-	{ FIRE, SE_SUN, -1, SE_SUN,
+	{ FIRE, SE_SUN, 12, SE_SUN,
 	SE_JUPITER, SE_SATURN, SE_JUPITER, SE_VENUS,
 	SE_SATURN, SE_MERCURY, SE_MARS, SE_SATURN,
-	SE_JUPITER, SE_MARS, SE_SATURN, -1 };
+	SE_JUPITER, SE_MARS, SE_SATURN, 12 };
 	
 	int vir[] =
 	{ EARTH, SE_MERCURY, SE_MERCURY, SE_VENUS,
@@ -259,16 +258,16 @@ void zxx_fill(int *z_arr[])
 	SE_SATURN, SE_JUPITER, SE_MARS, SE_SUN };
 	
 	int sco[] =
-	{ WATER, SE_MARS, -1, SE_VENUS,
+	{ WATER, SE_MARS, 12, SE_VENUS,
 	SE_MARS, SE_MOON, SE_MARS, SE_VENUS,
 	SE_MERCURY, SE_JUPITER, SE_SATURN, SE_MARS,
 	SE_SUN, SE_VENUS, SE_VENUS, SE_MOON };
 	
 	int sag[] =
-	{ FIRE, SE_JUPITER, -1, SE_SUN,
+	{ FIRE, SE_JUPITER, 12, SE_SUN,
 	SE_JUPITER, SE_SATURN, SE_JUPITER, SE_VENUS,
 	SE_MERCURY, SE_SATURN, SE_MARS, SE_MERCURY,
-	SE_MOON, SE_SATURN, SE_MERCURY, -1 };
+	SE_MOON, SE_SATURN, SE_MERCURY, 12 };
 	
 	int cap[] =
 	{ EARTH, SE_SATURN, SE_MARS, SE_VENUS,
@@ -277,10 +276,10 @@ void zxx_fill(int *z_arr[])
 	SE_MARS, SE_SUN, SE_MOON, SE_JUPITER };
 	
 	int aqu[] =
-	{ AIR, SE_SATURN, -1, SE_SATURN,
+	{ AIR, SE_SATURN, 12, SE_SATURN,
 	SE_MERCURY, SE_JUPITER, SE_MERCURY, SE_VENUS,
 	SE_JUPITER, SE_MARS, SE_SATURN, SE_VENUS,
-	SE_MERCURY, SE_MOON, SE_SUN, -1 };
+	SE_MERCURY, SE_MOON, SE_SUN, 12 };
 	
 	int pis[] =
 	{ WATER, SE_JUPITER, SE_VENUS, SE_VENUS,
