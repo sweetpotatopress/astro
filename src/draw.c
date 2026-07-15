@@ -580,13 +580,12 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		int result[MAXZXX] = {0};
 		dignity_check(z_arr, p_arr, planet, result, pxx);
 	
-		j = ARI;
 		snprintf(buf, sizeof(buf),
 		"%-2s : %-2s : %-2s : %-2s : %-2s : %-2s ",
 		name[planet], name[result[RULER]], name[result[EXALT]],
 		name[result[TRIPLD]], name[result[BOUND0]], name[result[DECAN0]]);
 		mvwprintw(planet_win, starty, startx, "%s", buf);
-		starty += 1;
+		++starty;
 	}
 	while (planet++ < 11);
 			
