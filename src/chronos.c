@@ -153,7 +153,7 @@ int sect(struct pxx *pxx)
 {
 	int sect = NIGHT_SECT;
 	
-	if ((pxx->dsun[LONG] - pxx->dasc[LONG]) <= 180)
+	if ((pxx->dsun[LONG] - pxx->dasc[LONG]) >= 180)
 		sect = DAY_SECT;
 	else
 		sect = NIGHT_SECT;
@@ -166,22 +166,20 @@ void lots(int sect, struct pxx *pxx)
 	
 	if (sect == DAY_SECT)
 	{
-		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
+		diff = fabs(pxx->dmoon[LONG] - pxx->dsun[LONG]);
 		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
 		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
 	}
 	else // night
 	{
-		diff = pxx->dmoon[LONG] - pxx->dsun[LONG];
+		diff = fabs(pxx->dmoon[LONG] - pxx->dsun[LONG]);
 		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
 		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
 	}
 	
-	pxx->dfor[LONG] = fmod(pxx->dfor[LONG], 360.0);
-	if (pxx->dfor[LONG] < 0.0)
+	while(pxx->dfor[LONG] < 0.0)
 		pxx->dfor[LONG]+= 360.0;
-	pxx->dspir[LONG] = fmod(pxx->dspir[LONG], 360.0);
-	if (pxx->dspir[LONG] < 0.0)
+	while (pxx->dspir[LONG] < 0.0)
 		pxx->dspir[LONG] += 360.0;
 }
 

@@ -435,7 +435,8 @@ struct pxx *pxx)
 	result[RULER] = z_arr[sign][RULER];
 	result[EXALT] = z_arr[sign][EXALT];
 	
-	if (sect(pxx) == DAY)
+	int chart_sect = sect(pxx);
+	if (chart_sect == DAY_SECT)
 		result[TRIPLD] = z_arr[sign][TRIPLD];
 	else
 		result[TRIPLD] = z_arr[sign][TRIPLN];

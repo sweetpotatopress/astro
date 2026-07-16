@@ -73,9 +73,9 @@ int main()
 		pxx->dsat, pxx->dura,
 		pxx->dnep, pxx->dplu,
 		pxx->dmnod, pxx->dtnod,
+		pxx->dfor, pxx->dspir,
 		pxx->dasc, pxx->dmc,
-		pxx->ddsc, pxx->dic,
-		pxx->dfor, pxx->dspir};
+		pxx->ddsc, pxx->dic};
 
 	struct io *io = calloc(1, sizeof(*io));
 	if (!io)
