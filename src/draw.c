@@ -445,10 +445,12 @@ struct pxx *pxx)
 	
 	if (degree <= 9)
 		result[DECAN0] = z_arr[sign][DECAN0];
-	if (degree > 9 && degree <= 19)
+	else if (degree > 9 && degree <= 19)
 		result[DECAN0] = z_arr[sign][DECAN1];
-	else
+	else if (degree > 19)
 		result[DECAN0] = z_arr[sign][DECAN2];
+	else // error
+		result[DECAN0] = 12;
 }
 
 int moon_phase(struct pxx *pxx)
