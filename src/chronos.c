@@ -162,25 +162,31 @@ int sect(struct pxx *pxx)
 
 void lots(int sect, struct pxx *pxx)
 {
-	double diff;
+	double offset = (360 - pxx->dsun[LONG]);
+	double diff = (offset + pxx->dmoon[LONG]);
+	while (diff > 360.0)
+		diff -= 360.0;
 	
 	if (sect == DAY_SECT)
 	{
-		diff = fabs(pxx->dmoon[LONG] - pxx->dsun[LONG]);
-		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
-		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
-	}
-	else // night
-	{
-		diff = fabs(pxx->dmoon[LONG] - pxx->dsun[LONG]);
 		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
 		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
 	}
+	else // night
+	{
+		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
+		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
+	}
 	
-	while(pxx->dfor[LONG] < 0.0)
-		pxx->dfor[LONG]+= 360.0;
+	while (pxx->dfor[LONG] < 0.0)
+		pxx->dfor[LONG] += 360.0;
+	while (pxx->dfor[LONG] > 360.0)
+		pxx->dfor[LONG] -= 360.0;
+		
 	while (pxx->dspir[LONG] < 0.0)
 		pxx->dspir[LONG] += 360.0;
+	while (pxx->dspir[LONG] > 360.0)
+		pxx->dspir[LONG] -= 360.0;
 }
 
 void calculate_utc(struct cdata *cdata)
