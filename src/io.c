@@ -740,6 +740,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					else
 						cdata->dlon = 0.0;
 							
+					cdata->tm_sec = 0;
 					free(buffer);
 					fclose(fp);
 					
