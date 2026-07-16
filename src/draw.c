@@ -345,7 +345,7 @@ struct cdata *cdata)
 	if(cdata->state)
 	{
 		if (!isdigit((unsigned char)cdata->state[0]))
-		{
+		{ // when not in the usa
 			startx += (int)strlen(cdata->city);
 			mvwprintw(main_win, starty, startx, ", %s", cdata->state);
 			startx -= (int)strlen(cdata->city);
@@ -389,40 +389,39 @@ struct cdata *cdata)
 
 int bound_check(int sign, int degree)
 {
-	int ari[] =
-	{ 0, 5, 11, 19, 24, 29 };
-	int tau[] =
-	{ 0, 7, 13, 21, 26, 29 };
-	int gem[] =
-	{ 0, 5, 11, 16, 24, 29 };
-	int can[] =
-	{ 0, 6, 12, 18, 25, 29 };
-	int leo[] =
-	{ 0, 5, 10, 17, 23, 29 };
-	int vir[] =
-	{ 0, 6, 16, 20, 27, 29 };
-	int lib[] =
-	{ 0, 5, 10, 18, 25, 29 };
-	int sco[] =
-	{ 0, 6, 10, 18, 23, 29 };
-	int sag[] =
-	{ 0, 11, 16, 20, 25, 29 };
-	int cap[] =
-	{ 0, 6, 13, 21, 25, 29 };
-	int aqu[] = 
-	{ 0, 6, 12, 19, 24, 29 };
-	int pis[] = 
-	{ 0, 11, 15, 18, 27, 29 };
+	const int ari[] =
+	{ 5, 11, 19, 24, 29 };
+	const int tau[] =
+	{ 7, 13, 21, 26, 29 };
+	const int gem[] =
+	{ 5, 11, 16, 24, 29 };
+	const int can[] =
+	{ 6, 12, 18, 25, 29 };
+	const int leo[] =
+	{ 5, 10, 17, 23, 29 };
+	const int vir[] =
+	{ 6, 16, 20, 27, 29 };
+	const int lib[] =
+	{ 5, 10, 18, 25, 29 };
+	const int sco[] =
+	{ 6, 10, 18, 23, 29 };
+	const int sag[] =
+	{ 11, 16, 20, 25, 29 };
+	const int cap[] =
+	{ 6, 13, 21, 25, 29 };
+	const int aqu[] = 
+	{ 6, 12, 19, 24, 29 };
+	const int pis[] = 
+	{ 11, 15, 18, 27, 29 };
 	
-	int *zodia[] = { 0,
+	const int *zodia[] = { 0,
 	ari, tau, gem, can,
 	leo, vir, lib, sco,
 	sag, cap, aqu, pis };
 	
-	int i = 1;
-	for (; i < 6; ++i)
+	for (int i = 0; i < 5; ++i)
 		if (degree <= zodia[sign][i])
-			return i + 5;
+			return i + BOUND0;
 	return -1;
 }
 
@@ -535,6 +534,13 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		
 		else if (i >= 12) // asc -> ic
 		{
+			if (i == 12 || i == 16)
+			{
+				mvwprintw(planet_win, starty, startx,
+				"------------------------------");
+				starty += 1;
+			}
+			
 			const char *points[] = {
 			"as", "mc", "ds", "ic", "fortune", "spirit"};
 			
@@ -544,26 +550,13 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			"%-10s %3d.%02d : %02d*%02d`",
 			points[j], full_deg, minute, deg, minute);
 			
-			if (i == 12) // lots divider
-			{
-				mvwprintw(planet_win, starty, startx,
-				"------------------------------");
-				starty += 1;
-			}
-			
-			if (i == 16) // points divider
-			{
-				mvwprintw(planet_win, starty, startx,
-				"------------------------------");
-				starty += 1;
-			}
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
 			zodiac_color(planet_win, starty, color_x, sign, zo_sym, z_arr);
 	
 			starty += 1;
-		++j;
+			j++;
 		}
 	}
 	int planet = 0;
@@ -582,19 +575,19 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		int result[MAXZXX] = {0};
 		dignity_check(z_arr, p_arr, planet, result, pxx);
 	
-		int digtype[] = { RULER, EXALT, TRIPLD,
-		BOUND0, DECAN0, 0};
+		int dig[] = { RULER, EXALT, TRIPLD,
+		BOUND0, DECAN0 };
 		
 		mvwprintw(planet_win, starty, startx, "%-2s :", 
 		name[planet]);
 		startx += 5;
 		for (int i = 0; i < 5; ++i)
 		{
-			if (strcmp(name[planet], name[result[digtype[i]]]) == 0)
+			if (strcmp(name[planet], name[result[dig[i]]]) == 0)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
 				mvwprintw(planet_win, starty, startx, "%-2s", 
-				name[result[digtype[i]]]);
+				name[result[dig[i]]]);
 				wattroff(planet_win, COLOR_PAIR(EARTH));
 				
 				startx += 3;
@@ -604,7 +597,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			else
 			{
 				mvwprintw(planet_win, starty, startx, "%-2s :", 
-				name[result[digtype[i]]]);
+				name[result[dig[i]]]);
 				startx += 5;
 			}
 		}
@@ -699,6 +692,7 @@ void realtime_chart(NEW_CHART_PARAM())
 	wclrtoeol(main_win);
 	nodelay(main_win, FALSE);
 }
+
 void cpt(struct cdata *cdata,
 struct tm *temp, struct tm *result, time_t *t,
 bool x)
@@ -715,7 +709,6 @@ bool x)
 		
 		*t = mktime(temp);
 	}
-		
 	if (x)
 	{	
 		result = localtime(t);
@@ -831,7 +824,6 @@ void solar_return(NEW_CHART_PARAM())
 	}
 	mvwprintw(main_win, 0, COLS - 14, "              ");
 }
-
 
 void animate_chart(NEW_CHART_PARAM())
 {
@@ -1026,4 +1018,3 @@ void animate_chart(NEW_CHART_PARAM())
 	wclrtoeol(main_win);
 	wnoutrefresh(main_win);
 }
- 
