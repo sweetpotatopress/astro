@@ -373,7 +373,6 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						setfield_localtime(cdata_field);
 						break;
 						
-						
 					case '\n':
 						cdata_entry = 1;
 						break;
@@ -424,6 +423,10 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					
 					case KEY_F(1):
 						clear_fields(cdata_field, cdata_form);
+						break;
+						
+					case 9: // tab
+						setfield_localtime(cdata_field);
 						break;
 						
 					case 27: // esc
