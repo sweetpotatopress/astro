@@ -113,12 +113,12 @@ struct pxx {
 	double dplu[MAXPXX];
 	double dmnod[MAXPXX];
 	double dtnod[MAXPXX];
-	double dfor[MAXPXX];
-	double dspir[MAXPXX];
 	double dasc[MAXPXX];
 	double dmc[MAXPXX];
 	double ddsc[MAXPXX];
 	double dic[MAXPXX];
+	double dfor[MAXPXX];
+	double dspir[MAXPXX];
 };
 
 struct cdata {

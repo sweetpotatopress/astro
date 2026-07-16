@@ -151,7 +151,7 @@ int *calc_flag, int *iter, double *last_jd)
 	
 int sect(struct pxx *pxx)
 {
-	int sect = NIGHT_SECT;
+	int sect;
 	
 	if ((pxx->dsun[LONG] - pxx->dasc[LONG]) >= 180)
 		sect = DAY_SECT;

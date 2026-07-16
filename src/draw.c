@@ -534,7 +534,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		else if (i >= 12) // asc -> ic
 		{
 			const char *points[] = {
-			"fortune", "spirit", "as", "mc", "ds", "ic"};
+			"as", "mc", "ds", "ic", "fortune", "spirit"};
 			
 			char point_buff[MAXBUF];
 			
@@ -549,7 +549,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 				starty += 1;
 			}
 			
-			if (i == 14) // points divider
+			if (i == 16) // points divider
 			{
 				mvwprintw(planet_win, starty, startx,
 				"------------------------------");
