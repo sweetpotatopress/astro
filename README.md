@@ -14,7 +14,6 @@ doas/sudo make clean install
 - ncurses
 
 works on all linux/bsd systems. if not, tell me!  
-stable version - https://codeberg.org/yamlynn/astro/tags  
 
 FOUNDATION--0-  
   
@@ -58,6 +57,7 @@ i - - - input chart data
 
 \ - - - exit data input  
 F1 - - - clear fields  
+tab - - - fill local time  
 arrowkeys - - - navigate  
 
 **esc - - - NORMAL mode**  
