@@ -47,6 +47,40 @@ void buff_trim(FIELD *current, char *buffer)
 	buffer[len + 1] = '\0';
 }
 
+void setfield_localtime(FIELD *cdata_field[])
+{	// autofills chart field input with local systemtime 
+	char buff[128] = {0};
+	
+	struct tm *gettime = malloc(sizeof(struct tm));
+	if (!gettime)
+		ERR_EXIT("set_locatime() gettime malloc");
+		
+	time_t now = time(NULL);
+	localtime_r(&now, gettime);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_year+1900);
+	set_field_buffer(cdata_field[YEAR], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_mon + 1);
+	set_field_buffer(cdata_field[MONTH], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_mday);
+	set_field_buffer(cdata_field[DAY], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_hour);
+	set_field_buffer(cdata_field[HOUR], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
+	set_field_buffer(cdata_field[MINUTE], 0, buff);
+	
+	free(gettime);
+}
+
 void field_to_member
 (struct cdata *cdata, FORM *cdata_form,
 FIELD *cdata_field[],
@@ -334,6 +368,11 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					case KEY_F(1):
 						clear_fields(cdata_field, cdata_form);
 						break;
+						
+					case 9: // tab
+						setfield_localtime(cdata_field);
+						break;
+						
 						
 					case '\n':
 						cdata_entry = 1;
