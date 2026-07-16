@@ -572,19 +572,40 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	mvwprintw(planet_win, starty, startx, "p  : ru : ex : tr : bo : de ");
 	++starty;
 	mvwprintw(planet_win, starty, startx,
-	"...........................");
+	"...........................xx");
 	++starty;
 	do
 	{
-		char buf[MAXBUF] = {0};
 		int result[MAXZXX] = {0};
 		dignity_check(z_arr, p_arr, planet, result, pxx);
 	
-		snprintf(buf, sizeof(buf),
-		"%-2s : %-2s : %-2s : %-2s : %-2s : %-2s ",
-		name[planet], name[result[RULER]], name[result[EXALT]],
-		name[result[TRIPLD]], name[result[BOUND0]], name[result[DECAN0]]);
-		mvwprintw(planet_win, starty, startx, "%s", buf);
+		int digtype[] = { RULER, EXALT, TRIPLD,
+		BOUND0, DECAN0, 0};
+		
+		mvwprintw(planet_win, starty, startx, "%-2s :", 
+		name[planet]);
+		startx += 5;
+		for (int i = 0; i < 5; ++i)
+		{
+			if (strcmp(name[planet], name[result[digtype[i]]]) == 0)
+			{
+				wattron(planet_win, COLOR_PAIR(EARTH));
+				mvwprintw(planet_win, starty, startx, "%-2s", 
+				name[result[digtype[i]]]);
+				wattroff(planet_win, COLOR_PAIR(EARTH));
+				
+				startx += 3;
+				mvwprintw(planet_win, starty, startx, ":");
+				startx += 2;
+			}
+			else
+			{
+				mvwprintw(planet_win, starty, startx, "%-2s :", 
+				name[result[digtype[i]]]);
+				startx += 5;
+			}
+		}
+		startx = 2;
 		++starty;
 	}
 	while (planet++ < 11);
