@@ -91,10 +91,11 @@ const char *pl_sym[])
 	int sign_num = (int)(cusps[1] / 30.0);
 	double asc = sign_num * 30.0;
 	
-	int iter_count = 25;
+	int iter_count = 50;
 	int max_distance = 11;
 	double convergence_thresh = 0.1;
 	int pcount = 12;
+	double str_base = 5.0;
 
 	double adjusted_long[pcount];
 	for (int i = 0; i < pcount; ++i)
@@ -127,7 +128,7 @@ const char *pl_sym[])
 						
 						int place = (signed_distance > 0) ? -1 : 1;
 						
-						angle_offset += 3.5 * strength * place;
+						angle_offset += str_base * strength * place;
 					}
 				}
 			}
