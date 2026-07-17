@@ -221,7 +221,7 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-void zxx_fill(int *z_arr[])
+void zxx_init(int *z_arr[])
 { /* element, ruler, exalt, triplicity d,n,c,
 	bound 0-4, decan 0-2, detri, fall */
 	
@@ -308,7 +308,7 @@ void zxx_fill(int *z_arr[])
 			z_arr[z][d] = zodia[z][d];
 }
 
-void pxx_fill(double cusps[], double *p_arr[],
+void pxx_init(double cusps[], double *p_arr[],
 struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl, iret;

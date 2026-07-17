@@ -60,7 +60,7 @@ int main()
 		zxx->isag, zxx->icap,
 		zxx->iaqu, zxx->ipis};
 		
-	zxx_fill(z_arr); // fills essential dignities
+	zxx_init(z_arr); // fills essential dignities
 		
 	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
@@ -155,7 +155,7 @@ int main()
 	show_panel(main_panel);
 	
 	set_localtime(cdata);
-	pxx_fill(cusps, p_arr, cdata, pxx);
+	pxx_init(cusps, p_arr, cdata, pxx);
 	draw_chart(main_win, cusps, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);

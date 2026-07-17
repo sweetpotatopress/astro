@@ -636,7 +636,7 @@ const char *pl_sym[])
 
 void new_chart(NEW_CHART_PARAM())
 {
-	pxx_fill(cusps, p_arr, cdata, pxx);
+	pxx_init(cusps, p_arr, cdata, pxx);
 	draw_chart(main_win, cusps, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
@@ -760,7 +760,7 @@ void solar_return(NEW_CHART_PARAM())
 		}
 		flushinp();
 		
-		pxx_fill(cusps, p_arr, cdata, pxx);
+		pxx_init(cusps, p_arr, cdata, pxx);
 		
 		double temp_degree = pxx->dsun[LONG];
 		int iter = 3;
@@ -813,7 +813,7 @@ void solar_return(NEW_CHART_PARAM())
 			cpt(cdata, &temp, result, &t, 0);
 			cpt(cdata, &temp, result, &t, 1);
 			
-			pxx_fill(cusps, p_arr, cdata, pxx);
+			pxx_init(cusps, p_arr, cdata, pxx);
 			cur_chart_data(main_win, io, cdata);
 		}
 	}
