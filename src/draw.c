@@ -466,7 +466,7 @@ int moon_phase(struct pxx *pxx)
 void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx, 
 const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
-	char *name[13] = { 
+	const char *name[13] = { 
 	"su", "mo", "me", "ve",
 	"ma", "ju", "sa", "ur",
 	"ne", "pl", "so", "no",

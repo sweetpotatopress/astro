@@ -26,6 +26,8 @@ void zxx_init(int *z_arr[])
 { /* element, ruler, exalt, triplicity d,n,c,
 	bound 0-4, decan 0-2, detri, fall */
 	
+	const int empty = 12;
+	
 	const int ari[] = 
 	{ FIRE, SE_MARS, SE_SUN, SE_SUN,
 	SE_JUPITER, SE_SATURN, SE_JUPITER, SE_VENUS,
@@ -36,13 +38,13 @@ void zxx_init(int *z_arr[])
 	{ EARTH, SE_VENUS, SE_MOON, SE_VENUS,
 	SE_MOON, SE_MARS, SE_VENUS, SE_MERCURY,
 	SE_JUPITER, SE_SATURN, SE_MARS, SE_MERCURY,
-	SE_MOON, SE_SATURN, SE_MARS, 12 };
+	SE_MOON, SE_SATURN, SE_MARS, empty };
 	
 	const int gem[] =
-	{ AIR, SE_MERCURY, 12, SE_SATURN,
+	{ AIR, SE_MERCURY, empty, SE_SATURN,
 	SE_MERCURY, SE_JUPITER, SE_MERCURY, SE_JUPITER,
 	SE_VENUS, SE_MARS, SE_SATURN, SE_JUPITER,
-	SE_MARS, SE_SUN, SE_JUPITER, 12 };
+	SE_MARS, SE_SUN, SE_JUPITER, empty };
 
 	const int can[] = 
 	{ WATER, SE_MOON, SE_JUPITER, SE_VENUS,
@@ -51,10 +53,10 @@ void zxx_init(int *z_arr[])
 	SE_MERCURY, SE_MOON, SE_SATURN, SE_MARS };
 	
 	const int leo[] =
-	{ FIRE, SE_SUN, 12, SE_SUN,
+	{ FIRE, SE_SUN, empty, SE_SUN,
 	SE_JUPITER, SE_SATURN, SE_JUPITER, SE_VENUS,
 	SE_SATURN, SE_MERCURY, SE_MARS, SE_SATURN,
-	SE_JUPITER, SE_MARS, SE_SATURN, 12 };
+	SE_JUPITER, SE_MARS, SE_SATURN, empty };
 	
 	const int vir[] =
 	{ EARTH, SE_MERCURY, SE_MERCURY, SE_VENUS,
@@ -69,16 +71,16 @@ void zxx_init(int *z_arr[])
 	SE_SATURN, SE_JUPITER, SE_MARS, SE_SUN };
 	
 	const int sco[] =
-	{ WATER, SE_MARS, 12, SE_VENUS,
+	{ WATER, SE_MARS, empty, SE_VENUS,
 	SE_MARS, SE_MOON, SE_MARS, SE_VENUS,
 	SE_MERCURY, SE_JUPITER, SE_SATURN, SE_MARS,
 	SE_SUN, SE_VENUS, SE_VENUS, SE_MOON };
 	
 	const int sag[] =
-	{ FIRE, SE_JUPITER, 12, SE_SUN,
+	{ FIRE, SE_JUPITER, empty, SE_SUN,
 	SE_JUPITER, SE_SATURN, SE_JUPITER, SE_VENUS,
 	SE_MERCURY, SE_SATURN, SE_MARS, SE_MERCURY,
-	SE_MOON, SE_SATURN, SE_MERCURY, 12 };
+	SE_MOON, SE_SATURN, SE_MERCURY, empty };
 	
 	const int cap[] =
 	{ EARTH, SE_SATURN, SE_MARS, SE_VENUS,
@@ -87,10 +89,10 @@ void zxx_init(int *z_arr[])
 	SE_MARS, SE_SUN, SE_MOON, SE_JUPITER };
 	
 	const int aqu[] =
-	{ AIR, SE_SATURN, 12, SE_SATURN,
+	{ AIR, SE_SATURN, empty, SE_SATURN,
 	SE_MERCURY, SE_JUPITER, SE_MERCURY, SE_VENUS,
 	SE_JUPITER, SE_MARS, SE_SATURN, SE_VENUS,
-	SE_MERCURY, SE_MOON, SE_SUN, 12 };
+	SE_MERCURY, SE_MOON, SE_SUN, empty };
 	
 	const int pis[] =
 	{ WATER, SE_JUPITER, SE_VENUS, SE_VENUS,
