@@ -48,7 +48,7 @@ void buff_trim(FIELD *current, char *buffer)
 }
 
 void setfield_localtime(FIELD *cdata_field[])
-{	// autofills chart field input with local systemtime 
+{
 	char buff[128] = {0};
 	
 	struct tm *gettime = malloc(sizeof(struct tm));
