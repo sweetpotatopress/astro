@@ -218,8 +218,6 @@ int main()
 				case 'w':
 					save_chart(cdata, io,
 					citybuffer, statebuffer, countrybuffer);
-					touchwin(main_win);
-					wnoutrefresh(main_win);
 					doupdate();
 					break;
 				case 'e':
