@@ -157,9 +157,6 @@ const char *pl_sym[])
 		int x = center_x - (int)(radius * cos_rad);
 		int y = center_y + (int)(radius * sin_rad * 0.5);
 		
-		p_arr[i][DEGREE] = (int)p_arr[i][LONG] % 30;
-		p_arr[i][MIN] = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
-	
 		degree_color(main_win, y-1, x, i, p_arr, z_arr);
 		mvwaddstr(main_win, y, x, pl_sym[i]);
 	
@@ -200,9 +197,6 @@ int radius, int center_y, int center_x)
 		int y = center_y + (int)(radius * sin(rad) * 0.5);
 		
 		mvwaddstr(main_win, y, x, ascmc_sym[j]);
-		
-		p_arr[i][DEGREE] = (int)p_arr[i][LONG] % 30;
-		p_arr[i][MIN]  = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
 		
 		degree_color(main_win, y-1, x, i, p_arr, z_arr);
 	}

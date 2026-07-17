@@ -386,6 +386,12 @@ struct cdata *cdata, struct pxx *pxx)
 	
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
+	
+	for (ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
+	{
+		p_arr[ipl][DEGREE] = (int)p_arr[ipl][LONG] % 30;
+		p_arr[ipl][MIN] = (int)((p_arr[ipl][LONG] - (int)p_arr[ipl][LONG]) * 60);
+	}
 }
 
 

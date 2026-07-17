@@ -100,6 +100,7 @@ struct zxx {
 	int ipis[MAXZXX];
 };
 
+#define SPXXMAX 18
 struct pxx {
 	double dsun[MAXPXX];
 	double dmoon[MAXPXX];
