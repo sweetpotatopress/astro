@@ -81,6 +81,14 @@ h/l - - - left/right
  
  compiled astro binary: /usr/local/bin  
  
+ create a file named 'config' in .config/astro to set open location  
+ config template, tz is IANA format  
+ ```
+ timezone = America/Chicago
+ latitude = 50.123456
+ longitude = -100.123456
+ ```
+ 
  **TODO**
  
  | | |
@@ -98,7 +106,7 @@ h/l - - - left/right
  | declination/out of bounds | |
  | tabs/multiple charts open | |
  | terminal window resize refresh | [DONE] |
- | user default config file | |
+ | user default config | [DONE] |
  | code documentation | |
  | zodiacal releasing | |
  
