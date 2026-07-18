@@ -33,6 +33,21 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 		&planet_trig, &retro_trig, cusps, p_arr, z_arr, \
 		pl_sym, zo_sym, moon
 
+#define PWINY 40
+#define PWINX 33
+#define PWIN_Y 0
+#define PWIN_X 0
+
+#define RWINY 9
+#define RWINX 24
+#define RWIN_Y LINES - 9
+#define RWIN_X COLS - 24
+
+#define CWINY 20
+#define CWINX 47
+#define CWIN_Y (LINES - CWINY) / 2
+#define CWIN_X (COLS - CWINX) / 2
+
 #define LONG 0
 #define LAT 1
 #define DIST 2
@@ -154,3 +169,8 @@ enum mode { NORMAL, INSERT };
 
 void zxx_init(int *z_arr[]);
 void config_parse(struct cdata *cdata);
+
+void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx,
+const char *pl_sym[], const char *zo_sym[], const char *moon[]);
+void retro_table(WINDOW *retro_win, double *p_arr[], 
+const char *pl_sym[]);

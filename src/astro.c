@@ -17,6 +17,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "io.h"
 #include "draw.h"
+#include "anim.h"
 #include "chronos.h"
 #include "cdata.h"
 
