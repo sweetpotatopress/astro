@@ -60,6 +60,8 @@ void config_parse(struct cdata *cdata)
 	if (setenv("TZ", field[TZ_DEF], 1) != 0)
 		ERR_EXIT("ERR: setenv conf.c");
 	tzset();
+	memcpy(cdata->timezone,
+	field[TZ_DEF], strlen(field[TZ_DEF]) + 1);
 	
 	char *endptr = NULL;
 	double dret;

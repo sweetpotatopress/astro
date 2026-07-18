@@ -135,7 +135,9 @@ int main()
 	cdata->city = malloc(MAXBUF);
 	if (!cdata->city)
 		ERR_EXIT("ERR: main cdata->city malloc");
-	
+	cdata->timezone = malloc(MAXBUF);
+	if (!cdata->timezone)
+		ERR_EXIT("ERR: main cdata->timezone malloc");
 		
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)

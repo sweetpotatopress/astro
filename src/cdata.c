@@ -47,9 +47,12 @@ void buff_trim(FIELD *current, char *buffer)
 	buffer[len + 1] = '\0';
 }
 
-void setfield_localtime(FIELD *cdata_field[])
+void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 {
 	char buff[128] = {0};
+	if ((setenv("TZ", cdata->timezone, 1) != 0))
+		return;
+	tzset();
 	
 	struct tm *gettime = malloc(sizeof(struct tm));
 	if (!gettime)
@@ -370,7 +373,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						break;
 						
 					case 9: // tab
-						setfield_localtime(cdata_field);
+						setfield_localtime(cdata_field, cdata);
 						break;
 						
 					case '\n':
@@ -426,7 +429,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						break;
 						
 					case 9: // tab
-						setfield_localtime(cdata_field);
+						setfield_localtime(cdata_field, cdata);
 						break;
 						
 					case 27: // esc
