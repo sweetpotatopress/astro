@@ -153,3 +153,4 @@ struct io {
 enum mode { NORMAL, INSERT };
 
 void zxx_init(int *z_arr[]);
+void config_parse(struct cdata *cdata);

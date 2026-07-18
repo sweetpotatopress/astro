@@ -135,6 +135,7 @@ int main()
 	cdata->city = malloc(MAXBUF);
 	if (!cdata->city)
 		ERR_EXIT("ERR: main cdata->city malloc");
+	
 		
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)
@@ -244,6 +245,8 @@ int main()
 	show_panel(main_panel);
 	
 	set_localtime(cdata);
+	config_parse(cdata);
+	
 	pxx_init(cusps, p_arr, cdata, pxx);
 	draw_chart(main_win, cusps, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
