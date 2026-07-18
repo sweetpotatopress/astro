@@ -49,6 +49,7 @@ install: all
 	/bin/mkdir -p $(INSTALL_DIR)
 	/bin/cp $(TARGET) $(INSTALL_DIR)/$(TARGET)
 	@echo "-x--o Creating data directories --oo-"
+	/bin/mkdir -p $(REAL_HOME)/.config/astro; \
 	/bin/mkdir -p $(REAL_HOME)/.local/share/astro/charts; \
 	/bin/chown -R $(REAL_USER):$(REAL_USER) $(REAL_HOME)/.local/share/astro; \
 	/bin/cp -r $(SWE_DIR)/ephe $(REAL_HOME)/.local/share/astro/; \
