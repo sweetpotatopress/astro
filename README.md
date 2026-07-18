@@ -81,12 +81,14 @@ h/l - - - left/right
  
  compiled astro binary: /usr/local/bin  
  
- create a file named 'config' in .config/astro to set open location  
- config template, tz is IANA format  
+ ~optional~
+ create a file named 'config' in .config/astro to set local timezone and location  
+ config template, timezone is IANA format  
+ 
  ```
  timezone = America/Chicago
- latitude = 50.123456
- longitude = -100.123456
+ latitude = 41.85003
+ longitude = -87.65005
  ```
  
  **TODO**
