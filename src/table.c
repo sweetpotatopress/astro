@@ -260,8 +260,8 @@ const char *pl_sym[])
 	
 		char buff[MAXBUF];
 		
-		snprintf(buff, sizeof(buff), "%-6s%6.3f  %-4.0f %-4.0f",
-		pl_sym[j], p_arr[j][LONG_S], 
+		snprintf(buff, sizeof(buff), "%-6s%2.0f*%-2.02d'  %-4.0f %-4.0f",
+		pl_sym[j], p_arr[j][DEGREE_S], (int)p_arr[j][MIN_S],
 		p_arr[j][NEXT_R], fabs(p_arr[j][NEXT_S]));
 		
 		mvwprintw(retro_win, (int)i + 1, 0, "%s", buff);

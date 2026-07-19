@@ -58,9 +58,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define STATION 7
 #define DEGREE 8
 #define MIN 9
-#define NEXT_S 10
-#define NEXT_R 11
-#define MAXPXX 12
+#define DEGREE_S 10
+#define MIN_S 11
+#define NEXT_S 12
+#define NEXT_R 13
+#define MAXPXX 14
 
 #define ARI 1
 #define TAU 2

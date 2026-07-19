@@ -304,6 +304,11 @@ struct cdata *cdata, struct pxx *pxx)
 	{
 		p_arr[ipl][DEGREE] = (int)p_arr[ipl][LONG] % 30;
 		p_arr[ipl][MIN] = (int)((p_arr[ipl][LONG] - (int)p_arr[ipl][LONG]) * 60);
+		
+		p_arr[ipl][DEGREE_S] = (int)p_arr[ipl][LONG_S];
+		p_arr[ipl][MIN_S] = (fabs(p_arr[ipl][LONG_S] - (int)p_arr[ipl][LONG_S]) * 60);
+		if (p_arr[ipl][LONG_S] < 0)
+			p_arr[ipl][DEGREE_S] *= -1;
 	}
 }
 
