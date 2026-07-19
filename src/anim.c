@@ -33,7 +33,8 @@ struct cdata *cdata)
 		
 	if(cdata->state)
 	{
-		if (!isdigit((unsigned char)cdata->state[0]))
+		if (!isdigit((unsigned char)cdata->state[0]) &&
+		strlen(cdata->state) > 1)
 		{ // when not in the usa
 			startx += (int)strlen(cdata->city);
 			mvwprintw(main_win, starty, startx, ", %s", cdata->state);
