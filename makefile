@@ -51,6 +51,7 @@ install: all
 	@echo "-x--o Creating data directories --oo-"
 	/bin/mkdir -p $(REAL_HOME)/.config/astro; \
 	/bin/mkdir -p $(REAL_HOME)/.local/share/astro/charts; \
+	/bin/chown -R $(REAL_USER):$(REAL_USER) $(REAL_HOME)/.config/astro; \
 	/bin/chown -R $(REAL_USER):$(REAL_USER) $(REAL_HOME)/.local/share/astro; \
 	/bin/cp -r $(SWE_DIR)/ephe $(REAL_HOME)/.local/share/astro/; \
 	/bin/cp city-db $(REAL_HOME)/.local/share/astro/city-db
