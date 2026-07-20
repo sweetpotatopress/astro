@@ -283,11 +283,11 @@ chtype ch)
 	}
 }
 
-void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
+void draw_chart(WINDOW *win, double cusps[], double *p_arr[], int *z_arr[],
 struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[])
 {
 	curs_set(0);
-	werase(main_win);
+	werase(win);
 	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
 	
 	int offsetx = 0;
@@ -300,25 +300,25 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	int centerx = (COLS / 2) + offsetx;
 	
 	// zodiac
-	draw_circle(main_win, radius + 4, centery, centerx, '`');
+	draw_circle(win, radius + 4, centery, centerx, '`');
 	// out
-	draw_circle(main_win, radius, centery, centerx,'.');
+	draw_circle(win, radius, centery, centerx,'.');
 	// in
-	draw_circle(main_win, (radius / 2) - 1, centery, centerx, '.');
+	draw_circle(win, (radius / 2) - 1, centery, centerx, '.');
 	
-	draw_house(main_win, cusps, radius + 4, centery, centerx, '`');
+	draw_house(win, cusps, radius + 4, centery, centerx, '`');
 	
-	zo_pos(main_win, cusps, radius + 3, centery, centerx, pxx,
+	zo_pos(win, cusps, radius + 3, centery, centerx, pxx,
 	zo_sym, z_arr);
 	
-	planet_pos(main_win, cusps, p_arr, z_arr,
+	planet_pos(win, cusps, p_arr, z_arr,
 	radius - 5, centery, centerx, pl_sym);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(main_win, cusps, p_arr, z_arr,
+		ascmc_pos(win, cusps, p_arr, z_arr,
 		(radius / 2) + 4, centery, centerx);
 	
 	// status bar
-	mvwhline(main_win, 1, COLS - 15, '.', COLS);
-	mvwvline(main_win, 0, COLS - 15, '.', 2);
+	mvwhline(win, 1, COLS - 15, '.', COLS);
+	mvwvline(win, 0, COLS - 15, '.', 2);
 }
