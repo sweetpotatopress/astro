@@ -82,8 +82,8 @@ double *p_arr[], int *z_arr[])
 	}
 }
 
-void planet_pos(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
-int radius, int center_y, int center_x, 
+void planet_pos(WINDOW *win, double cusps[], double *p_arr[], int *z_arr[],
+int radius, int centery, int centerx, 
 const char *pl_sym[])
 {
 	int sign_num = (int)(cusps[1] / 30.0);
@@ -152,36 +152,36 @@ const char *pl_sym[])
 		double cos_rad = cos(angle_rad);
 		double sin_rad = sin(angle_rad);
 		
-		int x = center_x - (int)(radius * cos_rad);
-		int y = center_y + (int)(radius * sin_rad * 0.5);
+		int x = centerx - (int)(radius * cos_rad);
+		int y = centery + (int)(radius * sin_rad * 0.5);
 		
-		degree_color(main_win, y-1, x, i, p_arr, z_arr);
-		mvwaddstr(main_win, y, x, pl_sym[i]);
+		degree_color(win, y-1, x, i, p_arr, z_arr);
+		mvwaddstr(win, y, x, pl_sym[i]);
 	
 		if (p_arr[i][RETRO] > 0 && i != SE_TRUE_NODE)
 		{
-			wattron(main_win, COLOR_PAIR(FIRE));
-			mvwprintw(main_win, y, x-1, "r");
-			wattroff(main_win, COLOR_PAIR(FIRE));
+			wattron(win, COLOR_PAIR(FIRE));
+			mvwprintw(win, y, x-1, "r");
+			wattroff(win, COLOR_PAIR(FIRE));
 		}
 			
 		if ((int)p_arr[i][STATION] == STATION_R)
 		{
-			wattron(main_win, COLOR_PAIR(EARTH));
-			mvwaddstr(main_win, y, x-2, "sr");
-			wattroff(main_win, COLOR_PAIR(EARTH));
+			wattron(win, COLOR_PAIR(EARTH));
+			mvwaddstr(win, y, x-2, "sr");
+			wattroff(win, COLOR_PAIR(EARTH));
 		}
 		else if ((int)p_arr[i][STATION] == STATION_D)
 		{
-			wattron(main_win, COLOR_PAIR(EARTH));
-			mvwaddstr(main_win, y, x -2, "sd");
-			wattroff(main_win, COLOR_PAIR(EARTH));
+			wattron(win, COLOR_PAIR(EARTH));
+			mvwaddstr(win, y, x -2, "sd");
+			wattroff(win, COLOR_PAIR(EARTH));
 		}
 	}
 }
 
-void ascmc_pos(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
-int radius, int center_y, int center_x)
+void ascmc_pos(WINDOW *win, double cusps[], double *p_arr[], int *z_arr[],
+int radius, int centery, int centerx)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
@@ -191,17 +191,17 @@ int radius, int center_y, int center_x)
 	{
 		double rad = (p_arr[i][LONG] - cusps[1]) * M_PI / 180.0;
 		
-		int x = center_x - (int)(radius * cos(rad));
-		int y = center_y + (int)(radius * sin(rad) * 0.5);
+		int x = centerx - (int)(radius * cos(rad));
+		int y = centery + (int)(radius * sin(rad) * 0.5);
 		
-		mvwaddstr(main_win, y, x, ascmc_sym[j]);
+		mvwaddstr(win, y, x, ascmc_sym[j]);
 		
-		degree_color(main_win, y-1, x, i, p_arr, z_arr);
+		degree_color(win, y-1, x, i, p_arr, z_arr);
 	}
 }
 
-void zo_pos(WINDOW *main_win, double cusps[],
-int radius, int center_y, int center_x,
+void zo_pos(WINDOW *win, double cusps[],
+int radius, int centery, int centerx,
 struct pxx *pxx, const char *zo_sym[], int *z_arr[])
 {
 	int asc_sign = (int)(pxx->dasc[LONG] / 30) - 1;
@@ -215,26 +215,26 @@ struct pxx *pxx, const char *zo_sym[], int *z_arr[])
 		
 		double rad = (cusps[i] - sign_inc) * M_PI / 180.0;
 		
-		int x = center_x - (int)(radius * cos(rad));
-		int y = center_y + (int)(radius * sin(rad) * 0.5);
+		int x = centerx - (int)(radius * cos(rad));
+		int y = centery + (int)(radius * sin(rad) * 0.5);
 		
-		zodiac_color(main_win, y, x, sign, zo_sym, z_arr);
+		zodiac_color(win, y, x, sign, zo_sym, z_arr);
 	}
 }
 
-void draw_house(WINDOW *main_win, double cusps[],
-int radius, int center_y, int center_x,
+void draw_house(WINDOW *win, double cusps[],
+int radius, int centery, int centerx,
 chtype ch)
 {
 	for (int i = ARI; i < ZMAX; ++i)
 	{
 		double rad = cusps[i] * M_PI / 180.0;
 		
-		int edge_x = center_x - (int)(radius * cos(rad));
-		int edge_y = center_y + (int)(radius * sin(rad) * 0.5);
+		int edge_x = centerx - (int)(radius * cos(rad));
+		int edge_y = centery + (int)(radius * sin(rad) * 0.5);
 		
-		int half_x = center_x - (int)((radius / 2) * cos(rad));
-		int half_y = center_y + (int)((radius / 2)  * sin(rad) * 0.5);
+		int half_x = centerx - (int)((radius / 2) * cos(rad));
+		int half_y = centery + (int)((radius / 2)  * sin(rad) * 0.5);
 		
 		int dx = edge_x - half_x;
 		int dy = edge_y - half_y;
@@ -247,13 +247,13 @@ chtype ch)
 		{
 			int x = half_x + (dx * j) / distance;
 			int y = half_y + (dy * j) / distance;
-			mvwaddch(main_win, y, x, ch);
+			mvwaddch(win, y, x, ch);
 		}
 	}
 }
 
-void draw_circle(WINDOW *main_win,
-int radius, int center_y, int center_x,
+void draw_circle(WINDOW *win,
+int radius, int cy, int cx,
 chtype ch)
 {
 	int x = 0;
@@ -262,15 +262,15 @@ chtype ch)
 	
 	while (x <= y)
 	{
-		mvwaddch(main_win, center_y + y / 2, center_x + x, ch);
-		mvwaddch(main_win, center_y + y / 2, center_x - x, ch);
-		mvwaddch(main_win, center_y - y / 2, center_x + x, ch);
-		mvwaddch(main_win, center_y - y / 2, center_x - x, ch);
+		mvwaddch(win, cy + y / 2, cx + x, ch);
+		mvwaddch(win, cy + y / 2, cx - x, ch);
+		mvwaddch(win, cy - y / 2, cx + x, ch);
+		mvwaddch(win, cy - y / 2, cx - x, ch);
 		
-		mvwaddch(main_win, center_y + x / 2, center_x + y, ch);
-		mvwaddch(main_win, center_y + x / 2, center_x - y, ch);
-		mvwaddch(main_win, center_y - x / 2, center_x + y, ch);
-		mvwaddch(main_win, center_y - x / 2, center_x - y, ch);
+		mvwaddch(win, cy + x / 2, cx + y, ch);
+		mvwaddch(win, cy + x / 2, cx - y, ch);
+		mvwaddch(win, cy - x / 2, cx + y, ch);
+		mvwaddch(win, cy - x / 2, cx - y, ch);
 	
 		if (d < 0)
 			d = d + 4 * x + 6;
@@ -296,26 +296,27 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	else
 		offsetx = 0;
 		
-	int center_y = (LINES / 2);
-	int center_x = (COLS / 2) + offsetx;
+	int centery = (LINES / 2);
+	int centerx = (COLS / 2) + offsetx;
 	
 	// zodiac
-	draw_circle(main_win, radius + 4, center_y, center_x, '`');
+	draw_circle(main_win, radius + 4, centery, centerx, '`');
 	// out
-	draw_circle(main_win, radius, center_y, center_x,'.');
+	draw_circle(main_win, radius, centery, centerx,'.');
 	// in
-	draw_circle(main_win, (radius / 2) - 1, center_y, center_x, '.');
+	draw_circle(main_win, (radius / 2) - 1, centery, centerx, '.');
 	
-	draw_house(main_win, cusps, radius + 4, center_y, center_x, '`');
+	draw_house(main_win, cusps, radius + 4, centery, centerx, '`');
 	
-	zo_pos(main_win, cusps, radius + 3, center_y, center_x, pxx,
+	zo_pos(main_win, cusps, radius + 3, centery, centerx, pxx,
 	zo_sym, z_arr);
 	
-	planet_pos(main_win, cusps, p_arr, z_arr, radius - 5, center_y, center_x,
-	pl_sym);
+	planet_pos(main_win, cusps, p_arr, z_arr,
+	radius - 5, centery, centerx, pl_sym);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(main_win, cusps, p_arr, z_arr, (radius / 2) + 4, center_y, center_x);
+		ascmc_pos(main_win, cusps, p_arr, z_arr,
+		(radius / 2) + 4, centery, centerx);
 	
 	// status bar
 	mvwhline(main_win, 1, COLS - 15, '.', COLS);
