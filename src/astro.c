@@ -313,6 +313,7 @@ int main()
 				case 'w':
 					save_chart(cdata, io,
 					citybuffer, statebuffer, countrybuffer);
+					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'e':
