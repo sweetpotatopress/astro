@@ -14,11 +14,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
  
 #include <panel.h>
 
-void draw_chart(WINDOW *main_win, double cusps[], double *p_arr[], int *z_arr[],
+void draw_chart(WINDOW *win, double cusp[], double sign_cusp[], double *p_arr[], int *z_arr[],
 struct pxx *pxx, struct cdata *cdata,
 const char *pl_sym[], const char *zo_sym[]);
 
-void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata);
+void cur_chart_data(WINDOW *win, struct io *io, struct cdata *cdata);
 
 void zodiac_color(WINDOW *win, int y, int x, int sign,
 const char *zo_sym[], int *z_arr[]);

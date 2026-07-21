@@ -221,7 +221,7 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-void pxx_init(double cusps[], double *p_arr[],
+void pxx_init(double cusp[], double sign_cusp[], double *p_arr[],
 struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl, iret;
@@ -273,7 +273,12 @@ struct cdata *cdata, struct pxx *pxx)
 	}
 	
 	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
-	ihsy, cusps, ascmc);
+	'W', sign_cusp, ascmc);
+	if (iret < 0)
+		ERR_EXIT("ERR: swe_houses_ex failure");
+		
+	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
+	ihsy, cusp, ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		

@@ -82,11 +82,11 @@ double *p_arr[], int *z_arr[])
 	}
 }
 
-void planet_pos(WINDOW *win, double cusps[], double *p_arr[], int *z_arr[],
+void planet_pos(WINDOW *win, double sign_cusp[], double *p_arr[], int *z_arr[],
 int radius, int centery, int centerx, 
 const char *pl_sym[])
 {
-	int sign_num = (int)(cusps[1] / 30.0);
+	int sign_num = (int)(sign_cusp[1] / 30.0);
 	double asc = sign_num * 30.0;
 	
 	int iter_count = 50;
@@ -180,7 +180,7 @@ const char *pl_sym[])
 	}
 }
 
-void ascmc_pos(WINDOW *win, double cusps[], double *p_arr[], int *z_arr[],
+void ascmc_pos(WINDOW *win, double sign_cusp[], double *p_arr[], int *z_arr[],
 int radius, int centery, int centerx)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
@@ -189,7 +189,7 @@ int radius, int centery, int centerx)
 	int i = 12;
 	for (j = 0; i < 16; ++i, ++j)
 	{
-		double rad = (p_arr[i][LONG] - cusps[1]) * M_PI / 180.0;
+		double rad = (p_arr[i][LONG] - sign_cusp[1]) * M_PI / 180.0;
 		
 		int x = centerx - (int)(radius * cos(rad));
 		int y = centery + (int)(radius * sin(rad) * 0.5);
@@ -200,7 +200,7 @@ int radius, int centery, int centerx)
 	}
 }
 
-void zo_pos(WINDOW *win, double cusps[],
+void zo_pos(WINDOW *win, double sign_cusp[],
 int radius, int centery, int centerx,
 struct pxx *pxx, const char *zo_sym[], int *z_arr[])
 {
@@ -213,7 +213,7 @@ struct pxx *pxx, const char *zo_sym[], int *z_arr[])
 
 		int sign_inc = (((int)pxx->dasc[LONG] / 30) * 30) + 15;
 		
-		double rad = (cusps[i] - sign_inc) * M_PI / 180.0;
+		double rad = (sign_cusp[i] - sign_inc) * M_PI / 180.0;
 		
 		int x = centerx - (int)(radius * cos(rad));
 		int y = centery + (int)(radius * sin(rad) * 0.5);
@@ -222,13 +222,13 @@ struct pxx *pxx, const char *zo_sym[], int *z_arr[])
 	}
 }
 
-void draw_house(WINDOW *win, double cusps[],
+void draw_house(WINDOW *win, double cusp[],
 int radius, int centery, int centerx,
 chtype ch)
 {
 	for (int i = ARI; i < ZMAX; ++i)
 	{
-		double rad = cusps[i] * M_PI / 180.0;
+		double rad = cusp[i] * M_PI / 180.0;
 		
 		int edge_x = centerx - (int)(radius * cos(rad));
 		int edge_y = centery + (int)(radius * sin(rad) * 0.5);
@@ -283,7 +283,7 @@ chtype ch)
 	}
 }
 
-void draw_chart(WINDOW *win, double cusps[], double *p_arr[], int *z_arr[],
+void draw_chart(WINDOW *win, double cusp[], double sign_cusp[], double *p_arr[], int *z_arr[],
 struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[])
 {
 	curs_set(0);
@@ -306,16 +306,16 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	// in
 	draw_circle(win, (radius / 2) - 1, centery, centerx, '.');
 	
-	draw_house(win, cusps, radius + 4, centery, centerx, '`');
+	draw_house(win, cusp, radius + 4, centery, centerx, '`');
 	
-	zo_pos(win, cusps, radius + 3, centery, centerx, pxx,
+	zo_pos(win, sign_cusp, radius + 3, centery, centerx, pxx,
 	zo_sym, z_arr);
 	
-	planet_pos(win, cusps, p_arr, z_arr,
+	planet_pos(win, sign_cusp, p_arr, z_arr,
 	radius - 5, centery, centerx, pl_sym);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(win, cusps, p_arr, z_arr,
+		ascmc_pos(win, sign_cusp, p_arr, z_arr,
 		(radius / 2) + 4, centery, centerx);
 	
 	// status bar

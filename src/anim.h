@@ -17,13 +17,13 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEW_CHART_ARG() main_win, planet_win, retro_win, \
 	planet_panel, retro_panel, \
 	io, cdata, pxx, \
-	planet_trig, retro_trig, cusps, p_arr, z_arr, \
+	planet_trig, retro_trig, cusp, sign_cusp, p_arr, z_arr, \
 	pl_sym, zo_sym, moon
 	
 #define NEW_CHART_PARAM() WINDOW *main_win, WINDOW *planet_win, WINDOW *retro_win, \
 PANEL **planet_panel, PANEL **retro_panel, \
 struct io *io, struct cdata *cdata, struct pxx *pxx, \
-int *planet_trig, int *retro_trig, double cusps[], double *p_arr[], int *z_arr[], \
+int *planet_trig, int *retro_trig, double cusp[], double sign_cusp[], double *p_arr[], int *z_arr[], \
 const char *pl_sym[], const char *zo_sym[], const char *moon[] 
 
 void new_chart(NEW_CHART_PARAM());

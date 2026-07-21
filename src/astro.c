@@ -190,7 +190,8 @@ int main()
 	if (!countrybuffer)
 		ERR_EXIT("ERR: main countrybuffer alloc fail");
 		
-	double cusps[13];
+	double cusp[13];
+	double sign_cusp[13];
 	
 	const char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -250,8 +251,8 @@ int main()
 	set_localtime(cdata);
 	config_parse(cdata);
 	
-	pxx_init(cusps, p_arr, cdata, pxx);
-	draw_chart(main_win, cusps, p_arr, z_arr, pxx, cdata,
+	pxx_init(cusp, sign_cusp, p_arr, cdata, pxx);
+	draw_chart(main_win, cusp, sign_cusp, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 
