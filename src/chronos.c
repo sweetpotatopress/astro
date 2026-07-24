@@ -323,9 +323,7 @@ struct cdata *cdata, struct pxx *pxx)
 			p_arr[ipl][STATION] = 0;
 	}
 	
-	if (sol_eclipse[0] < 300)
-		eclipse(jd_ut, luna_eclipse, sol_eclipse, cdata);
-	else if (sol_eclipse[0] > 300)
+	eclipse(jd_ut, luna_eclipse, sol_eclipse, cdata);
 	
 	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
 	'W', sign_cusp, ascmc);
