@@ -104,9 +104,10 @@ void next_retro_station(double jd_ut, double *p_arr[],
 int *calc_flag, int *iter, double *last_jd)
 {
 	int ipl;
-	int itermax = 10;
-	double is_retro = 0.5;
-
+	const int itermax = 10;
+	const int station = 7;
+	const double is_retro = 0.5;
+	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
 		if ((p_arr[ipl][NEXT_R] < 50.0 && iter[ipl] >= itermax) ||
@@ -152,10 +153,10 @@ int *calc_flag, int *iter, double *last_jd)
 			p_arr[ipl][RETRO] = 1;
 		else
 			p_arr[ipl][RETRO] = 0;
-		if (p_arr[ipl][NEXT_S] <= STATION_POINT)
+		if (p_arr[ipl][NEXT_S] <= station)
 			p_arr[ipl][STATION] = STATION_D;
 		else if (p_arr[ipl][NEXT_R] <=
-		STATION_POINT && p_arr[ipl][NEXT_R] > is_retro)
+		station && p_arr[ipl][NEXT_R] > is_retro)
 			p_arr[ipl][STATION] = STATION_R;
 		else
 			p_arr[ipl][STATION] = 0;
@@ -234,6 +235,7 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mon = tm_utc->tm_mon + 1;
 	cdata->utc_mday = tm_utc->tm_mday;
 }
+
 void eclipse(double jd_ut,
 double *luna_eclipse, double *sol_eclipse,
 struct cdata *cdata)
@@ -289,7 +291,8 @@ void pxx_init(double cusp[], double sign_cusp[],
 double *luna_eclipse, double *sol_eclipse, double *p_arr[],
 struct cdata *cdata, struct pxx *pxx)
 {
-	int iflag, ipl, iret;
+	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+	int ipl, iret;
 	double xx[6];
 	char serr[AS_MAXCH];
 	double ascmc[10];
@@ -299,8 +302,6 @@ struct cdata *cdata, struct pxx *pxx)
 	
 	double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
 	cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
-	
-	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	
 	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
 	{
@@ -316,8 +317,8 @@ struct cdata *cdata, struct pxx *pxx)
 		p_arr[ipl][DIST_S] = xx[DIST_S];
 	}
 	
-	int calc_flag[RETROCOUNT] = {0};
-	int iter[RETROCOUNT] = {0};
+	int calc_flag[SE_PLUTO + 1] = {0};
+	int iter[SE_PLUTO + 1] = {0};
 	double last_jd = jd_ut;
 	
 	next_retro_station(jd_ut, p_arr, calc_flag, iter, &last_jd);
@@ -357,6 +358,7 @@ struct cdata *cdata, struct pxx *pxx)
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
 	
+	// seperate degree and minutes
 	for (ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
 	{
 		p_arr[ipl][DEGREE] = (int)p_arr[ipl][LONG] % 30;
@@ -368,5 +370,3 @@ struct cdata *cdata, struct pxx *pxx)
 			p_arr[ipl][DEGREE_S] *= -1;
 	}
 }
-
-

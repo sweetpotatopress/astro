@@ -15,9 +15,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NIGHT_SECT 0
 #define DAY_SECT 1
 
-#define RETROCOUNT (SE_PLUTO + 1)
-#define STATION_POINT 7
-
 #define STATION_R 1
 #define STATION_D 2
 
