@@ -79,7 +79,7 @@ struct cdata *cdata)
 
 void new_chart(NEW_CHART_PARAM())
 {
-	pxx_init(cusp, sign_cusp, p_arr, cdata, pxx);
+	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, p_arr, cdata, pxx);
 	draw_chart(main_win, cusp, sign_cusp, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
@@ -92,7 +92,8 @@ void new_chart(NEW_CHART_PARAM())
 	}
 	if (*retro_trig > 0)
 	{
-		retro_table(retro_win, p_arr, pl_sym);
+		retro_table(retro_win, luna_eclipse, sol_eclipse,
+		p_arr, z_arr, zo_sym, pl_sym);
 		show_panel(*retro_panel);
 	}	
 	update_panels();
@@ -203,7 +204,7 @@ void solar_return(NEW_CHART_PARAM())
 		}
 		flushinp();
 		
-		pxx_init(cusp, sign_cusp, p_arr, cdata, pxx);
+		pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, p_arr, cdata, pxx);
 		
 		double temp_degree = pxx->dsun[LONG];
 		int iter = 3;
@@ -256,7 +257,7 @@ void solar_return(NEW_CHART_PARAM())
 			cpt(cdata, &temp, result, &t, 0);
 			cpt(cdata, &temp, result, &t, 1);
 			
-			pxx_init(cusp, sign_cusp, p_arr, cdata, pxx);
+			pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, p_arr, cdata, pxx);
 			cur_chart_data(main_win, io, cdata);
 		}
 	}
@@ -310,7 +311,8 @@ void animate_chart(NEW_CHART_PARAM())
 				
 				if (*retro_trig > 0)
 				{
-					retro_table(retro_win, p_arr, pl_sym);
+					retro_table(retro_win, luna_eclipse, sol_eclipse,
+					p_arr, z_arr, zo_sym, pl_sym);
 					show_panel(*retro_panel);
 				}
 				
@@ -328,7 +330,8 @@ void animate_chart(NEW_CHART_PARAM())
 				}
 				else
 				{
-					retro_table(retro_win, p_arr, pl_sym);
+					retro_table(retro_win, luna_eclipse, sol_eclipse,
+					p_arr, z_arr, zo_sym, pl_sym);
 					show_panel(*retro_panel);
 					*retro_trig = 1;
 				}

@@ -192,6 +192,8 @@ int main()
 		
 	double cusp[13];
 	double sign_cusp[13];
+	double luna_eclipse[6];
+	double sol_eclipse[6];
 	
 	const char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -251,7 +253,8 @@ int main()
 	set_localtime(cdata);
 	config_parse(cdata);
 	
-	pxx_init(cusp, sign_cusp, p_arr, cdata, pxx);
+	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse,
+	p_arr, cdata, pxx);
 	draw_chart(main_win, cusp, sign_cusp, p_arr, z_arr, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
@@ -262,7 +265,8 @@ int main()
 	
 	planet_table(planet_win, p_arr, z_arr, pxx,
 	pl_sym, zo_sym, moon);
-	retro_table(retro_win, p_arr, pl_sym);
+	retro_table(retro_win, luna_eclipse, sol_eclipse,
+	p_arr, z_arr, zo_sym, pl_sym);
 		
 	show_panel(planet_panel);
 	show_panel(retro_panel);
@@ -344,7 +348,8 @@ int main()
 					
 					if (retro_trig > 0)
 					{
-						retro_table(retro_win, p_arr, pl_sym);
+						retro_table(retro_win, luna_eclipse, sol_eclipse,
+						p_arr, z_arr, zo_sym, pl_sym);
 						show_panel(retro_panel);
 					}
 					
@@ -356,7 +361,8 @@ int main()
 				case 'o':
 					if (!retro_trig)
 					{
-						retro_table(retro_win, p_arr, pl_sym);
+						retro_table(retro_win, luna_eclipse, sol_eclipse,
+						p_arr, z_arr, zo_sym, pl_sym);
 						show_panel(retro_panel);
 						retro_trig = 1;
 					}

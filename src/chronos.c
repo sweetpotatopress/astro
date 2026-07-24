@@ -220,8 +220,59 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mon = tm_utc->tm_mon + 1;
 	cdata->utc_mday = tm_utc->tm_mday;
 }
+void eclipse(double jd_ut,
+double *luna_eclipse, double *sol_eclipse,
+struct cdata *cdata)
+{
+	double tret[10];
+	double attr[15];
+	double geopos[3];
+	double xx[6];
+	char serr[AS_MAXCH];
+	
+	geopos[0] = cdata->dlon;
+	geopos[1] = cdata->dlat;
+	geopos[2] = 0;
+	
+	swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, 0, serr);
+	
+	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+	
+	sol_eclipse[0] = fabs(tret[0] - jd_ut);
+	sol_eclipse[1] = attr[2];
+	
+	sol_eclipse[2] = ((int)xx[LONG] / 30) + 1;
+	
+	swe_lun_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, 0, serr);
+	
+	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+	
+	luna_eclipse[0] = fabs(tret[0] - jd_ut);
+	luna_eclipse[1] = attr[2];
+	
+	luna_eclipse[2] = ((int)xx[LONG] / 30) + 1;
+	
+	swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, 1, serr);
+	
+	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+	
+	sol_eclipse[3] = fabs(tret[0] - jd_ut);
+	sol_eclipse[4] = attr[2];
+	
+	sol_eclipse[5] = ((int)xx[LONG] / 30) + 1;
+	
+	swe_lun_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, 1, serr);
+	
+	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+	
+	luna_eclipse[3] = fabs(tret[0] - jd_ut);
+	luna_eclipse[4] = attr[2];
+	
+	luna_eclipse[5] = ((int)xx[LONG] / 30) + 1;
+}
 
-void pxx_init(double cusp[], double sign_cusp[], double *p_arr[],
+void pxx_init(double cusp[], double sign_cusp[],
+double *luna_eclipse, double *sol_eclipse, double *p_arr[],
 struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag, ipl, iret;
@@ -271,6 +322,10 @@ struct cdata *cdata, struct pxx *pxx)
 		else
 			p_arr[ipl][STATION] = 0;
 	}
+	
+	if (sol_eclipse[0] < 300)
+		eclipse(jd_ut, luna_eclipse, sol_eclipse, cdata);
+	else if (sol_eclipse[0] > 300)
 	
 	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
 	'W', sign_cusp, ascmc);

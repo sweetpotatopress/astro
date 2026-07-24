@@ -240,23 +240,39 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	"moon phase: %s", moon[moon_phase(pxx)]);
 }
 
-void retro_table(WINDOW *retro_win, double *p_arr[],
-const char *pl_sym[])
+void retro_table(WINDOW *retro_win,
+double *luna_eclipse, double *sol_eclipse,
+double *p_arr[], int *z_arr[],
+const char *zo_sym[], const char *pl_sym[])
 {
-	size_t p_count = 8;
+	size_t p_count = 10;
 	
-	mvwin(retro_win, LINES - 9, COLS - 24);
-	wresize(retro_win, 9, 24);
+	mvwin(retro_win, LINES - 11, COLS - 24);
+	wresize(retro_win, 11, 24);
 	
 	werase(retro_win);
-        
-    size_t i = 0, j = SE_MERCURY;
+	
+	mvwprintw(retro_win, 0, 0, "(()");
+	zodiac_color(retro_win, 0, 4, (int)luna_eclipse[2], zo_sym, z_arr);
+	mvwprintw(retro_win, 0, 8, "%2.f", luna_eclipse[0]);
+ 
+	zodiac_color(retro_win, 0, 12, (int)luna_eclipse[5], zo_sym, z_arr);
+	mvwprintw(retro_win, 0, 16, "-%2.f", luna_eclipse[3]);
+	
+	mvwprintw(retro_win, 1, 0, "(o)");
+	zodiac_color(retro_win, 1, 4, (int)sol_eclipse[2], zo_sym, z_arr);
+	mvwprintw(retro_win, 1, 8, "%2.f", sol_eclipse[0]);
+ 
+	zodiac_color(retro_win, 1, 12, (int)sol_eclipse[5], zo_sym, z_arr);
+	mvwprintw(retro_win, 1, 16, "-%2.f", sol_eclipse[3]);
+   
+    size_t i = 2, j = SE_MERCURY;
 	for (; i < p_count; ++i, ++j)
 	{
 		char header[MAXBUF];
 		snprintf(header, sizeof(header), "%-6s%6s  %4s %4s", 
 		"x---x-", "speed", "n->r", "n->s");
-		mvwprintw(retro_win, 0, 0, "%s", header);
+		mvwprintw(retro_win, 2, 0, "%s", header);
 	
 		char buff[MAXBUF];
 		

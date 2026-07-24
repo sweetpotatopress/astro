@@ -31,6 +31,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 		&planet_panel, &retro_panel,\
 		io, cdata, pxx,\
 		&planet_trig, &retro_trig, cusp, sign_cusp, p_arr, z_arr, \
+		luna_eclipse, sol_eclipse, \
 		pl_sym, zo_sym, moon
 
 #define PWINY 40
@@ -174,5 +175,6 @@ void config_parse(struct cdata *cdata);
 
 void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx,
 const char *pl_sym[], const char *zo_sym[], const char *moon[]);
-void retro_table(WINDOW *retro_win, double *p_arr[], 
-const char *pl_sym[]);
+void retro_table(WINDOW *retro_win, double *luna_eclipse, double *sol_eclipse,
+double *p_arr[], int *z_arr[], 
+const char *zo_sym[], const char *pl_sym[]);
