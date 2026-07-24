@@ -49,11 +49,11 @@ int months(int month, int year)
 void retro_calc(double jd_ut, int iter[],
 int ipl, double *p_arr[])
 {
-	int iflag;
+	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	double xx[6];
 	char serr[AS_MAXCH];
-	
-	iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+	double parsemax = 5;
+	double parsemin = 0.5;
 	
 	double jd_copy = jd_ut;
 	
@@ -61,12 +61,12 @@ int ipl, double *p_arr[])
 	int retro_found = 0;
 	while(speed > 0.0 && !retro_found)
 	{
-		jd_copy += PARSEMAX;
+		jd_copy += parsemax;
 		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 		speed = xx[LONG_S];
 		while (speed < 0.0)
 		{
-			jd_copy -= PARSEMIN;
+			jd_copy -= parsemin;
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
 			p_arr[ipl][NEXT_R] = jd_copy - jd_ut;
@@ -76,7 +76,7 @@ int ipl, double *p_arr[])
 	
 	while(speed >= 0.0 && retro_found)
 	{
-		jd_copy += PARSEMAX;
+		jd_copy += parsemax;
 		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 		speed = xx[LONG_S];
 	}
@@ -84,12 +84,12 @@ int ipl, double *p_arr[])
 	int station_found = 0;
 	while(speed < 0.0 && !station_found)
 	{
-		jd_copy += PARSEMAX;
+		jd_copy += parsemax;
 		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 		speed = xx[LONG_S];
 		while (speed > 0.0)
 		{
-			jd_copy -= PARSEMIN;
+			jd_copy -= parsemin;
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
 			p_arr[ipl][NEXT_S] = jd_copy - jd_ut;
@@ -104,11 +104,13 @@ void next_retro_station(double jd_ut, double *p_arr[],
 int *calc_flag, int *iter, double *last_jd)
 {
 	int ipl;
+	int itermax = 10;
+	double is_retro = 0.5;
 
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		if ((p_arr[ipl][NEXT_R] < 50.0 && iter[ipl] >= ITERMAX) ||
-		(p_arr[ipl][NEXT_R] > 90.0 && iter[ipl] >= ITERMAX))
+		if ((p_arr[ipl][NEXT_R] < 50.0 && iter[ipl] >= itermax) ||
+		(p_arr[ipl][NEXT_R] > 90.0 && iter[ipl] >= itermax))
 			retro_calc(jd_ut, iter, ipl, p_arr);
 			
 		if (p_arr[ipl][NEXT_R] > -0.0001 && p_arr[ipl][NEXT_R] < 0.0001)
@@ -120,7 +122,7 @@ int *calc_flag, int *iter, double *last_jd)
 			calc_flag[ipl] = 1;
 			
 			if (p_arr[ipl][LONG_S] < 0.0)
-				p_arr[ipl][NEXT_R] = IS_RETRO;
+				p_arr[ipl][NEXT_R] = is_retro;
 		}
 		else if (fabs(*last_jd - jd_ut) >= 1.0)
 		{
@@ -131,20 +133,32 @@ int *calc_flag, int *iter, double *last_jd)
 				p_arr[ipl][NEXT_S] += offset;
 				p_arr[ipl][NEXT_R] -= offset;
 				if (p_arr[ipl][NEXT_R] <= 0.0)
-					p_arr[ipl][NEXT_R] = IS_RETRO;
+					p_arr[ipl][NEXT_R] = is_retro;
 			}
 			else if (*last_jd > jd_ut)
 			{
 				p_arr[ipl][NEXT_S] += offset;
-				if (p_arr[ipl][NEXT_R] > IS_RETRO)
+				if (p_arr[ipl][NEXT_R] > is_retro)
 					p_arr[ipl][NEXT_R] += offset;
 			}
 
 			if (p_arr[ipl][LONG_S] < 0.0)
-				p_arr[ipl][NEXT_R] = IS_RETRO;
+				p_arr[ipl][NEXT_R] = is_retro;
 		}
 		
 		iter[ipl]++;
+		
+		if (p_arr[ipl][NEXT_R] <= is_retro)
+			p_arr[ipl][RETRO] = 1;
+		else
+			p_arr[ipl][RETRO] = 0;
+		if (p_arr[ipl][NEXT_S] <= STATION_POINT)
+			p_arr[ipl][STATION] = STATION_D;
+		else if (p_arr[ipl][NEXT_R] <=
+		STATION_POINT && p_arr[ipl][NEXT_R] > is_retro)
+			p_arr[ipl][STATION] = STATION_R;
+		else
+			p_arr[ipl][STATION] = 0;
 	}
 	*last_jd = jd_ut;
 }
@@ -306,22 +320,7 @@ struct cdata *cdata, struct pxx *pxx)
 	int iter[RETROCOUNT] = {0};
 	double last_jd = jd_ut;
 	
-	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
-	{
-		next_retro_station(jd_ut, p_arr, calc_flag, iter, &last_jd);
-		
-		if (p_arr[ipl][NEXT_R] <= IS_RETRO)
-			p_arr[ipl][RETRO] = 1;
-		else
-			p_arr[ipl][RETRO] = 0;
-		if (p_arr[ipl][NEXT_S] <= STATION_POINT)
-			p_arr[ipl][STATION] = STATION_D;
-		else if (p_arr[ipl][NEXT_R] <=
-		STATION_POINT && p_arr[ipl][NEXT_R] > IS_RETRO)
-			p_arr[ipl][STATION] = STATION_R;
-		else
-			p_arr[ipl][STATION] = 0;
-	}
+	next_retro_station(jd_ut, p_arr, calc_flag, iter, &last_jd);
 	
 	eclipse(jd_ut, luna_eclipse, sol_eclipse, cdata);
 	

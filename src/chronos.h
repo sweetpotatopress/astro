@@ -15,10 +15,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NIGHT_SECT 0
 #define DAY_SECT 1
 
-#define IS_RETRO 0.5
-#define ITERMAX 10
-#define PARSEMAX 5
-#define PARSEMIN 0.5
 #define RETROCOUNT (SE_PLUTO + 1)
 #define STATION_POINT 7
 
