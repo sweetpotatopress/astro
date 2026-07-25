@@ -243,8 +243,8 @@ void eclipse(double jd_ut,
 double *luna_eclipse, double *sol_eclipse,
 struct cdata *cdata)
 {
-	double tret[10];
-	double attr[15];
+	double tret[10]; // 0 = time of eclipse
+	double attr[15]; // 2 = obscuration
 	double geopos[3];
 	double xx[6];
 	char serr[AS_MAXCH];
@@ -253,41 +253,44 @@ struct cdata *cdata)
 	geopos[1] = cdata->dlat;
 	geopos[2] = 0;
 	
-	swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, 0, serr);
+	// eclipse[0] = days away, 1 = obscuration, 2 = sign
+	
+
+	double *ec[] = { luna_eclipse, sol_eclipse };
+	
+	swe_lun_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, NEXT_E, serr);
 	
 	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
 	
-	sol_eclipse[0] = fabs(tret[0] - jd_ut);
-	sol_eclipse[1] = attr[2];
+	luna_eclipse[EN_JUL] = fabs(tret[EN_JUL] - jd_ut);
 	
-	sol_eclipse[2] = ((int)xx[LONG] / 30) + 1;
+	luna_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
 	
-	swe_lun_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, 0, serr);
-	
-	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
-	
-	luna_eclipse[0] = fabs(tret[0] - jd_ut);
-	luna_eclipse[1] = attr[2];
-	
-	luna_eclipse[2] = ((int)xx[LONG] / 30) + 1;
-	
-	swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, 1, serr);
+	swe_lun_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, PREV_E, serr);
 	
 	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
 	
-	sol_eclipse[3] = fabs(tret[0] - jd_ut);
-	sol_eclipse[4] = attr[2];
+	luna_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
 	
-	sol_eclipse[5] = ((int)xx[LONG] / 30) + 1;
+	luna_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 	
-	swe_lun_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, 1, serr);
+	swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, NEXT_E, serr);
 	
 	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
 	
-	luna_eclipse[3] = fabs(tret[0] - jd_ut);
-	luna_eclipse[4] = attr[2];
+	sol_eclipse[EN_JUL] = fabs(tret[0] - jd_ut);
+	sol_eclipse[EN_OBS] = attr[2];
 	
-	luna_eclipse[5] = ((int)xx[LONG] / 30) + 1;
+	sol_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
+	
+	swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, PREV_E, serr);
+	
+	swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+	
+	sol_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
+	sol_eclipse[EP_OBS] = attr[2];
+	
+	sol_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 }
 
 void pxx_init(double cusp[], double sign_cusp[],
