@@ -22,14 +22,16 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define PREV_E 1
 
 #define EN_JUL 0
-#define EN_FJUL 1
-#define EN_OBS 2
-#define EN_SIGN 3
-#define EP_JUL 4
-#define EP_FJUL 5
-#define EP_OBS 6
-#define EP_SIGN 7
-#define EMAX 8
+#define EN_1JUL 1
+#define EN_FJUL 2
+#define EN_OBS 3
+#define EN_SIGN 4
+#define EP_JUL 5
+#define EP_1JUL 6
+#define EP_FJUL 7
+#define EP_OBS 8
+#define EP_SIGN 9
+#define EMAX 10
 
 void set_localtime(struct cdata *cdata);
 int months(int month, int year);
@@ -37,3 +39,4 @@ void chart_timeset(struct cdata *cdata,int *day_offset);
 void pxx_init(double cusp[], double sign_cusp[], double *luna_eclipse, double *sol_eclipse, double *p_arr[],
 struct cdata *cdata, struct pxx *pxx);
 int sect(struct pxx *pxx);
+void init_eclipse(double *luna_eclipse, double *sol_eclipse);
