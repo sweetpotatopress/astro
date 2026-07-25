@@ -52,12 +52,14 @@ int ipl, double *p_arr[])
 	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	double xx[6];
 	char serr[AS_MAXCH];
-	double parsemax = 5;
-	double parsemin = 0.5;
+	
+	const double parsemax = 5;
+	const double parsemin = 0.5;
 	
 	double jd_copy = jd_ut;
 	
 	double speed = p_arr[ipl][LONG_S];
+	
 	int retro_found = 0;
 	while(speed > 0.0 && !retro_found)
 	{
@@ -100,7 +102,7 @@ int ipl, double *p_arr[])
 	iter[ipl] = 0;
 }
 
-void next_retro_station(double jd_ut, double *p_arr[],
+void retro_station(double jd_ut, double *p_arr[],
 int *calc_flag, int *iter, double *last_jd)
 {
 	int ipl;
@@ -149,6 +151,7 @@ int *calc_flag, int *iter, double *last_jd)
 		
 		iter[ipl]++;
 		
+		// fill retro & station data
 		if (p_arr[ipl][NEXT_R] <= is_retro)
 			p_arr[ipl][RETRO] = 1;
 		else
@@ -321,7 +324,7 @@ struct cdata *cdata, struct pxx *pxx)
 	int iter[SE_PLUTO + 1] = {0};
 	double last_jd = jd_ut;
 	
-	next_retro_station(jd_ut, p_arr, calc_flag, iter, &last_jd);
+	retro_station(jd_ut, p_arr, calc_flag, iter, &last_jd);
 	
 	eclipse(jd_ut, luna_eclipse, sol_eclipse, cdata);
 	
