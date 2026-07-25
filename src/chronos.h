@@ -22,11 +22,14 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define PREV_E 1
 
 #define EN_JUL 0
-#define EN_OBS 1
-#define EN_SIGN 2
-#define EP_JUL 3
-#define EP_OBS 4
-#define EP_SIGN 5
+#define EN_FJUL 1
+#define EN_OBS 2
+#define EN_SIGN 3
+#define EP_JUL 4
+#define EP_FJUL 5
+#define EP_OBS 6
+#define EP_SIGN 7
+#define EMAX 8
 
 void set_localtime(struct cdata *cdata);
 int months(int month, int year);

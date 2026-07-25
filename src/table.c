@@ -253,18 +253,18 @@ const char *zo_sym[], const char *pl_sym[])
 	werase(retro_win);
 	
 	mvwprintw(retro_win, 0, 0, "(()");
-	zodiac_color(retro_win, 0, 4, (int)luna_eclipse[2], zo_sym, z_arr);
-	mvwprintw(retro_win, 0, 8, "%2.f", luna_eclipse[0]);
+	zodiac_color(retro_win, 0, 4, (int)luna_eclipse[EN_SIGN], zo_sym, z_arr);
+	mvwprintw(retro_win, 0, 8, "%2.f", luna_eclipse[EN_JUL]);
  
-	zodiac_color(retro_win, 0, 12, (int)luna_eclipse[5], zo_sym, z_arr);
-	mvwprintw(retro_win, 0, 16, "-%2.f", luna_eclipse[3]);
+	zodiac_color(retro_win, 0, 12, (int)luna_eclipse[EP_SIGN], zo_sym, z_arr);
+	mvwprintw(retro_win, 0, 16, "-%2.f", luna_eclipse[EP_JUL]);
 	
 	mvwprintw(retro_win, 1, 0, "(o)");
-	zodiac_color(retro_win, 1, 4, (int)sol_eclipse[2], zo_sym, z_arr);
-	mvwprintw(retro_win, 1, 8, "%2.f", sol_eclipse[0]);
+	zodiac_color(retro_win, 1, 4, (int)sol_eclipse[EN_SIGN], zo_sym, z_arr);
+	mvwprintw(retro_win, 1, 8, "%2.f", sol_eclipse[EN_JUL]);
  
-	zodiac_color(retro_win, 1, 12, (int)sol_eclipse[5], zo_sym, z_arr);
-	mvwprintw(retro_win, 1, 16, "-%2.f", sol_eclipse[3]);
+	zodiac_color(retro_win, 1, 12, (int)sol_eclipse[EP_SIGN], zo_sym, z_arr);
+	mvwprintw(retro_win, 1, 16, "-%2.f", sol_eclipse[EP_JUL]);
    
     size_t i = 2, j = SE_MERCURY;
 	for (; i < p_count; ++i, ++j)
