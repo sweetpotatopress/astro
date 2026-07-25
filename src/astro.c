@@ -192,8 +192,8 @@ int main()
 		
 	double cusp[13];
 	double sign_cusp[13];
-	double luna_eclipse[EMAX];
-	double sol_eclipse[EMAX];
+	double luna_eclipse[EMAX] = {0};
+	double sol_eclipse[EMAX] = {0};
 	
 	const char *home_dir = getenv("HOME");
 	if (!home_dir)

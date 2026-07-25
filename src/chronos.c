@@ -46,6 +46,78 @@ int months(int month, int year)
 	return days[month];
 }
 
+int sect(struct pxx *pxx)
+{
+	int sect;
+	double dist = pxx->dsun[LONG] - pxx->dasc[LONG];
+	
+	while (dist < 0)
+		dist += 360;
+	while (dist >= 360)
+		dist -= 360;
+		
+	if (dist > 180)
+		sect = DAY_SECT;
+	else
+		sect = NIGHT_SECT;
+	return sect;
+}
+
+void lots(int sect, struct pxx *pxx)
+{
+	double offset = (360 - pxx->dsun[LONG]);
+	double diff = (offset + pxx->dmoon[LONG]);
+	while (diff > 360.0)
+		diff -= 360.0;
+	
+	if (sect == DAY_SECT)
+	{
+		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
+		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
+	}
+	else // night
+	{
+		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
+		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
+	}
+	
+	while (pxx->dfor[LONG] < 0.0)
+		pxx->dfor[LONG] += 360.0;
+	while (pxx->dfor[LONG] > 360.0)
+		pxx->dfor[LONG] -= 360.0;
+		
+	while (pxx->dspir[LONG] < 0.0)
+		pxx->dspir[LONG] += 360.0;
+	while (pxx->dspir[LONG] > 360.0)
+		pxx->dspir[LONG] -= 360.0;
+}
+
+void calculate_utc(struct cdata *cdata)
+{
+	struct tm tm_in = {0};
+	tm_in.tm_year = cdata->tm_year - 1900;
+	tm_in.tm_mon = cdata->tm_mon - 1;
+	tm_in.tm_mday = cdata->tm_mday;
+	tm_in.tm_hour = cdata->tm_hour;
+	tm_in.tm_min = cdata->tm_min;
+	tm_in.tm_sec = cdata->tm_sec;
+	tm_in.tm_isdst = -1;
+	
+	time_t t = mktime(&tm_in);
+	struct tm *result = localtime(&t);
+	
+	cdata->tm_isdst = result->tm_isdst;
+	
+	struct tm *tm_utc = gmtime(&t);
+	
+	cdata->utc_hour = tm_utc->tm_hour + tm_utc->tm_min / 60.0 +
+	tm_utc->tm_sec / 3600.0;
+	
+	cdata->utc_year = tm_utc->tm_year + 1900;
+	cdata->utc_mon = tm_utc->tm_mon + 1;
+	cdata->utc_mday = tm_utc->tm_mday;
+}
+
 void retro_calc(double jd_ut, int iter[],
 int ipl, double *p_arr[])
 {
@@ -167,78 +239,6 @@ int *calc_flag, int *iter, double *last_jd)
 	*last_jd = jd_ut;
 }
 	
-int sect(struct pxx *pxx)
-{
-	int sect;
-	double dist = pxx->dsun[LONG] - pxx->dasc[LONG];
-	
-	while (dist < 0)
-		dist += 360;
-	while (dist >= 360)
-		dist -= 360;
-		
-	if (dist > 180)
-		sect = DAY_SECT;
-	else
-		sect = NIGHT_SECT;
-	return sect;
-}
-
-void lots(int sect, struct pxx *pxx)
-{
-	double offset = (360 - pxx->dsun[LONG]);
-	double diff = (offset + pxx->dmoon[LONG]);
-	while (diff > 360.0)
-		diff -= 360.0;
-	
-	if (sect == DAY_SECT)
-	{
-		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
-		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
-	}
-	else // night
-	{
-		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
-		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
-	}
-	
-	while (pxx->dfor[LONG] < 0.0)
-		pxx->dfor[LONG] += 360.0;
-	while (pxx->dfor[LONG] > 360.0)
-		pxx->dfor[LONG] -= 360.0;
-		
-	while (pxx->dspir[LONG] < 0.0)
-		pxx->dspir[LONG] += 360.0;
-	while (pxx->dspir[LONG] > 360.0)
-		pxx->dspir[LONG] -= 360.0;
-}
-
-void calculate_utc(struct cdata *cdata)
-{
-	struct tm tm_in = {0};
-	tm_in.tm_year = cdata->tm_year - 1900;
-	tm_in.tm_mon = cdata->tm_mon - 1;
-	tm_in.tm_mday = cdata->tm_mday;
-	tm_in.tm_hour = cdata->tm_hour;
-	tm_in.tm_min = cdata->tm_min;
-	tm_in.tm_sec = cdata->tm_sec;
-	tm_in.tm_isdst = -1;
-	
-	time_t t = mktime(&tm_in);
-	struct tm *result = localtime(&t);
-	
-	cdata->tm_isdst = result->tm_isdst;
-	
-	struct tm *tm_utc = gmtime(&t);
-	
-	cdata->utc_hour = tm_utc->tm_hour + tm_utc->tm_min / 60.0 +
-	tm_utc->tm_sec / 3600.0;
-	
-	cdata->utc_year = tm_utc->tm_year + 1900;
-	cdata->utc_mon = tm_utc->tm_mon + 1;
-	cdata->utc_mday = tm_utc->tm_mday;
-}
-
 void eclipse(double jd_ut,
 double *luna_eclipse, double *sol_eclipse,
 struct cdata *cdata)
@@ -250,17 +250,25 @@ struct cdata *cdata)
 	char serr[AS_MAXCH];
 	double low_limit = 10.0;
 	double luna_limit = 25.0;
-	double sol_limit = 156.0;
+	double sol_limit[25] = {
+		156, 312, 468, 624,
+		780, 936, 1092, 1248, 
+		1404, 1560, 1716, 1872,
+		2028, 2184, 2340, 2496,
+		2808, 2964, 3120, 3276,
+		3432, 3588, 3744, 3900
+	};
 	
 	geopos[0] = cdata->dlon;
 	geopos[1] = cdata->dlat;
 	geopos[2] = 0;
 	
+	// next lunar eclipse
 	if (luna_eclipse[EN_JUL] <= low_limit || luna_eclipse[EN_JUL] > luna_limit)
 	{
 		swe_lun_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, NEXT_E, serr);
 		
-		swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+		swe_calc_ut(tret[0], SE_MOON, SEFLG_SWIEPH, xx, serr);
 		
 		luna_eclipse[EN_JUL] = tret[0] - jd_ut;
 		luna_eclipse[EN_FJUL] = tret[0];
@@ -272,12 +280,13 @@ struct cdata *cdata)
 		double new_jul = luna_eclipse[EN_FJUL] - jd_ut;
 		luna_eclipse[EN_JUL] = new_jul;
 	}
-		
+	
+	// previous lunar eclipse	
 	if (luna_eclipse[EP_JUL] <= low_limit || luna_eclipse[EP_JUL] > luna_limit)
 	{
 		swe_lun_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, PREV_E, serr);
 		
-		swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+		swe_calc_ut(tret[0], SE_MOON, SEFLG_SWIEPH, xx, serr);
 		
 		luna_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
 		luna_eclipse[EP_FJUL] = tret[0];
@@ -290,28 +299,49 @@ struct cdata *cdata)
 		luna_eclipse[EP_JUL] = new_jul;
 	}
 	
-	if (sol_eclipse[EN_JUL] <= low_limit)
+	double sol_parse = 13;
+	// next solar eclipse
+	for (int i = 0; i < 25; ++i)
 	{
-		swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, NEXT_E, serr);
-		
-		swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
-		
-		sol_eclipse[EN_JUL] = tret[0] - jd_ut;
-		sol_eclipse[EN_OBS] = attr[2];
-		
-		sol_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
+		if (fabs(sol_eclipse[EN_JUL] - sol_limit[i]) <= sol_parse || (int)sol_eclipse[EN_JUL] == 0)
+		{
+			swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, NEXT_E, serr);
+			
+			swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+			
+			sol_eclipse[EN_JUL] = fabs(tret[0] - jd_ut);
+			sol_eclipse[EN_FJUL] = tret[0];
+			sol_eclipse[EN_OBS] = attr[2];
+			
+			sol_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
+		}
+		else if (i >= 24)
+		{
+			double new_jul = fabs(sol_eclipse[EN_FJUL] - jd_ut);
+			sol_eclipse[EN_JUL] = new_jul;
+		}
 	}
 		
-	if (sol_eclipse[EP_JUL] >= -low_limit)
+	// previous solar eclipse
+	for (int i = 0; i < 25; ++i)
 	{
-		swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, PREV_E, serr);
-		
-		swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
-		
-		sol_eclipse[EP_JUL] = tret[0] - jd_ut;
-		sol_eclipse[EP_OBS] = attr[2];
-		
-		sol_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
+		if (fabs(sol_eclipse[EP_JUL] - sol_limit[i]) <= sol_parse || (int)sol_eclipse[EP_JUL] == 0)
+		{
+			swe_sol_eclipse_when_loc(jd_ut, SEFLG_SWIEPH, geopos, tret, attr, PREV_E, serr);
+			
+			swe_calc_ut(tret[0], SE_SUN, SEFLG_SWIEPH, xx, serr);
+			
+			sol_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
+			sol_eclipse[EP_FJUL] = tret[0];
+			sol_eclipse[EP_OBS] = attr[2];
+			
+			sol_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
+		}
+		else if (i >= 24)
+		{
+			double new_jul = fabs(sol_eclipse[EP_FJUL] - jd_ut);
+			sol_eclipse[EP_JUL] = new_jul;
+		}
 	}
 }
 
