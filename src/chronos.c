@@ -239,18 +239,14 @@ int *calc_flag, int *iter, double *last_jd)
 	*last_jd = jd_ut;
 }
 
-void init_eclipse(double *luna_eclipse, double *sol_eclipse)
-{
-	luna_eclipse[EN_1JUL] = 0;
-	luna_eclipse[EP_1JUL] = 0;
-	sol_eclipse[EN_1JUL] = 0;
-	sol_eclipse[EP_1JUL] = 0;
-}
-	
 void eclipse(double jd_ut,
 double *luna_eclipse, double *sol_eclipse,
 struct cdata *cdata)
 {
+	double xx[6];
+	char serr[AS_MAXCH];
+	int iflag = SEFLG_SWIEPH;
+	
 	double enl_tret[10];
 	double epl_tret[10];
 	
@@ -262,18 +258,13 @@ struct cdata *cdata)
 	
 	double ens_attr[15];
 	double eps_attr[15];
-	
+
 	double geopos[3];
-	double xx[6];
-	char serr[AS_MAXCH];
-	int iflag = SEFLG_SWIEPH;
-	
 	geopos[0] = cdata->dlon;
 	geopos[1] = cdata->dlat;
 	geopos[2] = 0;
 	
 	int iter = 100, sol_parse = 4, parse = 26;
-	
 	double limit[iter];
 	double up_limit = 2000;
 	

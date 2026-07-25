@@ -39,4 +39,3 @@ void chart_timeset(struct cdata *cdata,int *day_offset);
 void pxx_init(double cusp[], double sign_cusp[], double *luna_eclipse, double *sol_eclipse, double *p_arr[],
 struct cdata *cdata, struct pxx *pxx);
 int sect(struct pxx *pxx);
-void init_eclipse(double *luna_eclipse, double *sol_eclipse);
