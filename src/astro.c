@@ -192,6 +192,7 @@ int main()
 		
 	double cusp[13];
 	double sign_cusp[13];
+	
 	double luna_eclipse[EMAX] = {0};
 	double sol_eclipse[EMAX] = {0};
 	
@@ -292,12 +293,10 @@ int main()
 					doupdate();
 					break;
 				case 9: // tab
-					init_eclipse(luna_eclipse, sol_eclipse);
 					realtime_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'r':
-					init_eclipse(luna_eclipse, sol_eclipse);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
@@ -326,12 +325,10 @@ int main()
 				case 'e':
 					load_chart(cdata, io,
 					citybuffer, statebuffer, countrybuffer);
-					init_eclipse(luna_eclipse, sol_eclipse);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 's':
-					init_eclipse(luna_eclipse, sol_eclipse);
 					solar_return(NEW_CHART_MAIN());
 					break;
 				case 'p':
