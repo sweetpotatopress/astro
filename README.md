@@ -14,6 +14,7 @@ doas/sudo make clean install
 - ncurses
 
 works on all linux/bsd systems. if not, tell me!  
+if your city is not in the database open an issue or pr and ill add it!  
 
 FOUNDATION--0-  
   
@@ -104,7 +105,7 @@ h/l - - - left/right
  | essential dignities | |
  | synastry/ transit view | |
  | aspects | |
- | eclipse calender | |
+ | eclipse data | [DONE] |
  | declination/out of bounds | |
  | tabs/multiple charts open | |
  | terminal window resize refresh | [DONE] |
