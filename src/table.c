@@ -100,16 +100,17 @@ int moon_phase(struct pxx *pxx)
 void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx, 
 const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
-	const char *name[13] = { 
+	const char *name[17] = { 
 	"su", "mo", "me", "ve",
 	"ma", "ju", "sa", "ur",
 	"ne", "pl", "so", "no",
+	"as", "mc", "ds", "ic",
 	"  "};
 	
 	int p_count = 18;
 	
 	mvwin(planet_win, 0, 0);
-	wresize(planet_win, 40, 33);
+	wresize(planet_win, 44, 33);
 	
 	werase(planet_win);
 	
@@ -207,6 +208,14 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		int dig[] = { RULER, EXALT, TRIPLD,
 		BOUND0, DECAN0 };
 		
+		if (planet == 12)
+		{
+		
+			mvwprintw(planet_win, starty, startx,
+			".............................");
+			++starty;
+		}
+		
 		mvwprintw(planet_win, starty, startx, "%-2s :", 
 		name[planet]);
 		startx += 5;
@@ -233,7 +242,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		startx = 2;
 		++starty;
 	}
-	while (planet++ < 11);
+	while (planet++ < 15);
 			
 	++starty;
 	mvwprintw(planet_win, starty, startx, 

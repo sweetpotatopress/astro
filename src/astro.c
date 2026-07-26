@@ -27,7 +27,7 @@ void zxx_init(int *z_arr[])
 { /* element, ruler, exalt, triplicity d,n,c,
 	bound 0-4, decan 0-2, detri, fall */
 	
-	const int empty = 12;
+	const int empty = 16;
 	
 	const int ari[] = 
 	{ FIRE, SE_MARS, SE_SUN, SE_SUN,
