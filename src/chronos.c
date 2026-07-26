@@ -264,9 +264,9 @@ struct cdata *cdata)
 	geopos[1] = cdata->dlat;
 	geopos[2] = 0;
 	
-	int iter = 100, sol_parse = 4, parse = 26;
+	int iter = 200, sol_parse = 2, parse = 26;
 	double limit[iter];
-	double up_limit = 2000;
+	double up_limit = 4000;
 	
 	for (int i = 0; i < iter; ++i)
 		limit[i] = (parse * i);

@@ -293,10 +293,12 @@ int main()
 					doupdate();
 					break;
 				case 9: // tab
+					sol_eclipse[EN_1JUL] = 0;
 					realtime_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'r':
+					sol_eclipse[EN_1JUL] = 0;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
@@ -325,10 +327,12 @@ int main()
 				case 'e':
 					load_chart(cdata, io,
 					citybuffer, statebuffer, countrybuffer);
+					sol_eclipse[EN_1JUL] = 0;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 's':
+					sol_eclipse[EN_1JUL] = 0;
 					solar_return(NEW_CHART_MAIN());
 					break;
 				case 'p':
