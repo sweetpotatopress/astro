@@ -33,7 +33,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 		&planet_trig, &retro_trig, cusp, sign_cusp, p_arr, z_arr, \
 		luna_eclipse, sol_eclipse, \
 		pl_sym, zo_sym, moon
-
+		
 #define PWINY 40
 #define PWINX 33
 #define PWIN_Y 0

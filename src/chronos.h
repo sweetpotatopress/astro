@@ -12,6 +12,7 @@ See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 
+
 #define NIGHT_SECT 0
 #define DAY_SECT 1
 
@@ -32,6 +33,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define EP_OBS 8
 #define EP_SIGN 9
 #define EMAX 10
+
+#define ECLIPSE_INIT() sol_eclipse[EN_1JUL] = 0;
 
 void set_localtime(struct cdata *cdata);
 int months(int month, int year);
