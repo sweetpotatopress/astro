@@ -266,7 +266,6 @@ struct cdata *cdata)
 	
 	int iter = 200, sol_parse = 2, parse = 26;
 	double limit[iter];
-	double up_limit = 4000;
 	
 	for (int i = 0; i < iter; ++i)
 		limit[i] = (parse * i);
@@ -288,8 +287,7 @@ struct cdata *cdata)
 			c++;
 		}
 			
-		if (fabs(limit[i] - sol_eclipse[EN_JUL]) < sol_parse || (int)sol_eclipse[EN_1JUL] == 0 ||
-		fabs(limit[i] - sol_eclipse[EN_JUL]) > up_limit)
+		if (fabs(limit[i] - sol_eclipse[EN_JUL]) < sol_parse || (int)sol_eclipse[EN_1JUL] == 0)
 		{
 			swe_sol_eclipse_when_loc(jd_ut, iflag, geopos, ens_tret, ens_attr, NEXT_E, serr);
 			swe_calc_ut(ens_tret[0], SE_SUN, iflag, xx, serr);
@@ -316,7 +314,6 @@ struct cdata *cdata)
 			luna_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
 			sol_eclipse[EN_1JUL] = 1;
-			luna_eclipse[EN_1JUL] = 1;
 			break;
 		}
 	}
