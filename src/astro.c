@@ -315,6 +315,7 @@ int main()
 					free(io->filename);
 					io->filename = NULL;
 					
+					sol_eclipse[EN_1JUL] = 0;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
