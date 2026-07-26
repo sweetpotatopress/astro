@@ -254,16 +254,19 @@ struct cdata *cdata)
 	geopos[1] = cdata->dlat;
 	geopos[2] = 0;
 	
-	int iter = 200, sol_parse = 2, parse = 26;
-	double limit[iter];
+	const int iter = 200;
+	const int eclipse_calc = 2;
+	const int multi = 26;
+	
+	double limit[200] = {0};
 	
 	for (int i = 0; i < iter; ++i)
-		limit[i] = (parse * i);
+		limit[i] = (multi * i);
 	
 	for (int i = 0; i < iter; ++i)
 	{
 		int c = 0;
-		if (c == 0 && sol_eclipse[EN_1JUL] > 0)
+		if (c == 0 && sol_eclipse[E_INIT] > 0)
 		{
 			double ens_jul = fabs(sol_eclipse[EN_FJUL] - jd_ut);
 			sol_eclipse[EN_JUL] = ens_jul;
@@ -277,11 +280,12 @@ struct cdata *cdata)
 			c++;
 		}
 		
-		if (sol_eclipse[EN_JUL] < sol_parse || luna_eclipse[EN_JUL] < sol_parse ||
-		sol_eclipse[EP_JUL] < sol_parse || luna_eclipse[EP_JUL] < sol_parse)
+		if (sol_eclipse[EN_JUL] < eclipse_calc || luna_eclipse[EN_JUL] < eclipse_calc ||
+		sol_eclipse[EP_JUL] < eclipse_calc || luna_eclipse[EP_JUL] < eclipse_calc)
 			ECLIPSE_INIT();
 			
-		if (fabs(limit[i] - sol_eclipse[EN_JUL]) < sol_parse || (int)sol_eclipse[EN_1JUL] == 0)
+		if (fabs(limit[i] - sol_eclipse[EN_JUL]) < eclipse_calc ||
+		(int)sol_eclipse[E_INIT] == 0)
 		{
 			swe_sol_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, NEXT_E, serr);
 			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
@@ -307,7 +311,7 @@ struct cdata *cdata)
 			luna_eclipse[EP_FJUL] = tret[0];
 			luna_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
-			sol_eclipse[EN_1JUL] = 1;
+			sol_eclipse[E_INIT] = 1;
 			break;
 		}
 	}

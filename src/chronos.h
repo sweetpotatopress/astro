@@ -22,19 +22,18 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEXT_E 0
 #define PREV_E 1
 
-#define EN_JUL 0
-#define EN_1JUL 1
+#define E_INIT 0
+#define EN_JUL 1
 #define EN_FJUL 2
 #define EN_OBS 3
 #define EN_SIGN 4
 #define EP_JUL 5
-#define EP_1JUL 6
-#define EP_FJUL 7
-#define EP_OBS 8
-#define EP_SIGN 9
-#define EMAX 10
+#define EP_FJUL 6
+#define EP_OBS 7
+#define EP_SIGN 8
+#define EMAX 9
 
-#define ECLIPSE_INIT() sol_eclipse[EN_1JUL] = 0;
+#define ECLIPSE_INIT() sol_eclipse[E_INIT] = 0;
 
 void set_localtime(struct cdata *cdata);
 int months(int month, int year);
