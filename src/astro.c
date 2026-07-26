@@ -21,7 +21,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "chronos.h"
 #include "cdata.h"
 
-#define VERSION 0.67
+#define VERSION 0.68
 
 void zxx_init(int *z_arr[])
 { /* element, ruler, exalt, triplicity d,n,c,
