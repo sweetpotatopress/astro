@@ -204,6 +204,7 @@ void solar_return(NEW_CHART_PARAM())
 		}
 		flushinp();
 		
+		sol_eclipse[EN_1JUL] = 0;
 		pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, p_arr, cdata, pxx);
 		
 		double temp_degree = pxx->dsun[LONG];
