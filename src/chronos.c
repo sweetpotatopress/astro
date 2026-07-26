@@ -243,23 +243,13 @@ void eclipse(double jd_ut,
 double *luna_eclipse, double *sol_eclipse,
 struct cdata *cdata)
 {
+	int iflag = SEFLG_SWIEPH;
+	double geopos[3];
+	double tret[10];
+	double attr[15];
 	double xx[6];
 	char serr[AS_MAXCH];
-	int iflag = SEFLG_SWIEPH;
 	
-	double enl_tret[10];
-	double epl_tret[10];
-	
-	double ens_tret[10];
-	double eps_tret[10];
-	
-	double enl_attr[15];
-	double epl_attr[15];
-	
-	double ens_attr[15];
-	double eps_attr[15];
-
-	double geopos[3];
 	geopos[0] = cdata->dlon;
 	geopos[1] = cdata->dlat;
 	geopos[2] = 0;
@@ -293,28 +283,28 @@ struct cdata *cdata)
 			
 		if (fabs(limit[i] - sol_eclipse[EN_JUL]) < sol_parse || (int)sol_eclipse[EN_1JUL] == 0)
 		{
-			swe_sol_eclipse_when_loc(jd_ut, iflag, geopos, ens_tret, ens_attr, NEXT_E, serr);
-			swe_calc_ut(ens_tret[0], SE_SUN, iflag, xx, serr);
-			sol_eclipse[EN_JUL] = fabs(ens_tret[0] - jd_ut);
-			sol_eclipse[EN_FJUL] = ens_tret[0];
+			swe_sol_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, NEXT_E, serr);
+			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
+			sol_eclipse[EN_JUL] = fabs(tret[0] - jd_ut);
+			sol_eclipse[EN_FJUL] = tret[0];
 			sol_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
-			swe_sol_eclipse_when_loc(jd_ut, iflag, geopos, eps_tret, eps_attr, PREV_E, serr);
-			swe_calc_ut(eps_tret[0], SE_SUN, iflag, xx, serr);
-			sol_eclipse[EP_JUL] = fabs(eps_tret[0] - jd_ut);
-			sol_eclipse[EP_FJUL] = eps_tret[0];
+			swe_sol_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, PREV_E, serr);
+			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
+			sol_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
+			sol_eclipse[EP_FJUL] = tret[0];
 			sol_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
-			swe_lun_eclipse_when_loc(jd_ut, iflag, geopos, enl_tret, enl_attr, NEXT_E, serr);
-			swe_calc_ut(enl_tret[0], SE_MOON, iflag, xx, serr);
-			luna_eclipse[EN_JUL] = fabs(enl_tret[0] - jd_ut);
-			luna_eclipse[EN_FJUL] = enl_tret[0];
+			swe_lun_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, NEXT_E, serr);
+			swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
+			luna_eclipse[EN_JUL] = fabs(tret[0] - jd_ut);
+			luna_eclipse[EN_FJUL] = tret[0];
 			luna_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
-			swe_lun_eclipse_when_loc(jd_ut, iflag, geopos, epl_tret, epl_attr, PREV_E, serr);
-			swe_calc_ut(epl_tret[0], SE_MOON, iflag, xx, serr);
-			luna_eclipse[EP_JUL] = fabs(epl_tret[0] - jd_ut);
-			luna_eclipse[EP_FJUL] = epl_tret[0];
+			swe_lun_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, PREV_E, serr);
+			swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
+			luna_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
+			luna_eclipse[EP_FJUL] = tret[0];
 			luna_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
 			sol_eclipse[EN_1JUL] = 1;
