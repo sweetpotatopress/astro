@@ -102,7 +102,7 @@ h/l - - - left/right
  | next retrograde/ next station | [DONE] |
  | element colors | [DONE] |
  | solar return | [DONE] |
- | essential dignities | |
+ | essential dignities | [DONE] |
  | synastry/ transit view | |
  | aspects | |
  | eclipse data | [DONE] |
