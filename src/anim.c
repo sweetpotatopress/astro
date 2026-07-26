@@ -370,6 +370,7 @@ void animate_chart(NEW_CHART_PARAM())
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
+						sol_eclipse[EN_1JUL] = 0;
 						break;
 					case YEAR:
 						temp.tm_year++;
@@ -405,12 +406,14 @@ void animate_chart(NEW_CHART_PARAM())
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
+						sol_eclipse[EN_1JUL] = 0;
 						break;
 					case YEAR:
 						--temp.tm_year;
 						if (temp.tm_year < -12998)
 							temp.tm_year = 16799;
 						t = mktime(&temp);
+						sol_eclipse[EN_1JUL] = 0;
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);

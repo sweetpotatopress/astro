@@ -286,6 +286,10 @@ struct cdata *cdata)
 			luna_eclipse[EP_JUL] = epl_jul;
 			c++;
 		}
+		
+		if (sol_eclipse[EN_JUL] < sol_parse || luna_eclipse[EN_JUL] < sol_parse ||
+		sol_eclipse[EP_JUL] < sol_parse || luna_eclipse[EP_JUL] < sol_parse)
+			sol_eclipse[EN_1JUL] = 0;
 			
 		if (fabs(limit[i] - sol_eclipse[EN_JUL]) < sol_parse || (int)sol_eclipse[EN_1JUL] == 0)
 		{
