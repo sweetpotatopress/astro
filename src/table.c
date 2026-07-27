@@ -54,31 +54,35 @@ int bound_check(int sign, int degree)
 	return -1;
 }
 
-void dignity_check(int *z_arr[], double *p_arr[], int planet, int result[],
+void dignity_check(int *z_arr[], double *p_arr[], int result[16][MAXZXX],
 struct pxx *pxx)
 {
-	int sign = (int)(p_arr[planet][LONG] / 30) + 1;
-	int degree = (int)p_arr[planet][DEGREE];
-	
-	result[RULER] = z_arr[sign][RULER];
-	result[EXALT] = z_arr[sign][EXALT];
-	
-	int chart_sect = sect(pxx);
-	if (chart_sect == DAY_SECT)
-		result[TRIPLD] = z_arr[sign][TRIPLD];
-	else
-		result[TRIPLD] = z_arr[sign][TRIPLN];
+	int planet = 0;
+	for (; planet < 16; ++planet)
+	{
+		int sign = (int)(p_arr[planet][LONG] / 30) + 1;
+		int degree = (int)p_arr[planet][DEGREE];
 		
-	result[BOUND0] = z_arr[sign][bound_check(sign, degree)];
-	
-	if (degree <= 9)
-		result[DECAN0] = z_arr[sign][DECAN0];
-	else if (degree > 9 && degree <= 19)
-		result[DECAN0] = z_arr[sign][DECAN1];
-	else if (degree > 19)
-		result[DECAN0] = z_arr[sign][DECAN2];
-	else // error
-		result[DECAN0] = EMPTY;
+		result[planet][RULER] = z_arr[sign][RULER];
+		result[planet][EXALT] = z_arr[sign][EXALT];
+		
+		int chart_sect = sect(pxx);
+		if (chart_sect == DAY_SECT)
+			result[planet][TRIPLD] = z_arr[sign][TRIPLD];
+		else
+			result[planet][TRIPLD] = z_arr[sign][TRIPLN];
+			
+		result[planet][BOUND0] = z_arr[sign][bound_check(sign, degree)];
+		
+		if (degree <= 9)
+			result[planet][DECAN0] = z_arr[sign][DECAN0];
+		else if (degree > 9 && degree <= 19)
+			result[planet][DECAN0] = z_arr[sign][DECAN1];
+		else if (degree > 19)
+			result[planet][DECAN0] = z_arr[sign][DECAN2];
+		else // error
+			result[planet][DECAN0] = EMPTY;
+	}
 }
 
 int moon_phase(struct pxx *pxx)
@@ -202,15 +206,14 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	++starty;
 	do
 	{
-		int result[MAXZXX] = {0};
-		dignity_check(z_arr, p_arr, planet, result, pxx);
+		int result[16][MAXZXX] = {0};
+		dignity_check(z_arr, p_arr, result, pxx);
 	
 		int dig[] = { RULER, EXALT, TRIPLD,
 		BOUND0, DECAN0 };
 		
 		if (planet == 12)
 		{
-		
 			mvwprintw(planet_win, starty, startx,
 			".............................");
 			++starty;
@@ -221,11 +224,11 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		startx += 5;
 		for (int i = 0; i < 5; ++i)
 		{
-			if (strcmp(name[planet], name[result[dig[i]]]) == 0)
+			if (strcmp(name[planet], name[result[planet][dig[i]]]) == 0)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
 				mvwprintw(planet_win, starty, startx, "%-2s", 
-				name[result[dig[i]]]);
+				name[result[planet][dig[i]]]);
 				wattroff(planet_win, COLOR_PAIR(EARTH));
 				
 				startx += 3;
@@ -235,7 +238,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			else
 			{
 				mvwprintw(planet_win, starty, startx, "%-2s :", 
-				name[result[dig[i]]]);
+				name[result[planet][dig[i]]]);
 				startx += 5;
 			}
 		}
