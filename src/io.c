@@ -239,7 +239,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					werase(save_win);
 					box(save_win, 0, 0);
 					wprintw(save_win, "dir name?");
-					mvwgetnstr(save_win, 2, 2, mdir, 127);
+					mvwgetnstr(save_win, 1, 1, mdir, 127);
 					noecho();
 					
 					snprintf(newpath, MAXPATH,
