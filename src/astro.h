@@ -65,20 +65,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEXT_R 13
 #define MAXPXX 14
 
-#define ARI 1
-#define TAU 2
-#define GEM 3
-#define CAN 4
-#define LEO 5
-#define VIR 6
-#define LIB 7
-#define SCO 8
-#define SAG 9
-#define CAP 10
-#define AQU 11
-#define PIS 12
-#define ZMAX 13
-
 #define M_COLOR 1
 #define FIRE 2
 #define EARTH 3
@@ -137,7 +123,6 @@ struct io {
 
 enum mode { NORMAL, INSERT };
 
-void zxx_init(int *z_arr[]);
 void config_parse(struct cdata *cdata);
 
 void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx,
