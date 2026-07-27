@@ -85,40 +85,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define AIR 4
 #define WATER 5
 
-#define ELEMENT 0
-#define RULER 1
-#define EXALT 2
-#define TRIPLD 3
-#define TRIPLN 4
-#define TRIPLC 5
-#define BOUND0 6
-#define BOUND1 7
-#define BOUND2 8
-#define BOUND3 9
-#define BOUND4 10
-#define DECAN0 11
-#define DECAN1 12
-#define DECAN2 13
-#define DETRI 14
-#define FALL 15
-#define EMPTY 16
-#define MAXZXX 17
-
-struct zxx {
-	int iari[MAXZXX];
-	int itau[MAXZXX];
-	int igem[MAXZXX];
-	int ican[MAXZXX];
-	int ileo[MAXZXX];
-	int ivir[MAXZXX];
-	int ilib[MAXZXX];
-	int isco[MAXZXX];
-	int isag[MAXZXX];
-	int icap[MAXZXX];
-	int iaqu[MAXZXX];
-	int ipis[MAXZXX];
-};
-
 #define SPXXMAX 18
 struct pxx {
 	double dsun[MAXPXX];

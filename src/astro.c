@@ -15,6 +15,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <panel.h>
 #include "astro.h"
+#include "table.h"
 #include "io.h"
 #include "draw.h"
 #include "anim.h"

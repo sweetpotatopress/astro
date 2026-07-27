@@ -15,6 +15,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "chronos.h"
 #include "draw.h"
+#include "table.h"
 
 int bound_check(int sign, int degree)
 {
@@ -54,11 +55,11 @@ int bound_check(int sign, int degree)
 	return -1;
 }
 
-void dignity_check(int *z_arr[], double *p_arr[], int result[16][MAXZXX],
+void dignity_check(int *z_arr[], double *p_arr[], int result[PLMAX][MAXZXX],
 struct pxx *pxx)
 {
 	int planet = 0;
-	for (; planet < 16; ++planet)
+	for (; planet < PLMAX; ++planet)
 	{
 		int sign = (int)(p_arr[planet][LONG] / 30) + 1;
 		int degree = (int)p_arr[planet][DEGREE];
@@ -204,9 +205,10 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	mvwprintw(planet_win, starty, startx,
 	"...........................xx");
 	++starty;
-	do
+	
+	while (planet < PLMAX)
 	{
-		int result[16][MAXZXX] = {0};
+		int result[PLMAX][MAXZXX] = {0};
 		dignity_check(z_arr, p_arr, result, pxx);
 	
 		int dig[] = { RULER, EXALT, TRIPLD,
@@ -244,8 +246,8 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		}
 		startx = 2;
 		++starty;
+		++planet;
 	}
-	while (planet++ < 15);
 			
 	++starty;
 	mvwprintw(planet_win, starty, startx, 

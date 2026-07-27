@@ -19,6 +19,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "draw.h"
 #include "chronos.h"
+#include "table.h"
 
 void zodiac_color(WINDOW *win, int y, int x, int sign,
 const char *zo_sym[], int *z_arr[])
