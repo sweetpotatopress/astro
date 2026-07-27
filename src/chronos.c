@@ -240,19 +240,12 @@ int *calc_flag, int *iter, double *last_jd)
 }
 
 void eclipse(double jd_ut,
-double *luna_eclipse, double *sol_eclipse,
-struct cdata *cdata)
+double *luna_eclipse, double *sol_eclipse)
 {
 	int iflag = SEFLG_SWIEPH;
-	double geopos[3];
 	double tret[10];
-	double attr[15];
 	double xx[6];
 	char serr[AS_MAXCH];
-	
-	geopos[0] = cdata->dlon;
-	geopos[1] = cdata->dlat;
-	geopos[2] = 0;
 	
 	const int iter = 200;
 	const int eclipse_calc = 2;
@@ -287,25 +280,25 @@ struct cdata *cdata)
 		if (fabs(limit[i] - sol_eclipse[EN_JUL]) < eclipse_calc ||
 		(int)sol_eclipse[E_INIT] == 0)
 		{
-			swe_sol_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, NEXT_E, serr);
+			swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, NEXT_E, serr);
 			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
 			sol_eclipse[EN_JUL] = fabs(tret[0] - jd_ut);
 			sol_eclipse[EN_FJUL] = tret[0];
 			sol_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
-			swe_sol_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, PREV_E, serr);
+			swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, PREV_E, serr);
 			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
 			sol_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
 			sol_eclipse[EP_FJUL] = tret[0];
 			sol_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
-			swe_lun_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, NEXT_E, serr);
+			swe_lun_eclipse_when(jd_ut, iflag, 0, tret, NEXT_E, serr);
 			swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
 			luna_eclipse[EN_JUL] = fabs(tret[0] - jd_ut);
 			luna_eclipse[EN_FJUL] = tret[0];
 			luna_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
-			swe_lun_eclipse_when_loc(jd_ut, iflag, geopos, tret, attr, PREV_E, serr);
+			swe_lun_eclipse_when(jd_ut, iflag, 0, tret, PREV_E, serr);
 			swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
 			luna_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
 			luna_eclipse[EP_FJUL] = tret[0];
@@ -353,7 +346,7 @@ struct cdata *cdata, struct pxx *pxx)
 	
 	retro_station(jd_ut, p_arr, calc_flag, iter, &last_jd);
 	
-	eclipse(jd_ut, luna_eclipse, sol_eclipse, cdata);
+	eclipse(jd_ut, luna_eclipse, sol_eclipse);
 	
 	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
 	'W', sign_cusp, ascmc);
