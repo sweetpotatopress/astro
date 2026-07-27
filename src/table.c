@@ -78,7 +78,7 @@ struct pxx *pxx)
 	else if (degree > 19)
 		result[DECAN0] = z_arr[sign][DECAN2];
 	else // error
-		result[DECAN0] = 12;
+		result[DECAN0] = EMPTY;
 }
 
 int moon_phase(struct pxx *pxx)

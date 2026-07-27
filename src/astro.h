@@ -101,7 +101,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define DECAN2 13
 #define DETRI 14
 #define FALL 15
-#define MAXZXX 16
+#define EMPTY 16
+#define MAXZXX 17
 
 struct zxx {
 	int iari[MAXZXX];

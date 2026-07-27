@@ -247,11 +247,11 @@ double *luna_eclipse, double *sol_eclipse)
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const int iter = 128;
+	const int iter = 64;
 	const int eclipse_calc = 1;
-	const int multi = 64;
+	const int multi = 32;
 	
-	double limit[128] = {0};
+	double limit[64] = {0};
 	
 	for (int i = 0; i < iter; ++i)
 		limit[i] = (multi * i);
@@ -277,7 +277,7 @@ double *luna_eclipse, double *sol_eclipse)
 		sol_eclipse[EP_JUL] < eclipse_calc || luna_eclipse[EP_JUL] < eclipse_calc)
 			ECLIPSE_INIT();
 			
-		if (fabs(limit[i] - sol_eclipse[EN_JUL]) < eclipse_calc ||
+		if (fabs(limit[i] - sol_eclipse[EN_JUL]) <= eclipse_calc ||
 		(int)sol_eclipse[E_INIT] == 0)
 		{
 			swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, NEXT_E, serr);
