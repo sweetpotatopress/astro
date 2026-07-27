@@ -247,11 +247,11 @@ double *luna_eclipse, double *sol_eclipse)
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const int iter = 200;
-	const int eclipse_calc = 2;
-	const int multi = 26;
+	const int iter = 128;
+	const int eclipse_calc = 1;
+	const int multi = 64;
 	
-	double limit[200] = {0};
+	double limit[128] = {0};
 	
 	for (int i = 0; i < iter; ++i)
 		limit[i] = (multi * i);
