@@ -90,11 +90,11 @@ const char *pl_sym[])
 	int sign_num = (int)(sign_cusp[1] / 30.0);
 	double asc = sign_num * 30.0;
 	
-	int iter_count = 50;
+	int iter_count = 64;
 	int max_distance = 11;
 	double convergence_thresh = 0.1;
 	int pcount = 12;
-	double str_base = 5.0;
+	double str_base = 4.0;
 
 	double adjusted_long[pcount];
 	for (int i = 0; i < pcount; ++i)
