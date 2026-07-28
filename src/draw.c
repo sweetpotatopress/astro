@@ -87,12 +87,12 @@ void planet_pos(WINDOW *win, double sign_cusp[], double *p_arr[], int *z_arr[],
 int radius, int centery, int centerx, 
 const char *pl_sym[])
 {
-	int iter_count = 64;
-	int max_distance = 11;
-	double convergence_thresh = 0.1;
-	double str_base = 4.0;
+	const int iter_count = 64;
+	const int max_distance = 11;
+	const double convergence_thresh = 0.1;
+	const double str_base = 4.0;
 
-	int pcount = 12;
+	const int pcount = 12;
 	double adjusted_pos[12] = {0};
 	
 	for (int i = 0; i < pcount; ++i)
