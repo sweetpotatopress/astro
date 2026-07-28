@@ -87,18 +87,16 @@ void planet_pos(WINDOW *win, double sign_cusp[], double *p_arr[], int *z_arr[],
 int radius, int centery, int centerx, 
 const char *pl_sym[])
 {
-	int sign_num = (int)(sign_cusp[1] / 30.0);
-	double asc = sign_num * 30.0;
-	
 	int iter_count = 64;
 	int max_distance = 11;
 	double convergence_thresh = 0.1;
-	int pcount = 12;
 	double str_base = 4.0;
 
-	double adjusted_long[pcount];
+	int pcount = 12;
+	double adjusted_pos[12] = {0};
+	
 	for (int i = 0; i < pcount; ++i)
-		adjusted_long[i] = p_arr[i][LONG];
+		adjusted_pos[i] = p_arr[i][LONG];
 		
 	for (int iter = 0; iter < iter_count; ++iter)
 	{
@@ -106,14 +104,14 @@ const char *pl_sym[])
 		
 		for (int i = 0; i < pcount; ++i)
 		{
-			double current = adjusted_long[i];
-			double angle_offset = 0.0;
+			double current = adjusted_pos[i];
+			double degree_offset = 0.0;
 			
 			for (int j = 0; j < pcount; ++j)
 			{
 				if (i != j)
 				{
-					double signed_distance = adjusted_long[j] - current;
+					double signed_distance = adjusted_pos[j] - current;
 					while (signed_distance > 180)
 						signed_distance -= 360;
 					while (signed_distance < -180)
@@ -127,11 +125,11 @@ const char *pl_sym[])
 						
 						int place = (signed_distance > 0) ? -1 : 1;
 						
-						angle_offset += str_base * strength * place;
+						degree_offset += str_base * strength * place;
 					}
 				}
 			}
-			double new_long = current + angle_offset;
+			double new_long = current + degree_offset;
 			
 			while (new_long < 0.0)
 				new_long += 360.0;
@@ -141,7 +139,7 @@ const char *pl_sym[])
 			double change = fabs(new_long - current);
 			max_change = (change > max_change) ? change : max_change;
 			
-			adjusted_long[i] = new_long;
+			adjusted_pos[i] = new_long;
 		}
 		if (max_change < convergence_thresh)
 			break;
@@ -149,9 +147,12 @@ const char *pl_sym[])
 	
 	for (int i = 0; i < pcount; ++i)
 	{
-		double angle_rad = (adjusted_long[i] - asc) * M_PI / 180;
-		double cos_rad = cos(angle_rad);
-		double sin_rad = sin(angle_rad);
+		int zo_sign = (int)(sign_cusp[1] / 30.0);
+		double as_sign = zo_sign * 30.0;
+	
+		double zo_pos_radian = (adjusted_pos[i] - as_sign) * M_PI / 180;
+		double cos_rad = cos(zo_pos_radian);
+		double sin_rad = sin(zo_pos_radian);
 		
 		int x = centerx - (int)(radius * cos_rad);
 		int y = centery + (int)(radius * sin_rad * 0.5);
