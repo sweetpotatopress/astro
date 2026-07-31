@@ -16,13 +16,6 @@ doas/sudo make clean install
 works on all linux/bsd systems. if not, tell me!  
 if your city is not in the database open an issue or pr and ill add it!  
 
-FOUNDATION--0-  
-  
-built on the IANA time zone database, which has correct historical DST accuracy.
-the choice: spend over 300 dollars on "professional" proprietary software with poor DST accuracy or pay 0 for free beautiful accuracy in all your charts by using astro~  ;3  
-
-made with love, nyaa  
-
 **--o-KEYBINDS---o-**  
 
 **CHART VIEW**  
