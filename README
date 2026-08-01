@@ -1,103 +1,106 @@
---o-DEPENDENCIES---
+DEPENDENCIES
 
 - ncurses
 
---o-KEYBINDS---o-
+--o-KEYBINDS
 
 CHART VIEW
 
-w - - - save chart  
-	m --makedir  
-	esc --cancel  
-	--choose directory by hitting esc or q  
-	--chart saves after writing name and hitting enter  
+w			save chart  
+m			makedir  
+	esc		cancel  
+	esc/q	choose dir
+	enter	save named chart
 	
-e - - - load chart  
-	l/enter --choose  
-	esc --cancel  
+e		 	load chart  
+	l/enter	choose  
+	esc		cancel  
  
-r - - - redraw chart  
-tab - - - live update  
-q - - - exit astro  
+r			redraw chart  
+tab			live update  
+q			exit astro  
 
-s - - - solar return  
-k/j --up/down year  
-s/q/esc --exit mode  
+s			solar return  
+	k/j		up/down year  
+	s/q/esc	exit mode  
 
-enter - - - animate chart  
-	h/l --time increment  
-	k/j --up/down  
+enter		animate chart  
+	h/l 	time increment  
+	k/j 	up/down  
 
-p - - - toggle planet/point data  
-o - - - toggle retro/speed data  
+p			toggle planet/point data  
+o 			toggle retro/speed data  
 
-i - - - input chart data  
+i			input chart data  
 
-i - - - INSERT mode  
+INPUT CHART DATA
 
-\ - - - exit data input  
-F1 - - - clear fields  
-tab - - - fill local time  
-arrowkeys - - - navigate  
+i			INSERT mode  
 
-esc - - - NORMAL mode  
+	\		exit/save data input  
+	F1		clear fields  
+	tab		fill local time  
+	arrows	navigate  
 
-enter - - - draw chart  
+esc			NORMAL mode  
 
-w - - - save chart  
-e - - - load chart  
-q - - - exit data input  
+	enter	draw chart 
 
-k/j - - - up/down  
-h/l - - - left/right  
+	w		save chart  
+	e		load chart  
+	q		exit data input  
 
--)(DATA--DIR_)--o  
+	k/j		up/down  
+	h/l		left/right  
 
- 'charts' directory, city-db and swisseph 'ephe' directory: $XDG_DATA_HOME  
+DATA DIRECTORIES
 
- swiss ephemeris header files: /usr/local/include  
+'charts' directory, city-db and swisseph 'ephe' directory: $XDG_DATA_HOME  
+
+swiss ephemeris header files: /usr/local/include  
  
- swiss ephemeris library 'libswe.a': /usr/local/lib  
+swiss ephemeris library 'libswe.a': /usr/local/lib  
  
- compiled astro binary: /usr/local/bin  
+compiled astro binary: /usr/local/bin  
  
- ~optional--o  
- create a file named 'config' in ~/.config/astro to set local timezone and location  
- config template below, timezone is IANA format  
+~optional--o  
+
+create a file named 'config' in ~/.config/astro to set local timezone and location  
+config template below, timezone is IANA format  
  
- ```
- timezone = America/Chicago
- latitude = 41.85003
- longitude = -87.65005
- ```
+```
+timezone = America/Chicago
+latitude = 41.85003
+longitude = -87.65005
+```
  
- **TODO**
+TODO
  
- save and load charts			[DONE]
- animate chart					[DONE] 
- lot of spirit + fortune  		[DONE]
- next retrograde/ next station	[DONE]
- element colors					[DONE] 
- solar return					[DONE] 
- essential dignities			[DONE]
- synastry/ transit view 
- secondary progressions
- aspects
- eclipse data					[DONE]
- declination/out of bounds
- tabs/multiple charts open 
- terminal window resize refresh	[DONE]
- user default config			[DONE]
- code documentation
- zodiacal releasing
+save and load charts			[DONE]
+animate chart					[DONE] 
+lot of spirit + fortune  		[DONE]
+next retrograde/ next station	[DONE]
+element colors					[DONE] 
+solar return					[DONE] 
+essential dignities				[DONE]
+synastry/ transit view 
+secondary progressions
+aspects
+eclipse data					[DONE]
+declination/out of bounds
+tabs/multiple charts open 
+terminal window resize refresh	[DONE]
+user default config				[DONE]
+code documentation
+zodiacal releasing
+
+--license--
  
- --license--
+astro
+AGPLv3
  
- astro
- AGPLv3
+swiss ephemeris 
+https://github.com/aloistr/swisseph
  
- swiss ephemeris 
- https://github.com/aloistr/swisseph
- 
- geonames - (city-db)
- CC BY 4.0
+geonames - (city-db)
+CC BY 4.0
