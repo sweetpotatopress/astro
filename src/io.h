@@ -20,10 +20,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define FDAY 5
 #define FHOUR 6
 #define FMIN 7
-#define FTZ 8
-#define FLAT 9
-#define FLON 10
-#define FMAX 11
+#define FSEC 8
+#define FTZ 9
+#define FLAT 10
+#define FLON 11
+#define FMAX 12
 
 void load_chart(struct cdata *cdata, struct io *io,
 char *citybuffer, char *statebuffer, char *countrybuffer);

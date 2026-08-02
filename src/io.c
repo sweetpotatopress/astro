@@ -443,7 +443,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
 	// copy data to file, \n delimited
-	fprintf(ifp, "%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
+	fprintf(ifp, "%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
 		citybuffer,
 		statebuffer,
 		countrybuffer,
@@ -452,6 +452,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 		cdata->tm_mday,
 		cdata->tm_hour,
 		cdata->tm_min,
+		cdata->tm_sec,
 		tz_name,
 		cdata->dlat,
 		cdata->dlon
@@ -701,28 +702,34 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						cdata->tm_year = 1970;
 								
 					lret = strtol(field[FMONTH], &endptr, 10);
-					if (errno != ERANGE && iret != -1)
+					if (errno != ERANGE && lret != -1)
 						cdata->tm_mon = (int)lret;
 					else
 						cdata->tm_mon = 1;
 								
 					lret = strtol(field[FDAY], &endptr, 10);
-					if (errno != ERANGE && iret != -1)
+					if (errno != ERANGE && lret != -1)
 						cdata->tm_mday = (int)lret;
 					else
 						cdata->tm_mday = 1;
 								
 					lret = strtol(field[FHOUR], &endptr, 10);
-					if (errno != ERANGE && iret != -1) 
+					if (errno != ERANGE && lret != -1) 
 						cdata->tm_hour = (int)lret;
 					else
 						cdata->tm_hour = 1;
 									
 					lret = strtol(field[FMIN], &endptr, 10);
-					if (errno != ERANGE && iret != -1)
+					if (errno != ERANGE && lret != -1)
 						cdata->tm_min = (int)lret;
 					else
 						cdata->tm_min = 1;
+						
+					lret = strtol(field[FSEC], &endptr, 10);
+					if (errno != ERANGE && lret != -1)
+						cdata->tm_sec = (int)lret;
+					else
+						cdata->tm_sec = 0;
 								
 					if (setenv("TZ", field[FTZ], 1) != 0)
 						ERR_EXIT("ERR: TZ setenv fail field_to_member");
@@ -740,7 +747,6 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					else
 						cdata->dlon = 0.0;
 							
-					cdata->tm_sec = 0;
 					free(buffer);
 					fclose(fp);
 					

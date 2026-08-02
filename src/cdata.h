@@ -17,12 +17,13 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define MONTH 2
 #define DAY 3
 #define HOUR 4
-#define AMPM 5
-#define MINUTE 6
-#define TIMEZONE 7
-#define LATITUDE 8
-#define LONGITUDE 9
-#define FIELDMAX 10
+#define MINUTE 5
+#define SECOND 6
+#define AMPM 7
+#define TIMEZONE 8
+#define LATITUDE 9
+#define LONGITUDE 10
+#define FIELDMAX 11
 
 void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
 struct io *io, struct cdata *cdata, enum mode mode,

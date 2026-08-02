@@ -61,6 +61,17 @@ void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 	time_t now = time(NULL);
 	localtime_r(&now, gettime);
 	
+	if (gettime->tm_hour == 0)
+		gettime->tm_hour = 12;
+	
+	if (gettime->tm_hour > 12)
+	{
+		gettime->tm_hour -= 12;
+		set_field_buffer(cdata_field[AMPM], 0, "pm");
+	}
+	else
+		set_field_buffer(cdata_field[AMPM], 0, "am");
+	
 	memset(buff, 0, sizeof(buff));
 	snprintf(buff, sizeof(buff), "%d", gettime->tm_year+1900);
 	set_field_buffer(cdata_field[YEAR], 0, buff);
@@ -80,6 +91,10 @@ void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 	memset(buff, 0, sizeof(buff));
 	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
 	set_field_buffer(cdata_field[MINUTE], 0, buff);
+	
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_sec);
+	set_field_buffer(cdata_field[SECOND], 0, buff);
 	
 	free(gettime);
 }
@@ -147,21 +162,29 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 			else
 				cdata->tm_hour = 1;
 			break;
-		case AMPM:
-			if ((!strcasecmp(buffer, "p") || !strcasecmp(buffer, "pm")) &&
-			cdata->tm_hour != 12)
-			{
-				cdata->tm_hour += 12;
-				if (cdata->tm_hour >= 24)
-					cdata->tm_hour = 0;
-			}
-			break;
+			
 		case MINUTE:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
 				cdata->tm_min = (int)iret;
 			else
 				cdata->tm_min = 1;
+			break;
+			
+		case SECOND:
+			iret = strtol(buffer, &endptr, 10);
+			if (errno != ERANGE && iret != -1)
+				cdata->tm_sec = (int)iret;
+			else
+				cdata->tm_sec = 1;
+			break;
+		
+		case AMPM:
+			if ((!strcasecmp(buffer, "p") || !strcasecmp(buffer, "pm"))
+			&& cdata->tm_hour != 12)
+				cdata->tm_hour += 12;
+			if (cdata->tm_hour >= 24)
+				cdata->tm_hour = 0;
 			break;
 			
 		case TIMEZONE:
@@ -231,8 +254,9 @@ void field_label(WINDOW *in_cdata_win)
 		"month:",
 		"day:",
 		"hour:",
-		"am/pm:",
 		"minute:",
+		"second:",
+		"am/pm:",
 		"timezone:",
 		"lat.",
 		"long.",
@@ -295,14 +319,19 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	field_opts_off(cdata_field[HOUR], O_AUTOSKIP);
 	starty+= 2;
 	
-	cdata_field[AMPM] = new_field(1, 3, starty, startx, 0, 0);
-	set_field_back(cdata_field[AMPM], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(cdata_field[AMPM], O_AUTOSKIP);
-	starty+= 2;
-	
 	cdata_field[MINUTE] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[MINUTE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[MINUTE], O_AUTOSKIP);
+	starty+= 2;
+	
+	cdata_field[SECOND] = new_field(1, 3, starty, startx, 0, 0);
+	set_field_back(cdata_field[SECOND], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[SECOND], O_AUTOSKIP);
+	starty+= 2;
+	
+	cdata_field[AMPM] = new_field(1, 3, starty, startx, 0, 0);
+	set_field_back(cdata_field[AMPM], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[AMPM], O_AUTOSKIP);
 	starty+= 2;
 	
 	cdata_field[TIMEZONE] = new_field(1, 30, starty, startx, 0, 0);
