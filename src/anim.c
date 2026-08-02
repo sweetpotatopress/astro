@@ -74,10 +74,13 @@ struct cdata *cdata)
 		else if (hour > 0 && hour < 12)
 			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d AM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
 	}
+	starty += 1;
+	mvwprintw(main_win, starty, startx, "UTC%+d", cdata->tm_hour - (int)cdata->utc_hour);
 	if (cdata->tm_isdst > 0)
 	{
-		starty+= 1;
+		startx += 6;
 			mvwprintw(main_win, starty, startx, "dst");
+		startx -= 6;
 	}
 	
 	starty += 1;
