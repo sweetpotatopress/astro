@@ -75,12 +75,19 @@ struct cdata *cdata)
 			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d AM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
 	}
 	starty += 1;
-	mvwprintw(main_win, starty, startx, "UTC%+d", cdata->tm_hour - (int)cdata->utc_hour);
+	int utc;
+	
+	if ((int)cdata->utc_hour == 0)
+		utc = cdata->tm_hour - 24;
+	else
+		utc = cdata->tm_hour - (int)cdata->utc_hour;
+		
+	mvwprintw(main_win, starty, startx, "UTC%+02d", utc);
 	if (cdata->tm_isdst > 0)
 	{
-		startx += 6;
+		startx += 7;
 			mvwprintw(main_win, starty, startx, "dst");
-		startx -= 6;
+		startx -= 7;
 	}
 	
 	starty += 1;
