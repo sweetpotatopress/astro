@@ -218,6 +218,14 @@ int main()
 					main_done = 1;
 					chart_done = 1;
 					break;
+				case 'd':
+					if (cdata->tm_isdst == 0)
+						cdata->tm_isdst = 3;
+					else if (cdata->tm_isdst >= 1)
+						cdata->tm_isdst = 2;
+					new_chart(NEW_CHART_MAIN());
+					doupdate();
+					break;
 				case 'i':
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,

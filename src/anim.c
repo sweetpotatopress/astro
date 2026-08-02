@@ -74,6 +74,11 @@ struct cdata *cdata)
 		else if (hour > 0 && hour < 12)
 			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d AM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
 	}
+	if (cdata->tm_isdst > 0)
+	{
+		starty+= 1;
+			mvwprintw(main_win, starty, startx, "dst");
+	}
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)
@@ -151,7 +156,7 @@ bool x)
 		temp->tm_hour = cdata->tm_hour;
 		temp->tm_min = cdata->tm_min;
 		temp->tm_sec = cdata->tm_sec;
-		temp->tm_isdst = -1;
+		temp->tm_isdst = cdata->tm_isdst;
 		
 		*t = mktime(temp);
 	}
@@ -164,6 +169,7 @@ bool x)
 		cdata->tm_hour = result->tm_hour;
 		cdata->tm_min = result->tm_min;
 		cdata->tm_sec = result->tm_sec;
+		cdata->tm_isdst = result->tm_isdst;
 	}
 }
 

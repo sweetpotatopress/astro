@@ -101,12 +101,23 @@ void calculate_utc(struct cdata *cdata)
 	tm_in.tm_hour = cdata->tm_hour;
 	tm_in.tm_min = cdata->tm_min;
 	tm_in.tm_sec = cdata->tm_sec;
-	tm_in.tm_isdst = -1;
+	
+	if (cdata->tm_isdst == 3)
+		tm_in.tm_isdst = 1;
+	else if (cdata->tm_isdst == 2)
+		tm_in.tm_isdst = 0;
+	else
+		tm_in.tm_isdst = -1;
 	
 	time_t t = mktime(&tm_in);
 	struct tm *result = localtime(&t);
 	
-	cdata->tm_isdst = result->tm_isdst;
+	if (cdata->tm_isdst == 3)
+		cdata->tm_isdst = 1;
+	else if (cdata->tm_isdst == 2)
+		cdata->tm_isdst = 0;
+	else
+		cdata->tm_isdst = result->tm_isdst;
 	
 	struct tm *tm_utc = gmtime(&t);
 	
