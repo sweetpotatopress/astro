@@ -22,7 +22,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "chronos.h"
 #include "cdata.h"
 
-#define VERSION 0.69
+#define VERSION 0.70
 
 int main()
 {
