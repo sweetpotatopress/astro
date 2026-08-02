@@ -62,10 +62,10 @@ swiss ephemeris library 'libswe.a': /usr/local/lib
  
 compiled astro binary: /usr/local/bin  
  
-~optional--o  
+OPTIONAL
 
 create a file named 'config' in ~/.config/astro to set local timezone and location  
-config template below, timezone is IANA format  
+config template between ```, timezone is IANA format  
  
 ```
 timezone = America/Chicago
@@ -85,6 +85,7 @@ essential dignities				[DONE]
 synastry/ transit view 
 secondary progressions
 aspects
+planet day/hour					
 eclipse data					[DONE]
 declination/out of bounds
 tabs/multiple charts open 
