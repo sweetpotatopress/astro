@@ -750,9 +750,9 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					
 					lret = strtol(field[FDST], &endptr, 10);
 					if (lret > 0)
-						cdata->tm_isdst = 3;
+						cdata->tm_isdst = YDST;
 					else if (lret == 0)
-						cdata->tm_isdst = 2;
+						cdata->tm_isdst = NDST;
 							
 					free(buffer);
 					fclose(fp);

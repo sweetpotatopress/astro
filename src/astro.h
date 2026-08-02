@@ -93,6 +93,8 @@ struct pxx {
 	double dspir[MAXPXX];
 };
 
+#define NDST 2
+#define YDST 3
 struct cdata {
 	char *city;
 	char *state;

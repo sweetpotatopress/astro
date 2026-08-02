@@ -81,6 +81,10 @@ struct cdata *cdata)
 		utc = cdata->tm_hour - 24;
 	else
 		utc = cdata->tm_hour - (int)cdata->utc_hour;
+	if (utc > 14)
+		utc -= 24;
+	if (utc < - 12)
+		utc += 24;
 		
 	mvwprintw(main_win, starty, startx, "UTC%+02d", utc);
 	if (cdata->tm_isdst > 0)

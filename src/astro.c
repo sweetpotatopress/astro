@@ -220,9 +220,9 @@ int main()
 					break;
 				case 'd':
 					if (cdata->tm_isdst == 0)
-						cdata->tm_isdst = 3;
+						cdata->tm_isdst = YDST;
 					else if (cdata->tm_isdst >= 1)
-						cdata->tm_isdst = 2;
+						cdata->tm_isdst = NDST;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
