@@ -63,16 +63,17 @@ struct cdata *cdata)
 		
 	starty += 1;
 	if (cdata->tm_hour >= 0)
-		mvwprintw(main_win, starty, startx, "%02d", cdata->tm_hour);
-	
-	startx += 2;
-	if(cdata->tm_min >= 0)
-		mvwprintw(main_win, starty, startx, ":%02d", cdata->tm_min);
-	
-	startx += 3;
-	if (cdata->tm_sec >= 0)
-		mvwprintw(main_win, starty, startx, ":%02d", cdata->tm_sec);
-	startx -= 5;
+	{
+		int hour = cdata->tm_hour;
+		if (hour == 12)
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d PM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
+		else if (hour > 12)	
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d PM", cdata->tm_hour - 12, cdata->tm_min, cdata->tm_sec);
+		else if (hour == 0)
+			mvwprintw(main_win, starty, startx, "12:%02d:%02d AM", cdata->tm_min, cdata->tm_sec);
+		else if (hour > 0 && hour < 12)
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d AM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
+	}
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)
