@@ -443,7 +443,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
 	// copy data to file, \n delimited
-	fprintf(ifp, "%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f",
+	fprintf(ifp, "%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f\n%d",
 		citybuffer,
 		statebuffer,
 		countrybuffer,
@@ -455,7 +455,8 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 		cdata->tm_sec,
 		tz_name,
 		cdata->dlat,
-		cdata->dlon
+		cdata->dlon,
+		cdata->tm_isdst
 		);
 		
 		fclose(ifp);
@@ -746,6 +747,12 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						cdata->dlon = dret;
 					else
 						cdata->dlon = 0.0;
+					
+					lret = strtol(field[FDST], &endptr, 10);
+					if (lret > 0)
+						cdata->tm_isdst = 3;
+					else if (lret == 0)
+						cdata->tm_isdst = 2;
 							
 					free(buffer);
 					fclose(fp);

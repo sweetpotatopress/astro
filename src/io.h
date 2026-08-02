@@ -24,7 +24,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define FTZ 9
 #define FLAT 10
 #define FLON 11
-#define FMAX 12
+#define FDST 12
+#define FMAX 13
 
 void load_chart(struct cdata *cdata, struct io *io,
 char *citybuffer, char *statebuffer, char *countrybuffer);
