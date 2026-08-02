@@ -44,7 +44,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define RWIN_Y LINES - 9
 #define RWIN_X COLS - 24
 
-#define CWINY 20
+#define CWINY 22
 #define CWINX 47
 #define CWIN_Y (LINES - CWINY) / 2
 #define CWIN_X (COLS - CWINX) / 2

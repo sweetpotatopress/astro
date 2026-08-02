@@ -16,7 +16,13 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "chronos.h"
 #include "anim.h"
 #include "draw.h"
-#include "cdata.h"
+
+#define SECOND 6
+#define MINUTE 5
+#define HOUR 4
+#define DAY 3
+#define MONTH 2
+#define YEAR 1
 
 void cur_chart_data(WINDOW *main_win, struct io *io,
 struct cdata *cdata)
@@ -270,10 +276,10 @@ void animate_chart(NEW_CHART_PARAM())
 	int starty = 0;
 	int startx = COLS - 14;
 	
-	mvwprintw(main_win, starty, startx, "(min)");
+	mvwprintw(main_win, starty, startx, "(day)");
 	
 	int max_day = 0; // months() return flag
-	size_t i = MINUTE; // time inc/dec
+	size_t i = DAY; // time inc/dec
 	
 	struct tm temp = {0};
 	struct tm *result = NULL;
@@ -288,7 +294,7 @@ void animate_chart(NEW_CHART_PARAM())
 		switch(ch)
 		{
 			case 'h': case KEY_LEFT:
-				if (i != MINUTE)
+				if (i != SECOND)
 					++i;
 				break;
 				
@@ -352,6 +358,9 @@ void animate_chart(NEW_CHART_PARAM())
 			case 'k': case KEY_UP:
 				switch(i)
 				{
+					case SECOND:
+						t += 1;
+						break;
 					case MINUTE:
 						t += 60;
 						break;
@@ -388,6 +397,9 @@ void animate_chart(NEW_CHART_PARAM())
 			case 'j': case KEY_DOWN:
 				switch(i)
 				{
+					case SECOND:
+						t -= 1;
+						break;
 					case MINUTE:
 						t -= 60;
 						break;
@@ -429,6 +441,12 @@ void animate_chart(NEW_CHART_PARAM())
 		usleep(8666);
 		switch(i)
 		{
+			case SECOND:
+				wmove(main_win, starty, startx);
+				wclrtoeol(main_win);
+				mvwprintw(main_win, starty, startx, "(sec)");
+				break;
+				
 			case MINUTE:
 				wmove(main_win, starty, startx);
 				wclrtoeol(main_win);

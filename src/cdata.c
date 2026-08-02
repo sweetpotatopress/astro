@@ -142,12 +142,20 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 			
 		case HOUR:
 			iret = strtol(buffer, &endptr, 10);
-			if (errno != ERANGE && iret != -1) 
+			if (errno != ERANGE && iret != -1 && iret <= 12) 
 				cdata->tm_hour = (int)iret;
 			else
 				cdata->tm_hour = 1;
 			break;
-			
+		case AMPM:
+			if ((!strcasecmp(buffer, "p") || !strcasecmp(buffer, "pm")) &&
+			cdata->tm_hour != 12)
+			{
+				cdata->tm_hour += 12;
+				if (cdata->tm_hour >= 24)
+					cdata->tm_hour = 0;
+			}
+			break;
 		case MINUTE:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
@@ -223,6 +231,7 @@ void field_label(WINDOW *in_cdata_win)
 		"month:",
 		"day:",
 		"hour:",
+		"am/pm:",
 		"minute:",
 		"timezone:",
 		"lat.",
@@ -244,7 +253,7 @@ void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
 struct io *io, struct cdata *cdata, enum mode mode,
 char *citybuffer, char *statebuffer, char *countrybuffer)
 {
-	FIELD *cdata_field[10];
+	FIELD *cdata_field[FIELDMAX + 1];
 	FORM *cdata_form;
 	int ch;
 	int starty, startx;
@@ -284,6 +293,11 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	cdata_field[HOUR] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[HOUR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[HOUR], O_AUTOSKIP);
+	starty+= 2;
+	
+	cdata_field[AMPM] = new_field(1, 3, starty, startx, 0, 0);
+	set_field_back(cdata_field[AMPM], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(cdata_field[AMPM], O_AUTOSKIP);
 	starty+= 2;
 	
 	cdata_field[MINUTE] = new_field(1, 3, starty, startx, 0, 0);
