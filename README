@@ -1,10 +1,8 @@
 DEPENDENCIES
 
-- ncurses
+ncurses
 
---o-KEYBINDS
-
-CHART VIEW
+KEYBINDS
 
 w			save chart  
 m			makedir  
@@ -17,6 +15,7 @@ e		 	load chart
 	esc		cancel  
  
 r			redraw chart  
+d			toggle dst
 tab			live update  
 q			exit astro  
 
