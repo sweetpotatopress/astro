@@ -34,32 +34,19 @@ struct cdata *cdata)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
 	
 	starty += 1;
-	if(cdata->city)
-		mvwprintw(main_win, starty, startx, "%s", cdata->city);
-		
 	if(cdata->state)
 	{
 		if (!isdigit((unsigned char)cdata->state[0]) &&
 		strlen(cdata->state) > 1)
-		{ // when not in the usa
-			startx += (int)strlen(cdata->city);
-			mvwprintw(main_win, starty, startx, ", %s", cdata->state);
-			startx -= (int)strlen(cdata->city);
-		}
+			mvwprintw(main_win, starty, startx, "%s, %s, %s", cdata->city, cdata->state, cdata->country);
 	}
-	
+	else if (cdata->city && cdata->country)
+		mvwprintw(main_win, starty, startx, "%s, %s", cdata->city, cdata->country);
+		
 	starty += 1;
-	if(cdata->country)
-		mvwprintw(main_win, starty, startx, "%s", cdata->country);
-	
-	starty += 1;
-	if(cdata->tm_year)
-		mvwprintw(main_win, starty, startx, "%d", cdata->tm_year);
-	
-	starty += 1;
-	if(cdata->tm_mon && cdata->tm_mday)
-		mvwprintw(main_win, starty, startx, "%02d/%02d",
-		cdata->tm_mon, cdata->tm_mday);
+	if(cdata->tm_year && cdata->tm_mon && cdata->tm_mday)
+		mvwprintw(main_win, starty, startx, "%d.%02d.%02d",
+		cdata->tm_year, cdata->tm_mon, cdata->tm_mday);
 		
 	starty += 1;
 	if (cdata->tm_hour >= 0)
@@ -87,17 +74,17 @@ struct cdata *cdata)
 		utc += 24;
 		
 	if (cdata->tm_isdst > 0)
-		mvwprintw(main_win, starty, startx, "dst UTC%+02d", utc);
+		mvwprintw(main_win, starty, startx, "DST UTC%+02d", utc);
 	else
 		mvwprintw(main_win, starty, startx, "UTC%+02d", utc);
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)
-		mvwprintw(main_win, starty, startx, "lat.%f", cdata->dlat);
+		mvwprintw(main_win, starty, startx, "%f", cdata->dlat);
 	
 	starty += 1;
 	if (fabs(cdata->dlon) > 1e-6)
-		mvwprintw(main_win, starty, startx, "lon.%f", cdata->dlon);
+		mvwprintw(main_win, starty, startx, "%f", cdata->dlon);
 }
 
 void new_chart(NEW_CHART_PARAM())
