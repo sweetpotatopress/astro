@@ -66,13 +66,13 @@ struct cdata *cdata)
 	{
 		int hour = cdata->tm_hour;
 		if (hour == 12)
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d PM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dPM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
 		else if (hour > 12)	
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d PM", cdata->tm_hour - 12, cdata->tm_min, cdata->tm_sec);
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dPM", cdata->tm_hour - 12, cdata->tm_min, cdata->tm_sec);
 		else if (hour == 0)
-			mvwprintw(main_win, starty, startx, "12:%02d:%02d AM", cdata->tm_min, cdata->tm_sec);
+			mvwprintw(main_win, starty, startx, "12:%02d:%02dAM", cdata->tm_min, cdata->tm_sec);
 		else if (hour > 0 && hour < 12)
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02d AM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dAM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
 	}
 	starty += 1;
 	int utc;
@@ -86,13 +86,10 @@ struct cdata *cdata)
 	if (utc < - 12)
 		utc += 24;
 		
-	mvwprintw(main_win, starty, startx, "UTC%+02d", utc);
 	if (cdata->tm_isdst > 0)
-	{
-		startx += 7;
-			mvwprintw(main_win, starty, startx, "dst");
-		startx -= 7;
-	}
+		mvwprintw(main_win, starty, startx, "dst UTC%+02d", utc);
+	else
+		mvwprintw(main_win, starty, startx, "UTC%+02d", utc);
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)
