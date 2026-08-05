@@ -22,6 +22,22 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "cdata.h"
 #include "draw.h"
 
+static char *xstrcasestr(const char *h, const char *n)
+{
+	size_t i, nl = strlen(n);
+	if (!nl)
+		return (char *)h;
+	for (; *h; h++)
+	{
+		for (i = 0; i < nl; i++)
+			if (tolower((unsigned char)h[i]) != tolower((unsigned char)n[i]))
+				break;
+		if (i == nl)
+			return (char *)h;
+	}
+	return NULL;
+}
+
 char* strtok_E(char *str, const char *delim)
 { //strtok that doesnt skip repeating delims :3
 	static char *next_pos = NULL;
@@ -244,18 +260,9 @@ char *statebuffer, char *countrybuffer)
 			token = strtok_E(NULL, "\t");
 		}
 		
-		// make first letter of search capital, rest lowercase
-		if (search[0] >= 'a' && search[0] <= 'z')
-			search[0] = (search[0] - 'a' + 'A');
-		
-		for (size_t j = 1; search[j] != '\0'; j++)
-		{
-			if (search[j] >= 'A' && search[j] <= 'Z')
-				search[j] = (search[j] - 'A' + 'a');
-		}
-		
-		if (field_count > 1 && strstr(field[1], search) != NULL &&
-		field[1] != NULL && field[8] != NULL)
+		if (field_count > 1 &&
+		field[1] != NULL && field[8] != NULL &&
+		xstrcasestr(field[1], search) != NULL)
 		{
 			if (i >= search_max)
 			{
