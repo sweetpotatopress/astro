@@ -244,7 +244,17 @@ char *statebuffer, char *countrybuffer)
 			token = strtok_E(NULL, "\t");
 		}
 		
-		if (field_count > 1 && strcasestr(field[1], search) != NULL &&
+		// make first letter of search capital, rest lowercase
+		if (search[0] >= 'a' && search[0] <= 'z')
+			search[0] = (search[0] - 'a' + 'A');
+		
+		for (size_t j = 1; search[j] != '\0'; j++)
+		{
+			if (search[j] >= 'A' && search[j] <= 'Z')
+				search[j] = (search[j] - 'A' + 'a');
+		}
+		
+		if (field_count > 1 && strstr(field[1], search) != NULL &&
 		field[1] != NULL && field[8] != NULL)
 		{
 			if (i >= search_max)
