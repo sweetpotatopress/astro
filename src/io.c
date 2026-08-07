@@ -662,7 +662,9 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 					cur = current_item(load_menu);
 					selected = item_description(cur);
 					
-					memcpy(io->filename, selected, strlen(selected) + 1);
+					io->filename = strdup(selected);
+					if (!selected)
+						ERR_EXIT("load_chart strdup");
 					
 					snprintf(newpath, MAXPATH,
 					"%s/%s", io->filepath, selected);
