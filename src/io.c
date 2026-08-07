@@ -661,9 +661,8 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 				case 'l': case KEY_RIGHT: case '\n':
 					cur = current_item(load_menu);
 					selected = item_description(cur);
-					io->filename = strdup(selected);
-					if (!io->filename)
-						ERR_EXIT("load_chart io->filename strdup");
+					
+					memcpy(io->filename, selected, strlen(selected) + 1);
 					
 					snprintf(newpath, MAXPATH,
 					"%s/%s", io->filepath, selected);
