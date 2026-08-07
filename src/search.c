@@ -217,13 +217,19 @@ char *statebuffer, char *countrybuffer)
 	if (!search_result)
 		ERR_EXIT("city_search search_result calloc");
 	
-	char *home_dir = getenv("HOME");
+	const char *home_dir = getenv("HOME");
 	if (!home_dir)
-		ERR_EXIT("city_search home_dir getenv");
+		ERR_EXIT("HOME environment not set");
 		
-	char fn_buff[MAXPATH] = {0};
-	snprintf(fn_buff, MAXPATH,
-	"%s/.local/share/astro/city-db", home_dir);
+	char fn_buff[MAXBUF] = {0};
+		
+	const char *xdg_data = getenv("XDG_DATA_HOME");
+	if (!xdg_data)
+		snprintf(fn_buff, MAXBUF, 
+		"%s/.local/share/astro/city-db", home_dir);
+	else
+		snprintf(fn_buff, MAXBUF, 
+		"%s/astro/city-db", xdg_data);
 	
 	FILE *fp = fopen(fn_buff, "r");
 	if (fp == NULL)

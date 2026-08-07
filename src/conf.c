@@ -24,13 +24,19 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 void config_parse(struct cdata *cdata)
 {
-	char *home_dir = getenv("HOME");
+	const char *home_dir = getenv("HOME");
 	if (!home_dir)
-		ERR_EXIT("city_search home_dir getenv");
+		ERR_EXIT("HOME environment not set");
 		
-	char fn_buff[MAXPATH] = {0};
-	snprintf(fn_buff, MAXPATH,
-	"%s/.config/astro/config", home_dir);
+	char fn_buff[MAXBUF] = {0};
+		
+	const char *xdg_config = getenv("XDG_CONFIG_HOME");
+	if (!xdg_config)
+		snprintf(fn_buff, MAXBUF, 
+		"%s/.config/astro/config", home_dir);
+	else
+		snprintf(fn_buff, MAXBUF, 
+		"%s/astro/config", xdg_config);
 	
 	FILE *fp = fopen(fn_buff, "r");
 	if (fp == NULL)

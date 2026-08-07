@@ -113,8 +113,14 @@ int main()
 		ERR_EXIT("HOME environment not set");
 		
 	char fn_buff[MAXBUF] = {0};
-	snprintf(fn_buff, MAXBUF, 
-	"%s/.local/share/astro/ephe", home_dir);
+		
+	const char *xdg_data = getenv("XDG_DATA_HOME");
+	if (!xdg_data)
+		snprintf(fn_buff, MAXBUF, 
+		"%s/.local/share/astro/ephe", home_dir);
+	else
+		snprintf(fn_buff, MAXBUF, 
+		"%s/astro/ephe", xdg_data);
 	
 	swe_set_ephe_path(fn_buff);
 	

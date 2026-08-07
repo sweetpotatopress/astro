@@ -27,12 +27,17 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 void save_chart(struct cdata *cdata, struct io *io,
 char *citybuffer, char *statebuffer, char *countrybuffer)
 {
-	char *home_dir = getenv("HOME");
+	const char *home_dir = getenv("HOME");
 	if (!home_dir)
-		ERR_EXIT("main_io home_dir getenv");
-	
-	snprintf(io->filepath, MAXBUF,
-	"%s/.local/share/astro/charts/", home_dir);
+		ERR_EXIT("HOME environment not set");
+		
+	const char *xdg_data = getenv("XDG_DATA_HOME");
+	if (!xdg_data)
+		snprintf(io->filepath, MAXBUF, 
+		"%s/.local/share/astro/charts/", home_dir);
+	else
+		snprintf(io->filepath, MAXBUF, 
+		"%s/astro/charts/", xdg_data);
 	
 	MENU *save_menu;
 	WINDOW *save_win;
@@ -476,12 +481,17 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 void load_chart(struct cdata *cdata, struct io *io,
 char *citybuffer, char *statebuffer, char *countrybuffer)
 {
-	char *home_dir = getenv("HOME");
+	const char *home_dir = getenv("HOME");
 	if (!home_dir)
-		ERR_EXIT("main_io home_dir getenv");
-	
-	snprintf(io->filepath, MAXBUF,
-	"%s/.local/share/astro/charts/", home_dir);
+		ERR_EXIT("HOME environment not set");
+		
+	const char *xdg_data = getenv("XDG_DATA_HOME");
+	if (!xdg_data)
+		snprintf(io->filepath, MAXBUF, 
+		"%s/.local/share/astro/charts/", home_dir);
+	else
+		snprintf(io->filepath, MAXBUF, 
+		"%s/astro/charts/", xdg_data);
 	
 	MENU *load_menu;
 	WINDOW *load_win;
