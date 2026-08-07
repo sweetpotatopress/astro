@@ -54,24 +54,24 @@ esc			NORMAL mode
 
 DATA DIRECTORIES
 
-city-db $XDG_DATA_HOME/astro
-swisseph/ephe/ $XDG_DATA_HOME/astro
-charts/ $XDG_DATA_HOME/astro
+swiss ephemeris headers	: /usr/local/include  
+swiss ephemeris library	: /usr/local/lib  
+compiled astro binary	: /usr/local/bin  
 
-swiss ephemeris header files: /usr/local/include  
-swiss ephemeris library: /usr/local/lib  
-compiled astro binary: /usr/local/bin  
+city-db 		: $XDG_DATA_HOME/astro
+swisseph/ephe/ 	: $XDG_DATA_HOME/astro
+charts/ 		: $XDG_DATA_HOME/astro
  
 OPTIONAL
 
-create a file named 'config' in ~/.config/astro to set local timezone and location  
-config template between ```, timezone is IANA format  
+set default timezone and location
+config			: $XDG_CONFIG_HOME/astro  
+
+config template : 
  
-```
 timezone = America/Chicago
 latitude = 41.85003
 longitude = -87.65005
-```
  
 TODO
  
@@ -93,9 +93,9 @@ terminal window resize refresh	[DONE]
 user default config				[DONE]
 code documentation
 zodiacal releasing
-
---license--
  
+LICENSE
+
 astro
 AGPLv3
  
