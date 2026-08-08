@@ -88,7 +88,7 @@ int main()
 	io->filepath = malloc(MAXBUF);
 	if (!io->filepath)
 		ERR_EXIT("main io->filepath malloc");
-	io->filename = malloc(256);
+	io->filename = calloc(1, MAXBUF);
 	if (!io->filename)
 		ERR_EXIT("main io->filename malloc");
 		
@@ -239,8 +239,10 @@ int main()
 					citybuffer, statebuffer, countrybuffer);
 			
 					free(io->filename);
-					io->filename = NULL;
-					
+					io->filename = calloc(1, MAXBUF);
+					if (!io->filename)
+						ERR_EXIT("case i io->filename calloc");
+		
 					ECLIPSE_INIT();
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
