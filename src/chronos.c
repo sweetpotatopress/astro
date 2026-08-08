@@ -128,6 +128,7 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_year = tm_utc->tm_year + 1900;
 	cdata->utc_mon = tm_utc->tm_mon + 1;
 	cdata->utc_mday = tm_utc->tm_mday;
+	cdata->tm_wday = tm_utc->tm_wday;
 }
 
 void retro_calc(double jd_ut, int iter[],
