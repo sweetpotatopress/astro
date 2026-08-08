@@ -44,7 +44,6 @@ struct cdata *cdata)
 		mvwprintw(main_win, starty, startx, "%s, %s", cdata->city, cdata->country);
 		
 	starty += 1;
-	startx -= 4;
 	const char *month[] = 
 	{ "err", "jan", "feb", "mar", "apr", "may", "jun",
 	"jul", "aug", "sep", "oct", "nov", "dec" };
@@ -53,10 +52,9 @@ struct cdata *cdata)
 	{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
 	
 	if(cdata->tm_year && cdata->tm_mon && cdata->tm_mday)
-		mvwprintw(main_win, starty, startx, "%s.%s.%02d.%02d",
-		weekday[cdata->tm_wday], month[cdata->tm_mon], cdata->tm_mday, cdata->tm_year);
+		mvwprintw(main_win, starty, startx, "%s.%02d.%02d, %s",
+		month[cdata->tm_mon], cdata->tm_mday, cdata->tm_year, weekday[cdata->tm_wday]);
 		
-	startx += 4;	
 	starty += 1;
 	if (cdata->tm_hour >= 0)
 	{
