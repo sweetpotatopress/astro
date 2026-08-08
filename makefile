@@ -61,8 +61,8 @@ debug: $(SWE_DEPS)
 	@echo "-o--o-Debug build (sanitizers) --o--/-"
 	$(CC) \
 	  $(CFLAGS) \
-	  -g -O1 -fno-omit-frame-pointer \
-	  -fsanitize=undefined,address,leak \
+	  -g3 -O1 -fno-omit-frame-pointer \
+	  -fsanitize=undefined,address,leak,bounds \
 	  -fno-sanitize-recover=undefined \
 	  -o $(TARGET) $(SRCS) \
 	  -L$(SWE_LIB) -lswe -lm \
