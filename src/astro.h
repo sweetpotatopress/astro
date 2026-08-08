@@ -112,6 +112,7 @@ struct cdata {
 	int tm_mon;
 	int tm_year;
 	int tm_isdst;
+	int tm_wday;
 	int utc_year;
 	int utc_mon;
 	int utc_mday;

@@ -33,6 +33,7 @@ void set_localtime(struct cdata *cdata)
 	cdata->tm_hour = gettime.tm_hour;
 	cdata->tm_min = gettime.tm_min;
 	cdata->tm_sec = gettime.tm_sec;
+	cdata->tm_wday = gettime.tm_wday;
 }
 
 int months(int month, int year)

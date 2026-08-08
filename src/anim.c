@@ -44,10 +44,19 @@ struct cdata *cdata)
 		mvwprintw(main_win, starty, startx, "%s, %s", cdata->city, cdata->country);
 		
 	starty += 1;
+	startx -= 4;
+	const char *month[] = 
+	{ "err", "jan", "feb", "mar", "apr", "may", "jun",
+	"jul", "aug", "sep", "oct", "nov", "dec" };
+	
+	const char *weekday[] = 
+	{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
+	
 	if(cdata->tm_year && cdata->tm_mon && cdata->tm_mday)
-		mvwprintw(main_win, starty, startx, "%d.%02d.%02d",
-		cdata->tm_year, cdata->tm_mon, cdata->tm_mday);
+		mvwprintw(main_win, starty, startx, "%s.%s.%02d.%02d",
+		weekday[cdata->tm_wday], month[cdata->tm_mon], cdata->tm_mday, cdata->tm_year);
 		
+	startx += 4;	
 	starty += 1;
 	if (cdata->tm_hour >= 0)
 	{
@@ -155,6 +164,7 @@ bool x)
 		temp->tm_min = cdata->tm_min;
 		temp->tm_sec = cdata->tm_sec;
 		temp->tm_isdst = cdata->tm_isdst;
+		temp->tm_wday = cdata->tm_wday;
 		
 		*t = mktime(temp);
 	}
@@ -168,6 +178,7 @@ bool x)
 		cdata->tm_min = result->tm_min;
 		cdata->tm_sec = result->tm_sec;
 		cdata->tm_isdst = result->tm_isdst;
+		cdata->tm_wday = result->tm_wday;
 	}
 }
 
