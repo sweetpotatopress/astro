@@ -54,18 +54,18 @@ esc			NORMAL mode
 
 DATA DIRECTORIES
 
-swiss ephemeris headers	: /usr/local/include  
-swiss ephemeris library	: /usr/local/lib  
-compiled astro binary	: /usr/local/bin  
+swisseph/*.h		: /usr/local/include  
+swisseph/libswe.a	: /usr/local/lib  
+astro				: /usr/local/bin  
 
-city-db 		: $XDG_DATA_HOME/astro
-swisseph/ephe/ 	: $XDG_DATA_HOME/astro
-charts/ 		: $XDG_DATA_HOME/astro
+city-db 			: $XDG_DATA_HOME/astro
+swisseph/ephe/ 		: $XDG_DATA_HOME/astro
+charts/ 			: $XDG_DATA_HOME/astro
  
 OPTIONAL
+to set default timezone and location
 
-set default timezone and location
-config			: $XDG_CONFIG_HOME/astro  
+config				: $XDG_CONFIG_HOME/astro  
 
 config template : 
  
@@ -85,7 +85,7 @@ essential dignities				[DONE]
 synastry/ transit view 
 secondary progressions
 aspects
-planet day/hour					
+planet day/hour					[DONE]
 eclipse data					[DONE]
 declination/out of bounds
 tabs/multiple charts open 
