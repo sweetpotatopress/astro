@@ -40,6 +40,10 @@ DATA_DIR    := $(XDG_DATA_HOME)/astro
 CHARTS_DIR  := $(DATA_DIR)/charts
 EPHE_DIR    := $(DATA_DIR)/ephe
 
+SWE_SRCS := $(wildcard swisseph/*.c)
+SWEOBJ   := $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
+SCFLAGS	= -g -Wall -fPIC
+	
 SWE_DEPS :=
 ifeq ($(SWE_HEADERS_EXIST)$(SWE_LIB_EXISTS)$(shell test -d "$(EPHE_DIR)" && echo 1 || echo 0),111)
   SWE_DEPS :=
@@ -68,6 +72,13 @@ debug: $(SWE_DEPS)
 	  -L$(SWE_LIB) -lswe -lm \
 	  -lpanel -lmenu -lform -lncurses -ltinfo
 
+$(SWE_DIR)/%.o: swisseph/%.c
+	$(CC) $(SCFLAGS) -c $< -o $@
+		
+$(SWE_DIR)/libswe.a: $(SWEOBJ)
+	ar rcs $@ $(SWEOBJ)
+	rm -f $(SWEOBJ)
+
 install: all
 	@echo "-x--o Installing astro --oo-"
 	/bin/mkdir -p "$(INSTALL_DIR)"
@@ -82,7 +93,7 @@ install: all
 	/bin/cp -r "$(SWE_DIR)/ephe" "$(DATA_DIR)/"; \
 	/bin/cp city-db "$(DATA_DIR)/city-db"
 
-swe-install:
+swe-install: $(SWE_DIR)/libswe.a
 	@echo "--o-Installing Swiss Ephemeris x<--o-"
 	/bin/mkdir -p "$(SWE_INC)" "$(SWE_LIB)"
 	/bin/cp "$(SWE_DIR)/swephexp.h" "$(SWE_INC)/swephexp.h"
