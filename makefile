@@ -1,5 +1,5 @@
 CC        ?= gcc
-CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc \
+CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc -Iswisseph \
              -Wconversion -Wsign-conversion \
              -Wdouble-promotion -Wtype-limits \
              -Wold-style-declaration \
@@ -16,6 +16,9 @@ CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc \
 SWE_DIR     = swisseph
 SWE_INC     = /usr/local/include
 SWE_LIB     = /usr/local/lib
+SWE_SRCS	:= $(wildcard swisseph/*.c)
+SWEOBJ		:= $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
+SCFLAGS		= -g -Wall -fPIC
 INSTALL_DIR = /usr/local/bin
 
 TARGET     = astro
@@ -24,7 +27,6 @@ SRCS       = $(wildcard src/*.c)
 REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
 REAL_HOME := $(shell getent passwd $(REAL_USER) | cut -d: -f6)
 
-SWE_HEADERS_EXIST := $(shell test -f $(SWE_INC)/swephexp.h && test -f $(SWE_INC)/sweph.h && test -f $(SWE_INC)/sweodef.h && echo 1 || echo 0)
 SWE_LIB_EXISTS := $(shell test -f $(SWE_LIB)/libswe.a && echo 1 || echo 0)
 
 XDG_CONFIG_HOME := $(shell \
@@ -35,17 +37,13 @@ XDG_DATA_HOME := $(shell \
   if [ -n "$${XDG_DATA_HOME}" ]; then printf "%s" "$${XDG_DATA_HOME}"; \
   else printf "%s/.local/share" "$(REAL_HOME)"; fi)
 
-CONFIG_DIR := $(XDG_CONFIG_HOME)/astro
+CONFIG_DIR	:= $(XDG_CONFIG_HOME)/astro
 DATA_DIR    := $(XDG_DATA_HOME)/astro
 CHARTS_DIR  := $(DATA_DIR)/charts
 EPHE_DIR    := $(DATA_DIR)/ephe
 
-SWE_SRCS := $(wildcard swisseph/*.c)
-SWEOBJ   := $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
-SCFLAGS	= -g -Wall -fPIC
-	
 SWE_DEPS :=
-ifeq ($(SWE_HEADERS_EXIST)$(SWE_LIB_EXISTS)$(shell test -d "$(EPHE_DIR)" && echo 1 || echo 0),111)
+ifeq ($(SWE_LIB_EXISTS)$(shell test -d "$(EPHE_DIR)" && echo 1 || echo 0),11)
   SWE_DEPS :=
   $(info Swiss Ephemeris found - using them uwu)
 else
@@ -65,7 +63,7 @@ debug: $(SWE_DEPS)
 	@echo "-o--o-Debug build (sanitizers) --o--/-"
 	$(CC) \
 	  $(CFLAGS) \
-	  -g3 -O1 -fno-omit-frame-pointer \
+	  -g3 -fno-omit-frame-pointer \
 	  -fsanitize=undefined,address,leak,bounds \
 	  -fno-sanitize-recover=undefined \
 	  -o $(TARGET) $(SRCS) \
