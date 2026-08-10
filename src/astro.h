@@ -115,9 +115,6 @@ struct cdata {
 	int utc_year;
 	int utc_mon;
 	int utc_mday;
-	double pl_day;
-	double pl_hour;
-	int pl_nhour;
 };
 
 struct io {
