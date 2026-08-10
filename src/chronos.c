@@ -331,6 +331,76 @@ double *luna_eclipse, double *sol_eclipse)
 	}
 }
 
+void pl_dayhour(double jd_ut, struct cdata *cdata, struct pxx *pxx)
+{
+	int iflag = SEFLG_SWIEPH;
+	char serr[AS_MAXCH];
+	double atpress = 0, attemp = 0, tret[MAXBUF] = {0};
+	double geopos[] = {cdata->dlon, cdata->dlat, 0};
+	
+	int s = sect(pxx);
+	if (fabs(pxx->dsun[LONG] - pxx->dasc[LONG]) <= 0.75 ||
+	fabs(pxx->dsun[LONG] - pxx->ddsc[LONG]) <= 0.75)
+		return;
+	if (s == DAY_SECT)
+	{
+		swe_rise_trans(jd_ut - 1.0, SE_SUN, NULL, iflag, SE_CALC_RISE | SE_BIT_DISC_CENTER,
+		geopos, atpress, attemp, tret, serr);
+		double sunrise = tret[0];
+		
+		swe_rise_trans(jd_ut, SE_SUN, NULL, iflag, SE_CALC_SET | SE_BIT_DISC_CENTER,
+		geopos, atpress, attemp, tret, serr);
+		double sunset = tret[0];
+		
+		double len = sunset - sunrise;
+		double hourlen = len / 12.0;
+		
+		double hour_since = jd_ut - sunrise;
+		
+		cdata->pl_day = cdata->tm_wday;
+		cdata->pl_hour = (hour_since / hourlen) + 1;
+		
+		int min_left = 0;
+		double u = (hour_since / hourlen) + 1;
+		double u_next = ceil(u);
+		min_left = (int)((u_next - u) * hourlen * 1440);
+		cdata->pl_nhour = min_left;
+	}
+	
+	else if (s == NIGHT_SECT)
+	{
+		swe_rise_trans(jd_ut, SE_SUN, NULL, iflag, SE_CALC_RISE | SE_BIT_DISC_CENTER,
+		geopos, atpress, attemp, tret, serr);
+		double sunrise = tret[0];
+		
+		swe_rise_trans(jd_ut - 1.0, SE_SUN, NULL, iflag, SE_CALC_SET | SE_BIT_DISC_CENTER,
+		geopos, atpress, attemp, tret, serr);
+		double sunset = tret[0];
+		
+		double len = sunrise - sunset;
+		double hourlen = len / 12.0;
+		
+		double hour_since = jd_ut - sunset;
+		
+		if (cdata->tm_hour < 10)
+		{
+			cdata->pl_day = cdata->tm_wday - 1;
+			if (cdata->pl_day < 0)
+				cdata->pl_day = 6;
+		}
+		else
+			cdata->pl_day = cdata->tm_wday;
+		cdata->pl_hour = (hour_since / hourlen) + 12;
+		
+		int min_left = 0;
+		double u = (hour_since / hourlen) + 1;
+		double u_next = ceil(u);
+		min_left = (int)((u_next - u) * hourlen * 1440);
+		cdata->pl_nhour = min_left;
+	}
+		
+}
+	
 void pxx_init(double cusp[], double sign_cusp[],
 double *luna_eclipse, double *sol_eclipse, double *p_arr[],
 struct cdata *cdata, struct pxx *pxx)
@@ -402,6 +472,8 @@ struct cdata *cdata, struct pxx *pxx)
 	
 	int chart_sect = sect(pxx);
 	lots(chart_sect, pxx);
+	
+	pl_dayhour(jd_ut, cdata, pxx);
 	
 	// seperate degree and minutes
 	for (ipl = SE_SUN; ipl < SPXXMAX; ++ipl)

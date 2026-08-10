@@ -1,5 +1,4 @@
-/* Copyright (C) 2026 yam lynn
-This program is free software: you can redistribute it and/or modify
+/*This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License
 as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -116,6 +115,9 @@ struct cdata {
 	int utc_year;
 	int utc_mon;
 	int utc_mday;
+	double pl_day;
+	double pl_hour;
+	int pl_nhour;
 };
 
 struct io {

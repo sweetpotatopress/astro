@@ -320,7 +320,22 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 		(radius / 2) + 4, centery, centerx);
 	
 	// status bar
-	int bar_end = 15;
+	int bar_end = 30;
 	mvwhline(win, 1, COLS - bar_end, '.', COLS);
 	mvwvline(win, 0, COLS - bar_end, '.', 2);
+	
+	const char *pl[] = {"su", "mo", "ma", "me", "ju", "ve", "sa"};
+	const int order[] = {6, 4, 2, 0, 5, 3, 1};
+	int start = 0;
+	for (int i = 0; i < 7; i++)
+	{
+		if (order[i] == (int)cdata->pl_day)
+		{
+			start = i;
+			break;
+		}
+	}
+	int pos = (start + ((int)cdata->pl_hour)) % 7;
+	int pidx = order[pos];
+	mvwprintw(win, 0, COLS - bar_end + 2, "d:%s h:%s %d", pl[(int)cdata->pl_day], pl[pidx], cdata->pl_nhour);
 }
