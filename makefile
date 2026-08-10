@@ -12,22 +12,24 @@ CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc -Iswisseph \
              -Wnull-dereference \
              -Waddress -Wimplicit-function-declaration \
              -fanalyzer -O3
+             
+SWE_CFLAGS	= -g -Wall -fPIC
 
-SWE_DIR     = swisseph
-SWE_INC     = /usr/local/include
-SWE_LIB     = /usr/local/lib
-SWE_SRCS	:= $(wildcard swisseph/*.c)
-SWEOBJ		:= $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
-SCFLAGS		= -g -Wall -fPIC
+TARGET		= astro
+SRCS		= $(wildcard src/*.c)
 INSTALL_DIR = /usr/local/bin
 
-TARGET     = astro
-SRCS       = $(wildcard src/*.c)
+SWE_DIR     = swisseph
+SWE_LIB     = /usr/local/lib
+
+SWE_SRCS	:= $(wildcard swisseph/*.c)
+SWE_OBJS	:= $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
+SWE_A		:= $(SWE_DIR)/libswe.a
+
+SWE_LIB_EXISTS := $(shell test -f $(SWE_LIB)/libswe.a && echo 1 || echo 0)
 
 REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
 REAL_HOME := $(shell getent passwd $(REAL_USER) | cut -d: -f6)
-
-SWE_LIB_EXISTS := $(shell test -f $(SWE_LIB)/libswe.a && echo 1 || echo 0)
 
 XDG_CONFIG_HOME := $(shell \
   if [ -n "$${XDG_CONFIG_HOME}" ]; then printf "%s" "$${XDG_CONFIG_HOME}"; \
@@ -71,11 +73,11 @@ debug: $(SWE_DEPS)
 	  -lpanel -lmenu -lform -lncurses -ltinfo
 
 $(SWE_DIR)/%.o: swisseph/%.c
-	$(CC) $(SCFLAGS) -c $< -o $@
+	$(CC) $(SWE_CFLAGS) -c $< -o $@
 		
-$(SWE_DIR)/libswe.a: $(SWEOBJ)
-	ar rcs $@ $(SWEOBJ)
-	rm -f $(SWEOBJ)
+$(SWE_A): $(SWE_OBJS)
+	ar rcs $@ $(SWE_OBJS)
+	rm -f $(SWE_OBJS)
 
 install: all
 	@echo "-x--o Installing astro --oo-"
@@ -91,12 +93,8 @@ install: all
 	/bin/cp -r "$(SWE_DIR)/ephe" "$(DATA_DIR)/"; \
 	/bin/cp city-db "$(DATA_DIR)/city-db"
 
-swe-install: $(SWE_DIR)/libswe.a
+swe-install: $(SWE_A)
 	@echo "--o-Installing Swiss Ephemeris x<--o-"
-	/bin/mkdir -p "$(SWE_INC)" "$(SWE_LIB)"
-	/bin/cp "$(SWE_DIR)/swephexp.h" "$(SWE_INC)/swephexp.h"
-	/bin/cp "$(SWE_DIR)/sweph.h"     "$(SWE_INC)/sweph.h"
-	/bin/cp "$(SWE_DIR)/sweodef.h"   "$(SWE_INC)/sweodef.h"
 	/bin/cp "$(SWE_DIR)/libswe.a"    "$(SWE_LIB)/libswe.a"
 
 	/bin/mkdir -p "$(CHARTS_DIR)" "$(EPHE_DIR)"; \
