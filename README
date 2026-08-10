@@ -54,7 +54,6 @@ esc			NORMAL mode
 
 DATA DIRECTORIES
 
-swisseph/*.h		: /usr/local/include  
 swisseph/libswe.a	: /usr/local/lib  
 astro				: /usr/local/bin  
 
@@ -92,6 +91,7 @@ tabs/multiple charts open
 terminal window resize refresh	[DONE]
 user default config				[DONE]
 code documentation
+astro tutorial
 zodiacal releasing
  
 LICENSE
