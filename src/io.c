@@ -1,5 +1,4 @@
-/* Copyright (C) 2026 yam lynn
-This program is free software: you can redistribute it and/or modify
+/*This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License
 as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -762,7 +761,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						cdata->tm_isdst = YDST;
 					else if (lret == 0)
 						cdata->tm_isdst = NDST;
-							
+						
 					free(buffer);
 					fclose(fp);
 					

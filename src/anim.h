@@ -1,5 +1,4 @@
-/* Copyright (C) 2026 yam lynn
-This program is free software: you can redistribute it and/or modify
+/*This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License
 as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -27,6 +26,8 @@ struct io *io, struct cdata *cdata, struct pxx *pxx, \
 int *planet_trig, int *retro_trig, double cusp[], double sign_cusp[], double *p_arr[], int *z_arr[], \
 double *luna_eclipse, double *sol_eclipse, \
 const char *pl_sym[], const char *zo_sym[], const char *moon[] 
+
+void cur_chart_data(WINDOW *win, struct io *io, struct cdata *cdata);
 
 void new_chart(NEW_CHART_PARAM());
 

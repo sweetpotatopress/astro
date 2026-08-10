@@ -1,5 +1,4 @@
-/* Copyright (C) 2026 yam lynn
-This program is free software: you can redistribute it and/or modify
+/*This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License
 as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -321,6 +320,7 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 		(radius / 2) + 4, centery, centerx);
 	
 	// status bar
-	mvwhline(win, 1, COLS - 15, '.', COLS);
-	mvwvline(win, 0, COLS - 15, '.', 2);
+	int bar_end = 15;
+	mvwhline(win, 1, COLS - bar_end, '.', COLS);
+	mvwvline(win, 0, COLS - bar_end, '.', 2);
 }

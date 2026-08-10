@@ -1,5 +1,4 @@
-/* Copyright (C) 2026 yam lynn
-This program is free software: you can redistribute it and/or modify
+/*This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License
 as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -23,17 +22,32 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 void set_localtime(struct cdata *cdata)
 {	
 	time_t now = time(NULL);
-	struct tm gettime = {0};
+	struct tm gt = {0};
 		
-	localtime_r(&now, &gettime);
+	localtime_r(&now, &gt);
 	
-	cdata->tm_year = gettime.tm_year+1900;
-	cdata->tm_mon = gettime.tm_mon + 1;
-	cdata->tm_mday = gettime.tm_mday;
-	cdata->tm_hour = gettime.tm_hour;
-	cdata->tm_min = gettime.tm_min;
-	cdata->tm_sec = gettime.tm_sec;
-	cdata->tm_wday = gettime.tm_wday;
+	cdata->tm_year = gt.tm_year+1900;
+	cdata->tm_mon = gt.tm_mon + 1;
+	cdata->tm_mday = gt.tm_mday;
+	cdata->tm_hour = gt.tm_hour;
+	cdata->tm_min = gt.tm_min;
+	cdata->tm_sec = gt.tm_sec;
+	cdata->tm_wday = gt.tm_wday;
+}
+
+void weekday_check(struct cdata *cdata)
+{
+	struct tm gt = {0};
+	
+	gt.tm_year = cdata->tm_year - 1900;
+	gt.tm_mon = cdata->tm_mon - 1;
+	gt.tm_mday = cdata->tm_mday;
+	gt.tm_hour = cdata->tm_hour - 1;
+	gt.tm_min = cdata->tm_min;
+	gt.tm_sec = cdata->tm_sec;
+	
+	mktime(&gt);
+	cdata->tm_wday = gt.tm_wday;
 }
 
 int months(int month, int year)
@@ -49,19 +63,15 @@ int months(int month, int year)
 
 int sect(struct pxx *pxx)
 {
-	int sect;
+	int sect = 0;
 	double dist = pxx->dsun[LONG] - pxx->dasc[LONG];
 	
-	while (dist < 0)
-		dist += 360;
-	while (dist >= 360)
-		dist -= 360;
-		
-	if (dist > 180)
-		sect = DAY_SECT;
-	else
-		sect = NIGHT_SECT;
-	return sect;
+	while (dist < 0.0)
+		dist += 360.0;
+	while (dist >= 360.0)
+		dist -= 360.0;
+	
+	return sect = (dist > 180.0) ? DAY_SECT : NIGHT_SECT;
 }
 
 void lots(int sect, struct pxx *pxx)
@@ -102,7 +112,6 @@ void calculate_utc(struct cdata *cdata)
 	tm_in.tm_hour = cdata->tm_hour;
 	tm_in.tm_min = cdata->tm_min;
 	tm_in.tm_sec = cdata->tm_sec;
-	
 	if (cdata->tm_isdst == 3)
 		tm_in.tm_isdst = 1;
 	else if (cdata->tm_isdst == 2)
@@ -128,7 +137,6 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_year = tm_utc->tm_year + 1900;
 	cdata->utc_mon = tm_utc->tm_mon + 1;
 	cdata->utc_mday = tm_utc->tm_mday;
-	cdata->tm_wday = tm_utc->tm_wday;
 }
 
 void retro_calc(double jd_ut, int iter[],
@@ -322,7 +330,7 @@ double *luna_eclipse, double *sol_eclipse)
 		}
 	}
 }
-	
+
 void pxx_init(double cusp[], double sign_cusp[],
 double *luna_eclipse, double *sol_eclipse, double *p_arr[],
 struct cdata *cdata, struct pxx *pxx)
@@ -335,6 +343,7 @@ struct cdata *cdata, struct pxx *pxx)
 	int ihsy = 'W';
 	
 	calculate_utc(cdata);
+	weekday_check(cdata);
 	
 	double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
 	cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
