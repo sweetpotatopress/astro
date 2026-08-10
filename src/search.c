@@ -16,6 +16,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <ncurses.h>
 #include <form.h>
 #include <menu.h>
+#include "swephexp.h"
 #include "astro.h"
 #include "io.h"
 #include "cdata.h"

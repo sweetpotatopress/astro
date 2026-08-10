@@ -17,9 +17,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <time.h>
 #include <ncurses.h>
 #include <form.h>
 #include <menu.h>
+#include "swephexp.h"
 #include "astro.h"
 #include "io.h"
 

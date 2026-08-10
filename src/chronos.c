@@ -14,8 +14,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
-#include <swephexp.h>
 #include <ncurses.h>
+#include "swephexp.h"
 #include "astro.h"
 #include "chronos.h"
 

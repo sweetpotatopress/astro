@@ -12,9 +12,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <math.h>
-#include <swephexp.h>
 #include <ncurses.h>
 #include <panel.h>
+#include "swephexp.h"
 #include "astro.h"
 #include "draw.h"
 #include "chronos.h"

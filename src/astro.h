@@ -12,9 +12,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
 #pragma once
 
-#include <swephexp.h>
-#include <time.h>
-#include <form.h>
+#include <ncurses.h>
 
 #define MAXBUF 1024
 #define MAXPATH 2048

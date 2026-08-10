@@ -14,6 +14,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
+#include "swephexp.h"
 #include "astro.h"
 
 #define TZ_DEF 0
