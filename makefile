@@ -20,13 +20,12 @@ SRCS		= $(wildcard src/*.c)
 INSTALL_DIR = /usr/local/bin
 
 SWE_DIR     = swisseph
-SWE_LIB     = /usr/local/lib
 
 SWE_SRCS	:= $(wildcard swisseph/*.c)
 SWE_OBJS	:= $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
 SWE_A		:= $(SWE_DIR)/libswe.a
 
-SWE_LIB_EXISTS := $(shell test -f $(SWE_LIB)/libswe.a && echo 1 || echo 0)
+SWE_LIB_EXISTS := $(shell test -f $(SWE_DIR)/libswe.a && echo 1 || echo 0)
 
 REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
 REAL_HOME := $(shell getent passwd $(REAL_USER) | cut -d: -f6)
@@ -58,7 +57,7 @@ endif
 all: $(SWE_DEPS)
 	@echo "-o--o-Building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
-	    -L$(SWE_LIB) -lswe -lm \
+	    -L$(SWE_DIR) -lswe -lm \
 	    -lpanel -lmenu -lform -lncurses -ltinfo
 
 debug: $(SWE_DEPS)
@@ -69,7 +68,7 @@ debug: $(SWE_DEPS)
 	  -fsanitize=undefined,address,leak,bounds \
 	  -fno-sanitize-recover=undefined \
 	  -o $(TARGET) $(SRCS) \
-	  -L$(SWE_LIB) -lswe -lm \
+	  -L$(SWE_DIR) -lswe -lm \
 	  -lpanel -lmenu -lform -lncurses -ltinfo
 
 $(SWE_DIR)/%.o: swisseph/%.c
@@ -95,7 +94,6 @@ install: all
 
 swe-install: $(SWE_A)
 	@echo "--o-Installing Swiss Ephemeris x<--o-"
-	/bin/cp "$(SWE_DIR)/libswe.a"    "$(SWE_LIB)/libswe.a"
 
 	/bin/mkdir -p "$(CHARTS_DIR)" "$(EPHE_DIR)"; \
 	/bin/chown -R $(REAL_USER):$(REAL_USER) "$(DATA_DIR)"; \
