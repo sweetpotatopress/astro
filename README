@@ -54,7 +54,6 @@ esc			NORMAL mode
 
 DATA DIRECTORIES
 
-swisseph/libswe.a	: /usr/local/lib  
 astro				: /usr/local/bin  
 
 city-db 			: $XDG_DATA_HOME/astro
@@ -63,6 +62,7 @@ charts/ 			: $XDG_DATA_HOME/astro
  
 OPTIONAL
 to set default timezone and location
+timezone is IANA format
 
 config				: $XDG_CONFIG_HOME/astro  
 
@@ -84,7 +84,7 @@ essential dignities				[DONE]
 synastry/ transit view 
 secondary progressions
 aspects
-planet day/hour					[DONE]
+planet day/hour
 eclipse data					[DONE]
 declination/out of bounds
 tabs/multiple charts open 
