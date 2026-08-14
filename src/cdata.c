@@ -101,9 +101,7 @@ void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 }
 
 void field_to_member
-(struct cdata *cdata, FORM *cdata_form,
-FIELD *cdata_field[],
-char *citybuffer, char *statebuffer, char *countrybuffer)
+(struct cdata *cdata, FORM *cdata_form, FIELD *cdata_field[])
 {
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
@@ -122,13 +120,12 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	switch(index)
 	{
 		case CITY:
-			city_search(cdata_field, cdata_form, buffer,
-			statebuffer, countrybuffer);
+			city_search(cdata_field, cdata_form, buffer, cdata);
 			form_driver(cdata_form, REQ_VALIDATION);
 			
 			buff_trim(current, buffer);
 			
-			memcpy(citybuffer, buffer, strlen(buffer) + 1);
+			memcpy(cdata->city, buffer, strlen(buffer) + 1);
 			
 			break;
 			
@@ -214,8 +211,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 }
 
 void validate_fields(FIELD *cdata_field[],
-FORM *cdata_form, struct cdata *cdata,
-char *citybuffer, char *statebuffer, char *countrybuffer)
+FORM *cdata_form, struct cdata *cdata)
 {
 	size_t i = 0;
 	
@@ -224,7 +220,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	FIELD *current = current_field(cdata_form);
 	char buffer[MAXBUF] = {0};
 	buff_trim(current, buffer);
-	memcpy(citybuffer, buffer, strlen(buffer) + 1);
+	memcpy(cdata->city, buffer, strlen(buffer) + 1);
 	++i;
 		
 	for (; i < FIELDMAX; i++)
@@ -232,8 +228,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
 		field_to_member(cdata, cdata_form,
-		cdata_field, citybuffer, statebuffer,
-		countrybuffer);
+		cdata_field);
 	}
 }
 
@@ -275,8 +270,7 @@ void field_label(WINDOW *in_cdata_win)
 }
 	
 void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
-struct io *io, struct cdata *cdata, enum mode mode,
-char *citybuffer, char *statebuffer, char *countrybuffer)
+struct io *io, struct cdata *cdata, enum mode mode)
 {
 	FIELD *cdata_field[FIELDMAX + 1];
 	FORM *cdata_form;
@@ -398,16 +392,13 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						
 					case 'w':
 						validate_fields(cdata_field,
-						cdata_form, cdata, citybuffer,
-						statebuffer, countrybuffer);
-						save_chart(cdata, io,
-						citybuffer, statebuffer, countrybuffer);
+						cdata_form, cdata);
+						save_chart(cdata, io);
 						mode = NORMAL;
 						break;
 						
 					case 'e':
-						load_chart(cdata, io,
-						citybuffer, statebuffer, countrybuffer);
+						load_chart(cdata, io);
 						mode = NORMAL;
 						cdata_entry = 1;
 						break;
@@ -436,9 +427,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 				{
 					 case '\n':
 						form_driver(cdata_form, REQ_VALIDATION);
-						field_to_member(cdata, cdata_form,
-						cdata_field, citybuffer, statebuffer,
-						countrybuffer);
+						field_to_member(cdata, cdata_form, cdata_field);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						
 						field_label(in_cdata_win);
@@ -494,8 +483,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 	}
 	if (ch != 'e' && cancel != 1)
 		validate_fields(cdata_field,
-		cdata_form, cdata, citybuffer,
-		statebuffer, countrybuffer);
+		cdata_form, cdata);
 
 	unpost_form(cdata_form);
 	werase(in_cdata_win);

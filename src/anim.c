@@ -35,12 +35,10 @@ struct cdata *cdata)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
 	
 	starty += 1;
-	if(cdata->state)
-	{
-		if (!isdigit((unsigned char)cdata->state[0]) &&
-		strlen(cdata->state) > 1)
-			mvwprintw(main_win, starty, startx, "%s, %s, %s", cdata->city, cdata->state, cdata->country);
-	}
+	if (!isdigit((unsigned char)cdata->state[0]) &&
+	strlen(cdata->state) > 1)
+		mvwprintw(main_win, starty, startx, "%s, %s, %s", cdata->city, cdata->state, cdata->country);
+		
 	else if (cdata->city && cdata->country)
 		mvwprintw(main_win, starty, startx, "%s, %s", cdata->city, cdata->country);
 		

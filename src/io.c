@@ -25,8 +25,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "io.h"
 
-void save_chart(struct cdata *cdata, struct io *io,
-char *citybuffer, char *statebuffer, char *countrybuffer)
+void save_chart(struct cdata *cdata, struct io *io)
 {
 	const char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -450,9 +449,9 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 
 	// copy data to file, \n delimited
 	fprintf(ifp, "%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f\n%d",
-		citybuffer,
-		statebuffer,
-		countrybuffer,
+		cdata->city,
+		cdata->state,
+		cdata->country,
 		cdata->tm_year,
 		cdata->tm_mon,
 		cdata->tm_mday,
@@ -479,8 +478,7 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 		free(fn_copy);
 }
 
-void load_chart(struct cdata *cdata, struct io *io,
-char *citybuffer, char *statebuffer, char *countrybuffer)
+void load_chart(struct cdata *cdata, struct io *io)
 {
 	const char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -702,9 +700,9 @@ char *citybuffer, char *statebuffer, char *countrybuffer)
 						memcpy(field[count++], buffer, strlen(buffer) + 1);
 					}
 						
-					memcpy(citybuffer, field[FCITY], strlen(field[FCITY]) + 1);
-					memcpy(statebuffer, field[FSTATE], strlen(field[FSTATE]) + 1);
-					memcpy(countrybuffer, field[FCOUNTRY], strlen(field[FCOUNTRY]) + 1);
+					memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
+					memcpy(cdata->state, field[FSTATE], strlen(field[FSTATE]) + 1);
+					memcpy(cdata->country, field[FCOUNTRY], strlen(field[FCOUNTRY]) + 1);
 								
 					lret = strtol(field[FYEAR], &endptr, 10);
 					if (errno != ERANGE)

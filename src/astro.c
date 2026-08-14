@@ -46,23 +46,18 @@ int main()
 	struct cdata *cdata = calloc(1, sizeof(*cdata));
 	if (!cdata)
 		ERR_EXIT("main Location calloc");
+	cdata->city = calloc(1, MAXBUF);
+	if (!cdata->city)
+		ERR_EXIT("ERR: main cdata->city malloc");
+	cdata->state = calloc(1, MAXBUF);
+	if (!cdata->state)
+		ERR_EXIT("ERR: main cdata->state malloc");
+	cdata->country = calloc(1, MAXBUF);
+	if (!cdata->country)
+		ERR_EXIT("ERR: main cdata->country malloc");
 	cdata->timezone = calloc(1, MAXBUF);
 	if (!cdata->timezone)
 		ERR_EXIT("ERR: main cdata->timezone malloc");
-		
-	char *citybuffer = calloc(1, MAXBUF);
-	if (!citybuffer)
-		ERR_EXIT("ERR: main citybuffer alloc fail");
-	char *statebuffer = calloc(1, MAXBUF);
-	if (!statebuffer)
-		ERR_EXIT("ERR: main statebuffer alloc fail");
-	char *countrybuffer = calloc(1, MAXBUF);
-	if (!countrybuffer)
-		ERR_EXIT("ERR: main countrybuffer alloc fail");
-		
-	cdata->city = citybuffer;
-	cdata->state = statebuffer;
-	cdata->country = countrybuffer;
 		
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)
@@ -218,8 +213,7 @@ int main()
 				case 'i':
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,
-					io, cdata, mode,
-					citybuffer, statebuffer, countrybuffer);
+					io, cdata, mode);
 			
 					free(io->filename);
 					io->filename = calloc(1, MAXBUF);
@@ -231,14 +225,12 @@ int main()
 					doupdate();
 					break;
 				case 'w':
-					save_chart(cdata, io,
-					citybuffer, statebuffer, countrybuffer);
+					save_chart(cdata, io);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata, io,
-					citybuffer, statebuffer, countrybuffer);
+					load_chart(cdata, io);
 					ECLIPSE_INIT();
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
@@ -313,9 +305,6 @@ int main()
 	swe_close();
 	
 	free(cdata->timezone);
-	free(citybuffer);
-	free(statebuffer);
-	free(countrybuffer);
 	free(cdata);
 	free(zxx);
 	free(pxx);
