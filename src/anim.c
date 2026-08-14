@@ -39,7 +39,7 @@ struct cdata *cdata)
 	strlen(cdata->state) > 1)
 		mvwprintw(main_win, starty, startx, "%s, %s, %s", cdata->city, cdata->state, cdata->country);
 		
-	else if (cdata->city && cdata->country)
+	else if (strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
 		mvwprintw(main_win, starty, startx, "%s, %s", cdata->city, cdata->country);
 		
 	starty += 1;
