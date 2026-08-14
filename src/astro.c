@@ -177,7 +177,6 @@ int main()
 	int main_done = 0;
 	while (!main_done)
 	{
-		
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
 		(ch = wgetch(main_win)))
@@ -304,6 +303,9 @@ int main()
 	endwin();
 	swe_close();
 	
+	free(cdata->state);
+	free(cdata->city);
+	free(cdata->country);
 	free(cdata->timezone);
 	free(cdata);
 	free(zxx);

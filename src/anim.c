@@ -34,11 +34,11 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 		mvwprintw(main_win, starty, startx, "%s", io->filename);
 	
 	starty += 1;
-	if (!isdigit((unsigned char)cdata->state[0]) &&
+	if (cdata->state && !isdigit((unsigned char)cdata->state[0]) &&
 	strlen(cdata->state) > 1)
 		mvwprintw(main_win, starty, startx, "%s, %s, %s", cdata->city, cdata->state, cdata->country);
 		
-	else if (strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
+	else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
 		mvwprintw(main_win, starty, startx, "%s, %s", cdata->city, cdata->country);
 		
 	starty += 1;
@@ -134,12 +134,40 @@ void realtime_chart(NEW_CHART_PARAM())
 	
 		for (int i = 0; i < 10; ++i)
 		{
-			usleep(100000);
-			if ((ch = wgetch(main_win)) == 9)
+			usleep(1000);
+			if (ch == 9 || ch == 'q')
 				break;
+			if (ch == 'p' && *planet_trig == 0)
+			{
+				*planet_trig = 1;
+				show_panel(*planet_panel);
+				ch = 0;
+				break;
+			}
+			else if (ch == 'p' && *planet_trig == 1)
+			{
+				*planet_trig = 0;
+				hide_panel(*planet_panel);
+				ch = 0;
+				break;
+			}
+			if (ch == 'o' && *retro_trig == 0)
+			{
+				*retro_trig = 1;
+				show_panel(*retro_panel);
+				ch = 0;
+				break;
+			}
+			else if (ch == 'o' && *retro_trig == 1)
+			{
+				*retro_trig = 0;
+				hide_panel(*retro_panel);
+				ch = 0;
+				break;
+			}
 		}
 		
-		if (ch == 9)
+		if (ch == 9 || ch == 'q')
 			break;
 	}
 	wmove(main_win, 0, COLS - 14);
