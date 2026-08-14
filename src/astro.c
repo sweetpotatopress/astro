@@ -46,12 +46,23 @@ int main()
 	struct cdata *cdata = calloc(1, sizeof(*cdata));
 	if (!cdata)
 		ERR_EXIT("main Location calloc");
-	cdata->city = malloc(MAXBUF);
-	if (!cdata->city)
-		ERR_EXIT("ERR: main cdata->city malloc");
-	cdata->timezone = malloc(MAXBUF);
+	cdata->timezone = calloc(1, MAXBUF);
 	if (!cdata->timezone)
 		ERR_EXIT("ERR: main cdata->timezone malloc");
+		
+	char *citybuffer = calloc(1, MAXBUF);
+	if (!citybuffer)
+		ERR_EXIT("ERR: main citybuffer alloc fail");
+	char *statebuffer = calloc(1, MAXBUF);
+	if (!statebuffer)
+		ERR_EXIT("ERR: main statebuffer alloc fail");
+	char *countrybuffer = calloc(1, MAXBUF);
+	if (!countrybuffer)
+		ERR_EXIT("ERR: main countrybuffer alloc fail");
+		
+	cdata->city = citybuffer;
+	cdata->state = statebuffer;
+	cdata->country = countrybuffer;
 		
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)
@@ -86,23 +97,14 @@ int main()
 	struct io *io = calloc(1, sizeof(*io));
 	if (!io)
 		ERR_EXIT("mai io calloc");
-	io->filepath = malloc(MAXBUF);
+	io->filepath = calloc(1, MAXBUF);
 	if (!io->filepath)
 		ERR_EXIT("main io->filepath malloc");
 	io->filename = calloc(1, MAXBUF);
 	if (!io->filename)
 		ERR_EXIT("main io->filename malloc");
 		
-	char *citybuffer = malloc(MAXBUF);
-	if (!citybuffer)
-		ERR_EXIT("ERR: main citybuffer alloc fail");
-	char *statebuffer = malloc(MAXBUF);
-	if (!statebuffer)
-		ERR_EXIT("ERR: main statebuffer alloc fail");
-	char *countrybuffer = malloc(MAXBUF);
-	if (!countrybuffer)
-		ERR_EXIT("ERR: main countrybuffer alloc fail");
-		
+	
 	double cusp[13];
 	double sign_cusp[13];
 	
@@ -173,33 +175,13 @@ int main()
 	set_localtime(cdata);
 	config_parse(cdata);
 	
-	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse,
-	p_arr, cdata, pxx);
-	draw_chart(main_win, cusp, sign_cusp, p_arr, z_arr, pxx, cdata,
-	pl_sym, zo_sym);
-	cur_chart_data(main_win, io, cdata);
-
-	cdata->city = citybuffer;
-	cdata->state = statebuffer;
-	cdata->country = countrybuffer;
-	
-	planet_table(planet_win, p_arr, z_arr, pxx,
-	pl_sym, zo_sym, moon);
-	retro_table(retro_win, luna_eclipse, sol_eclipse,
-	p_arr, z_arr, zo_sym, pl_sym);
-		
-	show_panel(planet_panel);
-	show_panel(retro_panel);
-	
-	touchwin(main_win);
-	wnoutrefresh(main_win);
-	update_panels();
+	int retro_trig = 1, planet_trig = 1;
+	new_chart(NEW_CHART_MAIN());
 	doupdate();
 	
 	int main_done = 0;
 	while (!main_done)
 	{
-		static int retro_trig = 1, planet_trig = 1;
 		
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
@@ -330,11 +312,16 @@ int main()
 	endwin();
 	swe_close();
 	
-	free(cdata);
+	free(cdata->timezone);
 	free(citybuffer);
 	free(statebuffer);
 	free(countrybuffer);
+	free(cdata);
+	free(zxx);
 	free(pxx);
+	free(io->filepath);
+	free(io->filename);
+	free(io);
 	
 	return 0;
 } 
