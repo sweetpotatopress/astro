@@ -22,6 +22,22 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "cdata.h"
 #include "draw.h"
 
+#define GEONAMEID 0
+#define SNAME 1
+#define ASCIINAME 2
+#define SLAT 4
+#define SLON 5
+#define COUNTRYCODE 8
+#define SSTATE 10
+#define STIMEZONE 17
+#define SMAX 19
+
+/* [0]geonameid, [1]name, [2]asciiname, [3]alternatename, 
+[4]latitude, [5]longitude, [6]feature class, [7]feature code,
+[8]country code, [9]cc2, [10]admin1 code, [11]admin2 code,
+[12]admin3 code, [13]admin4 code, [14]population, 
+[15]elevation, [16]dem, [17]timezone, [18]modification date */
+
 static char *xstrcasestr(const char *h, const char *n)
 {
 	size_t i, nl = strlen(n);
@@ -38,7 +54,7 @@ static char *xstrcasestr(const char *h, const char *n)
 	return NULL;
 }
 
-char* strtok_E(char *str, const char *delim)
+static char* strtok_E(char *str, const char *delim)
 { //strtok that doesnt skip repeating delims :3
 	static char *next_pos = NULL;
 	char *token_start;
@@ -70,7 +86,7 @@ char* strtok_E(char *str, const char *delim)
 	return token_start;
 }
 
-void print_menu(FIELD *cdata_field[], FORM *cdata_form,
+static void print_menu(FIELD *cdata_field[], FORM *cdata_form,
 struct cdata **search_result, size_t search_count,
 char *statebuffer, char *countrybuffer)
 {
@@ -236,7 +252,7 @@ char *statebuffer, char *countrybuffer)
 		ERR_EXIT("city_search fopen");
 	
 	size_t search_max = MAXBUF;
-	size_t i = 0;
+	size_t search_count = 0;
 	char buffer[MAXBUF] = {0};
 	
 	while (fgets(buffer, sizeof(buffer), fp) != NULL)
@@ -247,15 +263,9 @@ char *statebuffer, char *countrybuffer)
 		
 		char *token = strtok_E(buffer, "\t");
 		int field_count = 0;
-		char *field[19] = {NULL};
-		/* 	
-			[0]geonameid, [1]name, [2]asciiname, [3]alternatename, 
-			[4]latitude, [5]longitude, [6]feature class, [7]feature code,
-			[8]country code, [9]cc2, [10]admin1 code, [11]admin2 code,
-			[12]admin3 code, [13]admin4 code, [14]population, 
-			[15]elevation, [16]dem, [17]timezone, [18]modification date
-		*/
-		while (token != NULL && field_count < 19)
+		char *field[SMAX] = {NULL};
+	
+		while (token != NULL && field_count < SMAX)
 		{
 			field[field_count] = calloc(1, strlen(token) + 1);
 			if (!field[field_count])
@@ -267,12 +277,12 @@ char *statebuffer, char *countrybuffer)
 		}
 		
 		if (field_count > 1 &&
-		field[1] != NULL && field[8] != NULL &&
-		xstrcasestr(field[1], search) != NULL)
+		field[SNAME] != NULL && field[COUNTRYCODE] != NULL &&
+		xstrcasestr(field[SNAME], search) != NULL)
 		{
-			if (i >= search_max)
+			if (search_count >= search_max)
 			{
-				while(i >= search_max)
+				while(search_count >= search_max)
 					search_max *= 2;
 				struct cdata **temp = reallocarray(
 				search_result, search_max, sizeof(struct cdata *));
@@ -282,24 +292,33 @@ char *statebuffer, char *countrybuffer)
 				search_result = temp;
 			}
 			
-			search_result[i] = malloc(sizeof(struct cdata));
-			if (!search_result[i])
-				ERR_EXIT("search_result[i] malloc");
+			search_result[search_count] = malloc(sizeof(struct cdata));
+			if (!search_result[search_count])
+				ERR_EXIT("search_result[search_count] malloc");
 			
-			search_result[i]->city = 		field[2];	field[2] = NULL;
-			search_result[i]->state = 		field[10];	field[10] = NULL;
-			search_result[i]->country =		field[8];	field[8] = NULL;
-			search_result[i]->timezone = 	field[17]; field[17] = NULL;
-			search_result[i]->latitude =	field[4]; 	field[4] = NULL;
-			search_result[i]->longitude = 	field[5];	field[5] = NULL;
-			++i;
+			search_result[search_count]->city =	field[ASCIINAME];
+			search_result[search_count]->state = field[SSTATE];
+			search_result[search_count]->country = field[COUNTRYCODE];	
+			search_result[search_count]->timezone =	field[STIMEZONE];
+			search_result[search_count]->latitude =	field[SLAT];
+			search_result[search_count]->longitude = field[SLON];
+			
+			field[SSTATE] = NULL;
+			field[ASCIINAME] = NULL;
+			field[COUNTRYCODE] = NULL;
+			field[STIMEZONE] = NULL;
+			field[SLAT] = NULL;
+			field[SLON] = NULL;
+			
+			++search_count;
 		}
+		
 		for (int j = 0; j < field_count; j++)
 			free(field[j]);
 	}
 	fclose(fp);
 	
-	if (i == 0)
+	if (search_count == 0)
 	{
 		printw("no search results\n");
 		getch();
@@ -308,6 +327,6 @@ char *statebuffer, char *countrybuffer)
 		free(search_result);
 		return;
 	}
-	print_menu(cdata_field, cdata_form, search_result, i,
+	print_menu(cdata_field, cdata_form, search_result, search_count,
 	statebuffer, countrybuffer);
 }
