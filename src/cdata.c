@@ -23,7 +23,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "draw.h"
 #include "search.h"
 
-void buff_trim(FIELD *current, char *buffer)
+static void buff_trim(FIELD *current, char *buffer)
 {
 	char *f_buf = field_buffer(current, 0);
 	int len = 0;
@@ -48,7 +48,7 @@ void buff_trim(FIELD *current, char *buffer)
 	buffer[len + 1] = '\0';
 }
 
-void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
+static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 {
 	char buff[128] = {0};
 	if ((setenv("TZ", cdata->timezone, 1) != 0))
@@ -100,8 +100,7 @@ void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 	free(gettime);
 }
 
-void field_to_member
-(struct cdata *cdata, FORM *cdata_form, FIELD *cdata_field[])
+static void field_to_member (struct cdata *cdata, FORM *cdata_form, FIELD *cdata_field[])
 {
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
@@ -210,8 +209,7 @@ void field_to_member
 	free(buffer);
 }
 
-void validate_fields(FIELD *cdata_field[],
-FORM *cdata_form, struct cdata *cdata)
+static void validate_fields(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata)
 {
 	size_t i = 0;
 	
@@ -232,7 +230,7 @@ FORM *cdata_form, struct cdata *cdata)
 	}
 }
 
-void clear_fields(FIELD *cdata_field[], FORM *cdata_form)
+static void clear_fields(FIELD *cdata_field[], FORM *cdata_form)
 {
 	for (int i = 0; i < FIELDMAX; i++)
 	{
@@ -242,7 +240,7 @@ void clear_fields(FIELD *cdata_field[], FORM *cdata_form)
 	set_current_field(cdata_form, cdata_field[CITY]);
 }
 
-void field_label(WINDOW *in_cdata_win)
+static void field_label(WINDOW *in_cdata_win)
 {
 	const char *c_labels[] = {
 		"city search:",

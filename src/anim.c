@@ -25,8 +25,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define MONTH 2
 #define YEAR 1
 
-void cur_chart_data(WINDOW *main_win, struct io *io,
-struct cdata *cdata)
+void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 {	
 	int starty = (LINES / 2) - 4;
 	int startx = (COLS / 2) - 4;
@@ -148,9 +147,7 @@ void realtime_chart(NEW_CHART_PARAM())
 	nodelay(main_win, FALSE);
 }
 
-void cpt(struct cdata *cdata,
-struct tm *temp, struct tm *result, time_t *t,
-bool x)
+static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)
 {
 	if (!x)
 	{

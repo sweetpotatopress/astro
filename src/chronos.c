@@ -35,7 +35,7 @@ void set_localtime(struct cdata *cdata)
 	cdata->tm_wday = gt.tm_wday;
 }
 
-void weekday_check(struct cdata *cdata)
+static void weekday_check(struct cdata *cdata)
 {
 	struct tm gt = {0};
 	
@@ -74,7 +74,7 @@ int sect(struct pxx *pxx)
 	return sect = (dist > 180.0) ? DAY_SECT : NIGHT_SECT;
 }
 
-void lots(int sect, struct pxx *pxx)
+static void lots(int sect, struct pxx *pxx)
 {
 	double offset = (360 - pxx->dsun[LONG]);
 	double diff = (offset + pxx->dmoon[LONG]);
@@ -103,7 +103,7 @@ void lots(int sect, struct pxx *pxx)
 		pxx->dspir[LONG] -= 360.0;
 }
 
-void calculate_utc(struct cdata *cdata)
+static void calculate_utc(struct cdata *cdata)
 {
 	struct tm tm_in = {0};
 	tm_in.tm_year = cdata->tm_year - 1900;
@@ -139,7 +139,7 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-void retro_calc(double jd_ut, int iter[],
+static void retro_calc(double jd_ut, int iter[],
 int ipl, double *p_arr[])
 {
 	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
@@ -195,7 +195,7 @@ int ipl, double *p_arr[])
 	iter[ipl] = 0;
 }
 
-void retro_station(double jd_ut, double *p_arr[],
+static void retro_station(double jd_ut, double *p_arr[],
 int *calc_flag, int *iter, double *last_jd)
 {
 	int ipl;
@@ -260,7 +260,7 @@ int *calc_flag, int *iter, double *last_jd)
 	*last_jd = jd_ut;
 }
 
-void eclipse(double jd_ut,
+static void eclipse(double jd_ut,
 double *luna_eclipse, double *sol_eclipse)
 {
 	int iflag = SEFLG_SWIEPH;

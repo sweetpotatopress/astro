@@ -104,7 +104,7 @@ void zxx_init(int *z_arr[])
 			z_arr[z][d] = zodia[z][d];
 }
 
-int bound_check(int sign, int degree)
+static int bound_check(int sign, int degree)
 {
 	const int ari[] =
 	{ 5, 11, 19, 24, 29 };
@@ -142,8 +142,7 @@ int bound_check(int sign, int degree)
 	return -1;
 }
 
-void dignity_check(int *z_arr[], double *p_arr[], int result[PLMAX][MAXZXX],
-struct pxx *pxx)
+static void dignity_check(int *z_arr[], double *p_arr[], int result[PLMAX][MAXZXX], struct pxx *pxx)
 {
 	int planet = 0;
 	for (; planet < PLMAX; ++planet)
@@ -173,7 +172,7 @@ struct pxx *pxx)
 	}
 }
 
-int moon_phase(struct pxx *pxx)
+static int moon_phase(struct pxx *pxx)
 {
 	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
 	

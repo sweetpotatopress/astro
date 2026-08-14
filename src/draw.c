@@ -82,7 +82,7 @@ double *p_arr[], int *z_arr[])
 	}
 }
 
-void planet_pos(WINDOW *win, double sign_cusp[], double *p_arr[], int *z_arr[],
+static void planet_pos(WINDOW *win, double sign_cusp[], double *p_arr[], int *z_arr[],
 int radius, int centery, int centerx, 
 const char *pl_sym[])
 {
@@ -181,7 +181,7 @@ const char *pl_sym[])
 	}
 }
 
-void ascmc_pos(WINDOW *win, double sign_cusp[], double *p_arr[], int *z_arr[],
+static void ascmc_pos(WINDOW *win, double sign_cusp[], double *p_arr[], int *z_arr[],
 int radius, int centery, int centerx)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
@@ -201,7 +201,7 @@ int radius, int centery, int centerx)
 	}
 }
 
-void zo_pos(WINDOW *win, double sign_cusp[],
+static void zo_pos(WINDOW *win, double sign_cusp[],
 int radius, int centery, int centerx,
 struct pxx *pxx, const char *zo_sym[], int *z_arr[])
 {
@@ -223,7 +223,7 @@ struct pxx *pxx, const char *zo_sym[], int *z_arr[])
 	}
 }
 
-void draw_house(WINDOW *win, double cusp[],
+static void draw_house(WINDOW *win, double cusp[],
 int radius, int centery, int centerx,
 chtype ch)
 {
@@ -253,7 +253,7 @@ chtype ch)
 	}
 }
 
-void draw_circle(WINDOW *win,
+static void draw_circle(WINDOW *win,
 int radius, int cy, int cx,
 chtype ch)
 {
