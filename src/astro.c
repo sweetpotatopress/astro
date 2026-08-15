@@ -33,13 +33,14 @@ int main()
 	"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
 	"(P)", "(u)", "(^)"};
 
-	// 0 = NULL because the swiss ephemeris skips 0
-	const char *zo_sym[] = {NULL, "ari", "tau", "gem", "can",
+	// the swiss ephemeris skips 0 for some reason
+	const char *zo_sym[] = {0, "ari", "tau", "gem", "can",
 	"leo", "vir", "lib", "sco", "sag",
 	"cap", "aqu", "pis"};
 
-	const char *moon[] = {"new", "crescent", "1st quarter", "gibbous", "full",
-	"dissem.", "last quarter", "balsamic"};
+	// condensed from valens 11 phases to the 'main 8' inspired by rudhyar 
+	const char *moon[] = {"new", "crescent", "quarter", "gibbous", "full",
+	"2nd gibbous", "2nd quarter", "2nd crescent"};
 	
 	enum mode mode = INSERT;
 	
@@ -99,7 +100,6 @@ int main()
 	if (!io->filename)
 		ERR_EXIT("main io->filename malloc");
 		
-	
 	double cusp[13];
 	double sign_cusp[13];
 	

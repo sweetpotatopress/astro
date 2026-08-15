@@ -228,10 +228,7 @@ struct cdata **search_result, struct cdata *cdata, size_t search_count)
 void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
 struct cdata *cdata)
 {
-	struct cdata **search_result = calloc(MAXBUF, sizeof(struct cdata *));
-	if (!search_result)
-		ERR_EXIT("city_search search_result calloc");
-	
+
 	const char *home_dir = getenv("HOME");
 	if (!home_dir)
 		ERR_EXIT("HOME environment not set");
@@ -249,6 +246,10 @@ struct cdata *cdata)
 	FILE *fp = fopen(fn_buff, "r");
 	if (fp == NULL)
 		ERR_EXIT("city_search fopen");
+		
+	struct cdata **search_result = calloc(MAXBUF, sizeof(struct cdata *));
+	if (!search_result)
+		ERR_EXIT("city_search search_result calloc");
 	
 	size_t search_max = MAXBUF;
 	size_t search_count = 0;

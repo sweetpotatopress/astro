@@ -74,14 +74,15 @@ int sect(struct pxx *pxx)
 	return sect = (dist > 180.0) ? DAY_SECT : NIGHT_SECT;
 }
 
-static void lots(int sect, struct pxx *pxx)
+static void lots(struct pxx *pxx)
 {
+	int chart_sect = sect(pxx);
 	double offset = (360 - pxx->dsun[LONG]);
 	double diff = (offset + pxx->dmoon[LONG]);
 	while (diff > 360.0)
 		diff -= 360.0;
 	
-	if (sect == DAY_SECT)
+	if (chart_sect == DAY_SECT)
 	{
 		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
 		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
@@ -400,8 +401,7 @@ struct cdata *cdata, struct pxx *pxx)
 	pxx->dic[LONG] = ic;
 	pxx->dmc[LONG] = mc;
 	
-	int chart_sect = sect(pxx);
-	lots(chart_sect, pxx);
+	lots(pxx);
 	
 	// seperate degree and minutes
 	for (ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
