@@ -314,7 +314,7 @@ void animate_chart(NEW_CHART_PARAM())
 	int starty = 0;
 	int startx = COLS - 14;
 	
-	mvwprintw(main_win, starty, startx, "(day)");
+	mvwprintw(main_win, starty, startx, "(hour)");
 	
 	int max_day = 0; // months() return flag
 	size_t i = HOUR; // time inc/dec
