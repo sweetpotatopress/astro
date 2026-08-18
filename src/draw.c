@@ -57,25 +57,25 @@ double *p_arr[], int *z_arr[])
 	{
 		case FIRE:
 			wattron(win, COLOR_PAIR(FIRE));
-			mvwprintw(win, y, x, "%.0f*%02.0f`",
+			mvwprintw(win, y, x, "%.0f*%02.0f",
 			p_arr[count][DEGREE], p_arr[count][MIN]);
 			wattroff(win, COLOR_PAIR(FIRE));
 			break;
 		case EARTH:
 			wattron(win, COLOR_PAIR(EARTH));
-			mvwprintw(win, y, x, "%.0f*%02.0f`",
+			mvwprintw(win, y, x, "%.0f*%02.0f",
 			p_arr[count][DEGREE], p_arr[count][MIN]);
 			wattroff(win, COLOR_PAIR(EARTH));
 			break;
 		case AIR:
 			wattron(win, COLOR_PAIR(AIR));
-			mvwprintw(win, y, x, "%.0f*%02.0f`",
+			mvwprintw(win, y, x, "%.0f*%02.0f",
 			p_arr[count][DEGREE], p_arr[count][MIN]);
 			wattroff(win, COLOR_PAIR(AIR));
 			break;
 		case WATER:
 			wattron(win, COLOR_PAIR(WATER));
-			mvwprintw(win, y, x, "%.0f*%02.0f`",
+			mvwprintw(win, y, x, "%.0f*%02.0f",
 			p_arr[count][DEGREE], p_arr[count][MIN]);
 			wattroff(win, COLOR_PAIR(WATER));
 			break;

@@ -100,7 +100,7 @@ void zxx_init(int *z_arr[])
 
 	int d, z;
 	for (z = ARI; z < ZMAX; ++z)
-		for(d = ELEMENT; d < FALL; ++d)
+		for(d = ELEMENT; d <= FALL; ++d)
 			z_arr[z][d] = zodia[z][d];
 }
 
@@ -152,6 +152,8 @@ static void dignity_check(int *z_arr[], double *p_arr[], int result[PLMAX][MAXZX
 		
 		result[planet][RULER] = z_arr[sign][RULER];
 		result[planet][EXALT] = z_arr[sign][EXALT];
+		result[planet][FALL] = z_arr[sign][FALL];
+		result[planet][DETRI] = z_arr[sign][DETRI];
 		
 		int chart_sect = sect(pxx);
 		if (chart_sect == DAY_SECT)
@@ -286,10 +288,10 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	"------------------------------");
 	++starty;
 			
-	mvwprintw(planet_win, starty, startx, "p  : ru : ex : tr : bo : de ");
+	mvwprintw(planet_win, starty, startx, "pl:rul:exa:tri:bou:dec:det:fal:");
 	++starty;
 	mvwprintw(planet_win, starty, startx,
-	"...........................xx");
+	".............................xx");
 	++starty;
 	
 	while (planet < PLMAX)
@@ -298,36 +300,48 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		dignity_check(z_arr, p_arr, result, pxx);
 	
 		int dig[] = { RULER, EXALT, TRIPLD,
-		BOUND0, DECAN0 };
+		BOUND0, DECAN0, DETRI, FALL };
 		
 		if (planet == 12)
 		{
 			mvwprintw(planet_win, starty, startx,
-			".............................");
+			"...............................");
 			++starty;
 		}
 		
-		mvwprintw(planet_win, starty, startx, "%-2s :", 
+		mvwprintw(planet_win, starty, startx, "%-2s:", 
 		name[planet]);
-		startx += 5;
-		for (int i = 0; i < 5; ++i)
+		startx += 4;
+		for (int i = 0; i < 7; ++i)
 		{
-			if (strcmp(name[planet], name[result[planet][dig[i]]]) == 0)
+			if (strcmp(name[planet], name[result[planet][dig[i]]]) == 0 && i < 5)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
 				mvwprintw(planet_win, starty, startx, "%-2s", 
 				name[result[planet][dig[i]]]);
 				wattroff(planet_win, COLOR_PAIR(EARTH));
 				
-				startx += 3;
+				startx += 2;
 				mvwprintw(planet_win, starty, startx, ":");
 				startx += 2;
 			}
+			else if (strcmp(name[planet], name[result[planet][dig[i]]]) == 0 && i >= 5)
+			{
+				wattron(planet_win, COLOR_PAIR(FIRE));
+				mvwprintw(planet_win, starty, startx, "%-2s", 
+				name[result[planet][dig[i]]]);
+				wattroff(planet_win, COLOR_PAIR(FIRE));
+				
+				startx += 2;
+				mvwprintw(planet_win, starty, startx, ":");
+				startx += 2;
+			}
+	
 			else
 			{
-				mvwprintw(planet_win, starty, startx, "%-2s :", 
+				mvwprintw(planet_win, starty, startx, "%-2s:", 
 				name[result[planet][dig[i]]]);
-				startx += 5;
+				startx += 4;
 			}
 		}
 		startx = 2;
