@@ -291,7 +291,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	mvwprintw(planet_win, starty, startx, "pl:rul:exa:tri:bou:dec:det:fal:");
 	++starty;
 	mvwprintw(planet_win, starty, startx,
-	"----------------------------xx");
+	"--:---:---:---:---:---:---:-xx");
 	++starty;
 	
 	while (planet < PLMAX)
@@ -305,7 +305,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		if (planet == 12)
 		{
 			mvwprintw(planet_win, starty, startx,
-			"------------------------------");
+			"--:---:---:---:---:---:---:---");
 			++starty;
 		}
 		
