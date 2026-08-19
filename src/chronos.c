@@ -140,8 +140,7 @@ static void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-static void retro_calc(double jd_ut, int iter[],
-int ipl, double *p_arr[])
+static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 {
 	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	double xx[6];
@@ -191,59 +190,42 @@ int ipl, double *p_arr[])
 			p_arr[ipl][NEXT_S] = jd_copy - jd_ut;
 			station_found = 1;
 		}
-	
 	}
-	iter[ipl] = 0;
 }
 
-static void retro_station(double jd_ut, double *p_arr[],
-int *calc_flag, int *iter, double *last_jd)
+static void retro_station(double jd_ut, double *p_arr[])
 {
 	int ipl;
-	const int itermax = 10;
 	const int station = 7;
-	const double is_retro = 0.5;
+	const double is_retro = 0.0;
+	
+	int calc_flag[SE_PLUTO + 1] = {0};
+	double last_jd = jd_ut;
 	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		if ((p_arr[ipl][NEXT_R] < 50.0 && iter[ipl] >= itermax) ||
-		(p_arr[ipl][NEXT_R] > 90.0 && iter[ipl] >= itermax))
-			retro_calc(jd_ut, iter, ipl, p_arr);
-			
 		if (p_arr[ipl][NEXT_R] > -0.0001 && p_arr[ipl][NEXT_R] < 0.0001)
-			retro_calc(jd_ut, iter, ipl, p_arr);
+			retro_calc(jd_ut, ipl, p_arr);
 	
 		if (calc_flag[ipl] == 0)
 		{
-			retro_calc(jd_ut, iter, ipl, p_arr);
+			retro_calc(jd_ut, ipl, p_arr);
 			calc_flag[ipl] = 1;
-			
-			if (p_arr[ipl][LONG_S] < 0.0)
-				p_arr[ipl][NEXT_R] = is_retro;
 		}
-		else if (fabs(*last_jd - jd_ut) >= 1.0)
+		else if (fabs(last_jd - jd_ut) >= 1.0)
 		{
-			double offset = fabs(*last_jd - jd_ut);
+			double offset = fabs(last_jd - jd_ut);
 			
-			if (*last_jd < jd_ut)
+			if (last_jd < jd_ut)
 			{
 				p_arr[ipl][NEXT_S] += offset;
 				p_arr[ipl][NEXT_R] -= offset;
-				if (p_arr[ipl][NEXT_R] <= 0.0)
-					p_arr[ipl][NEXT_R] = is_retro;
 			}
-			else if (*last_jd > jd_ut)
+			else if (last_jd > jd_ut)
 			{
 				p_arr[ipl][NEXT_S] += offset;
-				if (p_arr[ipl][NEXT_R] > is_retro)
-					p_arr[ipl][NEXT_R] += offset;
 			}
-
-			if (p_arr[ipl][LONG_S] < 0.0)
-				p_arr[ipl][NEXT_R] = is_retro;
 		}
-		
-		iter[ipl]++;
 		
 		// fill retro & station data
 		if (p_arr[ipl][NEXT_R] <= is_retro)
@@ -258,7 +240,7 @@ int *calc_flag, int *iter, double *last_jd)
 		else
 			p_arr[ipl][STATION] = 0;
 	}
-	*last_jd = jd_ut;
+	last_jd = jd_ut;
 }
 
 static void eclipse(double jd_ut,
@@ -362,12 +344,8 @@ struct cdata *cdata, struct pxx *pxx)
 		p_arr[ipl][LAT_S] = xx[LAT_S];
 		p_arr[ipl][DIST_S] = xx[DIST_S];
 	}
-	
-	int calc_flag[SE_PLUTO + 1] = {0};
-	int iter[SE_PLUTO + 1] = {0};
-	double last_jd = jd_ut;
-	
-	retro_station(jd_ut, p_arr, calc_flag, iter, &last_jd);
+
+	retro_station(jd_ut, p_arr);
 	
 	eclipse(jd_ut, luna_eclipse, sol_eclipse);
 	
