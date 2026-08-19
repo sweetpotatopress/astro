@@ -59,7 +59,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define DEGREE_S 10
 #define MIN_S 11
 #define NEXT_S 12
-#define NEXT_R 13
+#define PREV_S 13
 #define MAXPXX 14
 
 #define M_COLOR 1

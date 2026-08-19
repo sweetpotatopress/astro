@@ -386,7 +386,7 @@ const char *zo_sym[], const char *pl_sym[])
 	{
 		char header[MAXBUF];
 		snprintf(header, sizeof(header), "%-6s%6s  %4s %4s", 
-		"x---x-", "speed", "n->r", "n->s");
+		"planet", "speed", "next", "prev");
 		mvwprintw(retro_win, 2, 0, "%s", header);
 	
 		char buff[MAXBUF];
@@ -395,14 +395,14 @@ const char *zo_sym[], const char *pl_sym[])
 		{
 			snprintf(buff, sizeof(buff), "%-6s%2.0f*%-2.02d'  %-4.0f %-4.0f",
 			pl_sym[j], p_arr[j][DEGREE_S], (int)p_arr[j][MIN_S],
-			p_arr[j][NEXT_R], fabs(p_arr[j][NEXT_S]));
+			p_arr[j][NEXT_S], p_arr[j][PREV_S]);
 		}
 		
 		else
 		{
 			snprintf(buff, sizeof(buff), "%-6s-%1.0f*%-2.02d'  %-4.0f %-4.0f",
 			pl_sym[j], p_arr[j][DEGREE_S], (int)p_arr[j][MIN_S],
-			p_arr[j][NEXT_R], fabs(p_arr[j][NEXT_S]));
+			p_arr[j][NEXT_S], p_arr[j][PREV_S]);
 		}
 		
 		mvwprintw(retro_win, (int)i + 1, 0, "%s", buff);

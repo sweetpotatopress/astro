@@ -146,15 +146,15 @@ static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const double parsemax = 5;
+	const double parsemax = 4;
 	const double parsemin = 0.5;
 	
 	double jd_copy = jd_ut;
 	
 	double speed = p_arr[ipl][LONG_S];
 	
-	int retro_found = 0;
-	while(speed > 0.0 && !retro_found)
+	int ns_found = 0;
+	while(speed > 0.0 && !ns_found)
 	{
 		jd_copy += parsemax;
 		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
@@ -164,20 +164,12 @@ static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 			jd_copy -= parsemin;
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
-			p_arr[ipl][NEXT_R] = jd_copy - jd_ut;
-			retro_found = 1;
+			p_arr[ipl][NEXT_S] = jd_copy - jd_ut;
+			ns_found = 1;
 		}
 	}
 	
-	while(speed >= 0.0 && retro_found)
-	{
-		jd_copy += parsemax;
-		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
-		speed = xx[LONG_S];
-	}
-	
-	int station_found = 0;
-	while(speed < 0.0 && !station_found)
+	while(speed < 0.0 && !ns_found)
 	{
 		jd_copy += parsemax;
 		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
@@ -188,7 +180,40 @@ static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
 			p_arr[ipl][NEXT_S] = jd_copy - jd_ut;
-			station_found = 1;
+			ns_found = 1;
+		}
+	}
+	
+	speed = p_arr[ipl][LONG_S];
+	jd_copy = jd_ut;
+	int ps_found = 0;
+	while(speed > 0.0 && !ps_found)
+	{
+		jd_copy -= parsemax;
+		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
+		speed = xx[LONG_S];
+		while (speed < 0.0)
+		{
+			jd_copy += parsemin;
+			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
+			speed = xx[LONG_S];
+			p_arr[ipl][PREV_S] = jd_copy - jd_ut;
+			ps_found = 1;
+		}
+	}
+	
+	while(speed < 0.0 && !ps_found)
+	{
+		jd_copy -= parsemax;
+		swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
+		speed = xx[LONG_S];
+		while (speed > 0.0)
+		{
+			jd_copy += parsemin;
+			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
+			speed = xx[LONG_S];
+			p_arr[ipl][PREV_S] = jd_copy - jd_ut;
+			ps_found = 1;
 		}
 	}
 }
@@ -204,17 +229,17 @@ static void retro_station(double jd_ut, double *p_arr[])
 		retro_calc(jd_ut, ipl, p_arr);
 	
 		// fill retro & station data
-		if (p_arr[ipl][NEXT_R] <= is_retro)
-			p_arr[ipl][RETRO] = 1;
+		if (p_arr[ipl][LONG_S] <= is_retro)
+			p_arr[ipl][RETRO] = 1.0;
 		else
-			p_arr[ipl][RETRO] = 0;
-		if (p_arr[ipl][NEXT_S] <= station)
+			p_arr[ipl][RETRO] = 0.0;
+			
+		if ((int)p_arr[ipl][RETRO] == 1 && p_arr[ipl][NEXT_S] <= station)
 			p_arr[ipl][STATION] = STATION_D;
-		else if (p_arr[ipl][NEXT_R] <=
-		station && p_arr[ipl][NEXT_R] > is_retro)
+		else if ((int)p_arr[ipl][RETRO] == 0 && p_arr[ipl][NEXT_S] <= station)
 			p_arr[ipl][STATION] = STATION_R;
 		else
-			p_arr[ipl][STATION] = 0;
+			p_arr[ipl][STATION] = 0.0;
 	}
 }
 
