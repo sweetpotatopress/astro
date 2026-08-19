@@ -190,6 +190,19 @@ static int moon_phase(struct pxx *pxx)
 	return phase;
 }
 
+void mutual_reception(WINDOW *planet_win, int starty, int planet, int result[PLMAX][MAXZXX])
+{
+	for (int c = 0; c < PLMAX; ++c)
+	{
+		if (result[planet][RULER] == c && result[c][RULER] == planet && c != planet)
+		{
+			wattron(planet_win, COLOR_PAIR(WATER));
+			mvwprintw(planet_win, starty, 5, "+");
+			wattroff(planet_win, COLOR_PAIR(WATER));
+		}
+	}
+}
+
 void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx, 
 const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
@@ -282,8 +295,6 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			j++;
 		}
 	}
-	int planet = 0;
-	
 	mvwprintw(planet_win, starty, startx,
 	"------------------------------");
 	++starty;
@@ -294,6 +305,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	"--:---:---:---:---:---:---:-xx");
 	++starty;
 	
+	int planet = 0;
 	while (planet < PLMAX)
 	{
 		int result[PLMAX][MAXZXX] = {0};
@@ -320,6 +332,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 				mvwprintw(planet_win, starty, startx, "%-2s", 
 				name[result[planet][dig[i]]]);
 				wattroff(planet_win, COLOR_PAIR(EARTH));
+				mutual_reception(planet_win, starty, planet, result);
 				
 				startx += 2;
 				mvwprintw(planet_win, starty, startx, ":");
@@ -340,6 +353,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			{
 				mvwprintw(planet_win, starty, startx, "%-2s:", 
 				name[result[planet][dig[i]]]);
+				mutual_reception(planet_win, starty, planet, result);
 				startx += 4;
 			}
 		}
