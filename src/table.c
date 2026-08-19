@@ -291,7 +291,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	mvwprintw(planet_win, starty, startx, "pl:rul:exa:tri:bou:dec:det:fal:");
 	++starty;
 	mvwprintw(planet_win, starty, startx,
-	".............................xx");
+	"----------------------------xx");
 	++starty;
 	
 	while (planet < PLMAX)
@@ -305,7 +305,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		if (planet == 12)
 		{
 			mvwprintw(planet_win, starty, startx,
-			"...............................");
+			"------------------------------");
 			++starty;
 		}
 		
@@ -336,7 +336,6 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 				mvwprintw(planet_win, starty, startx, ":");
 				startx += 2;
 			}
-	
 			else
 			{
 				mvwprintw(planet_win, starty, startx, "%-2s:", 
@@ -348,7 +347,9 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		++starty;
 		++planet;
 	}
-			
+	mvwprintw(planet_win, starty, startx,
+	"------------------------------");
+	
 	++starty;
 	mvwprintw(planet_win, starty, startx, 
 	"moon phase: %s", moon[moon_phase(pxx)]);
