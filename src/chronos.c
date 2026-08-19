@@ -199,34 +199,10 @@ static void retro_station(double jd_ut, double *p_arr[])
 	const int station = 7;
 	const double is_retro = 0.0;
 	
-	int calc_flag[SE_PLUTO + 1] = {0};
-	double last_jd = jd_ut;
-	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		if (p_arr[ipl][NEXT_R] > -0.0001 && p_arr[ipl][NEXT_R] < 0.0001)
-			retro_calc(jd_ut, ipl, p_arr);
+		retro_calc(jd_ut, ipl, p_arr);
 	
-		if (calc_flag[ipl] == 0)
-		{
-			retro_calc(jd_ut, ipl, p_arr);
-			calc_flag[ipl] = 1;
-		}
-		else if (fabs(last_jd - jd_ut) >= 1.0)
-		{
-			double offset = fabs(last_jd - jd_ut);
-			
-			if (last_jd < jd_ut)
-			{
-				p_arr[ipl][NEXT_S] += offset;
-				p_arr[ipl][NEXT_R] -= offset;
-			}
-			else if (last_jd > jd_ut)
-			{
-				p_arr[ipl][NEXT_S] += offset;
-			}
-		}
-		
 		// fill retro & station data
 		if (p_arr[ipl][NEXT_R] <= is_retro)
 			p_arr[ipl][RETRO] = 1;
@@ -240,7 +216,6 @@ static void retro_station(double jd_ut, double *p_arr[])
 		else
 			p_arr[ipl][STATION] = 0;
 	}
-	last_jd = jd_ut;
 }
 
 static void eclipse(double jd_ut,
@@ -387,7 +362,7 @@ struct cdata *cdata, struct pxx *pxx)
 		p_arr[ipl][DEGREE] = (int)p_arr[ipl][LONG] % 30;
 		p_arr[ipl][MIN] = (int)((p_arr[ipl][LONG] - (int)p_arr[ipl][LONG]) * 60);
 		
-		p_arr[ipl][DEGREE_S] = (int)p_arr[ipl][LONG_S];
+		p_arr[ipl][DEGREE_S] = p_arr[ipl][LONG_S];
 		p_arr[ipl][MIN_S] = (fabs(p_arr[ipl][LONG_S] - (int)p_arr[ipl][LONG_S]) * 60);
 		if (p_arr[ipl][LONG_S] < 0)
 			p_arr[ipl][DEGREE_S] *= -1;
