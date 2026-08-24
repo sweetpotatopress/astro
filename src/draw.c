@@ -293,7 +293,7 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	
 	int offsetx = 0;
 	if ((COLS - LINES) > 60)
-		offsetx += 7;
+		offsetx += 9;
 	else
 		offsetx = 0;
 		
