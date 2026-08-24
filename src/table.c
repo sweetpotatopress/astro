@@ -196,9 +196,9 @@ void mutual_reception(WINDOW *planet_win, int starty, int planet, int result[PLM
 	{
 		if (result[planet][RULER] == c && result[c][RULER] == planet && c != planet)
 		{
-			wattron(planet_win, COLOR_PAIR(WATER));
+			wattron(planet_win, COLOR_PAIR(AIR));
 			mvwprintw(planet_win, starty, 5, "+");
-			wattroff(planet_win, COLOR_PAIR(WATER));
+			wattroff(planet_win, COLOR_PAIR(AIR));
 		}
 	}
 }
@@ -332,7 +332,6 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 				mvwprintw(planet_win, starty, startx, "%-2s", 
 				name[result[planet][dig[i]]]);
 				wattroff(planet_win, COLOR_PAIR(EARTH));
-				mutual_reception(planet_win, starty, planet, result);
 				
 				startx += 2;
 				mvwprintw(planet_win, starty, startx, ":");
@@ -353,9 +352,9 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			{
 				mvwprintw(planet_win, starty, startx, "%-2s:", 
 				name[result[planet][dig[i]]]);
-				mutual_reception(planet_win, starty, planet, result);
 				startx += 4;
 			}
+			mutual_reception(planet_win, starty, planet, result);
 		}
 		startx = 2;
 		++starty;
