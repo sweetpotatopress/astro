@@ -27,7 +27,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEW_CHART_MAIN() main_win, planet_win, retro_win, \
 		&planet_panel, &retro_panel,\
 		io, cdata, pxx,\
-		&planet_trig, &retro_trig, cusp, sign_cusp, p_arr, z_arr, \
+		&planet_trig, &retro_trig, cusp, sign_cusp, planets, zodiac, \
 		luna_eclipse, sol_eclipse, \
 		pl_sym, zo_sym, moon
 		
@@ -125,8 +125,8 @@ enum mode { NORMAL, INSERT };
 
 void config_parse(struct cdata *cdata);
 
-void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx,
+void planet_table(WINDOW *planet_win, double *planets[], int *zodiac[], struct pxx *pxx,
 const char *pl_sym[], const char *zo_sym[], const char *moon[]);
 void retro_table(WINDOW *retro_win, double *luna_eclipse, double *sol_eclipse,
-double *p_arr[], int *z_arr[], 
+double *planets[], int *zodiac[], 
 const char *zo_sym[], const char *pl_sym[]);

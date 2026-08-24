@@ -64,7 +64,7 @@ int main()
 	if (!zxx)
 		ERR_EXIT("main zxx calloc");
 		
-	int *z_arr[] = {
+	int *zodiac[] = {
 		0,
 		zxx->iari, zxx->itau,
 		zxx->igem, zxx->ican,
@@ -73,13 +73,13 @@ int main()
 		zxx->isag, zxx->icap,
 		zxx->iaqu, zxx->ipis};
 		
-	zxx_init(z_arr); // fills essential dignities
+	zxx_init(zodiac); // fills essential dignities
 		
 	struct pxx *pxx = calloc(1, sizeof(*pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
 		
-	double *p_arr[] = {
+	double *planets[] = {
 		pxx->dsun, pxx->dmoon,
 		pxx->dmerc, pxx->dven,
 		pxx->dmars, pxx->djup,
@@ -241,7 +241,7 @@ int main()
 				case 'p':
 					if (!planet_trig)
 					{
-						planet_table(planet_win, p_arr, z_arr, pxx,
+						planet_table(planet_win, planets, zodiac, pxx,
 						pl_sym, zo_sym, moon);
 						show_panel(planet_panel);
 						planet_trig = 1;
@@ -257,7 +257,7 @@ int main()
 					if (retro_trig > 0)
 					{
 						retro_table(retro_win, luna_eclipse, sol_eclipse,
-						p_arr, z_arr, zo_sym, pl_sym);
+						planets, zodiac, zo_sym, pl_sym);
 						show_panel(retro_panel);
 					}
 					
@@ -270,7 +270,7 @@ int main()
 					if (!retro_trig)
 					{
 						retro_table(retro_win, luna_eclipse, sol_eclipse,
-						p_arr, z_arr, zo_sym, pl_sym);
+						planets, zodiac, zo_sym, pl_sym);
 						show_panel(retro_panel);
 						retro_trig = 1;
 					}
@@ -284,7 +284,7 @@ int main()
 					
 					if (planet_trig > 0)
 					{
-						planet_table(planet_win, p_arr, z_arr, pxx,
+						planet_table(planet_win, planets, zodiac, pxx,
 						pl_sym, zo_sym, moon);
 						show_panel(planet_panel);
 					}

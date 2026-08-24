@@ -61,4 +61,4 @@ struct zxx {
 	int ipis[MAXZXX];
 };
 
-void zxx_init(int *z_arr[]);
+void zxx_init(int *zodiac[]);

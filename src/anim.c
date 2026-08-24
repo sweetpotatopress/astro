@@ -94,21 +94,21 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 
 void new_chart(NEW_CHART_PARAM())
 {
-	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, p_arr, cdata, pxx);
-	draw_chart(main_win, cusp, sign_cusp, p_arr, z_arr, pxx, cdata,
+	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planets, cdata, pxx);
+	draw_chart(main_win, cusp, sign_cusp, planets, zodiac, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 	
 	if (*planet_trig > 0)
 	{
-		planet_table(planet_win, p_arr, z_arr, pxx,
+		planet_table(planet_win, planets, zodiac, pxx,
 		pl_sym, zo_sym, moon);
 		show_panel(*planet_panel);
 	}
 	if (*retro_trig > 0)
 	{
 		retro_table(retro_win, luna_eclipse, sol_eclipse,
-		p_arr, z_arr, zo_sym, pl_sym);
+		planets, zodiac, zo_sym, pl_sym);
 		show_panel(*retro_panel);
 	}	
 	update_panels();
@@ -249,7 +249,7 @@ void solar_return(NEW_CHART_PARAM())
 		flushinp();
 		
 		ECLIPSE_INIT();
-		pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, p_arr, cdata, pxx);
+		pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planets, cdata, pxx);
 		
 		double temp_degree = pxx->dsun[LONG];
 		int iter = 3;
@@ -302,7 +302,7 @@ void solar_return(NEW_CHART_PARAM())
 			cpt(cdata, &temp, result, &t, 0);
 			cpt(cdata, &temp, result, &t, 1);
 			
-			pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, p_arr, cdata, pxx);
+			pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planets, cdata, pxx);
 			cur_chart_data(main_win, io, cdata);
 		}
 	}
@@ -348,7 +348,7 @@ void animate_chart(NEW_CHART_PARAM())
 				}
 				else
 				{
-					planet_table(planet_win, p_arr, z_arr, pxx,
+					planet_table(planet_win, planets, zodiac, pxx,
 					pl_sym, zo_sym, moon);
 					show_panel(*planet_panel);
 					*planet_trig = 1;
@@ -357,7 +357,7 @@ void animate_chart(NEW_CHART_PARAM())
 				if (*retro_trig > 0)
 				{
 					retro_table(retro_win, luna_eclipse, sol_eclipse,
-					p_arr, z_arr, zo_sym, pl_sym);
+					planets, zodiac, zo_sym, pl_sym);
 					show_panel(*retro_panel);
 				}
 				
@@ -376,14 +376,14 @@ void animate_chart(NEW_CHART_PARAM())
 				else
 				{
 					retro_table(retro_win, luna_eclipse, sol_eclipse,
-					p_arr, z_arr, zo_sym, pl_sym);
+					planets, zodiac, zo_sym, pl_sym);
 					show_panel(*retro_panel);
 					*retro_trig = 1;
 				}
 				
 				if (*planet_trig > 0)
 				{
-					planet_table(planet_win, p_arr, z_arr, pxx,
+					planet_table(planet_win, planets, zodiac, pxx,
 					pl_sym, zo_sym, moon);
 					show_panel(*planet_panel);
 				}

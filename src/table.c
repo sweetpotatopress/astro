@@ -17,7 +17,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "draw.h"
 #include "table.h"
 
-void zxx_init(int *z_arr[])
+void zxx_init(int *zodiac[])
 { /* element, ruler, exalt, triplicity d,n,c,
 	bound 0-4, decan 0-2, detri, fall */
 	
@@ -101,7 +101,7 @@ void zxx_init(int *z_arr[])
 	int d, z;
 	for (z = ARI; z < ZMAX; ++z)
 		for(d = ELEMENT; d <= FALL; ++d)
-			z_arr[z][d] = zodia[z][d];
+			zodiac[z][d] = zodia[z][d];
 }
 
 static int bound_check(int sign, int degree)
@@ -131,44 +131,44 @@ static int bound_check(int sign, int degree)
 	const int pis[] = 
 	{ 11, 15, 18, 27, 29 };
 	
-	const int *zodia[] = { 0,
+	const int *z[] = { 0,
 	ari, tau, gem, can,
 	leo, vir, lib, sco,
 	sag, cap, aqu, pis };
 	
 	for (int i = 0; i < 5; ++i)
-		if (degree <= zodia[sign][i])
+		if (degree <= z[sign][i])
 			return i + BOUND0;
 	return -1;
 }
 
-static void dignity_check(int *z_arr[], double *p_arr[], int result[PLMAX][MAXZXX], struct pxx *pxx)
+static void dignity_check(int *zodiac[], double *planets[], int result[PLMAX][MAXZXX], struct pxx *pxx)
 {
 	int planet = 0;
 	for (; planet < PLMAX; ++planet)
 	{
-		int sign = (int)(p_arr[planet][LONG] / 30) + 1;
-		int degree = (int)p_arr[planet][DEGREE];
+		int sign = (int)(planets[planet][LONG] / 30) + 1;
+		int degree = (int)planets[planet][DEGREE];
 		
-		result[planet][RULER] = z_arr[sign][RULER];
-		result[planet][EXALT] = z_arr[sign][EXALT];
-		result[planet][FALL] = z_arr[sign][FALL];
-		result[planet][DETRI] = z_arr[sign][DETRI];
+		result[planet][RULER] = zodiac[sign][RULER];
+		result[planet][EXALT] = zodiac[sign][EXALT];
+		result[planet][FALL] = zodiac[sign][FALL];
+		result[planet][DETRI] = zodiac[sign][DETRI];
 		
 		int chart_sect = sect(pxx);
 		if (chart_sect == DAY_SECT)
-			result[planet][TRIPLD] = z_arr[sign][TRIPLD];
+			result[planet][TRIPLD] = zodiac[sign][TRIPLD];
 		else
-			result[planet][TRIPLD] = z_arr[sign][TRIPLN];
+			result[planet][TRIPLD] = zodiac[sign][TRIPLN];
 			
-		result[planet][BOUND0] = z_arr[sign][bound_check(sign, degree)];
+		result[planet][BOUND0] = zodiac[sign][bound_check(sign, degree)];
 		
 		if (degree <= 9)
-			result[planet][DECAN0] = z_arr[sign][DECAN0];
+			result[planet][DECAN0] = zodiac[sign][DECAN0];
 		else if (degree > 9 && degree <= 19)
-			result[planet][DECAN0] = z_arr[sign][DECAN1];
+			result[planet][DECAN0] = zodiac[sign][DECAN1];
 		else if (degree > 19)
-			result[planet][DECAN0] = z_arr[sign][DECAN2];
+			result[planet][DECAN0] = zodiac[sign][DECAN2];
 		else // error
 			result[planet][DECAN0] = EMPTY;
 	}
@@ -203,7 +203,7 @@ void mutual_reception(WINDOW *planet_win, int starty, int planet, int result[PLM
 	}
 }
 
-void planet_table(WINDOW *planet_win, double *p_arr[], int *z_arr[], struct pxx *pxx, 
+void planet_table(WINDOW *planet_win, double *planets[], int *zodiac[], struct pxx *pxx, 
 const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
 	const char *name[17] = { 
@@ -225,11 +225,11 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	
 	for (int i = 0; i < p_count; ++i)
 	{
-		int sign = ((int)p_arr[i][LONG] / 30) + 1;
+		int sign = ((int)planets[i][LONG] / 30) + 1;
 		
-		int full_deg = (int)p_arr[i][LONG];
-		int deg = (int)p_arr[i][LONG] % 30;
-		int minute = (int)((p_arr[i][LONG] - (int)p_arr[i][LONG]) * 60);
+		int full_deg = (int)planets[i][LONG];
+		int deg = (int)planets[i][LONG] % 30;
+		int minute = (int)((planets[i][LONG] - (int)planets[i][LONG]) * 60);
 		
 		if (i < 12) // sun -> north node 
 		{
@@ -242,20 +242,20 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			
 			mvwprintw(planet_win, starty, startx, "%s ", buff);
 			
-			if (p_arr[i][RETRO] > 0)
+			if (planets[i][RETRO] > 0)
 			{
 				wattron(planet_win, COLOR_PAIR(FIRE));
 				mvwprintw(planet_win, starty, startx + 12, "r");
 				wattroff(planet_win, COLOR_PAIR(FIRE));
 			}
 				
-			if ((int)p_arr[i][STATION] == STATION_R)
+			if ((int)planets[i][STATION] == STATION_R)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
 				mvwaddstr(planet_win, starty, startx + 12, "sr");
 				wattroff(planet_win, COLOR_PAIR(EARTH));
 			}
-			else if ((int)p_arr[i][STATION] == STATION_D)
+			else if ((int)planets[i][STATION] == STATION_D)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
 				mvwaddstr(planet_win, starty, startx + 12, "sd");
@@ -263,7 +263,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			}
 			
 			int color_x = startx + (int)strlen(buff) + 1;
-			zodiac_color(planet_win, starty, color_x, sign, zo_sym, z_arr);
+			zo_color(planet_win, starty, color_x, sign, zo_sym, zodiac);
 			
 			starty += 1;
 		}
@@ -289,7 +289,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			mvwprintw(planet_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
-			zodiac_color(planet_win, starty, color_x, sign, zo_sym, z_arr);
+			zo_color(planet_win, starty, color_x, sign, zo_sym, zodiac);
 	
 			starty += 1;
 			j++;
@@ -309,7 +309,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	while (planet < PLMAX)
 	{
 		int result[PLMAX][MAXZXX] = {0};
-		dignity_check(z_arr, p_arr, result, pxx);
+		dignity_check(zodiac, planets, result, pxx);
 	
 		int dig[] = { RULER, EXALT, TRIPLD,
 		BOUND0, DECAN0, DETRI, FALL };
@@ -371,7 +371,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 
 void retro_table(WINDOW *retro_win,
 double *luna_eclipse, double *sol_eclipse,
-double *p_arr[], int *z_arr[],
+double *planets[], int *zodiac[],
 const char *zo_sym[], const char *pl_sym[])
 {
 	size_t p_count = 10;
@@ -382,17 +382,17 @@ const char *zo_sym[], const char *pl_sym[])
 	werase(retro_win);
 	
 	mvwprintw(retro_win, 0, 0, "(()");
-	zodiac_color(retro_win, 0, 4, (int)luna_eclipse[EN_SIGN], zo_sym, z_arr);
+	zo_color(retro_win, 0, 4, (int)luna_eclipse[EN_SIGN], zo_sym, zodiac);
 	mvwprintw(retro_win, 0, 8, "%2.f", luna_eclipse[EN_JUL]);
  
-	zodiac_color(retro_win, 0, 13, (int)luna_eclipse[EP_SIGN], zo_sym, z_arr);
+	zo_color(retro_win, 0, 13, (int)luna_eclipse[EP_SIGN], zo_sym, zodiac);
 	mvwprintw(retro_win, 0, 17, "-%2.f", luna_eclipse[EP_JUL]);
 	
 	mvwprintw(retro_win, 1, 0, "(o)");
-	zodiac_color(retro_win, 1, 4, (int)sol_eclipse[EN_SIGN], zo_sym, z_arr);
+	zo_color(retro_win, 1, 4, (int)sol_eclipse[EN_SIGN], zo_sym, zodiac);
 	mvwprintw(retro_win, 1, 8, "%2.f", sol_eclipse[EN_JUL]);
  
-	zodiac_color(retro_win, 1, 13, (int)sol_eclipse[EP_SIGN], zo_sym, z_arr);
+	zo_color(retro_win, 1, 13, (int)sol_eclipse[EP_SIGN], zo_sym, zodiac);
 	mvwprintw(retro_win, 1, 17, "-%2.f", sol_eclipse[EP_JUL]);
    
     size_t i = 2, j = SE_MERCURY;
@@ -405,18 +405,18 @@ const char *zo_sym[], const char *pl_sym[])
 	
 		char buff[MAXBUF];
 		
-		if (p_arr[j][LONG_S] > 0.0)
+		if (planets[j][LONG_S] > 0.0)
 		{
 			snprintf(buff, sizeof(buff), "%-6s%2.0f*%-2.02d'  %-4.0f %-4.0f",
-			pl_sym[j], p_arr[j][DEGREE_S], (int)p_arr[j][MIN_S],
-			p_arr[j][NEXT_S], p_arr[j][PREV_S]);
+			pl_sym[j], planets[j][DEGREE_S], (int)planets[j][MIN_S],
+			planets[j][NEXT_S], planets[j][PREV_S]);
 		}
 		
 		else
 		{
 			snprintf(buff, sizeof(buff), "%-6s-%1.0f*%-2.02d'  %-4.0f %-4.0f",
-			pl_sym[j], p_arr[j][DEGREE_S], (int)p_arr[j][MIN_S],
-			p_arr[j][NEXT_S], p_arr[j][PREV_S]);
+			pl_sym[j], planets[j][DEGREE_S], (int)planets[j][MIN_S],
+			planets[j][NEXT_S], planets[j][PREV_S]);
 		}
 		
 		mvwprintw(retro_win, (int)i + 1, 0, "%s", buff);

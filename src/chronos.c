@@ -140,7 +140,7 @@ static void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-static void retro_calc(double jd_ut, int ipl, double *p_arr[])
+static void retro_calc(double jd_ut, int ipl, double *planets[])
 {
 	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	double xx[6];
@@ -151,7 +151,7 @@ static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 	
 	double jd_copy = jd_ut;
 	
-	double speed = p_arr[ipl][LONG_S];
+	double speed = planets[ipl][LONG_S];
 	
 	int ns_found = 0;
 	while(speed > 0.0 && !ns_found)
@@ -164,7 +164,7 @@ static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 			jd_copy -= parsemin;
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
-			p_arr[ipl][NEXT_S] = jd_copy - jd_ut;
+			planets[ipl][NEXT_S] = jd_copy - jd_ut;
 			ns_found = 1;
 		}
 	}
@@ -179,12 +179,12 @@ static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 			jd_copy -= parsemin;
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
-			p_arr[ipl][NEXT_S] = jd_copy - jd_ut;
+			planets[ipl][NEXT_S] = jd_copy - jd_ut;
 			ns_found = 1;
 		}
 	}
 	
-	speed = p_arr[ipl][LONG_S];
+	speed = planets[ipl][LONG_S];
 	jd_copy = jd_ut;
 	int ps_found = 0;
 	while(speed > 0.0 && !ps_found)
@@ -197,7 +197,7 @@ static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 			jd_copy += parsemin;
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
-			p_arr[ipl][PREV_S] = jd_copy - jd_ut;
+			planets[ipl][PREV_S] = jd_copy - jd_ut;
 			ps_found = 1;
 		}
 	}
@@ -212,13 +212,13 @@ static void retro_calc(double jd_ut, int ipl, double *p_arr[])
 			jd_copy += parsemin;
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
-			p_arr[ipl][PREV_S] = jd_copy - jd_ut;
+			planets[ipl][PREV_S] = jd_copy - jd_ut;
 			ps_found = 1;
 		}
 	}
 }
 
-static void retro_station(double jd_ut, double *p_arr[])
+static void retro_station(double jd_ut, double *planets[])
 {
 	int ipl;
 	const int station = 7;
@@ -226,20 +226,20 @@ static void retro_station(double jd_ut, double *p_arr[])
 	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		retro_calc(jd_ut, ipl, p_arr);
+		retro_calc(jd_ut, ipl, planets);
 	
 		// fill retro & station data
-		if (p_arr[ipl][LONG_S] <= is_retro)
-			p_arr[ipl][RETRO] = 1.0;
+		if (planets[ipl][LONG_S] <= is_retro)
+			planets[ipl][RETRO] = 1.0;
 		else
-			p_arr[ipl][RETRO] = 0.0;
+			planets[ipl][RETRO] = 0.0;
 			
-		if ((int)p_arr[ipl][RETRO] == 1 && p_arr[ipl][NEXT_S] <= station)
-			p_arr[ipl][STATION] = STATION_D;
-		else if ((int)p_arr[ipl][RETRO] == 0 && p_arr[ipl][NEXT_S] <= station)
-			p_arr[ipl][STATION] = STATION_R;
+		if ((int)planets[ipl][RETRO] == 1 && planets[ipl][NEXT_S] <= station)
+			planets[ipl][STATION] = STATION_D;
+		else if ((int)planets[ipl][RETRO] == 0 && planets[ipl][NEXT_S] <= station)
+			planets[ipl][STATION] = STATION_R;
 		else
-			p_arr[ipl][STATION] = 0.0;
+			planets[ipl][STATION] = 0.0;
 	}
 }
 
@@ -315,7 +315,7 @@ double *luna_eclipse, double *sol_eclipse)
 }
 
 void pxx_init(double cusp[], double sign_cusp[],
-double *luna_eclipse, double *sol_eclipse, double *p_arr[],
+double *luna_eclipse, double *sol_eclipse, double *planets[],
 struct cdata *cdata, struct pxx *pxx)
 {
 	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
@@ -337,15 +337,15 @@ struct cdata *cdata, struct pxx *pxx)
 		if (iret < 0) 
 			ERR_EXIT("ERR: swe_calc_ut failure");
 			
-		p_arr[ipl][LONG] = xx[LONG];
-		p_arr[ipl][LAT] = xx[LAT];
-		p_arr[ipl][DIST] = xx[DIST];
-		p_arr[ipl][LONG_S] = xx[LONG_S];
-		p_arr[ipl][LAT_S] = xx[LAT_S];
-		p_arr[ipl][DIST_S] = xx[DIST_S];
+		planets[ipl][LONG] = xx[LONG];
+		planets[ipl][LAT] = xx[LAT];
+		planets[ipl][DIST] = xx[DIST];
+		planets[ipl][LONG_S] = xx[LONG_S];
+		planets[ipl][LAT_S] = xx[LAT_S];
+		planets[ipl][DIST_S] = xx[DIST_S];
 	}
 
-	retro_station(jd_ut, p_arr);
+	retro_station(jd_ut, planets);
 	
 	eclipse(jd_ut, luna_eclipse, sol_eclipse);
 	
@@ -360,9 +360,9 @@ struct cdata *cdata, struct pxx *pxx)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
 	// turn mean node into south node
-	p_arr[SE_MEAN_NODE][LONG] = (p_arr[SE_TRUE_NODE][LONG] + 180);
-	if (p_arr[SE_MEAN_NODE][LONG] >= 360)
-		p_arr[SE_MEAN_NODE][LONG] -= 360;
+	planets[SE_MEAN_NODE][LONG] = (planets[SE_TRUE_NODE][LONG] + 180);
+	if (planets[SE_MEAN_NODE][LONG] >= 360)
+		planets[SE_MEAN_NODE][LONG] -= 360;
 	
 	// calculates ic/mc and fills struct members
 	double asc = ascmc[0];
@@ -384,12 +384,12 @@ struct cdata *cdata, struct pxx *pxx)
 	// seperate degree and minutes
 	for (ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
 	{
-		p_arr[ipl][DEGREE] = (int)p_arr[ipl][LONG] % 30;
-		p_arr[ipl][MIN] = (int)((p_arr[ipl][LONG] - (int)p_arr[ipl][LONG]) * 60);
+		planets[ipl][DEGREE] = (int)planets[ipl][LONG] % 30;
+		planets[ipl][MIN] = (int)((planets[ipl][LONG] - (int)planets[ipl][LONG]) * 60);
 		
-		p_arr[ipl][DEGREE_S] = p_arr[ipl][LONG_S];
-		p_arr[ipl][MIN_S] = (fabs(p_arr[ipl][LONG_S] - (int)p_arr[ipl][LONG_S]) * 60);
-		if (p_arr[ipl][LONG_S] < 0)
-			p_arr[ipl][DEGREE_S] *= -1;
+		planets[ipl][DEGREE_S] = planets[ipl][LONG_S];
+		planets[ipl][MIN_S] = (fabs(planets[ipl][LONG_S] - (int)planets[ipl][LONG_S]) * 60);
+		if (planets[ipl][LONG_S] < 0)
+			planets[ipl][DEGREE_S] *= -1;
 	}
 }
