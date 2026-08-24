@@ -305,8 +305,8 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	"--:---:---:---:---:---:---:-xx");
 	++starty;
 	
-	int planet = 0;
-	while (planet < PLMAX)
+	int ipl = 0;
+	while (ipl < PLMAX)
 	{
 		int result[PLMAX][MAXZXX] = {0};
 		dignity_check(zodiac, planets, result, pxx);
@@ -314,7 +314,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		int dig[] = { RULER, EXALT, TRIPLD,
 		BOUND0, DECAN0, DETRI, FALL };
 		
-		if (planet == 12)
+		if (ipl == 12)
 		{
 			mvwprintw(planet_win, starty, startx,
 			"--:---:---:---:---:---:---:---");
@@ -322,26 +322,26 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		}
 		
 		mvwprintw(planet_win, starty, startx, "%-2s:", 
-		name[planet]);
+		name[ipl]);
 		startx += 4;
 		for (int i = 0; i < 7; ++i)
 		{
-			if (strcmp(name[planet], name[result[planet][dig[i]]]) == 0 && i < 5)
+			if (ipl == result[ipl][dig[i]] && i < 5)
 			{
 				wattron(planet_win, COLOR_PAIR(EARTH));
 				mvwprintw(planet_win, starty, startx, "%-2s", 
-				name[result[planet][dig[i]]]);
+				name[result[ipl][dig[i]]]);
 				wattroff(planet_win, COLOR_PAIR(EARTH));
 				
 				startx += 2;
 				mvwprintw(planet_win, starty, startx, ":");
 				startx += 2;
 			}
-			else if (strcmp(name[planet], name[result[planet][dig[i]]]) == 0 && i >= 5)
+			else if (ipl == result[ipl][dig[i]] && i >= 5)
 			{
 				wattron(planet_win, COLOR_PAIR(FIRE));
 				mvwprintw(planet_win, starty, startx, "%-2s", 
-				name[result[planet][dig[i]]]);
+				name[result[ipl][dig[i]]]);
 				wattroff(planet_win, COLOR_PAIR(FIRE));
 				
 				startx += 2;
@@ -351,14 +351,14 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			else
 			{
 				mvwprintw(planet_win, starty, startx, "%-2s:", 
-				name[result[planet][dig[i]]]);
+				name[result[ipl][dig[i]]]);
 				startx += 4;
 			}
-			mutual_reception(planet_win, starty, planet, result);
+			mutual_reception(planet_win, starty, ipl, result);
 		}
 		startx = 2;
 		++starty;
-		++planet;
+		++ipl;
 	}
 	mvwprintw(planet_win, starty, startx,
 	"------------------------------");
