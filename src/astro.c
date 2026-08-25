@@ -14,8 +14,8 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #include <ncurses.h>
 #include <panel.h>
-#include "astro.h"
 #include "swephexp.h"
+#include "astro.h"
 #include "table.h"
 #include "io.h"
 #include "draw.h"
@@ -146,19 +146,19 @@ int main()
 	
 	wbkgdset(in_cdata_win, COLOR_PAIR(M_COLOR));
 	
-	PANEL *planet_panel;
-	WINDOW *planet_win = newwin(PWINY, PWINX, PWIN_Y, PWIN_X);
-	planet_panel = new_panel(planet_win);
-	hide_panel(planet_panel);
+	PANEL *left_panel;
+	WINDOW *left_win = newwin(PWINY, PWINX, PWIN_Y, PWIN_X);
+	left_panel = new_panel(left_win);
+	hide_panel(left_panel);
 	
-	wbkgdset(planet_win, COLOR_PAIR(M_COLOR));
+	wbkgdset(left_win, COLOR_PAIR(M_COLOR));
 	
-	PANEL *retro_panel;
-	WINDOW *retro_win = newwin(RWINY, RWINX, RWIN_Y, RWIN_X);
-	retro_panel = new_panel(retro_win);
-	hide_panel(retro_panel);
+	PANEL *right_panel;
+	WINDOW *right_win = newwin(RWINY, RWINX, RWIN_Y, RWIN_X);
+	right_panel = new_panel(right_win);
+	hide_panel(right_panel);
 	
-	wbkgdset(retro_win, COLOR_PAIR(M_COLOR));
+	wbkgdset(right_win, COLOR_PAIR(M_COLOR));
 	
 	keypad(main_win, TRUE);
 	keypad(stdscr, TRUE);
@@ -170,7 +170,7 @@ int main()
 	set_localtime(cdata);
 	config_parse(cdata);
 	
-	int retro_trig = 1, planet_trig = 1;
+	int right_trig = 1, left_trig = 1;
 	new_chart(NEW_CHART_MAIN());
 	doupdate();
 	
@@ -239,26 +239,26 @@ int main()
 					solar_return(NEW_CHART_MAIN());
 					break;
 				case 'p':
-					if (!planet_trig)
+					if (!left_trig)
 					{
-						planet_table(planet_win, planets, zodiac, pxx,
+						left_table(left_win, planets, zodiac, pxx,
 						pl_sym, zo_sym, moon);
-						show_panel(planet_panel);
-						planet_trig = 1;
+						show_panel(left_panel);
+						left_trig = 1;
 					}
 					else
 					{
-						hide_panel(planet_panel);
+						hide_panel(left_panel);
 						clear();
 						refresh();
-						planet_trig = 0;
+						left_trig = 0;
 					}
 					
-					if (retro_trig > 0)
+					if (right_trig > 0)
 					{
-						retro_table(retro_win, luna_eclipse, sol_eclipse,
+						right_table(right_win, luna_eclipse, sol_eclipse,
 						planets, zodiac, zo_sym, pl_sym);
-						show_panel(retro_panel);
+						show_panel(right_panel);
 					}
 					
 					touchwin(main_win);
@@ -267,26 +267,26 @@ int main()
 					doupdate();
 					break;
 				case 'o':
-					if (!retro_trig)
+					if (!right_trig)
 					{
-						retro_table(retro_win, luna_eclipse, sol_eclipse,
+						right_table(right_win, luna_eclipse, sol_eclipse,
 						planets, zodiac, zo_sym, pl_sym);
-						show_panel(retro_panel);
-						retro_trig = 1;
+						show_panel(right_panel);
+						right_trig = 1;
 					}
 					else
 					{
-						hide_panel(retro_panel);
+						hide_panel(right_panel);
 						clear();
 						refresh();
-						retro_trig = 0;
+						right_trig = 0;
 					}	
 					
-					if (planet_trig > 0)
+					if (left_trig > 0)
 					{
-						planet_table(planet_win, planets, zodiac, pxx,
+						left_table(left_win, planets, zodiac, pxx,
 						pl_sym, zo_sym, moon);
-						show_panel(planet_panel);
+						show_panel(left_panel);
 					}
 					
 					touchwin(main_win);

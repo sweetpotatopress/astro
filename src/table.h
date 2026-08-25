@@ -62,3 +62,9 @@ struct zxx {
 };
 
 void zxx_init(int *zodiac[]);
+
+void left_table(WINDOW *left_win, double *planets[], int *zodiac[], struct pxx *pxx,
+const char *pl_sym[], const char *zo_sym[], const char *moon[]);
+
+void right_table(WINDOW *right_win, double *luna_eclipse, double *sol_eclipse,
+double *planets[], int *zodiac[], const char *zo_sym[], const char *pl_sym[]);

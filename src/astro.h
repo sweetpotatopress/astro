@@ -24,10 +24,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 		exit(EXIT_FAILURE); \
 } while (0)
 
-#define NEW_CHART_MAIN() main_win, planet_win, retro_win, \
-		&planet_panel, &retro_panel,\
+#define NEW_CHART_MAIN() main_win, left_win, right_win, \
+		&left_panel, &right_panel,\
 		io, cdata, pxx,\
-		&planet_trig, &retro_trig, cusp, sign_cusp, planets, zodiac, \
+		&left_trig, &right_trig, cusp, sign_cusp, planets, zodiac, \
 		luna_eclipse, sol_eclipse, \
 		pl_sym, zo_sym, moon
 		
@@ -124,9 +124,3 @@ struct io {
 enum mode { NORMAL, INSERT };
 
 void config_parse(struct cdata *cdata);
-
-void planet_table(WINDOW *planet_win, double *planets[], int *zodiac[], struct pxx *pxx,
-const char *pl_sym[], const char *zo_sym[], const char *moon[]);
-void retro_table(WINDOW *retro_win, double *luna_eclipse, double *sol_eclipse,
-double *planets[], int *zodiac[], 
-const char *zo_sym[], const char *pl_sym[]);

@@ -17,6 +17,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "chronos.h"
 #include "anim.h"
 #include "draw.h"
+#include "table.h"
 
 #define SECOND 6
 #define MINUTE 5
@@ -99,17 +100,17 @@ void new_chart(NEW_CHART_PARAM())
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 	
-	if (*planet_trig > 0)
+	if (*left_trig > 0)
 	{
-		planet_table(planet_win, planets, zodiac, pxx,
+		left_table(left_win, planets, zodiac, pxx,
 		pl_sym, zo_sym, moon);
-		show_panel(*planet_panel);
+		show_panel(*left_panel);
 	}
-	if (*retro_trig > 0)
+	if (*right_trig > 0)
 	{
-		retro_table(retro_win, luna_eclipse, sol_eclipse,
+		right_table(right_win, luna_eclipse, sol_eclipse,
 		planets, zodiac, zo_sym, pl_sym);
-		show_panel(*retro_panel);
+		show_panel(*right_panel);
 	}	
 	update_panels();
 }
@@ -137,31 +138,31 @@ void realtime_chart(NEW_CHART_PARAM())
 			usleep(1000);
 			if (ch == 9 || ch == 'q')
 				break;
-			if (ch == 'p' && *planet_trig == 0)
+			if (ch == 'p' && *left_trig == 0)
 			{
-				*planet_trig = 1;
-				show_panel(*planet_panel);
+				*left_trig = 1;
+				show_panel(*left_panel);
 				ch = 0;
 				break;
 			}
-			else if (ch == 'p' && *planet_trig == 1)
+			else if (ch == 'p' && *left_trig == 1)
 			{
-				*planet_trig = 0;
-				hide_panel(*planet_panel);
+				*left_trig = 0;
+				hide_panel(*left_panel);
 				ch = 0;
 				break;
 			}
-			if (ch == 'o' && *retro_trig == 0)
+			if (ch == 'o' && *right_trig == 0)
 			{
-				*retro_trig = 1;
-				show_panel(*retro_panel);
+				*right_trig = 1;
+				show_panel(*right_panel);
 				ch = 0;
 				break;
 			}
-			else if (ch == 'o' && *retro_trig == 1)
+			else if (ch == 'o' && *right_trig == 1)
 			{
-				*retro_trig = 0;
-				hide_panel(*retro_panel);
+				*right_trig = 0;
+				hide_panel(*right_panel);
 				ch = 0;
 				break;
 			}
@@ -341,24 +342,24 @@ void animate_chart(NEW_CHART_PARAM())
 					--i;
 				break;
 			case 'p':
-				if (*planet_trig)
+				if (*left_trig)
 				{
-					hide_panel(*planet_panel);
-					*planet_trig = 0;
+					hide_panel(*left_panel);
+					*left_trig = 0;
 				}
 				else
 				{
-					planet_table(planet_win, planets, zodiac, pxx,
+					left_table(left_win, planets, zodiac, pxx,
 					pl_sym, zo_sym, moon);
-					show_panel(*planet_panel);
-					*planet_trig = 1;
+					show_panel(*left_panel);
+					*left_trig = 1;
 				}
 				
-				if (*retro_trig > 0)
+				if (*right_trig > 0)
 				{
-					retro_table(retro_win, luna_eclipse, sol_eclipse,
+					right_table(right_win, luna_eclipse, sol_eclipse,
 					planets, zodiac, zo_sym, pl_sym);
-					show_panel(*retro_panel);
+					show_panel(*right_panel);
 				}
 				
 				touchwin(main_win);
@@ -368,24 +369,24 @@ void animate_chart(NEW_CHART_PARAM())
 				break;
 				
 			case 'o':
-				if (*retro_trig)
+				if (*right_trig)
 				{
-					hide_panel(*retro_panel);
-					*retro_trig = 0;
+					hide_panel(*right_panel);
+					*right_trig = 0;
 				}
 				else
 				{
-					retro_table(retro_win, luna_eclipse, sol_eclipse,
+					right_table(right_win, luna_eclipse, sol_eclipse,
 					planets, zodiac, zo_sym, pl_sym);
-					show_panel(*retro_panel);
-					*retro_trig = 1;
+					show_panel(*right_panel);
+					*right_trig = 1;
 				}
 				
-				if (*planet_trig > 0)
+				if (*left_trig > 0)
 				{
-					planet_table(planet_win, planets, zodiac, pxx,
+					left_table(left_win, planets, zodiac, pxx,
 					pl_sym, zo_sym, moon);
-					show_panel(*planet_panel);
+					show_panel(*left_panel);
 				}
 				touchwin(main_win);
 				wnoutrefresh(main_win);
