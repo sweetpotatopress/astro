@@ -13,43 +13,37 @@ CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc -Iswisseph \
              -Waddress -Wimplicit-function-declaration \
              -fanalyzer -O3
              
-SWE_CFLAGS	= -g -Wall -fPIC
-
 TARGET		= astro
 SRCS		= $(wildcard src/*.c)
 INSTALL_DIR = /usr/local/bin
 
+SWE_CFLAGS	= -g -Wall -fPIC
 SWE_DIR     = swisseph
-
 SWE_SRCS	:= $(wildcard swisseph/*.c)
 SWE_OBJS	:= $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
 SWE_A		:= $(SWE_DIR)/libswe.a
 
-SWE_LIB_EXISTS := $(shell test -f $(SWE_DIR)/libswe.a && echo 1 || echo 0)
-
 REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
 REAL_HOME := $(shell getent passwd $(REAL_USER) | cut -d: -f6)
 
-XDG_CONFIG_HOME := $(shell \
-  if [ -n "$${XDG_CONFIG_HOME}" ]; then printf "%s" "$${XDG_CONFIG_HOME}"; \
-  else printf "%s/.config" "$(REAL_HOME)"; fi)
-
-XDG_DATA_HOME := $(shell \
-  if [ -n "$${XDG_DATA_HOME}" ]; then printf "%s" "$${XDG_DATA_HOME}"; \
-  else printf "%s/.local/share" "$(REAL_HOME)"; fi)
+XDG_CONFIG_HOME := $(or $(XDG_CONFIG_HOME),$(REAL_HOME)/.config)
+XDG_DATA_HOME	:= $(or $(XDG_DATA_HOME),$(REAL_HOME)/.local/share)
 
 CONFIG_DIR	:= $(XDG_CONFIG_HOME)/astro
 DATA_DIR    := $(XDG_DATA_HOME)/astro
 CHARTS_DIR  := $(DATA_DIR)/charts
 EPHE_DIR    := $(DATA_DIR)/ephe
 
+SWE_A_EXISTS := $(if $(wildcard $(SWE_A)),1,0)
+SWE_EPHE_EXISTS := $(if $(wildcard $(EPHE_DIR)/.),1,0)
+
 SWE_DEPS :=
-ifeq ($(SWE_LIB_EXISTS)$(shell test -d "$(EPHE_DIR)" && echo 1 || echo 0),11)
+ifeq ($(SWE_A_EXISTS)$(SWE_EPHE_EXISTS),11)
   SWE_DEPS :=
-  $(info libswe.a found: $(SWE_A))
+  $(info $(SWE_A) and $(EPHE_DIR) found --x-)
 else
   SWE_DEPS := swe-install
-  $(info libswe.a not found - building --o-i)
+  $(info $(SWE_A) and/or $(EPHE_DIR) not found, building --x-)
 endif
 
 .PHONY: all install swe-install clean debug
