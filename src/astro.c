@@ -147,7 +147,7 @@ int main()
 	wbkgdset(in_cdata_win, COLOR_PAIR(M_COLOR));
 	
 	PANEL *left_panel;
-	WINDOW *left_win = newwin(PWINY, PWINX, PWIN_Y, PWIN_X);
+	WINDOW *left_win = newwin(LWINY, LWINX, LWIN_Y, LWIN_X);
 	left_panel = new_panel(left_win);
 	hide_panel(left_panel);
 	

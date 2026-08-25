@@ -31,10 +31,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 		luna_eclipse, sol_eclipse, \
 		pl_sym, zo_sym, moon
 		
-#define PWINY 40
-#define PWINX 33
-#define PWIN_Y 0
-#define PWIN_X 0
+#define LWINY 40
+#define LWINX 33
+#define LWIN_Y 0
+#define LWIN_X 0
 
 #define RWINY 9
 #define RWINX 24
