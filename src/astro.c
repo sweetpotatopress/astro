@@ -21,7 +21,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "draw.h"
 #include "anim.h"
 #include "chronos.h"
-#include "cdata.h"
+#include "indat.h"
 
 #define VERSION 0.73.3
 

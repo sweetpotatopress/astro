@@ -19,7 +19,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "swephexp.h"
 #include "astro.h"
 #include "io.h"
-#include "cdata.h"
+#include "indat.h"
 #include "draw.h"
 
 #define GEONAMEID 0
