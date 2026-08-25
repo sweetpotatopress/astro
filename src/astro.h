@@ -46,6 +46,13 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define CWIN_Y (LINES - CWINY) / 2
 #define CWIN_X (COLS - CWINX) / 2
 
+#define M_COLOR 1
+#define FIRE 2
+#define EARTH 3
+#define AIR 4
+#define WATER 5
+
+// planet data
 #define LONG 0
 #define LAT 1
 #define DIST 2
@@ -61,12 +68,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEXT_S 12
 #define PREV_S 13
 #define MAXPXX 14
-
-#define M_COLOR 1
-#define FIRE 2
-#define EARTH 3
-#define AIR 4
-#define WATER 5
 
 #define SPXXMAX 18
 struct pxx {
@@ -90,6 +91,7 @@ struct pxx {
 	double dspir[MAXPXX];
 };
 
+// dst trigger
 #define NDST 2
 #define YDST 3
 struct cdata {
