@@ -27,7 +27,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define NEW_CHART_MAIN() main_win, left_win, right_win, \
 		&left_panel, &right_panel,\
 		io, cdata, pxx,\
-		&left_trig, &right_trig, cusp, sign_cusp, planets, zodiac, \
+		&left_trig, &right_trig, cusp, sign_cusp, planet, zodiac, \
 		luna_eclipse, sol_eclipse, \
 		pl_sym, zo_sym, moon
 		

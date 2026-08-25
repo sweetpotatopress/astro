@@ -142,35 +142,35 @@ static int bound_check(int sign, int degree)
 	return -1;
 }
 
-static void dignity_check(int *zodiac[], double *planets[], int result[PLMAX][MAXZXX], struct pxx *pxx)
+static void dignity_check(int *zodiac[], double *planet[], int result[PLMAX][MAXZXX], struct pxx *pxx)
 {
-	int planet = 0;
-	for (; planet < PLMAX; ++planet)
+	int ipl = 0;
+	for (; ipl < PLMAX; ++ipl)
 	{
-		int sign = (int)(planets[planet][LONG] / 30) + 1;
-		int degree = (int)planets[planet][DEGREE];
+		int sign = (int)(planet[ipl][LONG] / 30) + 1;
+		int degree = (int)planet[ipl][DEGREE];
 		
-		result[planet][RULER] = zodiac[sign][RULER];
-		result[planet][EXALT] = zodiac[sign][EXALT];
-		result[planet][FALL] = zodiac[sign][FALL];
-		result[planet][DETRI] = zodiac[sign][DETRI];
+		result[ipl][RULER] = zodiac[sign][RULER];
+		result[ipl][EXALT] = zodiac[sign][EXALT];
+		result[ipl][FALL] = zodiac[sign][FALL];
+		result[ipl][DETRI] = zodiac[sign][DETRI];
 		
 		int chart_sect = sect(pxx);
 		if (chart_sect == DAY_SECT)
-			result[planet][TRIPLD] = zodiac[sign][TRIPLD];
+			result[ipl][TRIPLD] = zodiac[sign][TRIPLD];
 		else
-			result[planet][TRIPLD] = zodiac[sign][TRIPLN];
+			result[ipl][TRIPLD] = zodiac[sign][TRIPLN];
 			
-		result[planet][BOUND0] = zodiac[sign][bound_check(sign, degree)];
+		result[ipl][BOUND0] = zodiac[sign][bound_check(sign, degree)];
 		
 		if (degree <= 9)
-			result[planet][DECAN0] = zodiac[sign][DECAN0];
+			result[ipl][DECAN0] = zodiac[sign][DECAN0];
 		else if (degree > 9 && degree <= 19)
-			result[planet][DECAN0] = zodiac[sign][DECAN1];
+			result[ipl][DECAN0] = zodiac[sign][DECAN1];
 		else if (degree > 19)
-			result[planet][DECAN0] = zodiac[sign][DECAN2];
+			result[ipl][DECAN0] = zodiac[sign][DECAN2];
 		else // error
-			result[planet][DECAN0] = EMPTY;
+			result[ipl][DECAN0] = EMPTY;
 	}
 }
 
@@ -203,7 +203,7 @@ void mutual_reception(WINDOW *left_win, int starty, int planet, int result[PLMAX
 	}
 }
 
-void left_table(WINDOW *left_win, double *planets[], int *zodiac[], struct pxx *pxx, 
+void left_table(WINDOW *left_win, double *planet[], int *zodiac[], struct pxx *pxx, 
 const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
 	const char *name[17] = { 
@@ -225,11 +225,11 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	
 	for (int i = 0; i < p_count; ++i)
 	{
-		int sign = ((int)planets[i][LONG] / 30) + 1;
+		int sign = ((int)planet[i][LONG] / 30) + 1;
 		
-		int full_deg = (int)planets[i][LONG];
-		int deg = (int)planets[i][LONG] % 30;
-		int minute = (int)((planets[i][LONG] - (int)planets[i][LONG]) * 60);
+		int full_deg = (int)planet[i][LONG];
+		int deg = (int)planet[i][LONG] % 30;
+		int minute = (int)((planet[i][LONG] - (int)planet[i][LONG]) * 60);
 		
 		if (i < 12) // sun -> north node 
 		{
@@ -242,20 +242,20 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			
 			mvwprintw(left_win, starty, startx, "%s ", buff);
 			
-			if (planets[i][RETRO] > 0)
+			if (planet[i][RETRO] > 0)
 			{
 				wattron(left_win, COLOR_PAIR(FIRE));
 				mvwprintw(left_win, starty, startx + 12, "r");
 				wattroff(left_win, COLOR_PAIR(FIRE));
 			}
 				
-			if ((int)planets[i][STATION] == STATION_R)
+			if ((int)planet[i][STATION] == STATION_R)
 			{
 				wattron(left_win, COLOR_PAIR(EARTH));
 				mvwaddstr(left_win, starty, startx + 12, "sr");
 				wattroff(left_win, COLOR_PAIR(EARTH));
 			}
-			else if ((int)planets[i][STATION] == STATION_D)
+			else if ((int)planet[i][STATION] == STATION_D)
 			{
 				wattron(left_win, COLOR_PAIR(EARTH));
 				mvwaddstr(left_win, starty, startx + 12, "sd");
@@ -309,7 +309,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	while (ipl < PLMAX)
 	{
 		int result[PLMAX][MAXZXX] = {0};
-		dignity_check(zodiac, planets, result, pxx);
+		dignity_check(zodiac, planet, result, pxx);
 	
 		int dig[] = { RULER, EXALT, TRIPLD,
 		BOUND0, DECAN0, DETRI, FALL };
@@ -370,7 +370,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 
 void right_table(WINDOW *right_win,
 double *luna_eclipse, double *sol_eclipse,
-double *planets[], int *zodiac[],
+double *planet[], int *zodiac[],
 const char *zo_sym[], const char *pl_sym[])
 {
 	size_t p_count = 10;
@@ -404,18 +404,18 @@ const char *zo_sym[], const char *pl_sym[])
 	
 		char buff[MAXBUF];
 		
-		if (planets[j][LONG_S] > 0.0)
+		if (planet[j][LONG_S] > 0.0)
 		{
 			snprintf(buff, sizeof(buff), "%-6s%2.0f*%-2.02d'  %-4.0f %-4.0f",
-			pl_sym[j], planets[j][DEGREE_S], (int)planets[j][MIN_S],
-			planets[j][NEXT_S], planets[j][PREV_S]);
+			pl_sym[j], planet[j][DEGREE_S], (int)planet[j][MIN_S],
+			planet[j][NEXT_S], planet[j][PREV_S]);
 		}
 		
 		else
 		{
 			snprintf(buff, sizeof(buff), "%-6s-%1.0f*%-2.02d'  %-4.0f %-4.0f",
-			pl_sym[j], planets[j][DEGREE_S], (int)planets[j][MIN_S],
-			planets[j][NEXT_S], planets[j][PREV_S]);
+			pl_sym[j], planet[j][DEGREE_S], (int)planet[j][MIN_S],
+			planet[j][NEXT_S], planet[j][PREV_S]);
 		}
 		
 		mvwprintw(right_win, (int)i + 1, 0, "%s", buff);

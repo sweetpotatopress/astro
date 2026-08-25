@@ -79,7 +79,7 @@ int main()
 	if (!pxx)
 		ERR_EXIT("main pxx");
 		
-	double *planets[] = {
+	double *planet[] = {
 		pxx->dsun, pxx->dmoon,
 		pxx->dmerc, pxx->dven,
 		pxx->dmars, pxx->djup,
@@ -241,7 +241,7 @@ int main()
 				case 'p':
 					if (!left_trig)
 					{
-						left_table(left_win, planets, zodiac, pxx,
+						left_table(left_win, planet, zodiac, pxx,
 						pl_sym, zo_sym, moon);
 						show_panel(left_panel);
 						left_trig = 1;
@@ -257,7 +257,7 @@ int main()
 					if (right_trig > 0)
 					{
 						right_table(right_win, luna_eclipse, sol_eclipse,
-						planets, zodiac, zo_sym, pl_sym);
+						planet, zodiac, zo_sym, pl_sym);
 						show_panel(right_panel);
 					}
 					
@@ -270,7 +270,7 @@ int main()
 					if (!right_trig)
 					{
 						right_table(right_win, luna_eclipse, sol_eclipse,
-						planets, zodiac, zo_sym, pl_sym);
+						planet, zodiac, zo_sym, pl_sym);
 						show_panel(right_panel);
 						right_trig = 1;
 					}
@@ -284,7 +284,7 @@ int main()
 					
 					if (left_trig > 0)
 					{
-						left_table(left_win, planets, zodiac, pxx,
+						left_table(left_win, planet, zodiac, pxx,
 						pl_sym, zo_sym, moon);
 						show_panel(left_panel);
 					}

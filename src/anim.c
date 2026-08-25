@@ -95,21 +95,21 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 
 void new_chart(NEW_CHART_PARAM())
 {
-	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planets, cdata, pxx);
-	draw_chart(main_win, cusp, sign_cusp, planets, zodiac, pxx, cdata,
+	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
+	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
 	
 	if (*left_trig > 0)
 	{
-		left_table(left_win, planets, zodiac, pxx,
+		left_table(left_win, planet, zodiac, pxx,
 		pl_sym, zo_sym, moon);
 		show_panel(*left_panel);
 	}
 	if (*right_trig > 0)
 	{
 		right_table(right_win, luna_eclipse, sol_eclipse,
-		planets, zodiac, zo_sym, pl_sym);
+		planet, zodiac, zo_sym, pl_sym);
 		show_panel(*right_panel);
 	}	
 	update_panels();
@@ -250,7 +250,7 @@ void solar_return(NEW_CHART_PARAM())
 		flushinp();
 		
 		ECLIPSE_INIT();
-		pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planets, cdata, pxx);
+		pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
 		
 		double temp_degree = pxx->dsun[LONG];
 		int iter = 3;
@@ -303,7 +303,7 @@ void solar_return(NEW_CHART_PARAM())
 			cpt(cdata, &temp, result, &t, 0);
 			cpt(cdata, &temp, result, &t, 1);
 			
-			pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planets, cdata, pxx);
+			pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
 			cur_chart_data(main_win, io, cdata);
 		}
 	}
@@ -349,7 +349,7 @@ void animate_chart(NEW_CHART_PARAM())
 				}
 				else
 				{
-					left_table(left_win, planets, zodiac, pxx,
+					left_table(left_win, planet, zodiac, pxx,
 					pl_sym, zo_sym, moon);
 					show_panel(*left_panel);
 					*left_trig = 1;
@@ -358,7 +358,7 @@ void animate_chart(NEW_CHART_PARAM())
 				if (*right_trig > 0)
 				{
 					right_table(right_win, luna_eclipse, sol_eclipse,
-					planets, zodiac, zo_sym, pl_sym);
+					planet, zodiac, zo_sym, pl_sym);
 					show_panel(*right_panel);
 				}
 				
@@ -377,14 +377,14 @@ void animate_chart(NEW_CHART_PARAM())
 				else
 				{
 					right_table(right_win, luna_eclipse, sol_eclipse,
-					planets, zodiac, zo_sym, pl_sym);
+					planet, zodiac, zo_sym, pl_sym);
 					show_panel(*right_panel);
 					*right_trig = 1;
 				}
 				
 				if (*left_trig > 0)
 				{
-					left_table(left_win, planets, zodiac, pxx,
+					left_table(left_win, planet, zodiac, pxx,
 					pl_sym, zo_sym, moon);
 					show_panel(*left_panel);
 				}
