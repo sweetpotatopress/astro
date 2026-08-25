@@ -4,8 +4,24 @@ ncurses
 
 KEYBINDS
 
+enter		animate chart  
+	h/l 	time increment  
+	k/j 	up/down  
+
+s			solar return  
+	k/j		up/down year  
+	s/q/esc	exit mode  
+
+p			toggle left table
+o 			toggle right table
+
+tab			live update  
+d			toggle dst
+r			redraw chart  
+q			exit astro  
+
 w			save chart  
-m			makedir  
+	m		makedir  
 	esc		cancel  
 	esc/q	choose dir
 	enter	save named chart
@@ -14,32 +30,16 @@ e		 	load chart
 	l/enter	choose  
 	esc		cancel  
  
-r			redraw chart  
-d			toggle dst
-tab			live update  
-q			exit astro  
-
-s			solar return  
-	k/j		up/down year  
-	s/q/esc	exit mode  
-
-enter		animate chart  
-	h/l 	time increment  
-	k/j 	up/down  
-
-p			toggle planet/point data  
-o 			toggle retro/speed data  
-
 i			input chart data  
 
 INPUT CHART DATA
 
 i			INSERT mode  
 
-	\		exit/save data input  
 	F1		clear fields  
 	tab		fill local time  
 	arrows	navigate  
+	\		exit data input
 
 esc			NORMAL mode  
 
