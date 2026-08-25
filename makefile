@@ -46,22 +46,22 @@ EPHE_DIR    := $(DATA_DIR)/ephe
 SWE_DEPS :=
 ifeq ($(SWE_LIB_EXISTS)$(shell test -d "$(EPHE_DIR)" && echo 1 || echo 0),11)
   SWE_DEPS :=
-  $(info Swiss Ephemeris found - using them uwu)
+  $(info libswe.a found: $(SWE_A))
 else
   SWE_DEPS := swe-install
-  $(info Swiss Ephemeris not found - installing --o-i)
+  $(info libswe.a not found - building --o-i)
 endif
 
 .PHONY: all install swe-install clean debug
 
 all: $(SWE_DEPS)
-	@echo "-o--o-Building astro -o--/-"
+	@echo "-o--o-building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
 	    -L$(SWE_DIR) -lswe -lm \
 	    -lpanel -lmenu -lform -lncurses -ltinfo
 
 debug: $(SWE_DEPS)
-	@echo "-o--o-Debug build (sanitizers) --o--/-"
+	@echo "-o--o-debug build (sanitizers) --o--/-"
 	$(CC) \
 	  $(CFLAGS) \
 	  -g3 -fno-omit-frame-pointer \
@@ -75,15 +75,15 @@ $(SWE_DIR)/%.o: swisseph/%.c
 	$(CC) $(SWE_CFLAGS) -c $< -o $@
 		
 $(SWE_A): $(SWE_OBJS)
-	ar rcs $@ $(SWE_OBJS)
-	rm -f $(SWE_OBJS)
+	/bin/ar rcs $@ $(SWE_OBJS)
+	/bin/rm -f $(SWE_OBJS)
 
 install: all
-	@echo "-x--o Installing astro --oo-"
+	@echo "-x--o installing astro --oo-"
 	/bin/mkdir -p "$(INSTALL_DIR)"
 	/bin/cp "$(TARGET)" "$(INSTALL_DIR)/$(TARGET)"
 
-	@echo "-x--o Creating data directories --oo-"
+	@echo "-x--o creating data directories --oo-"
 	/bin/mkdir -p "$(CONFIG_DIR)"; \
 	/bin/mkdir -p "$(CHARTS_DIR)"; \
 	/bin/chown -R $(REAL_USER):$(REAL_USER) "$(CONFIG_DIR)"; \
@@ -93,7 +93,7 @@ install: all
 	/bin/cp city-db "$(DATA_DIR)/city-db"
 
 swe-install: $(SWE_A)
-	@echo "--o-Installing Swiss Ephemeris x<--o-"
+	@echo "--o-installing swiss ephemeris x<--o-"
 
 	/bin/mkdir -p "$(CHARTS_DIR)" "$(EPHE_DIR)"; \
 	/bin/chown -R $(REAL_USER):$(REAL_USER) "$(DATA_DIR)"; \
