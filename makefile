@@ -40,10 +40,10 @@ SWE_EPHE_EXISTS := $(if $(wildcard $(EPHE_DIR)/.),1,0)
 SWE_DEPS :=
 ifeq ($(SWE_A_EXISTS)$(SWE_EPHE_EXISTS),11)
   SWE_DEPS :=
-  $(info $(SWE_A) and $(EPHE_DIR) found --x-)
+  $(info --o $(SWE_A) and $(EPHE_DIR) found --x-)
 else
   SWE_DEPS := swe-install
-  $(info $(SWE_A) and/or $(EPHE_DIR) not found, building --x-)
+  $(info --o $(SWE_A) and/or $(EPHE_DIR) not found, building --x-)
 endif
 
 .PHONY: all install swe-install clean debug
@@ -65,7 +65,7 @@ debug: $(SWE_DEPS)
 	  -L$(SWE_DIR) -lswe -lm \
 	  -lpanel -lmenu -lform -lncurses -ltinfo
 
-$(SWE_DIR)/%.o: swisseph/%.c
+$(SWE_DIR)/%.o: $(SWE_DIR)/%.c
 	$(CC) $(SWE_CFLAGS) -c $< -o $@
 		
 $(SWE_A): $(SWE_OBJS)
