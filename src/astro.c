@@ -23,7 +23,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "chronos.h"
 #include "indat.h"
 
-#define VERSION 0.73.3
+#define VERSION 0.74.0
 
 static void planet_init(double *planet[], int cur_chart, struct pxx **pxx)
 {
