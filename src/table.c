@@ -348,14 +348,9 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	"------------------------------");
 	
 	++starty;
-	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
-	while (elongation < 0)
-		elongation += 360;
-	while (elongation >= 360)
-		elongation -= 360;
 	
 	mvwprintw(left_win, starty, startx, 
-	"moon phase: %s, %0.f", moon[cdata->moonphase], elongation);
+	"moon phase: %s", moon[cdata->moonphase]);
 }
 
 void right_table(WINDOW *right_win,
