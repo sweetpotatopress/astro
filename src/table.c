@@ -174,22 +174,6 @@ static void dignity_check(int *zodiac[], double *planet[], int result[PLMAX][MAX
 	}
 }
 
-static int moon_phase(struct pxx *pxx)
-{
-	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
-	
-	while (elongation < 0)
-		elongation += 360;
-	while (elongation >= 360)
-		elongation -= 360;
-		
-	int phase = (int)(elongation / 45);
-	if (phase > 7)
-		phase = 7;
-		
-	return phase;
-}
-
 void mutual_reception(WINDOW *left_win, int starty, int planet, int result[PLMAX][MAXZXX])
 {
 	for (int c = 0; c < PLMAX; ++c)
@@ -203,7 +187,7 @@ void mutual_reception(WINDOW *left_win, int starty, int planet, int result[PLMAX
 	}
 }
 
-void left_table(WINDOW *left_win, double *planet[], int *zodiac[], struct pxx *pxx, 
+void left_table(WINDOW *left_win, double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *cdata,
 const char *pl_sym[], const char *zo_sym[], const char *moon[])
 {
 	const char *name[17] = { 
@@ -364,8 +348,14 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	"------------------------------");
 	
 	++starty;
+	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
+	while (elongation < 0)
+		elongation += 360;
+	while (elongation >= 360)
+		elongation -= 360;
+	
 	mvwprintw(left_win, starty, startx, 
-	"moon phase: %s", moon[moon_phase(pxx)]);
+	"moon phase: %s, %0.f", moon[cdata->moonphase], elongation);
 }
 
 void right_table(WINDOW *right_win,

@@ -228,9 +228,20 @@ void solar_return(NEW_CHART_PARAM())
 		flushinp();
 		
 		ECLIPSE_INIT();
-		pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
 		
-		double temp_degree = pxx->dsun[LONG];
+		int iflag = SEFLG_SWIEPH;
+		double xx[6];
+		char serr[AS_MAXCH];
+		
+		calculate_utc(cdata);
+		weekday_check(cdata);
+		
+		double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
+		cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
+		
+		swe_calc_ut(jd_ut, SE_SUN, iflag, xx, serr);
+				
+		double temp_degree = xx[LONG];
 		int iter = 3;
 		
 		while (--iter > 0)
@@ -250,10 +261,6 @@ void solar_return(NEW_CHART_PARAM())
 					
 				new_chart(NEW_CHART_ARG());
 				temp_degree = pxx->dsun[LONG];
-		
-				wattron(main_win, COLOR_PAIR(AIR));
-				mvwprintw(main_win, 0, COLS - 14, "*solar return");
-				wattroff(main_win, COLOR_PAIR(AIR));
 			}
 			while (temp_degree > base_degree)
 			{
@@ -269,10 +276,6 @@ void solar_return(NEW_CHART_PARAM())
 					
 				new_chart(NEW_CHART_ARG());
 				temp_degree = pxx->dsun[LONG];
-				
-				wattron(main_win, COLOR_PAIR(AIR));
-				mvwprintw(main_win, 0, COLS - 14, "*solar return");
-				wattroff(main_win, COLOR_PAIR(AIR));
 			}
 			struct tm temp = {0};
 			struct tm *result = NULL;
@@ -280,9 +283,10 @@ void solar_return(NEW_CHART_PARAM())
 	
 			cpt(cdata, &temp, result, &t, 0);
 			cpt(cdata, &temp, result, &t, 1);
-			
-			pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
-			cur_chart_data(main_win, io, cdata);
+			new_chart(NEW_CHART_ARG());
+			wattron(main_win, COLOR_PAIR(AIR));
+			mvwprintw(main_win, 0, COLS - 14, "*solar return");
+			wattroff(main_win, COLOR_PAIR(AIR));
 		}
 	}
 	mvwprintw(main_win, 0, COLS - 14, "              ");
@@ -327,7 +331,7 @@ void animate_chart(NEW_CHART_PARAM())
 				}
 				else
 				{
-					left_table(left_win, planet, zodiac, pxx,
+					left_table(left_win, planet, zodiac, pxx, cdata,
 					pl_sym, zo_sym, moon);
 					show_panel(*left_panel);
 					*left_trig = 1;
@@ -362,7 +366,7 @@ void animate_chart(NEW_CHART_PARAM())
 				
 				if (*left_trig > 0)
 				{
-					left_table(left_win, planet, zodiac, pxx,
+					left_table(left_win, planet, zodiac, pxx, cdata,
 					pl_sym, zo_sym, moon);
 					show_panel(*left_panel);
 				}

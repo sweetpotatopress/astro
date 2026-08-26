@@ -25,6 +25,22 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define VERSION 0.73.3
 
+static void planet_init(double *planet[], int cur_chart, struct pxx **pxx)
+{
+	double *new_planet[] = {
+		pxx[cur_chart]->dsun, pxx[cur_chart]->dmoon,
+		pxx[cur_chart]->dmerc, pxx[cur_chart]->dven,
+		pxx[cur_chart]->dmars, pxx[cur_chart]->djup,
+		pxx[cur_chart]->dsat, pxx[cur_chart]->dura,
+		pxx[cur_chart]->dnep, pxx[cur_chart]->dplu,
+		pxx[cur_chart]->dmnod, pxx[cur_chart]->dtnod,
+		pxx[cur_chart]->dasc, pxx[cur_chart]->dmc,
+		pxx[cur_chart]->ddsc, pxx[cur_chart]->dic,
+		pxx[cur_chart]->dfor, pxx[cur_chart]->dspir};
+		
+	memcpy(planet, new_planet, sizeof(new_planet));
+}
+
 int main()
 {
 	// sun, moon, mercury, venus, mars, jupiter,
@@ -44,6 +60,7 @@ int main()
 	
 	enum mode mode = INSERT;
 	int cur_chart = 1;
+	int cur_chart_init[CHARTMAX] = {9};
 	
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)
@@ -119,8 +136,8 @@ int main()
 			ERR_EXIT("main io->filename malloc");
 	}
 		
-	double cusp[CHARTMAX][13];
-	double sign_cusp[CHARTMAX][13];
+	double cusp[CHARTMAX][13] = {0};
+	double sign_cusp[CHARTMAX][13] = {0};
 	
 	double luna_eclipse[CHARTMAX][EMAX] = {0};
 	double sol_eclipse[CHARTMAX][EMAX] = {0};
@@ -203,8 +220,16 @@ int main()
 			if (isdigit(ch))
 			{
 				cur_chart = ch - '0';
-				if (cur_chart >= CHARTMAX || cur_chart < 0)
-					cur_chart = 0;
+				if (cur_chart >= CHARTMAX || cur_chart <= 0)
+					cur_chart = 10;
+					
+				if (cur_chart_init[cur_chart] == 0)
+				{
+					set_localtime(cdata[cur_chart]);
+					config_parse(cdata[cur_chart]);
+					cur_chart_init[cur_chart] = 1;
+				}
+				planet_init(planet, cur_chart, pxx);
 				new_chart(NEW_CHART_MAIN());
 				doupdate();
 			}
@@ -269,7 +294,7 @@ int main()
 				case 'p':
 					if (!left_trig)
 					{
-						left_table(left_win, planet, zodiac, pxx[cur_chart],
+						left_table(left_win, planet, zodiac, pxx[cur_chart], cdata[cur_chart],
 						pl_sym, zo_sym, moon);
 						show_panel(left_panel);
 						left_trig = 1;
@@ -312,7 +337,7 @@ int main()
 					
 					if (left_trig > 0)
 					{
-						left_table(left_win, planet, zodiac, pxx[cur_chart],
+						left_table(left_win, planet, zodiac, pxx[cur_chart], cdata[cur_chart],
 						pl_sym, zo_sym, moon);
 						show_panel(left_panel);
 					}

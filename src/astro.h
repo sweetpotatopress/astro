@@ -16,7 +16,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define MAXBUF 1024
 #define MAXPATH 2048
-#define CHARTMAX 10
+#define CHARTMAX 11
 
 #define ERR_EXIT(str) do { \
 		endwin(); \
@@ -30,7 +30,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 		io[cur_chart], cdata[cur_chart], pxx[cur_chart],\
 		&left_trig, &right_trig, cusp[cur_chart], sign_cusp[cur_chart], planet, zodiac, \
 		luna_eclipse[cur_chart], sol_eclipse[cur_chart], \
-		pl_sym, zo_sym, moon
+		pl_sym, zo_sym, moon, cur_chart
 		
 #define LWINY 40
 #define LWINX 33
@@ -116,6 +116,7 @@ struct cdata {
 	int utc_year;
 	int utc_mon;
 	int utc_mday;
+	int moonphase;
 };
 
 struct io {

@@ -34,9 +34,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define ECLIPSE_INIT() sol_eclipse[E_INIT] = 0;
 
-void pxx_init(double cusp[], double sign_cusp[], double *luna_eclipse, double *sol_eclipse, double *planet[],
-struct cdata *cdata, struct pxx *pxx);
-
 int sect(struct pxx *pxx);
 int months(int month, int year);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);

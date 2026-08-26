@@ -19,7 +19,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "anim.h"
 #include "draw.h"
 
-void pxx_init(double cusp[], double sign_cusp[],
+static void pxx_init(double cusp[], double sign_cusp[],
 double *luna_eclipse, double *sol_eclipse, double *planet[],
 struct cdata *cdata, struct pxx *pxx)
 {
@@ -97,10 +97,23 @@ struct cdata *cdata, struct pxx *pxx)
 		if (planet[ipl][LONG_S] < 0)
 			planet[ipl][DEGREE_S] *= -1;
 	}
+	
+	// moonphase
+	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
+	
+	while (elongation < 0)
+		elongation += 360;
+	while (elongation >= 360)
+		elongation -= 360;
+		
+	int phase = (int)(elongation / 45);
+	if (phase > 7)
+		phase = 7;
+	cdata->moonphase = phase;
 }
 
-void draw_chart(WINDOW *win, double cusp[], double sign_cusp[], double *planet[], int *zodiac[],
-struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[])
+static void draw_chart(WINDOW *win, double cusp[], double sign_cusp[], double *planet[], int *zodiac[],
+struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[], int cur_chart)
 {
 	curs_set(0);
 	werase(win);
@@ -138,6 +151,8 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	int bar_end = 15;
 	mvwhline(win, 1, COLS - bar_end, '.', COLS);
 	mvwvline(win, 0, COLS - bar_end, '.', 2);
+	
+	mvwprintw(win, 0, COLS - (bar_end + 3), "%d", cur_chart);
 }
 
 void new_chart(NEW_CHART_PARAM())
@@ -145,12 +160,12 @@ void new_chart(NEW_CHART_PARAM())
 	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse,
 	planet, cdata, pxx);
 	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata,
-	pl_sym, zo_sym);
+	pl_sym, zo_sym, cur_chart);
 	cur_chart_data(main_win, io, cdata);
 	
 	if (*left_trig > 0)
 	{
-		left_table(left_win, planet, zodiac, pxx,
+		left_table(left_win, planet, zodiac, pxx, cdata,
 		pl_sym, zo_sym, moon);
 		show_panel(*left_panel);
 	}
