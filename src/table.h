@@ -61,8 +61,6 @@ struct zxx {
 	int ipis[MAXZXX];
 };
 
-void zxx_init(int *zodiac[]);
-
 void left_table(WINDOW *left_win, double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *cdata,
 const char *pl_sym[], const char *zo_sym[], const char *moon[]);
 

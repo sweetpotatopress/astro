@@ -19,6 +19,109 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "anim.h"
 #include "draw.h"
 
+void planet_init(double *planet[], int cur_chart, struct pxx **pxx)
+{
+	double *new_planet[] = {
+		pxx[cur_chart]->dsun, pxx[cur_chart]->dmoon,
+		pxx[cur_chart]->dmerc, pxx[cur_chart]->dven,
+		pxx[cur_chart]->dmars, pxx[cur_chart]->djup,
+		pxx[cur_chart]->dsat, pxx[cur_chart]->dura,
+		pxx[cur_chart]->dnep, pxx[cur_chart]->dplu,
+		pxx[cur_chart]->dmnod, pxx[cur_chart]->dtnod,
+		pxx[cur_chart]->dasc, pxx[cur_chart]->dmc,
+		pxx[cur_chart]->ddsc, pxx[cur_chart]->dic,
+		pxx[cur_chart]->dfor, pxx[cur_chart]->dspir};
+		
+	memcpy(planet, new_planet, sizeof(new_planet));
+}
+
+void zxx_init(int *zodiac[])
+{ /* element, ruler, exalt, triplicity d,n,c,
+	bound 0-4, decan 0-2, detri, fall */
+	
+	const int ari[] = 
+	{ FIRE, SE_MARS, SE_SUN, SE_SUN,
+	SE_JUPITER, SE_SATURN, SE_JUPITER, SE_VENUS,
+	SE_MERCURY, SE_MARS, SE_SATURN, SE_MARS,
+	SE_SUN, SE_VENUS, SE_VENUS, SE_SATURN };
+
+	const int tau[] = 
+	{ EARTH, SE_VENUS, SE_MOON, SE_VENUS,
+	SE_MOON, SE_MARS, SE_VENUS, SE_MERCURY,
+	SE_JUPITER, SE_SATURN, SE_MARS, SE_MERCURY,
+	SE_MOON, SE_SATURN, SE_MARS, EMPTY };
+	
+	const int gem[] =
+	{ AIR, SE_MERCURY, EMPTY, SE_SATURN,
+	SE_MERCURY, SE_JUPITER, SE_MERCURY, SE_JUPITER,
+	SE_VENUS, SE_MARS, SE_SATURN, SE_JUPITER,
+	SE_MARS, SE_SUN, SE_JUPITER, EMPTY };
+
+	const int can[] = 
+	{ WATER, SE_MOON, SE_JUPITER, SE_VENUS,
+	SE_MARS, SE_MOON, SE_MARS, SE_VENUS,
+	SE_MERCURY, SE_JUPITER, SE_SATURN, SE_VENUS,
+	SE_MERCURY, SE_MOON, SE_SATURN, SE_MARS };
+	
+	const int leo[] =
+	{ FIRE, SE_SUN, EMPTY, SE_SUN,
+	SE_JUPITER, SE_SATURN, SE_JUPITER, SE_VENUS,
+	SE_SATURN, SE_MERCURY, SE_MARS, SE_SATURN,
+	SE_JUPITER, SE_MARS, SE_SATURN, EMPTY };
+	
+	const int vir[] =
+	{ EARTH, SE_MERCURY, SE_MERCURY, SE_VENUS,
+	SE_MOON, SE_MARS, SE_MERCURY, SE_VENUS,
+	SE_JUPITER, SE_MARS, SE_SATURN, SE_SUN,
+	SE_VENUS, SE_MERCURY, SE_JUPITER, SE_VENUS };
+	
+	const int lib[] = 
+	{ AIR, SE_VENUS, SE_SATURN, SE_SATURN,
+	SE_MERCURY, SE_JUPITER, SE_SATURN, SE_MERCURY,
+	SE_JUPITER, SE_VENUS, SE_MARS, SE_MOON,
+	SE_SATURN, SE_JUPITER, SE_MARS, SE_SUN };
+	
+	const int sco[] =
+	{ WATER, SE_MARS, EMPTY, SE_VENUS,
+	SE_MARS, SE_MOON, SE_MARS, SE_VENUS,
+	SE_MERCURY, SE_JUPITER, SE_SATURN, SE_MARS,
+	SE_SUN, SE_VENUS, SE_VENUS, SE_MOON };
+	
+	const int sag[] =
+	{ FIRE, SE_JUPITER, EMPTY, SE_SUN,
+	SE_JUPITER, SE_SATURN, SE_JUPITER, SE_VENUS,
+	SE_MERCURY, SE_SATURN, SE_MARS, SE_MERCURY,
+	SE_MOON, SE_SATURN, SE_MERCURY, EMPTY };
+	
+	const int cap[] =
+	{ EARTH, SE_SATURN, SE_MARS, SE_VENUS,
+	SE_MOON, SE_MARS, SE_MERCURY, SE_JUPITER,
+	SE_VENUS, SE_SATURN, SE_MARS, SE_JUPITER,
+	SE_MARS, SE_SUN, SE_MOON, SE_JUPITER };
+	
+	const int aqu[] =
+	{ AIR, SE_SATURN, EMPTY, SE_SATURN,
+	SE_MERCURY, SE_JUPITER, SE_MERCURY, SE_VENUS,
+	SE_JUPITER, SE_MARS, SE_SATURN, SE_VENUS,
+	SE_MERCURY, SE_MOON, SE_SUN, EMPTY };
+	
+	const int pis[] =
+	{ WATER, SE_JUPITER, SE_VENUS, SE_VENUS,
+	SE_MARS, SE_MOON, SE_VENUS, SE_JUPITER,
+	SE_MERCURY, SE_MARS, SE_SATURN, SE_SATURN,
+	SE_JUPITER, SE_MARS, SE_MERCURY, SE_MERCURY }; 
+	
+	const int *zodia[] = { 0,
+	ari, tau, gem, can,
+	leo, vir, lib, sco,
+	sag, cap, aqu, pis};
+
+	int d, z;
+	for (z = ARI; z < ZMAX; ++z)
+		for(d = ELEMENT; d <= FALL; ++d)
+			zodiac[z][d] = zodia[z][d];
+}
+
 static void pxx_init(double cusp[], double sign_cusp[],
 double *luna_eclipse, double *sol_eclipse, double *planet[],
 struct cdata *cdata, struct pxx *pxx)

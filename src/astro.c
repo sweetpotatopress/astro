@@ -22,24 +22,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "anim.h"
 #include "chronos.h"
 #include "indat.h"
+#include "init.h"
 
 #define VERSION 0.74.1
-
-static void planet_init(double *planet[], int cur_chart, struct pxx **pxx)
-{
-	double *new_planet[] = {
-		pxx[cur_chart]->dsun, pxx[cur_chart]->dmoon,
-		pxx[cur_chart]->dmerc, pxx[cur_chart]->dven,
-		pxx[cur_chart]->dmars, pxx[cur_chart]->djup,
-		pxx[cur_chart]->dsat, pxx[cur_chart]->dura,
-		pxx[cur_chart]->dnep, pxx[cur_chart]->dplu,
-		pxx[cur_chart]->dmnod, pxx[cur_chart]->dtnod,
-		pxx[cur_chart]->dasc, pxx[cur_chart]->dmc,
-		pxx[cur_chart]->ddsc, pxx[cur_chart]->dic,
-		pxx[cur_chart]->dfor, pxx[cur_chart]->dspir};
-		
-	memcpy(planet, new_planet, sizeof(new_planet));
-}
 
 int main()
 {
@@ -54,13 +39,12 @@ int main()
 	"leo", "vir", "lib", "sco", "sag",
 	"cap", "aqu", "pis"};
 
-	// condensed from valens 11 phases to the 'main 8' inspired by rudhyar 
 	const char *moon[] = {"new", "crescent", "quarter", "gibbous", "full",
 	"2nd gibbous", "2nd quarter", "2nd crescent"};
 	
 	enum mode mode = INSERT;
 	int cur_chart = 1;
-	int cur_chart_init[CHARTMAX] = {9};
+	int cur_chart_init[CHARTMAX] = {0};
 	
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)
@@ -109,16 +93,8 @@ int main()
 			ERR_EXIT("ERR: pxx[i] calloc");
 	}
 		
-	double *planet[] = {
-		pxx[cur_chart]->dsun, pxx[cur_chart]->dmoon,
-		pxx[cur_chart]->dmerc, pxx[cur_chart]->dven,
-		pxx[cur_chart]->dmars, pxx[cur_chart]->djup,
-		pxx[cur_chart]->dsat, pxx[cur_chart]->dura,
-		pxx[cur_chart]->dnep, pxx[cur_chart]->dplu,
-		pxx[cur_chart]->dmnod, pxx[cur_chart]->dtnod,
-		pxx[cur_chart]->dasc, pxx[cur_chart]->dmc,
-		pxx[cur_chart]->ddsc, pxx[cur_chart]->dic,
-		pxx[cur_chart]->dfor, pxx[cur_chart]->dspir};
+	double *planet[SPXXMAX];
+	planet_init(planet, cur_chart, pxx);
 
 	struct io **io = calloc(CHARTMAX, sizeof(*io));
 	if (!io)
