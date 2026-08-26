@@ -43,8 +43,16 @@ int main()
 	"2nd gibbous", "2nd quarter", "2nd crescent"};
 	
 	enum mode mode = INSERT;
+	
 	int cur_chart = 1;
 	int cur_chart_init[CHARTMAX] = {0};
+	int right_trig = 1, left_trig = 1;
+		
+	double cusp[CHARTMAX][13] = {0};
+	double sign_cusp[CHARTMAX][13] = {0};
+	
+	double luna_eclipse[CHARTMAX][EMAX] = {0};
+	double sol_eclipse[CHARTMAX][EMAX] = {0};
 	
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)
@@ -60,6 +68,19 @@ int main()
 		zxx->iaqu, zxx->ipis};
 		
 	zxx_init(zodiac); // fills essential dignities
+	
+	struct pxx **pxx = calloc(CHARTMAX, sizeof(*pxx));
+	if (!pxx)
+		ERR_EXIT("main pxx");
+	for (int i = 0; i < CHARTMAX; ++i)
+	{
+		pxx[i] = calloc(1, sizeof(*pxx[i]));
+		if (!pxx[i])
+			ERR_EXIT("ERR: pxx[i] calloc");
+	}
+		
+	double *planet[SPXXMAX];
+	planet_init(planet, cur_chart, pxx);
 	
 	struct cdata **cdata = calloc(CHARTMAX, sizeof(*cdata));
 	if (!cdata)
@@ -82,19 +103,6 @@ int main()
 		if (!cdata[i]->timezone)
 			ERR_EXIT("ERR: main cdata->timezone malloc");
 	}
-	
-	struct pxx **pxx = calloc(CHARTMAX, sizeof(*pxx));
-	if (!pxx)
-		ERR_EXIT("main pxx");
-	for (int i = 0; i < CHARTMAX; ++i)
-	{
-		pxx[i] = calloc(1, sizeof(*pxx[i]));
-		if (!pxx[i])
-			ERR_EXIT("ERR: pxx[i] calloc");
-	}
-		
-	double *planet[SPXXMAX];
-	planet_init(planet, cur_chart, pxx);
 
 	struct io **io = calloc(CHARTMAX, sizeof(*io));
 	if (!io)
@@ -111,13 +119,7 @@ int main()
 		if (!io[i]->filename)
 			ERR_EXIT("main io->filename malloc");
 	}
-		
-	double cusp[CHARTMAX][13] = {0};
-	double sign_cusp[CHARTMAX][13] = {0};
-	
-	double luna_eclipse[CHARTMAX][EMAX] = {0};
-	double sol_eclipse[CHARTMAX][EMAX] = {0};
-	
+
 	const char *home_dir = getenv("HOME");
 	if (!home_dir)
 		ERR_EXIT("HOME environment not set");
@@ -182,7 +184,6 @@ int main()
 	set_localtime(cdata[cur_chart]);
 	config_parse(cdata[cur_chart]);
 	
-	int right_trig = 1, left_trig = 1;
 	new_chart(NEW_CHART_MAIN());
 	doupdate();
 	
@@ -344,7 +345,10 @@ int main()
 		free(io[i]->filename);
 		free(io[i]);
 	}
-		
+	free(cdata);
+	free(pxx);
+	free(io);
 	free(zxx);
+	
 	return 0;
 } 

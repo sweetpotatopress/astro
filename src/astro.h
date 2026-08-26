@@ -31,7 +31,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 		&left_trig, &right_trig, cusp[cur_chart], sign_cusp[cur_chart], planet, zodiac, \
 		luna_eclipse[cur_chart], sol_eclipse[cur_chart], \
 		pl_sym, zo_sym, moon, cur_chart
-		
+
 #define LWINY 40
 #define LWINX 33
 #define LWIN_Y 0
@@ -53,6 +53,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define AIR 4
 #define WATER 5
 
+// dst trigger
+#define NDST 2
+#define YDST 3
+
 // planet data
 #define LONG 0
 #define LAT 1
@@ -70,7 +74,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define PREV_S 13
 #define MAXPXX 14
 
-#define SPXXMAX 18
+#define SPXXMAX 18 // struct member count
 struct pxx {
 	double dsun[MAXPXX];
 	double dmoon[MAXPXX];
@@ -92,9 +96,6 @@ struct pxx {
 	double dspir[MAXPXX];
 };
 
-// dst trigger
-#define NDST 2
-#define YDST 3
 struct cdata {
 	char *city;
 	char *state;
