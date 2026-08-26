@@ -15,7 +15,7 @@ s			solar return
 
 p			toggle left table
 o 			toggle right table
-0...9		chart of selected number
+0...9		select chart number
 
 tab			live update  
 d			toggle dst
@@ -41,7 +41,7 @@ i			INSERT mode
 	F1		clear fields  
 	tab		fill local time  
 	arrows	navigate  
-	\		exit data input
+	\		draw chart
 
 esc			NORMAL mode  
 
@@ -87,7 +87,7 @@ aspects
 planet day/hour
 eclipse data					[DONE]
 declination/out of bounds
-tabs/multiple charts open 		[DONE]
+multiple charts			 		[DONE]
 terminal window resize refresh	[DONE]
 user default config				[DONE]
 code documentation
