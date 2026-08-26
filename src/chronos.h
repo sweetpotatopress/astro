@@ -34,9 +34,15 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define ECLIPSE_INIT() sol_eclipse[E_INIT] = 0;
 
-void set_localtime(struct cdata *cdata);
-int months(int month, int year);
-void chart_timeset(struct cdata *cdata,int *day_offset);
 void pxx_init(double cusp[], double sign_cusp[], double *luna_eclipse, double *sol_eclipse, double *planet[],
 struct cdata *cdata, struct pxx *pxx);
+
 int sect(struct pxx *pxx);
+int months(int month, int year);
+void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);
+void retro_station(double jd_ut, double *planet[]);
+void calculate_utc(struct cdata *cdata);
+void chart_timeset(struct cdata *cdata, int *day_offset);
+void lots(struct pxx *pxx);
+void weekday_check(struct cdata *cdata);
+void set_localtime(struct cdata *cdata);

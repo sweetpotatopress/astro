@@ -35,7 +35,7 @@ void set_localtime(struct cdata *cdata)
 	cdata->tm_wday = gt.tm_wday;
 }
 
-static void weekday_check(struct cdata *cdata)
+void weekday_check(struct cdata *cdata)
 {
 	struct tm gt = {0};
 	
@@ -74,7 +74,7 @@ int sect(struct pxx *pxx)
 	return sect = (dist > 180.0) ? DAY_SECT : NIGHT_SECT;
 }
 
-static void lots(struct pxx *pxx)
+void lots(struct pxx *pxx)
 {
 	int chart_sect = sect(pxx);
 	double offset = (360 - pxx->dsun[LONG]);
@@ -104,7 +104,7 @@ static void lots(struct pxx *pxx)
 		pxx->dspir[LONG] -= 360.0;
 }
 
-static void calculate_utc(struct cdata *cdata)
+void calculate_utc(struct cdata *cdata)
 {
 	struct tm tm_in = {0};
 	tm_in.tm_year = cdata->tm_year - 1900;
@@ -140,7 +140,7 @@ static void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-static void retro_calc(double jd_ut, int ipl, double *planet[])
+void retro_calc(double jd_ut, int ipl, double *planet[])
 {
 	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	double xx[6];
@@ -218,7 +218,7 @@ static void retro_calc(double jd_ut, int ipl, double *planet[])
 	}
 }
 
-static void retro_station(double jd_ut, double *planet[])
+void retro_station(double jd_ut, double *planet[])
 {
 	int ipl;
 	const int station = 7;
@@ -243,8 +243,7 @@ static void retro_station(double jd_ut, double *planet[])
 	}
 }
 
-static void eclipse(double jd_ut,
-double *luna_eclipse, double *sol_eclipse)
+void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 {
 	int iflag = SEFLG_SWIEPH;
 	double tret[10];
@@ -311,85 +310,5 @@ double *luna_eclipse, double *sol_eclipse)
 			sol_eclipse[E_INIT] = 1;
 			break;
 		}
-	}
-}
-
-void pxx_init(double cusp[], double sign_cusp[],
-double *luna_eclipse, double *sol_eclipse, double *planet[],
-struct cdata *cdata, struct pxx *pxx)
-{
-	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
-	int ipl, iret;
-	double xx[6];
-	char serr[AS_MAXCH];
-	double ascmc[10];
-	int ihsy = 'W';
-	
-	calculate_utc(cdata);
-	weekday_check(cdata);
-	
-	double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
-	cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
-	
-	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
-	{
-		iret = swe_calc_ut(jd_ut, ipl, iflag, xx, serr);
-		if (iret < 0) 
-			ERR_EXIT("ERR: swe_calc_ut failure");
-			
-		planet[ipl][LONG] = xx[LONG];
-		planet[ipl][LAT] = xx[LAT];
-		planet[ipl][DIST] = xx[DIST];
-		planet[ipl][LONG_S] = xx[LONG_S];
-		planet[ipl][LAT_S] = xx[LAT_S];
-		planet[ipl][DIST_S] = xx[DIST_S];
-	}
-
-	retro_station(jd_ut, planet);
-	
-	eclipse(jd_ut, luna_eclipse, sol_eclipse);
-	
-	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
-	'W', sign_cusp, ascmc);
-	if (iret < 0)
-		ERR_EXIT("ERR: swe_houses_ex failure");
-		
-	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
-	ihsy, cusp, ascmc);
-	if (iret < 0)
-		ERR_EXIT("ERR: swe_houses_ex failure");
-		
-	// turn mean node into south node
-	planet[SE_MEAN_NODE][LONG] = (planet[SE_TRUE_NODE][LONG] + 180);
-	if (planet[SE_MEAN_NODE][LONG] >= 360)
-		planet[SE_MEAN_NODE][LONG] -= 360;
-	
-	// calculates ic/mc and fills struct members
-	double asc = ascmc[0];
-	double dsc = (ascmc[0] + 180);
-	if (dsc >= 360)
-		dsc -= 360;
-	double ic = (ascmc[1] + 180);
-	if (ic >= 360)
-		ic -= 360;
-	double mc = ascmc[1];
-	
-	pxx->dasc[LONG] = asc;
-	pxx->ddsc[LONG] = dsc;
-	pxx->dic[LONG] = ic;
-	pxx->dmc[LONG] = mc;
-	
-	lots(pxx);
-	
-	// seperate degree and minutes
-	for (ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
-	{
-		planet[ipl][DEGREE] = (int)planet[ipl][LONG] % 30;
-		planet[ipl][MIN] = (int)((planet[ipl][LONG] - (int)planet[ipl][LONG]) * 60);
-		
-		planet[ipl][DEGREE_S] = planet[ipl][LONG_S];
-		planet[ipl][MIN_S] = (fabs(planet[ipl][LONG_S] - (int)planet[ipl][LONG_S]) * 60);
-		if (planet[ipl][LONG_S] < 0)
-			planet[ipl][DEGREE_S] *= -1;
 	}
 }

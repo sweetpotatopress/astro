@@ -93,28 +93,6 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 		mvwprintw(main_win, starty, startx, "%f", cdata->dlon);
 }
 
-void new_chart(NEW_CHART_PARAM())
-{
-	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
-	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata,
-	pl_sym, zo_sym);
-	cur_chart_data(main_win, io, cdata);
-	
-	if (*left_trig > 0)
-	{
-		left_table(left_win, planet, zodiac, pxx,
-		pl_sym, zo_sym, moon);
-		show_panel(*left_panel);
-	}
-	if (*right_trig > 0)
-	{
-		right_table(right_win, luna_eclipse, sol_eclipse,
-		planet, zodiac, zo_sym, pl_sym);
-		show_panel(*right_panel);
-	}	
-	update_panels();
-}
-
 void realtime_chart(NEW_CHART_PARAM())
 {
 	nodelay(main_win, TRUE);

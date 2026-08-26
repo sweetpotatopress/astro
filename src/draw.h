@@ -22,4 +22,20 @@ const char *zo_sym[], int *zodiac[]);
 void degree_color(WINDOW *win, int y, int x, int count,
 double *planet[], int *zodiac[]);
 
+void planet_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
+int radius, int centery, int centerx, const char *pl_sym[]);
 
+void ascmc_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
+int radius, int centery, int centerx);
+
+void zo_pos(WINDOW *win, double sign_cusp[],
+int radius, int centery, int centerx,
+struct pxx *pxx, const char *zo_sym[], int *zodiac[]);
+
+void draw_house(WINDOW *win, double cusp[],
+int radius, int centery, int centerx,
+chtype ch);
+
+void draw_circle(WINDOW *win,
+int radius, int cy, int cx,
+chtype ch);

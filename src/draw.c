@@ -82,9 +82,8 @@ double *planet[], int *zodiac[])
 	}
 }
 
-static void planet_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
-int radius, int centery, int centerx, 
-const char *pl_sym[])
+void planet_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
+int radius, int centery, int centerx, const char *pl_sym[])
 {
 	const int iter_count = 64;
 	const int max_distance = 11;
@@ -181,7 +180,7 @@ const char *pl_sym[])
 	}
 }
 
-static void ascmc_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
+void ascmc_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
 int radius, int centery, int centerx)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
@@ -201,7 +200,7 @@ int radius, int centery, int centerx)
 	}
 }
 
-static void zo_pos(WINDOW *win, double sign_cusp[],
+void zo_pos(WINDOW *win, double sign_cusp[],
 int radius, int centery, int centerx,
 struct pxx *pxx, const char *zo_sym[], int *zodiac[])
 {
@@ -223,7 +222,7 @@ struct pxx *pxx, const char *zo_sym[], int *zodiac[])
 	}
 }
 
-static void draw_house(WINDOW *win, double cusp[],
+void draw_house(WINDOW *win, double cusp[],
 int radius, int centery, int centerx,
 chtype ch)
 {
@@ -253,7 +252,7 @@ chtype ch)
 	}
 }
 
-static void draw_circle(WINDOW *win,
+void draw_circle(WINDOW *win,
 int radius, int cy, int cx,
 chtype ch)
 {
@@ -282,45 +281,4 @@ chtype ch)
 		}
 		x++;
 	}
-}
-
-void draw_chart(WINDOW *win, double cusp[], double sign_cusp[], double *planet[], int *zodiac[],
-struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[])
-{
-	curs_set(0);
-	werase(win);
-	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
-	
-	int offsetx = 0;
-	if ((COLS - LINES) > 60)
-		offsetx += 9;
-	else
-		offsetx = 0;
-		
-	int centery = (LINES / 2);
-	int centerx = (COLS / 2) + offsetx;
-	
-	// zo
-	draw_circle(win, radius + 4, centery, centerx, '`');
-	// out
-	draw_circle(win, radius, centery, centerx,'.');
-	// in
-	draw_circle(win, (radius / 2) - 1, centery, centerx, '.');
-	
-	draw_house(win, cusp, radius + 4, centery, centerx, '`');
-	
-	zo_pos(win, sign_cusp, radius + 3, centery, centerx, pxx,
-	zo_sym, zodiac);
-	
-	planet_pos(win, sign_cusp, planet, zodiac,
-	radius - 5, centery, centerx, pl_sym);
-	
-	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(win, sign_cusp, planet, zodiac,
-		(radius / 2) + 4, centery, centerx);
-	
-	// status bar
-	int bar_end = 15;
-	mvwhline(win, 1, COLS - bar_end, '.', COLS);
-	mvwvline(win, 0, COLS - bar_end, '.', 2);
 }
