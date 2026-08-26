@@ -43,23 +43,8 @@ int main()
 	"2nd gibbous", "2nd quarter", "2nd crescent"};
 	
 	enum mode mode = INSERT;
+	int cur_chart = 1;
 	
-	struct cdata *cdata = calloc(1, sizeof(*cdata));
-	if (!cdata)
-		ERR_EXIT("main Location calloc");
-	cdata->city = calloc(1, MAXBUF);
-	if (!cdata->city)
-		ERR_EXIT("ERR: main cdata->city malloc");
-	cdata->state = calloc(1, MAXBUF);
-	if (!cdata->state)
-		ERR_EXIT("ERR: main cdata->state malloc");
-	cdata->country = calloc(1, MAXBUF);
-	if (!cdata->country)
-		ERR_EXIT("ERR: main cdata->country malloc");
-	cdata->timezone = calloc(1, MAXBUF);
-	if (!cdata->timezone)
-		ERR_EXIT("ERR: main cdata->timezone malloc");
-		
 	struct zxx *zxx = calloc(1, sizeof(*zxx));
 	if (!zxx)
 		ERR_EXIT("main zxx calloc");
@@ -74,37 +59,71 @@ int main()
 		zxx->iaqu, zxx->ipis};
 		
 	zxx_init(zodiac); // fills essential dignities
-		
-	struct pxx *pxx = calloc(1, sizeof(*pxx));
+	
+	struct cdata **cdata = calloc(CHARTMAX, sizeof(*cdata));
+	if (!cdata)
+		ERR_EXIT("main Location calloc");
+	for (int i = 0; i < CHARTMAX; ++i)
+	{
+		cdata[i] = calloc(1, sizeof(*cdata[i]));
+		if (!cdata[i])
+			ERR_EXIT("ERR: cdata[i] calloc");
+		cdata[i]->city = calloc(1, MAXBUF);
+		if (!cdata[i]->city)
+			ERR_EXIT("ERR: main cdata->city malloc");
+		cdata[i]->state = calloc(1, MAXBUF);
+		if (!cdata[i]->state)
+			ERR_EXIT("ERR: main cdata->state malloc");
+		cdata[i]->country = calloc(1, MAXBUF);
+		if (!cdata[i]->country)
+			ERR_EXIT("ERR: main cdata->country malloc");
+		cdata[i]->timezone = calloc(1, MAXBUF);
+		if (!cdata[i]->timezone)
+			ERR_EXIT("ERR: main cdata->timezone malloc");
+	}
+	
+	struct pxx **pxx = calloc(CHARTMAX, sizeof(*pxx));
 	if (!pxx)
 		ERR_EXIT("main pxx");
+	for (int i = 0; i < CHARTMAX; ++i)
+	{
+		pxx[i] = calloc(1, sizeof(*pxx[i]));
+		if (!pxx[i])
+			ERR_EXIT("ERR: pxx[i] calloc");
+	}
 		
 	double *planet[] = {
-		pxx->dsun, pxx->dmoon,
-		pxx->dmerc, pxx->dven,
-		pxx->dmars, pxx->djup,
-		pxx->dsat, pxx->dura,
-		pxx->dnep, pxx->dplu,
-		pxx->dmnod, pxx->dtnod,
-		pxx->dasc, pxx->dmc,
-		pxx->ddsc, pxx->dic,
-		pxx->dfor, pxx->dspir};
+		pxx[cur_chart]->dsun, pxx[cur_chart]->dmoon,
+		pxx[cur_chart]->dmerc, pxx[cur_chart]->dven,
+		pxx[cur_chart]->dmars, pxx[cur_chart]->djup,
+		pxx[cur_chart]->dsat, pxx[cur_chart]->dura,
+		pxx[cur_chart]->dnep, pxx[cur_chart]->dplu,
+		pxx[cur_chart]->dmnod, pxx[cur_chart]->dtnod,
+		pxx[cur_chart]->dasc, pxx[cur_chart]->dmc,
+		pxx[cur_chart]->ddsc, pxx[cur_chart]->dic,
+		pxx[cur_chart]->dfor, pxx[cur_chart]->dspir};
 
-	struct io *io = calloc(1, sizeof(*io));
+	struct io **io = calloc(CHARTMAX, sizeof(*io));
 	if (!io)
 		ERR_EXIT("mai io calloc");
-	io->filepath = calloc(1, MAXBUF);
-	if (!io->filepath)
-		ERR_EXIT("main io->filepath malloc");
-	io->filename = calloc(1, MAXBUF);
-	if (!io->filename)
-		ERR_EXIT("main io->filename malloc");
+	for (int i = 0; i < CHARTMAX; ++i)
+	{
+		io[i] = calloc(1, sizeof(*io[i]));
+		if (!io[i])
+			ERR_EXIT("ERR: io[i] calloc");
+		io[i]->filepath = calloc(CHARTMAX, MAXBUF);
+		if (!io[i]->filepath)
+			ERR_EXIT("main io->filepath malloc");
+		io[i]->filename = calloc(CHARTMAX, MAXBUF);
+		if (!io[i]->filename)
+			ERR_EXIT("main io->filename malloc");
+	}
 		
-	double cusp[13];
-	double sign_cusp[13];
+	double cusp[CHARTMAX][13];
+	double sign_cusp[CHARTMAX][13];
 	
-	double luna_eclipse[EMAX] = {0};
-	double sol_eclipse[EMAX] = {0};
+	double luna_eclipse[CHARTMAX][EMAX] = {0};
+	double sol_eclipse[CHARTMAX][EMAX] = {0};
 	
 	const char *home_dir = getenv("HOME");
 	if (!home_dir)
@@ -167,8 +186,8 @@ int main()
 	wrefresh(stdscr);
 	show_panel(main_panel);
 	
-	set_localtime(cdata);
-	config_parse(cdata);
+	set_localtime(cdata[cur_chart]);
+	config_parse(cdata[cur_chart]);
 	
 	int right_trig = 1, left_trig = 1;
 	new_chart(NEW_CHART_MAIN());
@@ -181,6 +200,15 @@ int main()
 		while(!chart_done && !main_done &&
 		(ch = wgetch(main_win)))
 		{
+			if (isdigit(ch))
+			{
+				cur_chart = ch - '0';
+				if (cur_chart >= CHARTMAX || cur_chart < 0)
+					cur_chart = 0;
+				new_chart(NEW_CHART_MAIN());
+				doupdate();
+			}
+			
 			switch(ch)
 			{
 				case '\n':
@@ -188,12 +216,12 @@ int main()
 					doupdate();
 					break;
 				case 9: // tab
-					ECLIPSE_INIT();
+					sol_eclipse[cur_chart][E_INIT] = 0;
 					realtime_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'r':
-					ECLIPSE_INIT();
+					sol_eclipse[cur_chart][E_INIT] = 0;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
@@ -202,46 +230,46 @@ int main()
 					chart_done = 1;
 					break;
 				case 'd':
-					if (cdata->tm_isdst == 0)
-						cdata->tm_isdst = YDST;
-					else if (cdata->tm_isdst >= 1)
-						cdata->tm_isdst = NDST;
+					if (cdata[cur_chart]->tm_isdst == 0)
+						cdata[cur_chart]->tm_isdst = YDST;
+					else if (cdata[cur_chart]->tm_isdst >= 1)
+						cdata[cur_chart]->tm_isdst = NDST;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'i':
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,
-					io, cdata, mode);
+					io[cur_chart], cdata[cur_chart], mode);
 			
-					free(io->filename);
-					io->filename = calloc(1, MAXBUF);
-					if (!io->filename)
+					free(io[cur_chart]->filename);
+					io[cur_chart]->filename = calloc(1, MAXBUF);
+					if (!io[cur_chart]->filename)
 						ERR_EXIT("case i io->filename calloc");
 		
-					ECLIPSE_INIT();
+					sol_eclipse[cur_chart][E_INIT] = 0;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'w':
-					save_chart(cdata, io);
+					save_chart(cdata[cur_chart], io[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata, io);
-					ECLIPSE_INIT();
+					load_chart(cdata[cur_chart], io[cur_chart]);
+					sol_eclipse[cur_chart][E_INIT] = 0;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 's':
-					ECLIPSE_INIT();
+					sol_eclipse[cur_chart][E_INIT] = 0;
 					solar_return(NEW_CHART_MAIN());
 					break;
 				case 'p':
 					if (!left_trig)
 					{
-						left_table(left_win, planet, zodiac, pxx,
+						left_table(left_win, planet, zodiac, pxx[cur_chart],
 						pl_sym, zo_sym, moon);
 						show_panel(left_panel);
 						left_trig = 1;
@@ -256,7 +284,7 @@ int main()
 					
 					if (right_trig > 0)
 					{
-						right_table(right_win, luna_eclipse, sol_eclipse,
+						right_table(right_win, luna_eclipse[cur_chart], sol_eclipse[cur_chart],
 						planet, zodiac, zo_sym, pl_sym);
 						show_panel(right_panel);
 					}
@@ -269,7 +297,7 @@ int main()
 				case 'o':
 					if (!right_trig)
 					{
-						right_table(right_win, luna_eclipse, sol_eclipse,
+						right_table(right_win, luna_eclipse[cur_chart], sol_eclipse[cur_chart],
 						planet, zodiac, zo_sym, pl_sym);
 						show_panel(right_panel);
 						right_trig = 1;
@@ -284,7 +312,7 @@ int main()
 					
 					if (left_trig > 0)
 					{
-						left_table(left_win, planet, zodiac, pxx,
+						left_table(left_win, planet, zodiac, pxx[cur_chart],
 						pl_sym, zo_sym, moon);
 						show_panel(left_panel);
 					}
@@ -303,16 +331,19 @@ int main()
 	endwin();
 	swe_close();
 	
-	free(cdata->state);
-	free(cdata->city);
-	free(cdata->country);
-	free(cdata->timezone);
-	free(cdata);
+	for (int i = 0; i < CHARTMAX; ++i)
+	{
+		free(cdata[i]->state);
+		free(cdata[i]->city);
+		free(cdata[i]->country);
+		free(cdata[i]->timezone);
+		free(cdata[i]);
+		free(pxx[i]);
+		free(io[i]->filepath);
+		free(io[i]->filename);
+		free(io[i]);
+	}
+		
 	free(zxx);
-	free(pxx);
-	free(io->filepath);
-	free(io->filename);
-	free(io);
-	
 	return 0;
 } 

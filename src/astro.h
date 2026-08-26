@@ -16,6 +16,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define MAXBUF 1024
 #define MAXPATH 2048
+#define CHARTMAX 10
 
 #define ERR_EXIT(str) do { \
 		endwin(); \
@@ -26,9 +27,9 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 #define NEW_CHART_MAIN() main_win, left_win, right_win, \
 		&left_panel, &right_panel,\
-		io, cdata, pxx,\
-		&left_trig, &right_trig, cusp, sign_cusp, planet, zodiac, \
-		luna_eclipse, sol_eclipse, \
+		io[cur_chart], cdata[cur_chart], pxx[cur_chart],\
+		&left_trig, &right_trig, cusp[cur_chart], sign_cusp[cur_chart], planet, zodiac, \
+		luna_eclipse[cur_chart], sol_eclipse[cur_chart], \
 		pl_sym, zo_sym, moon
 		
 #define LWINY 40

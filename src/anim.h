@@ -25,7 +25,7 @@ PANEL **left_panel, PANEL **right_panel, \
 struct io *io, struct cdata *cdata, struct pxx *pxx, \
 int *left_trig, int *right_trig, double cusp[], double sign_cusp[], double *planet[], int *zodiac[], \
 double *luna_eclipse, double *sol_eclipse, \
-const char *pl_sym[], const char *zo_sym[], const char *moon[] 
+const char *pl_sym[], const char *zo_sym[], const char *moon[]
 
 void cur_chart_data(WINDOW *win, struct io *io, struct cdata *cdata);
 

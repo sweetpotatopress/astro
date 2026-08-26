@@ -142,7 +142,8 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 
 void new_chart(NEW_CHART_PARAM())
 {
-	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
+	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse,
+	planet, cdata, pxx);
 	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata,
 	pl_sym, zo_sym);
 	cur_chart_data(main_win, io, cdata);
