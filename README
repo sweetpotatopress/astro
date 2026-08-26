@@ -15,6 +15,7 @@ s			solar return
 
 p			toggle left table
 o 			toggle right table
+0...9		chart of selected number
 
 tab			live update  
 d			toggle dst
@@ -61,8 +62,7 @@ swisseph/ephe/ 		: $XDG_DATA_HOME/astro
 charts/ 			: $XDG_DATA_HOME/astro
  
 OPTIONAL
-to set default timezone and location
-timezone is IANA format
+to set default IANA timezone and location
 
 config				: $XDG_CONFIG_HOME/astro  
 
@@ -87,7 +87,7 @@ aspects
 planet day/hour
 eclipse data					[DONE]
 declination/out of bounds
-tabs/multiple charts open 
+tabs/multiple charts open 		[DONE]
 terminal window resize refresh	[DONE]
 user default config				[DONE]
 code documentation
