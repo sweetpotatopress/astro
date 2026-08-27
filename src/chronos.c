@@ -258,8 +258,6 @@ void retro_station(double jd_ut, double *planet[])
 				planet[ipl][RET_INIT] = 0;
 				break;
 			}
-			else
-				break;
 		}
 		
 		if ((int)planet[ipl][RET_INIT] == 0)
