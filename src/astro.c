@@ -24,7 +24,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "indat.h"
 #include "init.h"
 
-#define VERSION 0.74.1
+#define VERSION 0.74.2
 
 int main()
 {
