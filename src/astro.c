@@ -112,10 +112,10 @@ int main()
 		io[i] = calloc(1, sizeof(*io[i]));
 		if (!io[i])
 			ERR_EXIT("ERR: io[i] calloc");
-		io[i]->filepath = calloc(CHARTMAX, MAXBUF);
+		io[i]->filepath = calloc(1, MAXBUF);
 		if (!io[i]->filepath)
 			ERR_EXIT("main io->filepath malloc");
-		io[i]->filename = calloc(CHARTMAX, MAXBUF);
+		io[i]->filename = calloc(1, MAXBUF);
 		if (!io[i]->filename)
 			ERR_EXIT("main io->filename malloc");
 	}
@@ -206,6 +206,7 @@ int main()
 					config_parse(cdata[cur_chart]);
 					cur_chart_init[cur_chart] = 1;
 				}
+				sol_eclipse[cur_chart][E_INIT] = 0;
 				planet_init(planet, cur_chart, pxx);
 				new_chart(NEW_CHART_MAIN());
 				doupdate();
