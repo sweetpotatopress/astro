@@ -183,6 +183,7 @@ int main()
 	
 	set_localtime(cdata[cur_chart]);
 	config_parse(cdata[cur_chart]);
+	calc_init(planet, sol_eclipse[cur_chart]);
 	
 	new_chart(NEW_CHART_MAIN());
 	doupdate();
@@ -206,7 +207,7 @@ int main()
 					config_parse(cdata[cur_chart]);
 					cur_chart_init[cur_chart] = 1;
 				}
-				sol_eclipse[cur_chart][E_INIT] = 0;
+				calc_init(planet, sol_eclipse[cur_chart]);
 				planet_init(planet, cur_chart, pxx);
 				new_chart(NEW_CHART_MAIN());
 				doupdate();
@@ -219,12 +220,12 @@ int main()
 					doupdate();
 					break;
 				case 9: // tab
-					sol_eclipse[cur_chart][E_INIT] = 0;
+					calc_init(planet, sol_eclipse[cur_chart]);
 					realtime_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'r':
-					sol_eclipse[cur_chart][E_INIT] = 0;
+					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
@@ -250,7 +251,7 @@ int main()
 					if (!io[cur_chart]->filename)
 						ERR_EXIT("case i io->filename calloc");
 		
-					sol_eclipse[cur_chart][E_INIT] = 0;
+					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
@@ -261,12 +262,12 @@ int main()
 					break;
 				case 'e':
 					load_chart(cdata[cur_chart], io[cur_chart]);
-					sol_eclipse[cur_chart][E_INIT] = 0;
+					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 's':
-					sol_eclipse[cur_chart][E_INIT] = 0;
+					calc_init(planet, sol_eclipse[cur_chart]);
 					solar_return(NEW_CHART_MAIN());
 					break;
 				case 'p':

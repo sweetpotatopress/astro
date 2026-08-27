@@ -11,5 +11,6 @@ See the GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program. if not, see <https://www.gnu.org/licenses/> */
  
+void calc_init(double *planet[], double *sol_eclipse);
 void planet_init(double *planet[], int cur_chart, struct pxx **pxx);
 void zxx_init(int *zodiac[]);

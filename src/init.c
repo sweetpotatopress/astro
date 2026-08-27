@@ -19,6 +19,13 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "anim.h"
 #include "draw.h"
 
+void calc_init(double *planet[], double *sol_eclipse)
+{
+	for (int ipl = SE_MERCURY; ipl <= SE_PLUTO; ++ipl)
+		planet[ipl][RET_INIT] = 0;
+	sol_eclipse[E_INIT] = 0;
+}
+
 void planet_init(double *planet[], int cur_chart, struct pxx **pxx)
 {
 	double *new_planet[] = {

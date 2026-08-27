@@ -71,8 +71,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define DEGREE_S 10
 #define MIN_S 11
 #define NEXT_S 12
-#define PREV_S 13
-#define MAXPXX 14
+#define NEXT_JUL 13
+#define PREV_S 14
+#define PREV_JUL 15
+#define RET_INIT 16
+#define MAXPXX 17
 
 #define SPXXMAX 18 // struct member count
 struct pxx {

@@ -31,8 +31,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define EP_SIGN 8
 #define EMAX 9
 
-#define ECLIPSE_INIT() sol_eclipse[E_INIT] = 0;
-
 int sect(struct pxx *pxx);
 int months(int month, int year);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);

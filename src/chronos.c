@@ -165,6 +165,7 @@ void retro_calc(double jd_ut, int ipl, double *planet[])
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
 			planet[ipl][NEXT_S] = jd_copy - jd_ut;
+			planet[ipl][NEXT_JUL] = jd_copy;
 			ns_found = 1;
 		}
 	}
@@ -180,6 +181,7 @@ void retro_calc(double jd_ut, int ipl, double *planet[])
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
 			planet[ipl][NEXT_S] = jd_copy - jd_ut;
+			planet[ipl][NEXT_JUL] = jd_copy;
 			ns_found = 1;
 		}
 	}
@@ -198,6 +200,7 @@ void retro_calc(double jd_ut, int ipl, double *planet[])
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
 			planet[ipl][PREV_S] = jd_copy - jd_ut;
+			planet[ipl][PREV_JUL] = jd_copy;
 			ps_found = 1;
 		}
 	}
@@ -213,6 +216,7 @@ void retro_calc(double jd_ut, int ipl, double *planet[])
 			swe_calc_ut(jd_copy, ipl, iflag, xx, serr);
 			speed = xx[LONG_S];
 			planet[ipl][PREV_S] = jd_copy - jd_ut;
+			planet[ipl][PREV_JUL] = jd_copy;
 			ps_found = 1;
 		}
 	}
@@ -224,9 +228,43 @@ void retro_station(double jd_ut, double *planet[])
 	const int station = 7;
 	const double is_retro = 0.0;
 	
+	const int iter = 32;
+	const int multi = 16;
+	
+	double limit[32] = {0};
+	
 	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		retro_calc(jd_ut, ipl, planet);
+		for (int i = 0; i < iter; ++i)
+		{
+			limit[i] = (multi * i);
+			
+			if (planet[ipl][NEXT_JUL] - jd_ut > 1 ||
+			planet[ipl][PREV_JUL] - jd_ut < -1)
+			{
+				double nr = planet[ipl][NEXT_JUL] - jd_ut;
+				planet[ipl][NEXT_S] = nr;
+				double pr = planet[ipl][PREV_JUL] - jd_ut;
+				planet[ipl][PREV_S] = pr;
+			}
+			if (fabs(planet[ipl][NEXT_S] - limit[i]) <= 1 || 
+			fabs(planet[ipl][PREV_S] - limit[i]) <= 1)
+			{
+				planet[ipl][RET_INIT] = 0;
+				break;
+			}
+			if (planet[ipl][NEXT_S] <= 0 || planet[ipl][PREV_S] >= 0)
+			{
+				planet[ipl][RET_INIT] = 0;
+				break;
+			}
+		}
+		
+		if ((int)planet[ipl][RET_INIT] == 0)
+		{
+			retro_calc(jd_ut, ipl, planet);
+			planet[ipl][RET_INIT] = 1;
+		}
 	
 		// fill retro & station data
 		if (planet[ipl][LONG_S] <= is_retro)
@@ -278,7 +316,7 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 		
 		if (sol_eclipse[EN_JUL] < eclipse_calc || luna_eclipse[EN_JUL] < eclipse_calc ||
 		sol_eclipse[EP_JUL] < eclipse_calc || luna_eclipse[EP_JUL] < eclipse_calc)
-			ECLIPSE_INIT();
+			sol_eclipse[E_INIT] = 0;
 			
 		if (fabs(limit[i] - sol_eclipse[EN_JUL]) <= eclipse_calc ||
 		(int)sol_eclipse[E_INIT] == 0)

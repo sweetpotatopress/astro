@@ -18,6 +18,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "anim.h"
 #include "draw.h"
 #include "table.h"
+#include "init.h"
 
 #define SECOND 6
 #define MINUTE 5
@@ -113,7 +114,7 @@ void realtime_chart(NEW_CHART_PARAM())
 	
 		for (int i = 0; i < 10; ++i)
 		{
-			usleep(1000);
+			usleep(10000);
 			if (ch == 9 || ch == 'q')
 				break;
 			if (ch == 'p' && *left_trig == 0)
@@ -227,7 +228,7 @@ void solar_return(NEW_CHART_PARAM())
 		}
 		flushinp();
 		
-		ECLIPSE_INIT();
+		calc_init(planet, sol_eclipse);
 		
 		int iflag = SEFLG_SWIEPH;
 		double xx[6];
@@ -401,14 +402,14 @@ void animate_chart(NEW_CHART_PARAM())
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
-						ECLIPSE_INIT();
+						calc_init(planet, sol_eclipse);
 						break;
 					case YEAR:
 						temp.tm_year++;
 						if (temp.tm_year > 16799)
 							temp.tm_year = -12998;
 						t = mktime(&temp);
-						ECLIPSE_INIT();
+						calc_init(planet, sol_eclipse);
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);
@@ -440,14 +441,14 @@ void animate_chart(NEW_CHART_PARAM())
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
-						ECLIPSE_INIT();
+						calc_init(planet, sol_eclipse);
 						break;
 					case YEAR:
 						--temp.tm_year;
 						if (temp.tm_year < -12998)
 							temp.tm_year = 16799;
 						t = mktime(&temp);
-						ECLIPSE_INIT();
+						calc_init(planet, sol_eclipse);
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);
