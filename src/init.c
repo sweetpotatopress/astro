@@ -251,11 +251,11 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 		(radius / 2) + 4, centery, centerx);
 	
 	// status bar
-	int bar_end = 15;
-	mvwhline(win, 1, COLS - bar_end, '.', COLS);
-	mvwvline(win, 0, COLS - bar_end, '.', 2);
+	int bar_end = 20;
+	mvwhline(win, 1, COLS - bar_end, '-', COLS);
+	mvwvline(win, 0, COLS - bar_end, ':', 1);
 	
-	mvwprintw(win, 0, COLS - (bar_end + 3), "%d", cur_chart);
+	mvwprintw(win, 0, COLS - (bar_end - 2), "%d :", cur_chart);
 }
 
 void new_chart(NEW_CHART_PARAM())
