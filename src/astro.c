@@ -45,7 +45,6 @@ int main()
 	enum mode mode = INSERT;
 	
 	int cur_chart = 1;
-	int cur_chart_init[CHARTMAX] = {0};
 	int right_trig = 1, left_trig = 1;
 		
 	double cusp[CHARTMAX][13] = {0};
@@ -181,9 +180,12 @@ int main()
 	wrefresh(stdscr);
 	show_panel(main_panel);
 	
-	set_localtime(cdata[cur_chart]);
-	config_parse(cdata[cur_chart]);
-	calc_init(planet, sol_eclipse[cur_chart]);
+	for (int i = 1; i < CHARTMAX; ++i)
+	{
+		set_localtime(cdata[i]);
+		config_parse(cdata[i]);
+		calc_init(planet, sol_eclipse[i]);
+	}
 	
 	new_chart(NEW_CHART_MAIN());
 	doupdate();
@@ -201,12 +203,6 @@ int main()
 				if (cur_chart >= CHARTMAX || cur_chart <= 0)
 					cur_chart = 10;
 					
-				if (cur_chart_init[cur_chart] == 0)
-				{
-					set_localtime(cdata[cur_chart]);
-					config_parse(cdata[cur_chart]);
-					cur_chart_init[cur_chart] = 1;
-				}
 				calc_init(planet, sol_eclipse[cur_chart]);
 				planet_init(planet, cur_chart, pxx);
 				new_chart(NEW_CHART_MAIN());
