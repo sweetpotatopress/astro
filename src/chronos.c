@@ -224,7 +224,6 @@ void retro_calc(double jd_ut, int ipl, double *planet[])
 
 void retro_station(double jd_ut, double *planet[])
 {
-	int ipl;
 	const int station = 7;
 	const double is_retro = 0.0;
 	
@@ -233,7 +232,7 @@ void retro_station(double jd_ut, double *planet[])
 	
 	double limit[32] = {0};
 	
-	for (ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
+	for (int ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
 		for (int i = 0; i < iter; ++i)
 		{
@@ -288,19 +287,17 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const int iter = 64;
 	const int eclipse_calc = 1;
-	const int multi = 32;
+	const int iter = 32;
+	const int multi = 8;
 	
-	double limit[64] = {0};
-	
-	for (int i = 0; i < iter; ++i)
-		limit[i] = (multi * i);
+	double limit[32] = {0};
 	
 	for (int i = 0; i < iter; ++i)
 	{
-		int c = 0;
-		if (c == 0 && sol_eclipse[E_INIT] > 0)
+		limit[i] = (multi * i);
+		
+		if (sol_eclipse[E_INIT] > 0)
 		{
 			double ens_jul = fabs(sol_eclipse[EN_FJUL] - jd_ut);
 			sol_eclipse[EN_JUL] = ens_jul;
@@ -311,7 +308,6 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 			luna_eclipse[EN_JUL] = enl_jul;
 			double epl_jul = fabs(luna_eclipse[EP_FJUL] - jd_ut);
 			luna_eclipse[EP_JUL] = epl_jul;
-			c++;
 		}
 		
 		if (sol_eclipse[EN_JUL] < eclipse_calc || luna_eclipse[EN_JUL] < eclipse_calc ||
