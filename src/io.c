@@ -25,19 +25,38 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "io.h"
 
-void save_chart(struct cdata *cdata, struct io *io)
+void xdg_check(struct hd *hd, const char *s)
 {
-	const char *home_dir = getenv("HOME");
-	if (!home_dir)
-		ERR_EXIT("HOME environment not set");
-		
-	const char *xdg_data = getenv("XDG_DATA_HOME");
-	if (!xdg_data)
-		snprintf(io->filepath, MAXBUF, 
-		"%s/.local/share/astro/charts/", home_dir);
+	memset(hd->f, 0, MAXBUF);
+	
+	if (strcmp("config", s) == 0)
+	{
+		if (!hd->xdg_config)
+			snprintf(hd->f, MAXBUF,
+			"%s/.config/astro/%s", hd->home_dir, s);
+		else
+			snprintf(hd->f, MAXBUF,
+			"%s/astro/%s", hd->xdg_config, s);
+	}
+	
+	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
+	{
+		if (!hd->xdg_data)
+			snprintf(hd->f, MAXBUF,
+			"%s/.local/share/astro/%s", hd->home_dir, s);
+		else
+			snprintf(hd->f, MAXBUF,
+			"%s/astro/%s", hd->xdg_data, s);
+	}
+	
 	else
-		snprintf(io->filepath, MAXBUF, 
-		"%s/astro/charts/", xdg_data);
+		ERR_EXIT("xdg set incorrectly");
+}
+
+void save_chart(struct cdata *cdata, struct io *io, struct hd *hd)
+{
+	xdg_check(hd, "charts");
+	memcpy(io->filepath, hd->f, strlen(hd->f));
 	
 	MENU *save_menu;
 	WINDOW *save_win;
@@ -50,12 +69,8 @@ void save_chart(struct cdata *cdata, struct io *io)
 	struct dirent *entry;
 	struct stat buff, st;
 	
-	char *homepath = malloc(strlen(io->filepath) + 1);
-	if (!homepath)
-		ERR_EXIT("save_chart homepath malloc");
+	char *homepath = hd->f;
 		
-	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
-	
 	char *newpath = calloc(1, MAXPATH);
 	if (!newpath)
 		ERR_EXIT("save_chart newpath calloc");
@@ -478,19 +493,10 @@ void save_chart(struct cdata *cdata, struct io *io)
 		free(fn_copy);
 }
 
-void load_chart(struct cdata *cdata, struct io *io)
+void load_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 {
-	const char *home_dir = getenv("HOME");
-	if (!home_dir)
-		ERR_EXIT("HOME environment not set");
-		
-	const char *xdg_data = getenv("XDG_DATA_HOME");
-	if (!xdg_data)
-		snprintf(io->filepath, MAXBUF, 
-		"%s/.local/share/astro/charts/", home_dir);
-	else
-		snprintf(io->filepath, MAXBUF, 
-		"%s/astro/charts/", xdg_data);
+	xdg_check(hd, "charts");
+	memcpy(io->filepath, hd->f, strlen(hd->f));
 	
 	MENU *load_menu;
 	WINDOW *load_win;
@@ -504,11 +510,7 @@ void load_chart(struct cdata *cdata, struct io *io)
 	if (!newpath)
 		ERR_EXIT("load_chart newpath malloc");
 	
-	char *homepath = malloc(strlen(io->filepath) + 1);
-	if (!homepath)
-		ERR_EXIT("load_chart homepath malloc");
-		
-	memcpy(homepath, io->filepath, strlen(io->filepath) + 1);
+	char *homepath = hd->f;
 	
 	int load_done = 0;
 	while (!load_done)
@@ -810,6 +812,5 @@ void load_chart(struct cdata *cdata, struct io *io)
 		delwin(load_win);
 	} // end of load_done loop
 	free(newpath);
-	free(homepath);
 }
 

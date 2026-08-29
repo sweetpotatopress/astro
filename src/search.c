@@ -226,24 +226,11 @@ struct cdata **search_result, struct cdata *cdata, size_t search_count)
 }
 	
 void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
-struct cdata *cdata)
+struct cdata *cdata, struct hd *hd)
 {
-
-	const char *home_dir = getenv("HOME");
-	if (!home_dir)
-		ERR_EXIT("HOME environment not set");
-		
-	char fn_buff[MAXBUF] = {0};
-		
-	const char *xdg_data = getenv("XDG_DATA_HOME");
-	if (!xdg_data)
-		snprintf(fn_buff, MAXBUF, 
-		"%s/.local/share/astro/city-db", home_dir);
-	else
-		snprintf(fn_buff, MAXBUF, 
-		"%s/astro/city-db", xdg_data);
+	xdg_check(hd, "city-db");
 	
-	FILE *fp = fopen(fn_buff, "r");
+	FILE *fp = fopen(hd->f, "r");
 	if (fp == NULL)
 		ERR_EXIT("city_search fopen");
 		

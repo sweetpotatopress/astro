@@ -118,22 +118,31 @@ int main()
 		if (!io[i]->filename)
 			ERR_EXIT("main io->filename malloc");
 	}
-
-	const char *home_dir = getenv("HOME");
-	if (!home_dir)
-		ERR_EXIT("HOME environment not set");
-		
-	char fn_buff[MAXBUF] = {0};
-		
-	const char *xdg_data = getenv("XDG_DATA_HOME");
-	if (!xdg_data)
-		snprintf(fn_buff, MAXBUF, 
-		"%s/.local/share/astro/ephe", home_dir);
-	else
-		snprintf(fn_buff, MAXBUF, 
-		"%s/astro/ephe", xdg_data);
 	
-	swe_set_ephe_path(fn_buff);
+	struct hd *hd = calloc(1, sizeof(*hd));
+	if(!hd)
+		ERR_EXIT("homedata calloc");
+		
+	hd->home_dir = calloc(1, MAXBUF);
+	if (!hd->home_dir)
+		ERR_EXIT("homedata calloc");
+	hd->xdg_data = calloc(1, MAXBUF);
+	if (!hd->xdg_data)
+		ERR_EXIT("hd calloc");
+	hd->xdg_config = calloc(1, MAXBUF);
+	if (!hd->xdg_config)
+		ERR_EXIT("hd calloc");
+	hd->f = calloc(1, MAXBUF);
+	if (!hd->f)
+		ERR_EXIT("hd calloc");
+		
+	hd->home_dir = getenv("HOME");
+	hd->xdg_data = getenv("XDG_DATA_HOME");
+	hd->xdg_config = getenv("XDG_CONFIG_HOME");
+	
+	xdg_check(hd, "ephe");
+
+	swe_set_ephe_path(hd->f);
 	
 	initscr();
 	set_escdelay(25);
@@ -240,7 +249,7 @@ int main()
 				case 'i':
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,
-					io[cur_chart], cdata[cur_chart], mode);
+					io[cur_chart], cdata[cur_chart], hd, mode);
 			
 					free(io[cur_chart]->filename);
 					io[cur_chart]->filename = calloc(1, MAXBUF);
@@ -252,12 +261,12 @@ int main()
 					doupdate();
 					break;
 				case 'w':
-					save_chart(cdata[cur_chart], io[cur_chart]);
+					save_chart(cdata[cur_chart], io[cur_chart], hd);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata[cur_chart], io[cur_chart]);
+					load_chart(cdata[cur_chart], io[cur_chart], hd);
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
@@ -343,6 +352,12 @@ int main()
 		free(io[i]->filename);
 		free(io[i]);
 	}
+	
+	free(hd->xdg_data);
+	free(hd->xdg_config);
+	free(hd->f);
+	free(hd);
+	
 	free(cdata);
 	free(pxx);
 	free(io);

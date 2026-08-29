@@ -129,6 +129,13 @@ struct io {
 	size_t file_count;
 };
 
+struct hd {
+	char *home_dir;
+	char *xdg_data;
+	char *xdg_config;
+	char *f;
+};
+
 enum mode { NORMAL, INSERT };
 
 void config_parse(struct cdata *cdata);
