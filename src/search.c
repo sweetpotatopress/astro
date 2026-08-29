@@ -54,7 +54,7 @@ static char *xstrcasestr(const char *h, const char *n)
 	return NULL;
 }
 
-static char *strtok_E(char *str, const char *delim)
+static char *xstrtok(char *str, const char *delim)
 { //strtok that doesnt skip repeating delims :3
 	static char *next_pos = NULL;
 	char *token_start;
@@ -84,6 +84,15 @@ static char *strtok_E(char *str, const char *delim)
 	}
 	
 	return token_start;
+}
+
+static char *xstrdup(const char *s)
+{
+	size_t l = strlen(s);
+	char *d = malloc(l+1);
+	if (!d)
+		ERR_EXIT("ERR:xstrdup allocation");
+	return memcpy(d, s, l+1);
 }
 
 static void print_menu(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata,
@@ -198,12 +207,12 @@ struct cdata *cdata, char xdg_path[])
 	size_t search_count = 0;
 	int max_width = 0;
 	char buffer[MAXBUF] = {0};
-	char **field = calloc(1, MAXBUF);
+	char **field = calloc(SMAX, sizeof (*field));
 	if (!field)
 		ERR_EXIT("calloc");
 	for (int i = 0; i < SMAX; ++i)
 	{
-		field[i] = calloc(1, MAXBUF);
+		field[i] = calloc(MAXBUF, sizeof(*field[i]));
 		if (!field[i])
 			ERR_EXIT("calloc");
 	}
@@ -214,14 +223,14 @@ struct cdata *cdata, char xdg_path[])
 		if (buffer[len - 1] == '\n')
 			buffer[len - 1] = '\0';
 		
-		char *token = strtok_E(buffer, "\t");
+		char *token = xstrtok(buffer, "\t");
 		int field_count = 0;
 	
 		while (token != NULL && field_count < SMAX)
 		{
 			memcpy(field[field_count], token, strlen(token) + 1);
 			field_count++;
-			token = strtok_E(NULL, "\t");
+			token = xstrtok(NULL, "\t");
 		}
 		
 		if (field_count > 1 &&
@@ -240,16 +249,16 @@ struct cdata *cdata, char xdg_path[])
 				search_result = temp;
 			}
 			
-			search_result[search_count] = malloc(MAXBUF);
+			search_result[search_count] = malloc(sizeof(*search_result[search_count]));
 			if (!search_result[search_count])
 				ERR_EXIT("search_result[search_count] malloc");
 			
-			search_result[search_count]->city = strdup(field[ASCIINAME]);
-			search_result[search_count]->state = strdup(field[SSTATE]);
-			search_result[search_count]->country = strdup(field[COUNTRYCODE]);
-			search_result[search_count]->timezone = strdup(field[STIMEZONE]);
-			search_result[search_count]->latitude = strdup(field[SLAT]);
-			search_result[search_count]->longitude = strdup(field[SLON]);
+			search_result[search_count]->city = xstrdup(field[ASCIINAME]);
+			search_result[search_count]->state = xstrdup(field[SSTATE]);
+			search_result[search_count]->country = xstrdup(field[COUNTRYCODE]);
+			search_result[search_count]->timezone = xstrdup(field[STIMEZONE]);
+			search_result[search_count]->latitude = xstrdup(field[SLAT]);
+			search_result[search_count]->longitude = xstrdup(field[SLON]);
 			
 			++search_count;
 		}
@@ -291,23 +300,13 @@ struct cdata *cdata, char xdg_path[])
 	
 	if (search_count == 0)
 	{
-		printw("no search results\n");
+		printw("no search results, press any key\n");
 		getch();
-		for (size_t i = 0; i < search_count + 1; ++i)
-		{
-			free(full_result[i]);
-			free_item(result_item[i]);
-		}
-		for (int i = 0; i < SMAX; ++i)
-			free(field[i]);
-		free(full_result);
-		free(result_item);
-		free(search_result);
-		free(field);
-		return;
+		goto cleanup;
 	}
 	print_menu(cdata_field, cdata_form, cdata, search_result, result_item, max_width, search_count);
 	
+	cleanup:
 	for (size_t i = 0; i < search_count; ++i)
 	{
 		free(full_result[i]);
