@@ -27,15 +27,16 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 
 void xdg_check(char xdg_path[], const char *s)
 {
-	char *home_dir = getenv("HOME");
-	char *xdg_data = getenv("XDG_DATA_HOME");
-	char *xdg_config = getenv("XDG_CONFIG_HOME");
+	const char *home_dir = getenv("HOME");
+	const char *xdg_data = getenv("XDG_DATA_HOME");
+	const char *xdg_config = getenv("XDG_CONFIG_HOME");
 	
-	memset(xdg_path, 0, MAXBUF);
+	if (!home_dir)
+		ERR_EXIT("$HOME not set");
 	
 	if (strcmp("config", s) == 0)
 	{
-		if (!xdg_config)
+		if (!xdg_config || xdg_config[0] == '\0')
 			snprintf(xdg_path, MAXBUF,
 			"%s/.config/astro/%s", home_dir, s);
 		else
@@ -45,7 +46,7 @@ void xdg_check(char xdg_path[], const char *s)
 	
 	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
 	{
-		if (!xdg_data)
+		if (!xdg_data || xdg_data[0] == '\0')
 			snprintf(xdg_path, MAXBUF,
 			"%s/.local/share/astro/%s", home_dir, s);
 		else
