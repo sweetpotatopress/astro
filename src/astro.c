@@ -44,6 +44,8 @@ int main()
 	
 	enum mode mode = INSERT;
 	
+	char fn_buf[MAXBUF] = {0};
+	
 	int cur_chart = 1;
 	int right_trig = 1, left_trig = 1;
 		
@@ -118,8 +120,6 @@ int main()
 		if (!io[i]->filename)
 			ERR_EXIT("main io->filename malloc");
 	}
-	
-	char fn_buf[MAXBUF] = {0};
 	
 	xdg_check(fn_buf, "ephe");
 	
