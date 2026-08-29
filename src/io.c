@@ -25,38 +25,42 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "io.h"
 
-void xdg_check(struct hd *hd, const char *s)
+void xdg_check(char fp_buf[], const char *s)
 {
-	memset(hd->f, 0, MAXBUF);
+	char *home_dir = getenv("HOME");
+	char *xdg_data = getenv("XDG_DATA_HOME");
+	char *xdg_config = getenv("XDG_CONFIG_HOME");
+	
+	memset(fp_buf, 0, MAXBUF);
 	
 	if (strcmp("config", s) == 0)
 	{
-		if (!hd->xdg_config)
-			snprintf(hd->f, MAXBUF,
-			"%s/.config/astro/%s", hd->home_dir, s);
+		if (!xdg_config)
+			snprintf(fp_buf, MAXBUF,
+			"%s/.config/astro/%s", home_dir, s);
 		else
-			snprintf(hd->f, MAXBUF,
-			"%s/astro/%s", hd->xdg_config, s);
+			snprintf(fp_buf, MAXBUF,
+			"%s/astro/%s", xdg_config, s);
 	}
 	
 	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
 	{
-		if (!hd->xdg_data)
-			snprintf(hd->f, MAXBUF,
-			"%s/.local/share/astro/%s", hd->home_dir, s);
+		if (!xdg_data)
+			snprintf(fp_buf, MAXBUF,
+			"%s/.local/share/astro/%s", home_dir, s);
 		else
-			snprintf(hd->f, MAXBUF,
-			"%s/astro/%s", hd->xdg_data, s);
+			snprintf(fp_buf, MAXBUF,
+			"%s/astro/%s", xdg_data, s);
 	}
 	
 	else
 		ERR_EXIT("xdg set incorrectly");
 }
 
-void save_chart(struct cdata *cdata, struct io *io, struct hd *hd)
+void save_chart(struct cdata *cdata, struct io *io, char fp_buf[])
 {
-	xdg_check(hd, "charts");
-	memcpy(io->filepath, hd->f, strlen(hd->f));
+	xdg_check(fp_buf, "charts");
+	memcpy(io->filepath, fp_buf, strlen(fp_buf));
 	
 	MENU *save_menu;
 	WINDOW *save_win;
@@ -69,7 +73,7 @@ void save_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 	struct dirent *entry;
 	struct stat buff, st;
 	
-	char *homepath = hd->f;
+	char *homepath = fp_buf;
 		
 	char *newpath = calloc(1, MAXPATH);
 	if (!newpath)
@@ -476,10 +480,10 @@ void save_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 		free(fn_copy);
 }
 
-void load_chart(struct cdata *cdata, struct io *io, struct hd *hd)
+void load_chart(struct cdata *cdata, struct io *io, char fp_buf[])
 {
-	xdg_check(hd, "charts");
-	memcpy(io->filepath, hd->f, strlen(hd->f));
+	xdg_check(fp_buf, "charts");
+	memcpy(io->filepath, fp_buf, strlen(fp_buf));
 	
 	MENU *load_menu;
 	WINDOW *load_win;
@@ -493,7 +497,7 @@ void load_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 	if (!newpath)
 		ERR_EXIT("load_chart newpath malloc");
 	
-	char *homepath = hd->f;
+	char *homepath = fp_buf;
 	
 	int load_done = 0;
 	while (!load_done)

@@ -100,7 +100,7 @@ static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 	free(gettime);
 }
 
-static void field_to_member (struct cdata *cdata, struct hd *hd, FORM *cdata_form, FIELD *cdata_field[])
+static void field_to_member (struct cdata *cdata, char fp_buf[], FORM *cdata_form, FIELD *cdata_field[])
 {
 	FIELD *current = current_field(cdata_form);
 	int index = field_index(current);
@@ -119,7 +119,7 @@ static void field_to_member (struct cdata *cdata, struct hd *hd, FORM *cdata_for
 	switch(index)
 	{
 		case CITY:
-			city_search(cdata_field, cdata_form, buffer, cdata, hd);
+			city_search(cdata_field, cdata_form, buffer, cdata, fp_buf);
 			form_driver(cdata_form, REQ_VALIDATION);
 			
 			buff_trim(current, buffer);
@@ -209,7 +209,7 @@ static void field_to_member (struct cdata *cdata, struct hd *hd, FORM *cdata_for
 	free(buffer);
 }
 
-static void validate_fields(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata, struct hd *hd)
+static void validate_fields(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata, char fp_buf[])
 {
 	size_t i = 0;
 	
@@ -225,7 +225,7 @@ static void validate_fields(FIELD *cdata_field[], FORM *cdata_form, struct cdata
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
-		field_to_member(cdata, hd, cdata_form,
+		field_to_member(cdata, fp_buf, cdata_form,
 		cdata_field);
 	}
 }
@@ -268,7 +268,7 @@ static void field_label(WINDOW *in_cdata_win)
 }
 	
 void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
-struct io *io, struct cdata *cdata, struct hd *hd, enum mode mode)
+struct io *io, struct cdata *cdata, char fp_buf[], enum mode mode)
 {
 	FIELD *cdata_field[FIELDMAX + 1];
 	FORM *cdata_form;
@@ -390,13 +390,13 @@ struct io *io, struct cdata *cdata, struct hd *hd, enum mode mode)
 						
 					case 'w':
 						validate_fields(cdata_field,
-						cdata_form, cdata, hd);
-						save_chart(cdata, io, hd);
+						cdata_form, cdata, fp_buf);
+						save_chart(cdata, io, fp_buf);
 						mode = NORMAL;
 						break;
 						
 					case 'e':
-						load_chart(cdata, io, hd);
+						load_chart(cdata, io, fp_buf);
 						mode = NORMAL;
 						cdata_entry = 1;
 						break;
@@ -425,7 +425,7 @@ struct io *io, struct cdata *cdata, struct hd *hd, enum mode mode)
 				{
 					 case '\n':
 						form_driver(cdata_form, REQ_VALIDATION);
-						field_to_member(cdata, hd, cdata_form, cdata_field);
+						field_to_member(cdata, fp_buf, cdata_form, cdata_field);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						
 						field_label(in_cdata_win);
@@ -481,7 +481,7 @@ struct io *io, struct cdata *cdata, struct hd *hd, enum mode mode)
 	}
 	if (ch != 'e' && cancel != 1)
 		validate_fields(cdata_field,
-		cdata_form, cdata, hd);
+		cdata_form, cdata, fp_buf);
 
 	unpost_form(cdata_form);
 	werase(in_cdata_win);

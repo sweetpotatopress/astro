@@ -119,30 +119,11 @@ int main()
 			ERR_EXIT("main io->filename malloc");
 	}
 	
-	struct hd *hd = calloc(1, sizeof(*hd));
-	if(!hd)
-		ERR_EXIT("homedata calloc");
-		
-	hd->home_dir = calloc(1, MAXBUF);
-	if (!hd->home_dir)
-		ERR_EXIT("homedata calloc");
-	hd->xdg_data = calloc(1, MAXBUF);
-	if (!hd->xdg_data)
-		ERR_EXIT("hd calloc");
-	hd->xdg_config = calloc(1, MAXBUF);
-	if (!hd->xdg_config)
-		ERR_EXIT("hd calloc");
-	hd->f = calloc(1, MAXBUF);
-	if (!hd->f)
-		ERR_EXIT("hd calloc");
-		
-	hd->home_dir = getenv("HOME");
-	hd->xdg_data = getenv("XDG_DATA_HOME");
-	hd->xdg_config = getenv("XDG_CONFIG_HOME");
+	char fp_buf[MAXBUF] = {0};
 	
-	xdg_check(hd, "ephe");
+	xdg_check(fp_buf, "ephe");
 
-	swe_set_ephe_path(hd->f);
+	swe_set_ephe_path(fp_buf);
 	
 	initscr();
 	set_escdelay(25);
@@ -192,7 +173,7 @@ int main()
 	for (int i = 1; i < CHARTMAX; ++i)
 	{
 		set_localtime(cdata[i]);
-		config_parse(cdata[i]);
+		config_parse(cdata[i], fp_buf);
 		calc_init(planet, sol_eclipse[i]);
 	}
 	
@@ -249,7 +230,7 @@ int main()
 				case 'i':
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,
-					io[cur_chart], cdata[cur_chart], hd, mode);
+					io[cur_chart], cdata[cur_chart], fp_buf, mode);
 			
 					free(io[cur_chart]->filename);
 					io[cur_chart]->filename = calloc(1, MAXBUF);
@@ -261,12 +242,12 @@ int main()
 					doupdate();
 					break;
 				case 'w':
-					save_chart(cdata[cur_chart], io[cur_chart], hd);
+					save_chart(cdata[cur_chart], io[cur_chart], fp_buf);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata[cur_chart], io[cur_chart], hd);
+					load_chart(cdata[cur_chart], io[cur_chart], fp_buf);
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
@@ -352,11 +333,6 @@ int main()
 		free(io[i]->filename);
 		free(io[i]);
 	}
-	
-	free(hd->xdg_data);
-	free(hd->xdg_config);
-	free(hd->f);
-	free(hd);
 	
 	free(cdata);
 	free(pxx);

@@ -17,29 +17,18 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include <time.h>
 #include "swephexp.h"
 #include "astro.h"
+#include "io.h"
 
 #define TZ_DEF 0
 #define LAT_DEF 1
 #define LON_DEF 2
 #define MAX_DEF 3
 
-void config_parse(struct cdata *cdata)
+void config_parse(struct cdata *cdata, char fp_buf[])
 {
-	const char *home_dir = getenv("HOME");
-	if (!home_dir)
-		ERR_EXIT("HOME environment not set");
-		
-	char fn_buff[MAXBUF] = {0};
-		
-	const char *xdg_config = getenv("XDG_CONFIG_HOME");
-	if (!xdg_config)
-		snprintf(fn_buff, MAXBUF, 
-		"%s/.config/astro/config", home_dir);
-	else
-		snprintf(fn_buff, MAXBUF, 
-		"%s/astro/config", xdg_config);
+	xdg_check(fp_buf, "config");
 	
-	FILE *fp = fopen(fn_buff, "r");
+	FILE *fp = fopen(fp_buf, "r");
 	if (fp == NULL)
 		return;
 		
