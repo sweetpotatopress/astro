@@ -85,8 +85,8 @@ synastry/ transit view
 secondary progressions
 aspects
 planet day/hour
+primary directions
 eclipse data					[DONE]
-declination/out of bounds
 multiple charts			 		[DONE]
 terminal window resize refresh	[DONE]
 user default config				[DONE]
