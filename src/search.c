@@ -54,7 +54,7 @@ static char *xstrcasestr(const char *h, const char *n)
 	return NULL;
 }
 
-static char* strtok_E(char *str, const char *delim)
+static char *strtok_E(char *str, const char *delim)
 { //strtok that doesnt skip repeating delims :3
 	static char *next_pos = NULL;
 	char *token_start;
@@ -86,52 +86,16 @@ static char* strtok_E(char *str, const char *delim)
 	return token_start;
 }
 
-static void print_menu(FIELD *cdata_field[], FORM *cdata_form,
-struct cdata **search_result, struct cdata *cdata, size_t search_count)
+static void print_menu(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata,
+struct cdata **search_result, ITEM **result_item, int max_width, size_t search_count)
 {
 	MENU *city_menu;
 	WINDOW *city_win;
 	WINDOW *city_subwin;
-	
-	char **full_result = calloc(search_count, sizeof(char *));
-	if (!full_result)
-		ERR_EXIT("print_menu full_result calloc");
 
-	ITEM **result_item = calloc(search_count + 1, sizeof(ITEM *));
-	if (!result_item)
-		ERR_EXIT("print_menu citties calloc");
-
-	int max_width = 0;
-	
-	for (size_t i = 0; i < search_count; ++i)
-	{
-		char buffer[MAXBUF] = {0};
-		full_result[i] = malloc(sizeof(buffer));
-		if(!full_result[i])
-			ERR_EXIT("print_menu full_result[i] malloc");
-	
-		snprintf(buffer, sizeof(buffer),
-		"%-25.25s %.2s %.2s %-15s %-5s %s",
-			search_result[i]->city,
-			search_result[i]->state,
-			search_result[i]->country,
-			search_result[i]->timezone,
-			search_result[i]->latitude,
-			search_result[i]->longitude);
-			
-		memcpy(full_result[i], buffer, strlen(buffer) + 1);
-		
-		int len = (int)strlen(buffer) + 1;
-		if (len > max_width)
-			max_width = len;
-
-		result_item[i] = new_item(full_result[i], NULL);
-	}
-	result_item[search_count] = NULL;
-	
 	city_menu = new_menu(result_item);	
-		if (!city_menu) 
-			ERR_EXIT("search city_menu new_menu");
+	if (!city_menu) 
+		ERR_EXIT("search city_menu new_menu");
 	
 	int width = max_width + 4;
 	int height = (int)search_count + 2;
@@ -213,14 +177,6 @@ struct cdata **search_result, struct cdata *cdata, size_t search_count)
 	
 	unpost_menu(city_menu);
 	free_menu(city_menu);
-	for (size_t j = 0; j < search_count; ++j)
-	{
-		free_item(result_item[j]);
-		free(full_result[j]);
-	    free(search_result[j]);
-	}
-	free(full_result);
-	free(search_result);
 	delwin(city_subwin);
 	delwin(city_win);
 }
@@ -237,10 +193,20 @@ struct cdata *cdata, char xdg_path[])
 	struct cdata **search_result = calloc(MAXBUF, sizeof(struct cdata *));
 	if (!search_result)
 		ERR_EXIT("city_search search_result calloc");
-	
+		
 	size_t search_max = MAXBUF;
 	size_t search_count = 0;
+	int max_width = 0;
 	char buffer[MAXBUF] = {0};
+	char **field = calloc(1, MAXBUF);
+	if (!field)
+		ERR_EXIT("calloc");
+	for (int i = 0; i < SMAX; ++i)
+	{
+		field[i] = calloc(1, MAXBUF);
+		if (!field[i])
+			ERR_EXIT("calloc");
+	}
 	
 	while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	{
@@ -250,14 +216,9 @@ struct cdata *cdata, char xdg_path[])
 		
 		char *token = strtok_E(buffer, "\t");
 		int field_count = 0;
-		char *field[SMAX] = {NULL};
 	
 		while (token != NULL && field_count < SMAX)
 		{
-			field[field_count] = calloc(1, strlen(token) + 1);
-			if (!field[field_count])
-				ERR_EXIT("location_parse fields[field_count] calloc");
-			
 			memcpy(field[field_count], token, strlen(token) + 1);
 			field_count++;
 			token = strtok_E(NULL, "\t");
@@ -279,40 +240,90 @@ struct cdata *cdata, char xdg_path[])
 				search_result = temp;
 			}
 			
-			search_result[search_count] = malloc(sizeof(struct cdata));
+			search_result[search_count] = malloc(MAXBUF);
 			if (!search_result[search_count])
 				ERR_EXIT("search_result[search_count] malloc");
 			
-			search_result[search_count]->city =	field[ASCIINAME];
-			search_result[search_count]->state = field[SSTATE];
-			search_result[search_count]->country = field[COUNTRYCODE];	
-			search_result[search_count]->timezone =	field[STIMEZONE];
-			search_result[search_count]->latitude =	field[SLAT];
-			search_result[search_count]->longitude = field[SLON];
-			
-			field[SSTATE] = NULL;
-			field[ASCIINAME] = NULL;
-			field[COUNTRYCODE] = NULL;
-			field[STIMEZONE] = NULL;
-			field[SLAT] = NULL;
-			field[SLON] = NULL;
+			search_result[search_count]->city = strdup(field[ASCIINAME]);
+			search_result[search_count]->state = strdup(field[SSTATE]);
+			search_result[search_count]->country = strdup(field[COUNTRYCODE]);
+			search_result[search_count]->timezone = strdup(field[STIMEZONE]);
+			search_result[search_count]->latitude = strdup(field[SLAT]);
+			search_result[search_count]->longitude = strdup(field[SLON]);
 			
 			++search_count;
 		}
-		
-		for (int j = 0; j < field_count; j++)
-			free(field[j]);
 	}
 	fclose(fp);
+	
+	char **full_result = calloc(search_count + 1, sizeof(char *));
+	if (!full_result)
+		ERR_EXIT("print_menu full_result calloc");
+		
+	ITEM **result_item = calloc(search_count + 1, sizeof(ITEM *));
+	if (!result_item)
+		ERR_EXIT("print_menu citties calloc");
+	
+	for (size_t i = 0; i < search_count; ++i)
+	{
+		char result_buf[MAXBUF] = {0};
+		full_result[i] = malloc(MAXBUF);
+		if(!full_result[i])
+			ERR_EXIT("print_menu full_result[i] malloc");
+	
+		snprintf(result_buf, MAXBUF,
+		"%-25.25s %.2s %.2s %-15s %-5s %s",
+			search_result[i]->city,
+			search_result[i]->state,
+			search_result[i]->country,
+			search_result[i]->timezone,
+			search_result[i]->latitude,
+			search_result[i]->longitude);
+			
+		int len = (int)strlen(result_buf) + 1;
+		if (len > max_width)
+			max_width = len;
+			
+		memcpy(full_result[i], result_buf, strlen(result_buf) + 1);
+		result_item[i] = new_item(full_result[i], NULL);
+	}
+	result_item[search_count] = NULL;
 	
 	if (search_count == 0)
 	{
 		printw("no search results\n");
 		getch();
-		for (size_t j = 0; j < search_max; ++j)
-			free(search_result[j]);
+		for (size_t i = 0; i < search_count + 1; ++i)
+		{
+			free(full_result[i]);
+			free_item(result_item[i]);
+		}
+		for (int i = 0; i < SMAX; ++i)
+			free(field[i]);
+		free(full_result);
+		free(result_item);
 		free(search_result);
+		free(field);
 		return;
 	}
-	print_menu(cdata_field, cdata_form, search_result, cdata, search_count);
+	print_menu(cdata_field, cdata_form, cdata, search_result, result_item, max_width, search_count);
+	
+	for (size_t i = 0; i < search_count; ++i)
+	{
+		free(full_result[i]);
+		free_item(result_item[i]);
+	    free(search_result[i]->city);
+	    free(search_result[i]->state);
+	    free(search_result[i]->country);
+	    free(search_result[i]->timezone);
+	    free(search_result[i]->latitude);
+	    free(search_result[i]->longitude);
+	    free(search_result[i]);
+	}
+	for (int i = 0; i < SMAX; ++i)
+		free(field[i]);
+	free(full_result);
+	free(result_item);
+	free(search_result);
+	free(field);
 }
