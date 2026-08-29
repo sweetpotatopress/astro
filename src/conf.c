@@ -24,11 +24,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define LON_DEF 2
 #define MAX_DEF 3
 
-void config_parse(struct cdata *cdata, char fp_buf[])
+void config_parse(struct cdata *cdata, char xdg_path[])
 {
-	xdg_check(fp_buf, "config");
+	xdg_check(xdg_path, "config");
 	
-	FILE *fp = fopen(fp_buf, "r");
+	FILE *fp = fopen(xdg_path, "r");
 	if (fp == NULL)
 		return;
 		

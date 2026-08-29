@@ -44,7 +44,7 @@ int main()
 	
 	enum mode mode = INSERT;
 	
-	char fn_buf[MAXBUF] = {0};
+	char xdg_path[MAXBUF] = {0};
 	
 	int cur_chart = 1;
 	int right_trig = 1, left_trig = 1;
@@ -121,11 +121,11 @@ int main()
 			ERR_EXIT("main io->filename malloc");
 	}
 	
-	xdg_check(fn_buf, "ephe");
+	xdg_check(xdg_path, "ephe");
 	
-	if (strlen(fn_buf) > 255)
+	if (strlen(xdg_path) > 255)
 		ERR_EXIT("XDG_DATA_HOME path too long");
-	swe_set_ephe_path(fn_buf);
+	swe_set_ephe_path(xdg_path);
 	
 	initscr();
 	set_escdelay(25);
@@ -175,7 +175,7 @@ int main()
 	for (int i = 1; i < CHARTMAX; ++i)
 	{
 		set_localtime(cdata[i]);
-		config_parse(cdata[i], fn_buf);
+		config_parse(cdata[i], xdg_path);
 		calc_init(planet, sol_eclipse[i]);
 	}
 	
@@ -232,7 +232,7 @@ int main()
 				case 'i':
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,
-					io[cur_chart], cdata[cur_chart], fn_buf, mode);
+					io[cur_chart], cdata[cur_chart], xdg_path, mode);
 			
 					free(io[cur_chart]->filename);
 					io[cur_chart]->filename = calloc(1, MAXBUF);
@@ -244,12 +244,12 @@ int main()
 					doupdate();
 					break;
 				case 'w':
-					save_chart(cdata[cur_chart], io[cur_chart], fn_buf);
+					save_chart(cdata[cur_chart], io[cur_chart], xdg_path);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata[cur_chart], io[cur_chart], fn_buf);
+					load_chart(cdata[cur_chart], io[cur_chart], xdg_path);
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();

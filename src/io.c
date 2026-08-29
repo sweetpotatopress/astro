@@ -25,31 +25,31 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "astro.h"
 #include "io.h"
 
-void xdg_check(char fn_buf[], const char *s)
+void xdg_check(char xdg_path[], const char *s)
 {
 	char *home_dir = getenv("HOME");
 	char *xdg_data = getenv("XDG_DATA_HOME");
 	char *xdg_config = getenv("XDG_CONFIG_HOME");
 	
-	memset(fn_buf, 0, MAXBUF);
+	memset(xdg_path, 0, MAXBUF);
 	
 	if (strcmp("config", s) == 0)
 	{
 		if (!xdg_config)
-			snprintf(fn_buf, MAXBUF,
+			snprintf(xdg_path, MAXBUF,
 			"%s/.config/astro/%s", home_dir, s);
 		else
-			snprintf(fn_buf, MAXBUF,
+			snprintf(xdg_path, MAXBUF,
 			"%s/astro/%s", xdg_config, s);
 	}
 	
 	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
 	{
 		if (!xdg_data)
-			snprintf(fn_buf, MAXBUF,
+			snprintf(xdg_path, MAXBUF,
 			"%s/.local/share/astro/%s", home_dir, s);
 		else
-			snprintf(fn_buf, MAXBUF,
+			snprintf(xdg_path, MAXBUF,
 			"%s/astro/%s", xdg_data, s);
 	}
 	
@@ -57,10 +57,10 @@ void xdg_check(char fn_buf[], const char *s)
 		ERR_EXIT("xdg set incorrectly");
 }
 
-void save_chart(struct cdata *cdata, struct io *io, char fn_buf[])
+void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 {
-	xdg_check(fn_buf, "charts");
-	memcpy(io->filepath, fn_buf, strlen(fn_buf));
+	xdg_check(xdg_path, "charts");
+	memcpy(io->filepath, xdg_path, strlen(xdg_path));
 	
 	MENU *save_menu;
 	WINDOW *save_win;
@@ -73,7 +73,7 @@ void save_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 	struct dirent *entry;
 	struct stat buff, st;
 	
-	char *homepath = fn_buf;
+	char *homepath = xdg_path;
 		
 	char *newpath = calloc(1, MAXPATH);
 	if (!newpath)
@@ -85,7 +85,7 @@ void save_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 		size_t i = 0;
 		size_t max_count = 20480;
 		
-		char fn_buff[MAXBUF] = {0};
+		char xdg_pathf[MAXBUF] = {0};
 		int max_width = 0;
 		
 		ITEM **save_files = calloc(max_count, sizeof(ITEM *));
@@ -112,26 +112,26 @@ void save_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 			if (strcmp(entry->d_name, ".") != 0 &&
 			strcmp(entry->d_name, "..") != 0)
 			{
-				snprintf(fn_buff, sizeof(fn_buff), "%s/%s",
+				snprintf(xdg_pathf, sizeof(xdg_pathf), "%s/%s",
 				io->filepath,
 				entry->d_name
 				);
 			
-				if (stat(fn_buff, &st) == 0 &&
+				if (stat(xdg_pathf, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
-					i_name[i] = malloc(sizeof(fn_buff));
+					i_name[i] = malloc(sizeof(xdg_pathf));
 					if (!i_name[i])
 						ERR_EXIT("S_ISDIR save_chart i_name");
 					
-					i_desc[i] = malloc(sizeof(fn_buff));
+					i_desc[i] = malloc(sizeof(xdg_pathf));
 					if (!i_desc[i])
 						ERR_EXIT("S_ISDIR save_chart i_desc");
 					
-					snprintf(i_desc[i], sizeof(fn_buff), "%s",
+					snprintf(i_desc[i], sizeof(xdg_pathf), "%s",
 					entry->d_name);
 					
-					snprintf(i_name[i], sizeof(fn_buff), "[%s]",
+					snprintf(i_name[i], sizeof(xdg_pathf), "[%s]",
 					entry->d_name);
 						
 					// menu window width
@@ -403,14 +403,14 @@ void save_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 	}
 	
 	// create file path 
-	char fn_buff[MAXBUF];
-	snprintf(fn_buff, MAXBUF, "%s%s",
+	char xdg_pathf[MAXBUF];
+	snprintf(xdg_pathf, MAXBUF, "%s%s",
 	io->filepath,
 	fn_copy
 	);
 	
 	// if file exists with same name, ask to overwrite
-	if (stat(fn_buff, &buff) == 0)
+	if (stat(xdg_pathf, &buff) == 0)
 	{
 		werase(save_win);
 		mvwprintw(save_win, 1, 1,
@@ -445,7 +445,7 @@ void save_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 		}
 	}
 
-	FILE *ifp = fopen(fn_buff, "w");
+	FILE *ifp = fopen(xdg_pathf, "w");
 	if (!ifp)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
@@ -480,10 +480,10 @@ void save_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 		free(fn_copy);
 }
 
-void load_chart(struct cdata *cdata, struct io *io, char fn_buf[])
+void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 {
-	xdg_check(fn_buf, "charts");
-	memcpy(io->filepath, fn_buf, strlen(fn_buf));
+	xdg_check(xdg_path, "charts");
+	memcpy(io->filepath, xdg_path, strlen(xdg_path));
 	
 	MENU *load_menu;
 	WINDOW *load_win;
@@ -497,7 +497,7 @@ void load_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 	if (!newpath)
 		ERR_EXIT("load_chart newpath malloc");
 	
-	char *homepath = fn_buf;
+	char *homepath = xdg_path;
 	
 	int load_done = 0;
 	while (!load_done)
@@ -505,7 +505,7 @@ void load_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 		size_t i = 0;
 		size_t max_count = 20480;
 		
-		char fn_buff[MAXBUF] = {0};
+		char xdg_pathf[MAXBUF] = {0};
 		int max_width = 0;
 		
 		ITEM **load_files = calloc(max_count, sizeof(ITEM *));
@@ -532,29 +532,29 @@ void load_chart(struct cdata *cdata, struct io *io, char fn_buf[])
 			if (strcmp(entry->d_name, ".") != 0 &&
 			strcmp(entry->d_name, "..") != 0)
 			{
-				snprintf(fn_buff, sizeof(fn_buff), "%s/%s",
+				snprintf(xdg_pathf, sizeof(xdg_pathf), "%s/%s",
 				io->filepath,
 				entry->d_name
 				);
-				if (stat(fn_buff, &st) == -1)
+				if (stat(xdg_pathf, &st) == -1)
 					ERR_EXIT("load_chat stat");
 				
-				i_name[i] = malloc(sizeof(fn_buff));
+				i_name[i] = malloc(sizeof(xdg_pathf));
 				if (!i_name[i])
 					ERR_EXIT("load_chart i_name[i] malloc");
 				
-				i_desc[i] = malloc(sizeof(fn_buff));
+				i_desc[i] = malloc(sizeof(xdg_pathf));
 				if (!i_desc[i])
 					ERR_EXIT("load_chart i_desc[i] malloc");
 				
-				snprintf(i_desc[i], sizeof(fn_buff), "%s",
+				snprintf(i_desc[i], sizeof(xdg_pathf), "%s",
 				entry->d_name);
 				
 				if (S_ISDIR(st.st_mode))
-					snprintf(i_name[i], sizeof(fn_buff), "[%s]",
+					snprintf(i_name[i], sizeof(xdg_pathf), "[%s]",
 					entry->d_name);
 				else
-					snprintf(i_name[i], sizeof(fn_buff), " %s",
+					snprintf(i_name[i], sizeof(xdg_pathf), " %s",
 					entry->d_name);
 					
 				// menu window width
