@@ -131,4 +131,4 @@ struct io {
 
 enum mode { NORMAL, INSERT };
 
-void config_parse(struct cdata *cdata, char fp_buf[]);
+void config_parse(struct cdata *cdata, char fn_buf[]);

@@ -26,6 +26,6 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define FDST 12
 #define FMAX 13
 
-void xdg_check(char fp_buf[], const char *s);
-void load_chart(struct cdata *cdata, struct io *io, char fp_buf[]);
-void save_chart(struct cdata *cdata, struct io *io, char fp_buf[]);
+void xdg_check(char fn_buf[], const char *s);
+void load_chart(struct cdata *cdata, struct io *io, char fn_buf[]);
+void save_chart(struct cdata *cdata, struct io *io, char fn_buf[]);

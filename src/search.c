@@ -226,11 +226,11 @@ struct cdata **search_result, struct cdata *cdata, size_t search_count)
 }
 	
 void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
-struct cdata *cdata, char fp_buf[])
+struct cdata *cdata, char fn_buf[])
 {
-	xdg_check(fp_buf, "city-db");
+	xdg_check(fn_buf, "city-db");
 	
-	FILE *fp = fopen(fp_buf, "r");
+	FILE *fp = fopen(fn_buf, "r");
 	if (fp == NULL)
 		ERR_EXIT("city_search fopen");
 		
