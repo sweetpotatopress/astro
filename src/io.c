@@ -31,7 +31,7 @@ void xdg_check(char xdg_path[], const char *s)
 	const char *xdg_data = getenv("XDG_DATA_HOME");
 	const char *xdg_config = getenv("XDG_CONFIG_HOME");
 	
-	if (!home_dir)
+	if (!home_dir || home_dir[0] == '\0')
 		ERR_EXIT("$HOME not set");
 	
 	if (strcmp("config", s) == 0)
@@ -55,7 +55,7 @@ void xdg_check(char xdg_path[], const char *s)
 	}
 	
 	else
-		ERR_EXIT("xdg set incorrectly");
+		ERR_EXIT("const char *s incorrect");
 }
 
 void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
