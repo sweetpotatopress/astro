@@ -222,12 +222,6 @@ void save_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 					if (stat(newpath, &st) == 0 &&
 					S_ISDIR(st.st_mode))
 					{
-						free(io->filepath);
-						
-						io->filepath = malloc(strlen(newpath) + 1);
-						if (!io->filepath)
-							ERR_EXIT("save_chart case l malloc");
-							
 						//copy new file path to open
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
@@ -238,12 +232,6 @@ void save_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 					
 					break;
 				case 'h': case KEY_LEFT:
-					free(io->filepath);
-					
-					io->filepath = malloc(strlen(homepath) + 1);
-					if (!io->filepath)
-						ERR_EXIT("save_chart case h malloc");
-					
 					//return to homepath
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					
@@ -268,12 +256,7 @@ void save_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 					if (mkdir(newpath, 0755) == -1)
 						ERR_EXIT("save_menu mkdir fail");
 					
-					free(io->filepath);
-					
-					io->filepath = malloc(strlen(newpath) + 1);
-					if (!io->filepath)
-						ERR_EXIT("save_chart case m io->filepath");
-						
+					// open the new dir
 					memcpy(io->filepath, newpath, strlen(newpath) + 1);	
 					
 					free(mdir);
@@ -672,12 +655,6 @@ void load_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 					if (stat(newpath, &st) == 0 &&
 					S_ISDIR(st.st_mode))
 					{
-						free(io->filepath);
-						
-						io->filepath = malloc(strlen(newpath) + 1);
-						if (!io->filepath)
-							ERR_EXIT("load_chart case l io->filepath");
-							
 						// copy new file path to open
 						memcpy(io->filepath, newpath, strlen(newpath) + 1);
 						
@@ -771,12 +748,6 @@ void load_chart(struct cdata *cdata, struct io *io, struct hd *hd)
 					menu_done = 1;
 					break;
 				case 'h': case KEY_LEFT:
-					free(io->filepath);
-					
-					io->filepath = malloc(strlen(homepath) + 1);
-					if (!io->filepath)
-						ERR_EXIT("load_chart case h io->filepath");
-					
 					//return to homepath
 					memcpy(io->filepath, homepath, strlen(homepath) + 1);
 					
