@@ -85,7 +85,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		size_t i = 0;
 		size_t max_count = 20480;
 		
-		char xdg_pathf[MAXBUF] = {0};
+		char fn_buf[MAXBUF] = {0};
 		int max_width = 0;
 		
 		ITEM **save_files = calloc(max_count, sizeof(ITEM *));
@@ -112,26 +112,26 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 			if (strcmp(entry->d_name, ".") != 0 &&
 			strcmp(entry->d_name, "..") != 0)
 			{
-				snprintf(xdg_pathf, sizeof(xdg_pathf), "%s/%s",
+				snprintf(fn_buf, sizeof(fn_buf), "%s/%s",
 				io->filepath,
 				entry->d_name
 				);
 			
-				if (stat(xdg_pathf, &st) == 0 &&
+				if (stat(fn_buf, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
-					i_name[i] = malloc(sizeof(xdg_pathf));
+					i_name[i] = malloc(sizeof(fn_buf));
 					if (!i_name[i])
 						ERR_EXIT("S_ISDIR save_chart i_name");
 					
-					i_desc[i] = malloc(sizeof(xdg_pathf));
+					i_desc[i] = malloc(sizeof(fn_buf));
 					if (!i_desc[i])
 						ERR_EXIT("S_ISDIR save_chart i_desc");
 					
-					snprintf(i_desc[i], sizeof(xdg_pathf), "%s",
+					snprintf(i_desc[i], sizeof(fn_buf), "%s",
 					entry->d_name);
 					
-					snprintf(i_name[i], sizeof(xdg_pathf), "[%s]",
+					snprintf(i_name[i], sizeof(fn_buf), "[%s]",
 					entry->d_name);
 						
 					// menu window width
@@ -403,14 +403,14 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	}
 	
 	// create file path 
-	char xdg_pathf[MAXBUF];
-	snprintf(xdg_pathf, MAXBUF, "%s%s",
+	char fn_buf[MAXBUF];
+	snprintf(fn_buf, MAXBUF, "%s%s",
 	io->filepath,
 	fn_copy
 	);
 	
 	// if file exists with same name, ask to overwrite
-	if (stat(xdg_pathf, &buff) == 0)
+	if (stat(fn_buf, &buff) == 0)
 	{
 		werase(save_win);
 		mvwprintw(save_win, 1, 1,
@@ -445,7 +445,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		}
 	}
 
-	FILE *ifp = fopen(xdg_pathf, "w");
+	FILE *ifp = fopen(fn_buf, "w");
 	if (!ifp)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
@@ -505,7 +505,7 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		size_t i = 0;
 		size_t max_count = 20480;
 		
-		char xdg_pathf[MAXBUF] = {0};
+		char fn_buf[MAXBUF] = {0};
 		int max_width = 0;
 		
 		ITEM **load_files = calloc(max_count, sizeof(ITEM *));
@@ -532,29 +532,29 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 			if (strcmp(entry->d_name, ".") != 0 &&
 			strcmp(entry->d_name, "..") != 0)
 			{
-				snprintf(xdg_pathf, sizeof(xdg_pathf), "%s/%s",
+				snprintf(fn_buf, sizeof(fn_buf), "%s/%s",
 				io->filepath,
 				entry->d_name
 				);
-				if (stat(xdg_pathf, &st) == -1)
+				if (stat(fn_buf, &st) == -1)
 					ERR_EXIT("load_chat stat");
 				
-				i_name[i] = malloc(sizeof(xdg_pathf));
+				i_name[i] = malloc(sizeof(fn_buf));
 				if (!i_name[i])
 					ERR_EXIT("load_chart i_name[i] malloc");
 				
-				i_desc[i] = malloc(sizeof(xdg_pathf));
+				i_desc[i] = malloc(sizeof(fn_buf));
 				if (!i_desc[i])
 					ERR_EXIT("load_chart i_desc[i] malloc");
 				
-				snprintf(i_desc[i], sizeof(xdg_pathf), "%s",
+				snprintf(i_desc[i], sizeof(fn_buf), "%s",
 				entry->d_name);
 				
 				if (S_ISDIR(st.st_mode))
-					snprintf(i_name[i], sizeof(xdg_pathf), "[%s]",
+					snprintf(i_name[i], sizeof(fn_buf), "[%s]",
 					entry->d_name);
 				else
-					snprintf(i_name[i], sizeof(xdg_pathf), " %s",
+					snprintf(i_name[i], sizeof(fn_buf), " %s",
 					entry->d_name);
 					
 				// menu window width
