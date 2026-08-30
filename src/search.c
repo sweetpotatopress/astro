@@ -61,7 +61,7 @@ static char *xstrtok(char *s, const char *delim)
 	
 	if (s)
 		p = s;
-	if (!p || *p == '\0')
+	if (!p || !*p)
 		return NULL;
 	if (strchr(delim, *p))
 	{
@@ -69,7 +69,7 @@ static char *xstrtok(char *s, const char *delim)
 		return "E";
 	}
 	start = p;
-	while (*p != '\0' && !strchr(delim, *p))
+	while (*p && !strchr(delim, *p))
 		p++;
 	if (*p)
 		*p++ = 0;
@@ -158,14 +158,11 @@ struct cdata **search_result, ITEM **result_item, int max_width, size_t search_c
 				strlen(search_result[iret]->country) + 1);
 				
 				werase(city_win);
-				wrefresh(city_win);
-				
 				menu_done = 1;
 				break;
 			case 'q':
 				form_driver(cdata_form, REQ_CLR_FIELD);
 				werase(city_win);
-				wrefresh(city_win);
 				menu_done = 1;
 				break;
 			default:
