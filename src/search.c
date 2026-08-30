@@ -54,36 +54,26 @@ static char *xstrcasestr(const char *h, const char *n)
 	return NULL;
 }
 
-static char *xstrtok(char *str, const char *delim)
+static char *xstrtok(char *s, const char *delim)
 { // doesnt skip repeating delims :3
-	static char *next_pos = NULL;
-	char *token_start;
-	static char empty_token[] = "E";
+	static char *p = NULL;
+	char *start;
 	
-	if (str != NULL)
-		next_pos = str;
-		
-	if (next_pos == NULL || *next_pos == '\0')
+	if (s)
+		p = s;
+	if (!p || *p == '\0')
 		return NULL;
-		
-	if (strchr(delim, *next_pos) != NULL)
+	if (strchr(delim, *p))
 	{
-		next_pos++;
-		return empty_token;
+		p++;
+		return "E";
 	}
-	
-	token_start = next_pos;
-	
-	while (*next_pos != '\0' && strchr(delim, *next_pos) == NULL)
-		next_pos++;
-		
-	if (*next_pos != '\0')
-	{
-		*next_pos = '\0';
-		next_pos++;
-	}
-	
-	return token_start;
+	start = p;
+	while (*p != '\0' && !strchr(delim, *p))
+		p++;
+	if (*p)
+		*p++ = 0;
+	return start;
 }
 
 static char *xstrdup(const char *s)
