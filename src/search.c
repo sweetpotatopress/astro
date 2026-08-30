@@ -55,7 +55,7 @@ static char *xstrcasestr(const char *h, const char *n)
 }
 
 static char *xstrtok(char *str, const char *delim)
-{ //strtok that doesnt skip repeating delims :3
+{ // doesnt skip repeating delims :3
 	static char *next_pos = NULL;
 	char *token_start;
 	static char empty_token[] = "E";
@@ -91,7 +91,7 @@ static char *xstrdup(const char *s)
 	size_t l = strlen(s);
 	char *d = malloc(l+1);
 	if (!d)
-		ERR_EXIT("ERR:xstrdup allocation");
+		ERR_EXIT("ERR:xstrdup");
 	return memcpy(d, s, l+1);
 }
 
@@ -199,17 +199,16 @@ struct cdata *cdata, char xdg_path[])
 	if (fp == NULL)
 		ERR_EXIT("city_search fopen");
 		
-	struct cdata **search_result = calloc(MAXBUF, sizeof(struct cdata *));
+	struct cdata **search_result = calloc(256, sizeof(struct cdata *));
 	if (!search_result)
 		ERR_EXIT("city_search search_result calloc");
 		
-	size_t search_max = MAXBUF;
+	size_t search_max = 256;
 	size_t search_count = 0;
 	int max_width = 0;
+	
 	char buffer[MAXBUF] = {0};
-	char **field = calloc(SMAX, sizeof (*field));
-	if (!field)
-		ERR_EXIT("calloc");
+	char *field[SMAX] = {0};
 	for (int i = 0; i < SMAX; ++i)
 	{
 		field[i] = calloc(MAXBUF, sizeof(*field[i]));
@@ -265,22 +264,21 @@ struct cdata *cdata, char xdg_path[])
 	}
 	fclose(fp);
 	
-	char **full_result = calloc(search_count + 1, sizeof(char *));
+	char **full_result = calloc(search_count, sizeof(char *));
 	if (!full_result)
 		ERR_EXIT("print_menu full_result calloc");
 		
-	ITEM **result_item = calloc(search_count + 1, sizeof(ITEM *));
+	ITEM **result_item = calloc(search_count, sizeof(ITEM *));
 	if (!result_item)
 		ERR_EXIT("print_menu citties calloc");
 	
 	for (size_t i = 0; i < search_count; ++i)
 	{
-		char result_buf[MAXBUF] = {0};
 		full_result[i] = malloc(MAXBUF);
 		if(!full_result[i])
 			ERR_EXIT("print_menu full_result[i] malloc");
 	
-		snprintf(result_buf, MAXBUF,
+		snprintf(full_result[i], MAXBUF,
 		"%-25.25s %.2s %.2s %-15s %-5s %s",
 			search_result[i]->city,
 			search_result[i]->state,
@@ -289,14 +287,12 @@ struct cdata *cdata, char xdg_path[])
 			search_result[i]->latitude,
 			search_result[i]->longitude);
 			
-		int len = (int)strlen(result_buf) + 1;
+		int len = (int)strlen(full_result[i]);
 		if (len > max_width)
 			max_width = len;
 			
-		memcpy(full_result[i], result_buf, strlen(result_buf) + 1);
 		result_item[i] = new_item(full_result[i], NULL);
 	}
-	result_item[search_count] = NULL;
 	
 	if (search_count == 0)
 	{
@@ -304,6 +300,7 @@ struct cdata *cdata, char xdg_path[])
 		getch();
 		goto cleanup;
 	}
+	
 	print_menu(cdata_field, cdata_form, cdata, search_result, result_item, max_width, search_count);
 	
 	cleanup:
@@ -324,5 +321,4 @@ struct cdata *cdata, char xdg_path[])
 	free(full_result);
 	free(result_item);
 	free(search_result);
-	free(field);
 }
