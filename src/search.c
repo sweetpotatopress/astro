@@ -88,14 +88,6 @@ static char *xstrdup(const char *s)
 static void print_menu(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata,
 struct cdata **search_result, ITEM **result_item, int max_width, size_t search_count)
 {
-	MENU *city_menu;
-	WINDOW *city_win;
-	WINDOW *city_subwin;
-
-	city_menu = new_menu(result_item);	
-	if (!city_menu) 
-		ERR_EXIT("search city_menu new_menu");
-	
 	int width = max_width + 4;
 	int height = (int)search_count + 2;
 	
@@ -107,13 +99,12 @@ struct cdata **search_result, ITEM **result_item, int max_width, size_t search_c
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
 	
-	city_win = newwin(height, width, starty, startx);
-	city_subwin = derwin(city_win, height - 2, width - 2, 1, 1);
+	MENU *city_menu = new_menu(result_item);	
+	WINDOW *city_win = newwin(height, width, starty, startx);
+	WINDOW *city_subwin = derwin(city_win, height - 2, width - 2, 1, 1);
 		
 	wbkgdset(city_win, COLOR_PAIR(M_COLOR));
-		
 	keypad(city_win, TRUE);
-	
 	box(city_win, 0, 0);
 	
 	set_menu_win(city_menu, city_win);
@@ -139,23 +130,17 @@ struct cdata **search_result, ITEM **result_item, int max_width, size_t search_c
 			case 'k': case KEY_UP:
 				menu_driver(city_menu, REQ_UP_ITEM);
 				break;
-			case '\n':
+			case '\n': case 'l': case KEY_RIGHT:
 				selected = current_item(city_menu);
 				iret = item_index(selected);
 				
-				set_field_buffer(cdata_field[CITY], 0,
-				search_result[iret]->city);
-				set_field_buffer(cdata_field[TIMEZONE], 0,
-				search_result[iret]->timezone);
-				set_field_buffer(cdata_field[LATITUDE], 0,
-				search_result[iret]->latitude);
-				set_field_buffer(cdata_field[LONGITUDE], 0,
-				search_result[iret]->longitude);
+				set_field_buffer(cdata_field[CITY], 0, search_result[iret]->city);
+				set_field_buffer(cdata_field[TIMEZONE], 0, search_result[iret]->timezone);
+				set_field_buffer(cdata_field[LATITUDE], 0, search_result[iret]->latitude);
+				set_field_buffer(cdata_field[LONGITUDE], 0, search_result[iret]->longitude);
 				
-				memcpy(cdata->state, search_result[iret]->state,
-				strlen(search_result[iret]->state) + 1);
-				memcpy(cdata->country, search_result[iret]->country,
-				strlen(search_result[iret]->country) + 1);
+				memcpy(cdata->state, search_result[iret]->state, strlen(search_result[iret]->state) + 1);
+				memcpy(cdata->country, search_result[iret]->country, strlen(search_result[iret]->country) + 1);
 				
 				werase(city_win);
 				menu_done = 1;
@@ -165,12 +150,9 @@ struct cdata **search_result, ITEM **result_item, int max_width, size_t search_c
 				werase(city_win);
 				menu_done = 1;
 				break;
-			default:
-				break;
 		}	
 		wrefresh(city_win);
 	}
-	
 	unpost_menu(city_menu);
 	free_menu(city_menu);
 	delwin(city_subwin);
@@ -186,15 +168,14 @@ struct cdata *cdata, char xdg_path[])
 	if (fp == NULL)
 		ERR_EXIT("city_search fopen");
 		
-	struct cdata **search_result = calloc(256, sizeof(struct cdata *));
+	int max_width = 0;
+	size_t search_count = 0;
+	size_t search_max = 256;
+	
+	struct cdata **search_result = calloc(search_max, sizeof(struct cdata *));
 	if (!search_result)
 		ERR_EXIT("city_search search_result calloc");
-		
-	size_t search_max = 256;
-	size_t search_count = 0;
-	int max_width = 0;
 	
-	char buffer[MAXBUF] = {0};
 	char *field[SMAX] = {0};
 	for (int i = 0; i < SMAX; ++i)
 	{
@@ -203,10 +184,11 @@ struct cdata *cdata, char xdg_path[])
 			ERR_EXIT("calloc");
 	}
 	
+	char buffer[MAXBUF] = {0};
 	while (fgets(buffer, sizeof(buffer), fp) != NULL)
 	{
 		size_t len = strlen(buffer);
-		if (buffer[len - 1] == '\n')
+		if (len > 0 && buffer[len - 1] == '\n')
 			buffer[len - 1] = '\0';
 		
 		char *token = xstrtok(buffer, "\t");
