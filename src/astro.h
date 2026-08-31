@@ -19,7 +19,7 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define CHARTMAX 11
 
 #define ERR_EXIT(str) do { \
-		fprintf(stderr, "%s\n", str); \
+		perror(str); \
 		endwin(); \
 		swe_close(); \
 		exit(EXIT_FAILURE); \
