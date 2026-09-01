@@ -92,7 +92,7 @@ ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
 		
 	size_t count = last - first;
 		
-	ITEM **subset = calloc(count + 1, sizeof *subset);
+	ITEM **subset = calloc(count, sizeof *subset);
 	if (!subset)
 		ERR_EXIT("subset calloc");
 		
@@ -189,6 +189,7 @@ int max_width, size_t search_count, size_t search_max, size_t *city_choice)
 		free_menu(city_menu);
 		delwin(city_subwin);
 		delwin(city_win);
+		free(item_visible);
 	}
 }
 
@@ -342,6 +343,7 @@ struct cdata *cdata, char xdg_path[])
 	for (size_t i = 0; i < search_count; ++i)
 	{
 		free(full_result[i]);
+		free_item(item_result[i]);
 	    free(search_result[i]->city);
 	    free(search_result[i]->state);
 	    free(search_result[i]->country);
