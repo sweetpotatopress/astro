@@ -110,10 +110,11 @@ int max_width, size_t search_count)
 {
 	size_t per_page_max = 16;
 	size_t page_count = (search_count + per_page_max - 1) / per_page_max;
+	int i = 0;
 	
-	for(size_t i = 0; i < page_count; ++i)
+	for(;;)
 	{
-		size_t first_page = i * per_page_max;
+		size_t first_page = (size_t)i * per_page_max;
 		size_t remain = search_count - first_page;
 		size_t page_items = remain < per_page_max ? remain : per_page_max;
 		
@@ -121,7 +122,7 @@ int max_width, size_t search_count)
 		
 		ITEM **item_visible = item_range(item_result, search_count, first_page, last_page);
 		
-		int height = (int)page_items + 2;
+		int height = (int)per_page_max + 2;
 		int width = max_width + 4;
 	
 		if (width > COLS)
@@ -161,7 +162,21 @@ int max_width, size_t search_count)
 				case 'k': case KEY_UP:
 					menu_driver(city_menu, REQ_UP_ITEM);
 					break;
-				case '\n': case 'l': case KEY_RIGHT:
+				case 'h': case KEY_LEFT:
+					if (i <= 0)
+						i = (int)page_count - 1;
+					else
+						--i;
+					menu_done = 1;
+					break;
+				case 'l': case KEY_RIGHT:
+					if (i >= (int)page_count - 1)
+						i = 0;
+					else
+						++i;
+					menu_done = 1;
+						break;
+				case '\n':
 					selected = current_item(city_menu);
 					iret = item_index(selected) + (int)first_page;
 					
@@ -181,6 +196,7 @@ int max_width, size_t search_count)
 					form_driver(cdata_form, REQ_CLR_FIELD);
 					werase(city_win);
 					menu_done = 1;
+					city_choice = 1;
 					break;
 			}	
 			wrefresh(city_win);
