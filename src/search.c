@@ -309,7 +309,7 @@ struct cdata *cdata, char xdg_path[])
 			ERR_EXIT("print_menu full_result[i] malloc");
 	
 		snprintf(full_result[i], MAXBUF,
-		"%-25.25s %.2s %.2s %-5s %-5s",
+		"%-25.25s %.2s %-2.2s %-8s %-8s",
 			search_result[i]->city,
 			search_result[i]->country,
 			search_result[i]->state,
