@@ -103,7 +103,7 @@ ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
 
 static void print_menu(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata,
 struct cdata **search_result, ITEM **item_result,
-int max_width, size_t search_count, size_t page_count, size_t search_max, size_t *city_choice)
+int max_width, size_t search_count, size_t search_max, size_t *city_choice)
 {
 	int width = max_width + 4;
 	int height = (int)search_count + 2;
@@ -116,78 +116,80 @@ int max_width, size_t search_count, size_t page_count, size_t search_max, size_t
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
 	
-	size_t first_page = page_count * search_max;
-	size_t visible_count = search_count - first_page;
-	if (visible_count > search_max)
-		visible_count = search_max;
-	size_t last_page = first_page + visible_count;
+	double pc = (double)(search_count / search_max);
+	if (pc > search_count / search_max)
+		pc++;
 	
-	ITEM **item_visible = item_range(item_result, search_count, first_page, last_page);
-		
-	MENU *city_menu = new_menu(item_visible);	
-	WINDOW *city_win = newwin(height, width, starty, startx);
-	WINDOW *city_subwin = derwin(city_win, height - 2, width - 2, 1, 1);
+	size_t page_count = (size_t)pc;
 	
-	wbkgdset(city_win, COLOR_PAIR(M_COLOR));
-	keypad(city_win, TRUE);
-	box(city_win, 0, 0);
-	
-	set_menu_win(city_menu, city_win);
-	set_menu_sub(city_menu, city_subwin);
-	set_menu_fore(city_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
-	set_menu_back(city_menu, COLOR_PAIR(M_COLOR));
-	menu_opts_off(city_menu, O_NONCYCLIC);
-	
-	int iret = post_menu(city_menu);
-	if (iret != E_OK)
-		ERR_EXIT("search post_menu(city_menu)");
-	
-	ITEM *selected = NULL;
-	
-	int ch, menu_done = 0;
-	while(!menu_done && (ch = wgetch(city_win)))
+	for(size_t i = 0; i < page_count; ++i)
 	{
-		switch(ch)
+		size_t first_page = i * search_max;
+		
+		size_t last_page = first_page + search_max;
+		
+		ITEM **item_visible = item_range(item_result, search_count, first_page, last_page);
+			
+		MENU *city_menu = new_menu(item_visible);	
+		WINDOW *city_win = newwin(height, width, starty, startx);
+		WINDOW *city_subwin = derwin(city_win, height - 2, width - 2, 1, 1);
+		
+		wbkgdset(city_win, COLOR_PAIR(M_COLOR));
+		keypad(city_win, TRUE);
+		box(city_win, 0, 0);
+		
+		set_menu_win(city_menu, city_win);
+		set_menu_sub(city_menu, city_subwin);
+		set_menu_fore(city_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+		set_menu_back(city_menu, COLOR_PAIR(M_COLOR));
+		menu_opts_off(city_menu, O_NONCYCLIC);
+		
+		int iret = post_menu(city_menu);
+		if (iret != E_OK)
+			ERR_EXIT("search post_menu(city_menu)");
+		
+		ITEM *selected = NULL;
+		
+		int ch, menu_done = 0;
+		while(!menu_done && (ch = wgetch(city_win)))
 		{
-			case 'j': case KEY_DOWN:
-				menu_driver(city_menu, REQ_DOWN_ITEM);
-				break;
-			case 'k': case KEY_UP:
-				menu_driver(city_menu, REQ_UP_ITEM);
-				break;
-			case '\n': case 'l': case KEY_RIGHT:
-				selected = current_item(city_menu);
-				iret = item_index(selected) + (int)first_page;
-				
-				set_field_buffer(cdata_field[CITY], 0, search_result[iret]->city);
-				set_field_buffer(cdata_field[TIMEZONE], 0, search_result[iret]->timezone);
-				set_field_buffer(cdata_field[LATITUDE], 0, search_result[iret]->latitude);
-				set_field_buffer(cdata_field[LONGITUDE], 0, search_result[iret]->longitude);
-				
-				memcpy(cdata->state, search_result[iret]->state, strlen(search_result[iret]->state) + 1);
-				memcpy(cdata->country, search_result[iret]->country, strlen(search_result[iret]->country) + 1);
-				
-				werase(city_win);
-				menu_done = 1;
-				*city_choice = 1;
-				break;
-			case 'q':
-				form_driver(cdata_form, REQ_CLR_FIELD);
-				werase(city_win);
-				menu_done = 1;
-				break;
-		}	
-		wrefresh(city_win);
+			switch(ch)
+			{
+				case 'j': case KEY_DOWN:
+					menu_driver(city_menu, REQ_DOWN_ITEM);
+					break;
+				case 'k': case KEY_UP:
+					menu_driver(city_menu, REQ_UP_ITEM);
+					break;
+				case '\n': case 'l': case KEY_RIGHT:
+					selected = current_item(city_menu);
+					iret = item_index(selected) + (int)first_page;
+					
+					set_field_buffer(cdata_field[CITY], 0, search_result[iret]->city);
+					set_field_buffer(cdata_field[TIMEZONE], 0, search_result[iret]->timezone);
+					set_field_buffer(cdata_field[LATITUDE], 0, search_result[iret]->latitude);
+					set_field_buffer(cdata_field[LONGITUDE], 0, search_result[iret]->longitude);
+					
+					memcpy(cdata->state, search_result[iret]->state, strlen(search_result[iret]->state) + 1);
+					memcpy(cdata->country, search_result[iret]->country, strlen(search_result[iret]->country) + 1);
+					
+					werase(city_win);
+					menu_done = 1;
+					*city_choice = 1;
+					break;
+				case 'q':
+					form_driver(cdata_form, REQ_CLR_FIELD);
+					werase(city_win);
+					menu_done = 1;
+					break;
+			}	
+			wrefresh(city_win);
+		}
+		unpost_menu(city_menu);
+		free_menu(city_menu);
+		delwin(city_subwin);
+		delwin(city_win);
 	}
-	unpost_menu(city_menu);
-	free_menu(city_menu);
-	for (size_t i = 0; i < visible_count; ++i)
-		free_item(item_visible[i]);
-	
-	free(item_visible);
-	
-	delwin(city_subwin);
-	delwin(city_win);
 }
 
 static void fill_result(struct cdata **search_result, char **full_result, ITEM **item_result,
@@ -218,7 +220,7 @@ int *max_width, size_t search_count)
 
 static void fill_search_result(FILE *fp, char *field[], char *search,
 struct cdata ***search_result, char ***full_result, ITEM ***item_result,
-size_t *search_count, size_t *search_max)
+size_t *search_count, size_t search_max)
 {
 	char buffer[MAXBUF] = {0};
 	while (fgets(buffer, sizeof(buffer), fp) != NULL)
@@ -241,19 +243,19 @@ size_t *search_count, size_t *search_max)
 		field[SNAME] != NULL && field[COUNTRYCODE] != NULL &&
 		xstrcasestr(field[SNAME], search) != NULL)
 		{
-			if (*search_count >= *search_max)
+			if (*search_count >= search_max)
 			{
-				size_t old = *search_max;
-				*search_max *= 2;
-				size_t new = *search_max;
+				size_t old = search_max;
+				search_max *= 2;
+				size_t new = search_max;
 				
-				struct cdata **sr = realloc(*search_result, *search_max * sizeof(**search_result));
+				struct cdata **sr = realloc(*search_result, search_max * sizeof(**search_result));
 				if (!sr)
 					ERR_EXIT("sr realloc");
-				char **fr = realloc(*full_result, *search_max * sizeof(**full_result));
+				char **fr = realloc(*full_result, search_max * sizeof(**full_result));
 				if (!fr)
 					ERR_EXIT("fr realloc");
-				ITEM **ri = realloc(*item_result, *search_max * sizeof(**item_result));
+				ITEM **ri = realloc(*item_result, search_max * sizeof(**item_result));
 				if (!ri)
 					ERR_EXIT("fr realloc");
 		
@@ -316,35 +318,26 @@ struct cdata *cdata, char xdg_path[])
 	int max_width = 0;
 	
 	size_t search_count = 0;
-	size_t page_count = 0, lcount = 0;
-	
 	size_t city_choice = 0;
 	
 	fill_search_result(fp, field, search,
 	&search_result, &full_result, &item_result,
-	&search_count, &search_max);
+	&search_count, search_max);
 	
 	fclose(fp);
 	
 	fill_result(search_result, full_result, item_result, &max_width, search_count);
 	
-	while(!city_choice)
+	if (search_count == 0)
 	{
-		if (search_count == 0)
-		{
-			printw("no results");
-			getch();
-			goto cleanup;
-		}
-	  
-		print_menu(cdata_field, cdata_form, cdata, search_result, item_result,
-		max_width, search_count, page_count, search_max, &city_choice);
-	
-		if (lcount > page_count)
-			break;
-		++lcount;
+		printw("no results");
+		getch();
+		goto cleanup;
 	}
-		
+	  
+	print_menu(cdata_field, cdata_form, cdata, search_result, item_result,
+	max_width, search_count, search_max, &city_choice);
+	
 	cleanup:
 	for (size_t i = 0; i < search_count; ++i)
 	{
