@@ -1,15 +1,3 @@
-/*This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License
-as published by the Free Software Foundation,
-either version 3 of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty
-of MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program. if not, see <https://www.gnu.org/licenses/> */
 // Copyright (C) 2026 yam lynn
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License
@@ -45,11 +33,11 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define STIMEZONE 17
 #define SMAX 19
 
-/* [0]geonameid, [1]name, [2]asciiname, [3]alternatename, 
-[4]latitude, [5]longitude, [6]feature class, [7]feature code,
-[8]country code, [9]cc2, [10]admin1 code, [11]admin2 code,
-[12]admin3 code, [13]admin4 code, [14]population, 
-[15]elevation, [16]dem, [17]timezone, [18]modification date */
+// [0]geonameid, [1]name, [2]asciiname, [3]alternatename, 
+// [4]latitude, [5]longitude, [6]feature class, [7]feature code,
+// [8]country code, [9]cc2, [10]admin1 code, [11]admin2 code,
+// [12]admin3 code, [13]admin4 code, [14]population, 
+// [15]elevation, [16]dem, [17]timezone, [18]modification date
 
 static char *xstrcasestr(const char *h, const char *n)
 {
@@ -199,8 +187,11 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 					set_field_buffer(cdata_field[LATITUDE], 0, search_result[iret]->latitude);
 					set_field_buffer(cdata_field[LONGITUDE], 0, search_result[iret]->longitude);
 					
-					memcpy(cdata->state, search_result[iret]->state, strlen(search_result[iret]->state) + 1);
-					memcpy(cdata->country, search_result[iret]->country, strlen(search_result[iret]->country) + 1);
+					memcpy(cdata->state, search_result[iret]->state,
+					strlen(search_result[iret]->state) + 1);
+					
+					memcpy(cdata->country, search_result[iret]->country,
+					strlen(search_result[iret]->country) + 1);
 					
 					werase(city_win);
 					menu_done = 1;
@@ -240,7 +231,7 @@ struct cdata *cdata, char xdg_path[])
 	{
 		field[i] = calloc(MAXBUF, sizeof(*field[i]));
 		if (!field[i])
-			ERR_EXIT("calloc");
+			ERR_EXIT("field[i] calloc");
 	}
 	
 	size_t tmpmax = 16;
