@@ -85,7 +85,7 @@ static char *xstrdup(const char *s)
 	return memcpy(d, s, l+1);
 }
 
-ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
+static ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
 {
 	if (first > item_count)
 		first = item_count;
@@ -96,7 +96,7 @@ ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
 		
 	ITEM **range = calloc(count + 1, sizeof *range);
 	if (!range)
-		ERR_EXIT("subset calloc");
+		ERR_EXIT("range calloc");
 		
 	for (size_t i = 0; i < count; ++i)
 		range[i] = items[first + i];
@@ -135,24 +135,24 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 		WINDOW *city_win = newwin(height, width, starty, startx);
 		WINDOW *city_subwin = derwin(city_win, height - 3, width - 2, 2, 1);
 		
+		mvwprintw(city_win, 1, 9, "<- [h]-------page %ld/%ld-------[l] -> ", cur_page + 1, page_count);
+		
 		wbkgdset(city_win, COLOR_PAIR(M_COLOR));
 		keypad(city_win, TRUE);
 		box(city_win, 0, 0);
 				
-		mvwprintw(city_win, 1, 9, "<- [h]-------page %ld/%ld-------[l] -> ", cur_page + 1, page_count);
 		set_menu_win(city_menu, city_win);
 		set_menu_sub(city_menu, city_subwin);
+		
 		set_menu_fore(city_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
 		set_menu_back(city_menu, COLOR_PAIR(M_COLOR));
 		menu_opts_off(city_menu, O_NONCYCLIC);
 		
-		int iret = post_menu(city_menu);
-		if (iret != E_OK)
-			ERR_EXIT("search post_menu(city_menu)");
+		post_menu(city_menu);
 		
 		ITEM *selected = NULL;
 		
-		int ch, menu_done = 0, city_choice = 0;
+		int ch, iret, menu_done = 0, city_choice = 0;
 		while(!menu_done && (ch = wgetch(city_win)))
 		{
 			switch(ch)
@@ -207,6 +207,7 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 		delwin(city_subwin);
 		delwin(city_win);
 		free(item_visible);
+		
 		if (city_choice)
 			break;
 	}
@@ -273,11 +274,12 @@ struct cdata *cdata, char xdg_path[])
 				ERR_EXIT("search_result[count] malloc");
 				
 			search_result[search_count]->city = xstrdup(field[ASCIINAME]);
+			search_result[search_count]->country = xstrdup(field[COUNTRYCODE]);
 			if (strcmp(field[COUNTRYCODE], "US") == 0)
 				search_result[search_count]->state = xstrdup(field[SSTATE]);
 			else
 				search_result[search_count]->state = xstrdup("\0");
-			search_result[search_count]->country = xstrdup(field[COUNTRYCODE]);
+				
 			search_result[search_count]->timezone = xstrdup(field[STIMEZONE]);
 			search_result[search_count]->latitude = xstrdup(field[SLAT]);
 			search_result[search_count]->longitude = xstrdup(field[SLON]);
@@ -297,7 +299,7 @@ struct cdata *cdata, char xdg_path[])
 		
 	if (search_count == 0)
 	{
-		printw("no results");
+		mvprintw((LINES / 2) - 5, (COLS / 2) - 5, "no results, press any key");
 		getch();
 		goto cleanup;
 	}
