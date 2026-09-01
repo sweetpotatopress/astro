@@ -94,35 +94,36 @@ ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
 		
 	size_t count = last - first;
 		
-	ITEM **subset = calloc(count + 1, sizeof *subset);
-	if (!subset)
+	ITEM **range = calloc(count + 1, sizeof *range);
+	if (!range)
 		ERR_EXIT("subset calloc");
 		
 	for (size_t i = 0; i < count; ++i)
-		subset[i] = items[first + i];
-	subset[count] = NULL;
-	return subset;
+		range[i] = items[first + i];
+	range[count] = NULL;
+	return range;
 }
 
 static void print_menu(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata,
 struct cdata **search_result, ITEM **item_result,
 int max_width, size_t search_count)
 {
-	size_t per_page_max = 16;
-	size_t page_count = (search_count + per_page_max - 1) / per_page_max;
-	int i = 0;
+	size_t page_max_item = 16;
+	size_t page_count = (search_count + page_max_item - 1) / page_max_item;
+	size_t cur_page = 0;
 	
 	for(;;)
 	{
-		size_t first_page = (size_t)i * per_page_max;
-		size_t remain = search_count - first_page;
-		size_t page_items = remain < per_page_max ? remain : per_page_max;
+		size_t first_page = cur_page * page_max_item;
 		
-		size_t last_page = first_page + page_items;
+		size_t remaining = search_count - first_page;
+		size_t page_remaining_items = remaining < page_max_item ? remaining : page_max_item;
+		
+		size_t last_page = first_page + page_remaining_items;
 		
 		ITEM **item_visible = item_range(item_result, search_count, first_page, last_page);
 		
-		int height = (int)per_page_max + 2;
+		int height = (int)page_max_item + 2;
 		int width = max_width + 4;
 	
 		if (width > COLS)
@@ -163,17 +164,17 @@ int max_width, size_t search_count)
 					menu_driver(city_menu, REQ_UP_ITEM);
 					break;
 				case 'h': case KEY_LEFT:
-					if (i <= 0)
-						i = (int)page_count - 1;
+					if (cur_page <= 0)
+						cur_page = page_count - 1;
 					else
-						--i;
+						--cur_page;
 					menu_done = 1;
 					break;
 				case 'l': case KEY_RIGHT:
-					if (i >= (int)page_count - 1)
-						i = 0;
+					if (cur_page >= page_count - 1)
+						cur_page = 0;
 					else
-						++i;
+						++cur_page;
 					menu_done = 1;
 						break;
 				case '\n':
