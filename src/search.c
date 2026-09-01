@@ -105,8 +105,7 @@ ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
 }
 
 static void print_menu(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata,
-struct cdata **search_result, ITEM **item_result,
-int max_width, size_t search_count)
+struct cdata **search_result, ITEM **item_result, size_t search_count)
 {
 	size_t page_max_item = 16;
 	size_t page_count = (search_count + page_max_item - 1) / page_max_item;
@@ -123,8 +122,8 @@ int max_width, size_t search_count)
 		
 		ITEM **item_visible = item_range(item_result, search_count, first_page, last_page);
 		
-		int height = (int)page_max_item + 2;
-		int width = max_width + 4;
+		int height = (int)page_max_item + 3;
+		int width = 56;
 	
 		if (width > COLS)
 			width = COLS - 2;
@@ -134,12 +133,13 @@ int max_width, size_t search_count)
 	
 		MENU *city_menu = new_menu(item_visible);	
 		WINDOW *city_win = newwin(height, width, starty, startx);
-		WINDOW *city_subwin = derwin(city_win, height - 2, width - 2, 1, 1);
+		WINDOW *city_subwin = derwin(city_win, height - 3, width - 2, 2, 1);
 		
 		wbkgdset(city_win, COLOR_PAIR(M_COLOR));
 		keypad(city_win, TRUE);
 		box(city_win, 0, 0);
-		
+				
+		mvwprintw(city_win, 1, 9, "<- [h]-------page %ld/%ld-------[l] -> ", cur_page + 1, page_count);
 		set_menu_win(city_menu, city_win);
 		set_menu_sub(city_menu, city_subwin);
 		set_menu_fore(city_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
@@ -234,8 +234,6 @@ struct cdata *cdata, char xdg_path[])
 	if (!search_result)
 		ERR_EXIT("city_search search_result calloc");
 	
-	int max_width = 0;
-	
 	size_t search_count = 0;
 	
 	char buffer[MAXBUF] = {0};
@@ -258,7 +256,8 @@ struct cdata *cdata, char xdg_path[])
 			token = xstrtok(NULL, "\t");
 		}
 		
-		if (field[COUNTRYCODE] != NULL && xstrcasestr(field[ASCIINAME], search) != NULL)
+		if (field[COUNTRYCODE] != NULL && field[TIMEZONE] != NULL &&
+		xstrcasestr(field[ASCIINAME], search) != NULL)
 		{
 			if(search_count >= tmpmax)
 			{
@@ -274,7 +273,10 @@ struct cdata *cdata, char xdg_path[])
 				ERR_EXIT("search_result[count] malloc");
 				
 			search_result[search_count]->city = xstrdup(field[ASCIINAME]);
-			search_result[search_count]->state = xstrdup(field[SSTATE]);
+			if (strcmp(field[COUNTRYCODE], "US") == 0)
+				search_result[search_count]->state = xstrdup(field[SSTATE]);
+			else
+				search_result[search_count]->state = xstrdup("\0");
 			search_result[search_count]->country = xstrdup(field[COUNTRYCODE]);
 			search_result[search_count]->timezone = xstrdup(field[STIMEZONE]);
 			search_result[search_count]->latitude = xstrdup(field[SLAT]);
@@ -307,23 +309,17 @@ struct cdata *cdata, char xdg_path[])
 			ERR_EXIT("print_menu full_result[i] malloc");
 	
 		snprintf(full_result[i], MAXBUF,
-		"%-25.25s %.2s %.2s %-15s %-5s %s",
+		"%-25.25s %.2s %.2s %-5s %-5s",
 			search_result[i]->city,
-			search_result[i]->state,
 			search_result[i]->country,
-			search_result[i]->timezone,
+			search_result[i]->state,
 			search_result[i]->latitude,
 			search_result[i]->longitude);
-			
-		int len = (int)strlen(full_result[i]);
-		if (len > max_width)
-			max_width = len;
 			
 		item_result[i] = new_item(full_result[i], NULL);
 	}
 	
-	print_menu(cdata_field, cdata_form, cdata, search_result, item_result,
-	max_width, search_count);
+	print_menu(cdata_field, cdata_form, cdata, search_result, item_result, search_count);
 	
 	cleanup:
 	for (size_t i = 0; i < search_count; ++i)
