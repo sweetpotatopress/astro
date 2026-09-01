@@ -427,18 +427,18 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 						form_driver(cdata_form, REQ_VALIDATION);
 						field_to_member(cdata, xdg_path, cdata_form, cdata_field);
 						form_driver(cdata_form, REQ_NEXT_FIELD);
-						
+					
 						field_label(in_cdata_win);
 						
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
 						
-					case KEY_DOWN:
+					case KEY_DOWN: case ';':
 						form_driver(cdata_form, REQ_NEXT_FIELD);
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
 						
-					case KEY_UP:
+					case KEY_UP: case '\'':
 						form_driver(cdata_form, REQ_PREV_FIELD);
 						form_driver(cdata_form, REQ_END_LINE);
 						break;
