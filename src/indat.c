@@ -307,36 +307,43 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 	
 	cdata_field[YEAR] = new_field(1, 6, starty, startx, 0, 0);
 	set_field_back(cdata_field[YEAR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[YEAR], TYPE_INTEGER, 0, -12998, 16799);
 	field_opts_off(cdata_field[YEAR], O_AUTOSKIP);
 	starty += 2;
 	
 	cdata_field[MONTH] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[MONTH], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[MONTH], TYPE_INTEGER, 0, 1, 12);
 	field_opts_off(cdata_field[MONTH], O_AUTOSKIP);
 	starty += 2;
 	
 	cdata_field[DAY] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[DAY], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[DAY], TYPE_INTEGER, 0, 1, 31);
 	field_opts_off(cdata_field[DAY], O_AUTOSKIP);
 	starty += 2;
 	
 	cdata_field[HOUR] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[HOUR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[HOUR], TYPE_INTEGER, 0, 0, 24);
 	field_opts_off(cdata_field[HOUR], O_AUTOSKIP);
 	starty+= 2;
 	
 	cdata_field[MINUTE] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[MINUTE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[MINUTE], TYPE_INTEGER, 0, 0, 59);
 	field_opts_off(cdata_field[MINUTE], O_AUTOSKIP);
 	starty+= 2;
 	
 	cdata_field[SECOND] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[SECOND], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[SECOND], TYPE_INTEGER, 0, 0, 59);
 	field_opts_off(cdata_field[SECOND], O_AUTOSKIP);
 	starty+= 2;
 	
 	cdata_field[AMPM] = new_field(1, 3, starty, startx, 0, 0);
 	set_field_back(cdata_field[AMPM], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[AMPM], TYPE_ALPHA, 0);
 	field_opts_off(cdata_field[AMPM], O_AUTOSKIP);
 	starty+= 2;
 	
@@ -348,11 +355,13 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 	
 	cdata_field[LATITUDE] = new_field(1, 11, starty, startx, 0, 0);
 	set_field_back(cdata_field[LATITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[LATITUDE], TYPE_NUMERIC, 5, -90.0, 90.0);
 	field_opts_off(cdata_field[LATITUDE], O_AUTOSKIP);
 	starty+= 2;
 	
 	cdata_field[LONGITUDE] = new_field(1, 11, starty, startx, 0, 0);
 	set_field_back(cdata_field[LONGITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_type(cdata_field[LONGITUDE], TYPE_NUMERIC, 5, -180.0, 180.0);
 	field_opts_off(cdata_field[LONGITUDE], O_AUTOSKIP);
 	
 	cdata_field[FIELDMAX] = NULL;
