@@ -12,6 +12,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
+#include <unistd.h>
 #include <ncurses.h>
 #include <panel.h>
 #include "swephexp.h"
@@ -28,6 +29,7 @@
 
 int main()
 {
+	IANA_CHECK();
 	// sun, moon, mercury, venus, mars, jupiter,
 	// saturn, uranus, neptune, pluto, south, north node
 	const char *pl_sym[] = {"(o)", "(()", "(-o<)",

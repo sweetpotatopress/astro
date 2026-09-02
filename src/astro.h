@@ -24,8 +24,22 @@
 		endwin(); \
 		swe_close(); \
 		exit(EXIT_FAILURE); \
-} while (0)
+		} while (0)
 
+#define IANA_CHECK() do { \
+		const char *iana_path[] = { \
+		"/usr/share/zoneinfo/America/New_York", \
+		"/usr/share/lib/zoneinfo/America/New_York",\
+		"/usr/local/share/zoneinfo/America/New_York",\
+		"/usr/local/etc/zoneinfo/America/New_York"}; \
+		int c = 1; \
+		for (int i = 0; i < 4; ++i) \
+			if (access(iana_path[i], F_OK) == 0) \
+				c = 0; \
+		if (c) \
+			ERR_EXIT("ERR: no IANA timezone data installed"); \
+		} while (0)
+		
 #define NEW_CHART_MAIN() main_win, left_win, right_win, \
 		&left_panel, &right_panel,\
 		io[cur_chart], cdata[cur_chart], pxx[cur_chart],\
