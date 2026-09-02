@@ -1,15 +1,3 @@
-/*This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License
-as published by the Free Software Foundation,
-either version 3 of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty
-of MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program. if not, see <https://www.gnu.org/licenses/> */
 // Copyright (C) 2026 yam lynn
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License
@@ -84,7 +72,7 @@ static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 
 static void buff_trim(FIELD *current, char *buffer)
 {
-	char *f_buf = field_buffer(current, 0);
+	char *fbuf = field_buffer(current, 0);
 	int len = 0;
 	field_info(current, NULL, &len, NULL, NULL, NULL, NULL);
 	
@@ -94,7 +82,7 @@ static void buff_trim(FIELD *current, char *buffer)
 		return;
 	}
 	
-	memcpy(buffer, f_buf, (size_t)len);
+	memcpy(buffer, fbuf, (size_t)len);
 	
 	// decrement one to be in bounds, trim
 	--len;
@@ -218,22 +206,17 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 
 static void validate_fields(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata, char xdg_path[])
 {
-	size_t i = 0;
-	
-	// save city name
-	set_current_field(cdata_form, cdata_field[i]);
+	set_current_field(cdata_form, cdata_field[0]);
 	FIELD *current = current_field(cdata_form);
 	char buffer[MAXBUF] = {0};
 	buff_trim(current, buffer);
 	memcpy(cdata->city, buffer, strlen(buffer) + 1);
-	++i;
 		
-	for (; i < FIELDMAX; i++)
+	for (int i = 1; i < FIELDMAX; i++)
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
-		field_to_member(cdata, xdg_path, cdata_form,
-		cdata_field);
+		field_to_member(cdata, xdg_path, cdata_form, cdata_field);
 	}
 }
 
@@ -249,7 +232,7 @@ static void clear_fields(FIELD *cdata_field[], FORM *cdata_form)
 
 static void field_label(WINDOW *in_cdata_win)
 {
-	const char *c_labels[] = {
+	const char *labels[] = {
 		"city search:",
 		"year:",
 		"month:",
@@ -267,9 +250,9 @@ static void field_label(WINDOW *in_cdata_win)
 	int starty = 1;
 	int startx = 1;
 	
-	for (size_t i = CITY; i < FIELDMAX; ++i, starty+= 2)
-			mvwprintw(in_cdata_win, starty, startx,
-			"%s", c_labels[i]);
+	for (size_t i = CITY; i < FIELDMAX; ++i, starty += 2)
+			mvwprintw(in_cdata_win, starty, startx, "%s", labels[i]);
+			
 	box(in_cdata_win, 0, 0);
 	wrefresh(in_cdata_win);
 }
@@ -400,8 +383,7 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 						break;
 						
 					case 'w':
-						validate_fields(cdata_field,
-						cdata_form, cdata, xdg_path);
+						validate_fields(cdata_field, cdata_form, cdata, xdg_path);
 						save_chart(cdata, io, xdg_path);
 						mode = NORMAL;
 						break;
@@ -485,14 +467,13 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 					default:
 						form_driver(cdata_form, ch);
 						break;
-					}
-					break;
+				}
+				break;
 		}
 		wrefresh(in_cdata_win);
 	}
 	if (ch != 'e' && cancel != 1)
-		validate_fields(cdata_field,
-		cdata_form, cdata, xdg_path);
+		validate_fields(cdata_field, cdata_form, cdata, xdg_path);
 
 	unpost_form(cdata_form);
 	werase(in_cdata_win);
@@ -500,8 +481,6 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 	free_form(cdata_form);
 	
 	for (int i = CITY; i < FIELDMAX; ++i)
-	{
 		free_field(cdata_field[i]);
-	}
 	delwin(in_cdata_win);
 }
