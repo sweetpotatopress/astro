@@ -36,6 +36,52 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #include "draw.h"
 #include "search.h"
 
+static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
+{
+	char buff[MAXBUF] = {0};
+	if ((setenv("TZ", cdata->timezone, 1) != 0))
+		return;
+	tzset();
+	
+	struct tm *gettime = malloc(sizeof(struct tm));
+	if (!gettime)
+		ERR_EXIT("set_locatime() gettime malloc");
+		
+	time_t now = time(NULL);
+	localtime_r(&now, gettime);
+	
+	if (gettime->tm_hour == 0)
+		gettime->tm_hour = 12;
+	
+	if (gettime->tm_hour > 12)
+	{
+		gettime->tm_hour -= 12;
+		set_field_buffer(cdata_field[AMPM], 0, "pm");
+	}
+	else
+		set_field_buffer(cdata_field[AMPM], 0, "am");
+	
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_year+1900);
+	set_field_buffer(cdata_field[YEAR], 0, buff);
+	
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_mon + 1);
+	set_field_buffer(cdata_field[MONTH], 0, buff);
+	
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_mday);
+	set_field_buffer(cdata_field[DAY], 0, buff);
+	
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_hour);
+	set_field_buffer(cdata_field[HOUR], 0, buff);
+	
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
+	set_field_buffer(cdata_field[MINUTE], 0, buff);
+	
+	snprintf(buff, sizeof(buff), "%d", gettime->tm_sec);
+	set_field_buffer(cdata_field[SECOND], 0, buff);
+	
+	free(gettime);
+}
+
 static void buff_trim(FIELD *current, char *buffer)
 {
 	char *f_buf = field_buffer(current, 0);
@@ -59,58 +105,6 @@ static void buff_trim(FIELD *current, char *buffer)
 		--len;
 	}
 	buffer[len + 1] = '\0';
-}
-
-static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
-{
-	char buff[128] = {0};
-	if ((setenv("TZ", cdata->timezone, 1) != 0))
-		return;
-	tzset();
-	
-	struct tm *gettime = malloc(sizeof(struct tm));
-	if (!gettime)
-		ERR_EXIT("set_locatime() gettime malloc");
-		
-	time_t now = time(NULL);
-	localtime_r(&now, gettime);
-	
-	if (gettime->tm_hour == 0)
-		gettime->tm_hour = 12;
-	
-	if (gettime->tm_hour > 12)
-	{
-		gettime->tm_hour -= 12;
-		set_field_buffer(cdata_field[AMPM], 0, "pm");
-	}
-	else
-		set_field_buffer(cdata_field[AMPM], 0, "am");
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_year+1900);
-	set_field_buffer(cdata_field[YEAR], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_mon + 1);
-	set_field_buffer(cdata_field[MONTH], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_mday);
-	set_field_buffer(cdata_field[DAY], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_hour);
-	set_field_buffer(cdata_field[HOUR], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
-	set_field_buffer(cdata_field[MINUTE], 0, buff);
-	
-	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_sec);
-	set_field_buffer(cdata_field[SECOND], 0, buff);
-	
-	free(gettime);
 }
 
 static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_form, FIELD *cdata_field[])
@@ -285,9 +279,7 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 {
 	FIELD *cdata_field[FIELDMAX + 1];
 	FORM *cdata_form;
-	int ch;
-	int starty, startx;
-	size_t i = 0;
+	int starty = 0, startx = 13;
 	
 	mvwin(in_cdata_win, (LINES - CWINY) / 2, (COLS - CWINX) / 2);
 	wresize(in_cdata_win, CWINY, CWINX);
@@ -295,9 +287,6 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 	curs_set(1);
 	
 	keypad(in_cdata_win, TRUE);	
-	
-	starty = 0;
-	startx = 13;
 	
 	cdata_field[CITY] = new_field(1, 25, starty, startx, 0, 0);
 	set_field_back(cdata_field[CITY], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
@@ -377,7 +366,7 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 	field_label(in_cdata_win);
 	pos_form_cursor(cdata_form);
 	
-	int cdata_entry = 0, cancel = 0;
+	int cdata_entry = 0, cancel = 0, ch = 0;
 	while(!cdata_entry && (ch = wgetch(in_cdata_win)))
 	{
 		switch(mode)
@@ -510,7 +499,7 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 	wrefresh(in_cdata_win);
 	free_form(cdata_form);
 	
-	for (i = CITY; i < FIELDMAX; ++i)
+	for (int i = CITY; i < FIELDMAX; ++i)
 	{
 		free_field(cdata_field[i]);
 	}
