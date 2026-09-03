@@ -239,16 +239,16 @@ void retro_station(double jd_ut, double *planet[])
 		{
 			limit[i] = (multi * i);
 			
-			if (planet[ipl][NEXT_JUL] - jd_ut > 1 ||
-			planet[ipl][PREV_JUL] - jd_ut < -1)
+			if (planet[ipl][NEXT_JUL] - jd_ut > 0.05 ||
+			planet[ipl][PREV_JUL] - jd_ut < -0.05)
 			{
 				double nr = planet[ipl][NEXT_JUL] - jd_ut;
 				planet[ipl][NEXT_S] = nr;
 				double pr = planet[ipl][PREV_JUL] - jd_ut;
 				planet[ipl][PREV_S] = pr;
 			}
-			if (fabs(planet[ipl][NEXT_S] - limit[i]) <= 1 || 
-			fabs(planet[ipl][PREV_S] - limit[i]) <= 1)
+			if (fabs(planet[ipl][NEXT_S] - limit[i]) <= 0.0006 || 
+			fabs(planet[ipl][PREV_S] - limit[i]) <= 0.0006)
 			{
 				planet[ipl][RET_INIT] = 0;
 				break;
@@ -288,7 +288,7 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const int eclipse_calc = 1;
+	const double eclipse_calc = 1.0;
 	const int iter = 32;
 	const int multi = 8;
 	
@@ -315,30 +315,31 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 		sol_eclipse[EP_JUL] < eclipse_calc || luna_eclipse[EP_JUL] < eclipse_calc)
 			sol_eclipse[E_INIT] = 0;
 			
-		if (fabs(limit[i] - sol_eclipse[EN_JUL]) <= eclipse_calc ||
+		if (fabs(limit[i] - sol_eclipse[EN_JUL]) <= eclipse_calc || fabs(limit[i] - sol_eclipse[EP_JUL]) <= eclipse_calc ||
+		fabs(limit[i] - luna_eclipse[EN_JUL]) <= eclipse_calc || fabs(limit[i] - luna_eclipse[EP_JUL]) <= eclipse_calc ||
 		(int)sol_eclipse[E_INIT] == 0)
 		{
 			swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, NEXT_E, serr);
 			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
-			sol_eclipse[EN_JUL] = fabs(tret[0] - jd_ut);
+			sol_eclipse[EN_JUL] = tret[0] - jd_ut;
 			sol_eclipse[EN_FJUL] = tret[0];
 			sol_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
 			swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, PREV_E, serr);
 			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
-			sol_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
+			sol_eclipse[EP_JUL] = jd_ut - tret[0];
 			sol_eclipse[EP_FJUL] = tret[0];
 			sol_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
 			swe_lun_eclipse_when(jd_ut, iflag, 0, tret, NEXT_E, serr);
 			swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
-			luna_eclipse[EN_JUL] = fabs(tret[0] - jd_ut);
+			luna_eclipse[EN_JUL] = tret[0] - jd_ut;
 			luna_eclipse[EN_FJUL] = tret[0];
 			luna_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
 			swe_lun_eclipse_when(jd_ut, iflag, 0, tret, PREV_E, serr);
 			swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
-			luna_eclipse[EP_JUL] = fabs(tret[0] - jd_ut);
+			luna_eclipse[EP_JUL] = jd_ut - tret[0];
 			luna_eclipse[EP_FJUL] = tret[0];
 			luna_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
 			
