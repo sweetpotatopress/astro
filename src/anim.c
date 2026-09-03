@@ -325,6 +325,90 @@ void animate_chart(NEW_CHART_PARAM())
 				if (i != YEAR) // time inc/dec
 					--i;
 				break;
+			case 'k': case KEY_UP:
+				switch(i)
+				{
+					case SECOND:
+						t += 1;
+						break;
+					case MINUTE:
+						t += 60;
+						break;
+					case HOUR:
+						t += 3600;
+						break;
+					case DAY:
+						t += 86400;
+						break;
+					case MONTH:
+						if ((++temp.tm_mon) > 11)
+						{
+							temp.tm_mon = 0;
+							++temp.tm_year;
+						}
+						max_day = months(temp.tm_mon, temp.tm_year);
+						if (temp.tm_mday > max_day)
+							temp.tm_mday = max_day;
+						t = mktime(&temp);
+						calc_init(planet, sol_eclipse);
+						break;
+					case YEAR:
+						temp.tm_year++;
+						if (temp.tm_year > 16799)
+							temp.tm_year = -12998;
+						t = mktime(&temp);
+						calc_init(planet, sol_eclipse);
+					break;
+				}
+				cpt(cdata, &temp, result, &t, 1);
+				
+				new_chart(NEW_CHART_ARG());
+				break;
+				
+			case 'j': case KEY_DOWN:
+				switch(i)
+				{
+					case SECOND:
+						t -= 1;
+						break;
+					case MINUTE:
+						t -= 60;
+						break;
+					case HOUR:
+						t -= 3600;
+						break;
+					case DAY:
+						t -= 86400;
+						break;
+					case MONTH:
+						if ((--temp.tm_mon) < 0)
+						{
+							temp.tm_mon = 11;
+							--temp.tm_year;
+						}
+						max_day = months(temp.tm_mon, temp.tm_year);
+						if (temp.tm_mday > max_day)
+							temp.tm_mday = max_day;
+						t = mktime(&temp);
+						calc_init(planet, sol_eclipse);
+						break;
+					case YEAR:
+						--temp.tm_year;
+						if (temp.tm_year < -12998)
+							temp.tm_year = 16799;
+						t = mktime(&temp);
+						calc_init(planet, sol_eclipse);
+					break;
+				}
+				cpt(cdata, &temp, result, &t, 1);
+				
+				new_chart(NEW_CHART_ARG());
+				break;
+		
+			case '\n':
+				anim_done = 1;
+				break;
+				
 			case 'p':
 				if (*left_trig)
 				{
@@ -377,89 +461,7 @@ void animate_chart(NEW_CHART_PARAM())
 				update_panels();
 				doupdate();
 				break;
-			
-			case 'k': case KEY_UP:
-				switch(i)
-				{
-					case SECOND:
-						t += 1;
-						break;
-					case MINUTE:
-						t += 60;
-						break;
-					case HOUR:
-						t += 3600;
-						break;
-					case DAY:
-						t += 86400;
-						break;
-					case MONTH:
-						if ((++temp.tm_mon) > 11)
-						{
-							temp.tm_mon = 0;
-							++temp.tm_year;
-						}
-						max_day = months(temp.tm_mon, temp.tm_year);
-						if (temp.tm_mday > max_day)
-							temp.tm_mday = max_day;
-						t = mktime(&temp);
-						calc_init(planet, sol_eclipse);
-						break;
-					case YEAR:
-						temp.tm_year++;
-						if (temp.tm_year > 16799)
-							temp.tm_year = -12998;
-						t = mktime(&temp);
-						calc_init(planet, sol_eclipse);
-					break;
-				}
-				cpt(cdata, &temp, result, &t, 1);
-				
-				new_chart(NEW_CHART_ARG());
-				break;
-			case 'j': case KEY_DOWN:
-				switch(i)
-				{
-					case SECOND:
-						t -= 1;
-						break;
-					case MINUTE:
-						t -= 60;
-						break;
-					case HOUR:
-						t -= 3600;
-						break;
-					case DAY:
-						t -= 86400;
-						break;
-					case MONTH:
-						if ((--temp.tm_mon) < 0)
-						{
-							temp.tm_mon = 11;
-							--temp.tm_year;
-						}
-						max_day = months(temp.tm_mon, temp.tm_year);
-						if (temp.tm_mday > max_day)
-							temp.tm_mday = max_day;
-						t = mktime(&temp);
-						calc_init(planet, sol_eclipse);
-						break;
-					case YEAR:
-						--temp.tm_year;
-						if (temp.tm_year < -12998)
-							temp.tm_year = 16799;
-						t = mktime(&temp);
-						calc_init(planet, sol_eclipse);
-					break;
-				}
-				cpt(cdata, &temp, result, &t, 1);
-				
-				new_chart(NEW_CHART_ARG());
-				break;
-			case '\n':
-				anim_done = 1;
-				break;
-		}
+			}
 		flushinp();
 		usleep(8666);
 		switch(i)
