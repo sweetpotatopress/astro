@@ -71,12 +71,9 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	FORM *save_form;
 	FIELD *save_field[2];
 	char *tz_name = getenv("TZ");
-	DIR *chart_dir;
 	struct dirent *entry;
 	struct stat buff, st;
 	
-	char *homepath = xdg_path;
-		
 	char *newpath = calloc(1, MAXPATH);
 	if (!newpath)
 		ERR_EXIT("save_chart newpath calloc");
@@ -84,7 +81,6 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	int savedir_done = 0;
 	while (!savedir_done)
 	{
-		size_t i = 0;
 		size_t max_count = 20480;
 		
 		char fn_buf[MAXBUF] = {0};
@@ -102,10 +98,11 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		if (!i_desc)
 			ERR_EXIT("save_chart i_desc calloc");
 	
-		chart_dir = opendir(io->filepath);
+		DIR *chart_dir = opendir(io->filepath);
 		if (!chart_dir)
 			ERR_EXIT("ERR: save_chart chart_dir opendir");
 		
+		size_t i = 0;
 		while ((entry = readdir(chart_dir)) != NULL)
 		{
 			// hide the up and down directory,
@@ -239,7 +236,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 					break;
 				case 'h': case KEY_LEFT:
 					//return to homepath
-					memcpy(io->filepath, homepath, strlen(homepath) + 1);
+					memcpy(io->filepath, xdg_path, strlen(xdg_path) + 1);
 					
 					werase(save_win);
 					menu_done = 1;
@@ -499,8 +496,6 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	if (!newpath)
 		ERR_EXIT("load_chart newpath malloc");
 	
-	char *homepath = xdg_path;
-	
 	int load_done = 0;
 	while (!load_done)
 	{
@@ -755,7 +750,7 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 					break;
 				case 'h': case KEY_LEFT:
 					//return to homepath
-					memcpy(io->filepath, homepath, strlen(homepath) + 1);
+					memcpy(io->filepath, xdg_path, strlen(xdg_path) + 1);
 					
 					werase(load_win);
 					menu_done = 1;
