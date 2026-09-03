@@ -141,7 +141,6 @@ struct cdata {
 struct io {
 	char *filepath;
 	char *filename;
-	size_t file_count;
 };
 
 enum mode { NORMAL, INSERT };

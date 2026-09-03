@@ -113,9 +113,9 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		char fn_buf[MAXBUF] = {0};
 		int max_width = 0;
 		
-		ITEM **save_files = calloc(cnt, sizeof(ITEM *));
-		if (!save_files)
-			ERR_EXIT("**save_files calloc");
+		ITEM **item_save = calloc(cnt, sizeof(ITEM *));
+		if (!item_save)
+			ERR_EXIT("**item_save calloc");
 
 		char **file_name = calloc(cnt, sizeof(char *));
 		if (!file_name)
@@ -165,7 +165,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 					if (len > max_width)
 						max_width = len;
 						
-					save_files[i] = new_item(file_name[i], file_desc[i]);
+					item_save[i] = new_item(file_name[i], file_desc[i]);
 					i++;
 				}
 			}
@@ -173,23 +173,20 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		// keeps the menu alive in empty dirs
 		if (i == 0)
 		{
-			save_files[0] = new_item("save here?", " ");
+			item_save[0] = new_item("save here?", " ");
 			max_width = 10;
 			i = 1;
 		}
 		
-		save_files[i] = NULL;
+		item_save[i] = NULL;
 		closedir(chart_dir);
-		
-		//to later free the appropriate amount of memory
-		io->file_count = i;
 		
 		// window dimensions	
 		int width = max_width + 4;
 		if (max_width < 20)
 			max_width = 20;
 			
-		int height = (int)io->file_count + 2;
+		int height = (int)i + 2;
 		
 		if (width > COLS)
 			width = COLS - 2;
@@ -210,7 +207,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		keypad(save_win, TRUE);
 		
 		box(save_win, 0, 0);
-		save_menu = new_menu(save_files);
+		save_menu = new_menu(item_save);
 		if (!save_menu)
 			ERR_EXIT("ERR: save_menu new_menu");
 		
@@ -303,15 +300,15 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		
 		unpost_menu(save_menu);
 		free_menu(save_menu);
-		for (size_t j = 0; j < io->file_count; ++j)
+		for (size_t j = 0; j < cnt; ++j)
 		{
-			free_item(save_files[j]);
+			free_item(item_save[j]);
 			free(file_name[j]);
 			free(file_desc[j]);
 		}
 		free(file_name);
 		free(file_desc);
-		free(save_files);
+		free(item_save);
 		
 		werase(save_win);
 		wrefresh(save_win);
@@ -532,9 +529,9 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		char fn_buf[MAXBUF] = {0};
 		int max_width = 0;
 		
-		ITEM **load_files = calloc(cnt, sizeof(ITEM *));
-		if (!load_files)
-			ERR_EXIT("load_chart load_files calloc");
+		ITEM **item_load = calloc(cnt, sizeof(ITEM *));
+		if (!item_load)
+			ERR_EXIT("load_chart item_load calloc");
 
 		char **file_name = calloc(cnt, sizeof(char *));
 		if (!file_name)
@@ -586,29 +583,26 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 				if (len > max_width)
 					max_width = len;
 					
-				load_files[i] = new_item(file_name[i], file_desc[i]);
+				item_load[i] = new_item(file_name[i], file_desc[i]);
 				i++;
 			}
 		}
 		if (i == 0)
 		{
-			load_files[0] = new_item("empty dir", " ");
+			item_load[0] = new_item("empty dir", " ");
 			max_width = 10;
 			i = 1;
 		}
 		
-		load_files[i] = NULL;
+		item_load[i] = NULL;
 		closedir(chart_dir);
-		
-		//to later free the appropriate amount of memory
-		io->file_count = i;
 		
 		// window dimensions	
 		int width = max_width + 4;
 		if (max_width < 18)
 			max_width = 18;
 			
-		int height = (int)io->file_count + 2;
+		int height = (int)i + 2;
 		
 		if (width > COLS)
 			width = COLS - 2;
@@ -629,7 +623,7 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		keypad(load_win, TRUE);
 		
 		box(load_win, 0, 0);
-		load_menu = new_menu(load_files);
+		load_menu = new_menu(item_load);
 		if (!load_menu)
 			ERR_EXIT("ERR: load_menu new_menu");
 		
@@ -795,15 +789,15 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		
 		unpost_menu(load_menu);
 		free_menu(load_menu);
-		for (size_t j = 0; j < io->file_count; ++j)
+		for (size_t j = 0; j < cnt; ++j)
 		{
-			free_item(load_files[j]);
+			free_item(item_load[j]);
 			free(file_name[j]);
 			free(file_desc[j]);
 		}
 		free(file_name);
 		free(file_desc);
-		free(load_files);
+		free(item_load);
 		
 		werase(load_win);
 		wrefresh(load_win);
