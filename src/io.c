@@ -249,60 +249,13 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 	delwin(save_win);
 }
 
-void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
+static void savefile_name(struct cdata *cdata, struct io *io)
 {
-	xdg_check(xdg_path, "charts");
-	memcpy(io->filepath, xdg_path, strlen(xdg_path));
-	
+	FIELD *save_field[2];
 	struct stat buff;
 	FORM *save_form;
-	FIELD *save_field[2];
 	char *tz_name = getenv("TZ");
-	
-	char *newpath = calloc(1, MAXPATH);
-	if (!newpath)
-		ERR_EXIT("save_chart newpath calloc");
-	
-	size_t cnt = file_count(xdg_path, 1);
-	
 	char fn_buf[MAXBUF] = {0};
-	
-	ITEM **item_save = calloc(cnt, sizeof(ITEM *));
-	if (!item_save)
-		ERR_EXIT("**item_save calloc");
-
-	char **file_name = calloc(cnt, sizeof(char *));
-	if (!file_name)
-		ERR_EXIT("save_chart file_name calloc");
-	
-	char **file_desc = calloc(cnt, sizeof(char *));
-	if (!file_desc)
-		ERR_EXIT("save_chart file_desc calloc");
-		
-	for (size_t i = 0; i < cnt; ++i)	
-	{
-		file_name[i] = malloc(sizeof(fn_buf));
-		if (!file_name[i])
-			ERR_EXIT("S_ISDIR save_chart file_name");
-				
-		file_desc[i] = malloc(sizeof(fn_buf));
-		if (!file_desc[i])
-			ERR_EXIT("S_ISDIR save_chart file_desc");
-	}
-
-	name_to_item(io, item_save, file_name, file_desc);
-	
-	print_save_menu(io, item_save, file_name, file_desc, xdg_path);
-	
-	for (size_t j = 0; j < cnt; ++j)
-	{
-		free_item(item_save[j]);
-		free(file_name[j]);
-		free(file_desc[j]);
-	}
-	free(file_name);
-	free(file_desc);
-	free(item_save);
 	
 	int ch = 0;
 	int starty, startx, maxy, maxx;
@@ -394,25 +347,6 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		len--;
 	fn_copy[len] = '\0';
 	
-	if (len >= 100)
-	{
-		wprintw(save_win, "ERR: name too long");
-		wrefresh(save_win);
-		delwin(save_subwin);
-		delwin(save_win);
-		free(fn_copy);
-		return;
-	}
-	if (len <= 0)
-	{
-		wprintw(save_win, "ERR: name too short");
-		wrefresh(save_win);
-		delwin(save_subwin);
-		delwin(save_win);
-		free(fn_copy);
-		return;
-	}
-	
 	// create file path 
 	snprintf(fn_buf, MAXBUF, "%s/%s",
 	io->filepath,
@@ -488,6 +422,53 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		delwin(save_win);
 		
 		free(fn_copy);
+}
+
+void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
+{
+	xdg_check(xdg_path, "charts");
+	memcpy(io->filepath, xdg_path, strlen(xdg_path));
+	
+	size_t cnt = file_count(xdg_path, 1);
+	
+	ITEM **item_save = calloc(cnt, sizeof(ITEM *));
+	if (!item_save)
+		ERR_EXIT("**item_save calloc");
+
+	char **file_name = calloc(cnt, sizeof(char *));
+	if (!file_name)
+		ERR_EXIT("save_chart file_name calloc");
+	
+	char **file_desc = calloc(cnt, sizeof(char *));
+	if (!file_desc)
+		ERR_EXIT("save_chart file_desc calloc");
+		
+	for (size_t i = 0; i < cnt; ++i)	
+	{
+		file_name[i] = malloc(MAXBUF);
+		if (!file_name[i])
+			ERR_EXIT("S_ISDIR save_chart file_name");
+				
+		file_desc[i] = malloc(MAXBUF);
+		if (!file_desc[i])
+			ERR_EXIT("S_ISDIR save_chart file_desc");
+	}
+
+	name_to_item(io, item_save, file_name, file_desc);
+	
+	print_save_menu(io, item_save, file_name, file_desc, xdg_path);
+	
+	savefile_name(cdata, io);
+	
+	for (size_t j = 0; j < cnt; ++j)
+	{
+		free_item(item_save[j]);
+		free(file_name[j]);
+		free(file_desc[j]);
+	}
+	free(file_name);
+	free(file_desc);
+	free(item_save);
 }
 
 void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
