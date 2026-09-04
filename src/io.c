@@ -88,12 +88,11 @@ static size_t file_count(const char *path, const int r)
 	return count;
 }
 
-static int read_dir(struct io *io, ITEM **item, char **name, char **desc)
+static void name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 {
 	struct dirent *entry;
 	struct stat st;
 	char fn_buf[MAXBUF] = {0};
-	int max_width = 0;
 	DIR *dir = opendir(io->filepath);
 	if (!dir)
 		ERR_EXIT("wahhhh");
@@ -114,52 +113,35 @@ static int read_dir(struct io *io, ITEM **item, char **name, char **desc)
 			else
 				snprintf(name[i], sizeof(fn_buf), " %s", entry->d_name);
 				
-			int len = (int)strlen(name[i]) + 1;
-			if (len > max_width)
-				max_width = len;
-				
 			item[i] = new_item(name[i], desc[i]);
-			i++;
+			++i;
 		}
 	}
 	
 	if (i == 0)
 	{
 		item[0] = new_item("save here?", " ");
-		max_width = 10;
 		i = 1;
 	}
 	
 	item[i] = NULL;
 	closedir(dir);
-	
-	return max_width;
 }
 
-static void print_save_menu(struct io *io, ITEM **item_save, char *xdg_path, int max_width)
+static void print_save_menu(struct io *io, ITEM **item_save, char **name, char **desc, char *xdg_path)
 {
 	struct stat st;
-	size_t i = file_count(io->filepath, 0) + 2;
 	
-	int width = max_width + 4;
-	if (max_width < 20)
-		max_width = 20;
+	int width = 20;
 		
-	int height = (int)i + 2;
+	int height = 18;
 	
-	if (width > COLS)
-		width = COLS - 2;
-	if (height > LINES)
-		height = 18;
-		
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
 	
 	WINDOW *save_win = newwin(height, width, starty, startx);
 	if (!save_win)
 		ERR_EXIT("ERR: save_win newwin");
-		
-	wbkgdset(save_win, COLOR_PAIR(M_COLOR));
 		
 	WINDOW *save_subwin = derwin(save_win, height - 2, width - 2, 1, 1);
 	
@@ -170,16 +152,13 @@ static void print_save_menu(struct io *io, ITEM **item_save, char *xdg_path, int
 	if (!save_menu)
 		ERR_EXIT("ERR: save_menu new_menu");
 	
+	wbkgdset(save_win, COLOR_PAIR(M_COLOR));
 	menu_opts_off(save_menu, O_NONCYCLIC);
 	menu_opts_off(save_menu, O_SHOWDESC);
 	set_menu_fore(save_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
 	set_menu_back(save_menu, COLOR_PAIR(M_COLOR));
 	set_menu_win(save_menu, save_win);
 	set_menu_sub(save_menu, save_subwin);
-	
-	int iret = post_menu(save_menu);
-	if (iret != E_OK)
-		ERR_EXIT("ERR: post_menu(save_menu)");
 	
 	ITEM *cur = NULL;
 	const char *selected = NULL;
@@ -188,6 +167,8 @@ static void print_save_menu(struct io *io, ITEM **item_save, char *xdg_path, int
 	char newpath[MAXPATH] = {0};
 	int ch = 0;
 	int menu_done = 0;
+	post_menu(save_menu);
+	wrefresh(save_win);
 	while (!menu_done && (ch = wgetch(save_win)))
 	{
 		switch(ch)
@@ -205,24 +186,25 @@ static void print_save_menu(struct io *io, ITEM **item_save, char *xdg_path, int
 				snprintf(newpath, MAXPATH,
 				"%s/%s/", io->filepath, selected);
 		
-					//if file path is a directory
+				//if file path is a directory
 				if (stat(newpath, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
 					//copy new file path to open
 					memcpy(io->filepath, newpath, strlen(newpath) + 1);
-					
+					unpost_menu(save_menu);
 					werase(save_win);
-					menu_done = 1;
 					break;
 				}
 				
+				menu_done = 1;
 				break;
 			case 'h': case KEY_LEFT:
 				//return to homepath
 				memcpy(io->filepath, xdg_path, strlen(xdg_path) + 1);
-				
+				unpost_menu(save_menu);
 				werase(save_win);
+				
 				break;
 			case 'm':
 				mdir = calloc(1, 128);
@@ -231,7 +213,6 @@ static void print_save_menu(struct io *io, ITEM **item_save, char *xdg_path, int
 				
 				echo();
 				werase(save_win);
-				box(save_win, 0, 0);
 				wprintw(save_win, "dir name?");
 				mvwgetnstr(save_win, 1, 1, mdir, 127);
 				noecho();
@@ -250,9 +231,12 @@ static void print_save_menu(struct io *io, ITEM **item_save, char *xdg_path, int
 				break;
 			case 'q': case 27:
 				menu_done = 1;
-				werase(save_win);
 				break;
 		}
+		name_to_item(io, item_save, name, desc);
+		set_menu_items(save_menu, item_save);
+		box(save_win, 0, 0);
+		post_menu(save_menu);
 		wrefresh(save_win);
 	}
 	
@@ -282,7 +266,6 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	size_t cnt = file_count(xdg_path, 1);
 	
 	char fn_buf[MAXBUF] = {0};
-	int max_width = 0;
 	
 	ITEM **item_save = calloc(cnt, sizeof(ITEM *));
 	if (!item_save)
@@ -307,14 +290,9 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 			ERR_EXIT("S_ISDIR save_chart file_desc");
 	}
 
-	DIR *chart_dir = opendir(io->filepath);
-	if (!chart_dir)
-		ERR_EXIT("ERR: save_chart chart_dir opendir");
-		
-	max_width = read_dir(io, item_save, file_name, file_desc);
+	name_to_item(io, item_save, file_name, file_desc);
 	
-	print_save_menu(io, item_save, xdg_path, max_width);
-	closedir(chart_dir);
+	print_save_menu(io, item_save, file_name, file_desc, xdg_path);
 	
 	for (size_t j = 0; j < cnt; ++j)
 	{
