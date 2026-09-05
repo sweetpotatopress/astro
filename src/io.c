@@ -572,6 +572,8 @@ void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char 
 				menu_driver(load_menu, REQ_UP_ITEM);
 				break;
 			case 'l': case KEY_RIGHT: case '\n':
+				if ((int)icount == 0)
+					break;
 			
 				snprintf(io->filename, MAXBUF, "%s", selected);
 				
