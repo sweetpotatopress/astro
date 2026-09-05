@@ -505,305 +505,248 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		save_file_name(cdata, io);
 }
 
+
+void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char **name, char **desc, char xdg_path[])
+{
+	size_t icount = name_to_item(io, item_load, name, desc);
+	
+	int header = 4;
+	int width = 25;
+	int height = (int)icount + header;
+	
+	int starty = (LINES - height) / 2;
+	int startx = (COLS - width) / 2;
+	
+	WINDOW *load_win = newwin(height, width, starty, startx);
+	WINDOW *load_subwin = derwin(load_win, height - header, width - 2, 3, 1);
+	MENU *load_menu = new_menu(item_load);
+	FILE *fp;
+	
+	wbkgdset(load_win, COLOR_PAIR(M_COLOR));
+	keypad(load_win, TRUE);
+	box(load_win, 0, 0);
+	
+	menu_opts_off(load_menu, O_NONCYCLIC);
+	menu_opts_off(load_menu, O_SHOWDESC);
+	set_menu_back(load_menu, COLOR_PAIR(M_COLOR));
+	set_menu_fore(load_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+	set_menu_win(load_menu, load_win);
+	set_menu_sub(load_menu, load_subwin);
+	
+	mvwprintw(load_win, 1, 1, " charts/");
+	mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
+	
+	post_menu(load_menu);
+	wrefresh(load_win);
+	
+	struct stat st;
+	const char *selected = NULL;
+	ITEM *cur = NULL;
+	char *buffer = NULL;
+	char field[FMAX][MAXBUF] = {0};
+	char newpath[MAXBUF] = {0};
+	char cur_dir[MAXBUF] = {0};
+	snprintf(cur_dir, MAXBUF, " charts/");
+	
+	char *endptr = NULL;
+	long lret;
+	double dret;
+	errno = 0;
+	
+	int ch = 0, count = 0, menu_done = 0;
+	while (!menu_done && (ch = wgetch(load_win)))
+	{
+		cur = current_item(load_menu);
+		selected = item_description(cur);
+		
+		switch(ch)
+		{
+			case 'j': case KEY_DOWN:
+				menu_driver(load_menu, REQ_DOWN_ITEM);
+				break;
+			case 'k': case KEY_UP:
+				menu_driver(load_menu, REQ_UP_ITEM);
+				break;
+			case 'l': case KEY_RIGHT: case '\n':
+			
+				snprintf(io->filename, MAXBUF, "%s", selected);
+				
+				snprintf(newpath, MAXBUF,
+				"%s/%s", io->filepath, selected);
+		
+				if (stat(newpath, &st) == 0 &&
+				S_ISDIR(st.st_mode))
+				{
+					// copy new file path to open
+					memcpy(io->filepath, newpath, strlen(newpath) + 1);
+					snprintf(cur_dir, MAXBUF, " /%s", selected);
+					
+					break;
+				}
+				
+				// load selected file
+				
+				buffer = malloc(MAXBUF);
+				if (!buffer)
+					ERR_EXIT("load_chart case l buffer");
+				
+				fp = fopen(newpath, "r");
+				if (fp == NULL)
+					ERR_EXIT("load_chart fopen fail");
+				
+				while (fgets(buffer, MAXBUF, fp) != NULL && count < FMAX)
+				{
+					buffer[strcspn(buffer, "\n")] = 0;
+					memcpy(field[count++], buffer, strlen(buffer) + 1);
+				}
+					
+				memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
+				memcpy(cdata->state, field[FSTATE], strlen(field[FSTATE]) + 1);
+				memcpy(cdata->country, field[FCOUNTRY], strlen(field[FCOUNTRY]) + 1);
+							
+				lret = strtol(field[FYEAR], &endptr, 10);
+				if (errno != ERANGE)
+					cdata->tm_year = (int)lret;
+				else
+					cdata->tm_year = 1970;
+							
+				lret = strtol(field[FMONTH], &endptr, 10);
+				if (errno != ERANGE && lret != -1)
+					cdata->tm_mon = (int)lret;
+				else
+					cdata->tm_mon = 1;
+							
+				lret = strtol(field[FDAY], &endptr, 10);
+				if (errno != ERANGE && lret != -1)
+					cdata->tm_mday = (int)lret;
+				else
+					cdata->tm_mday = 1;
+							
+				lret = strtol(field[FHOUR], &endptr, 10);
+				if (errno != ERANGE && lret != -1) 
+					cdata->tm_hour = (int)lret;
+				else
+					cdata->tm_hour = 1;
+								
+				lret = strtol(field[FMIN], &endptr, 10);
+				if (errno != ERANGE && lret != -1)
+					cdata->tm_min = (int)lret;
+				else
+					cdata->tm_min = 1;
+					
+				lret = strtol(field[FSEC], &endptr, 10);
+				if (errno != ERANGE && lret != -1)
+					cdata->tm_sec = (int)lret;
+				else
+					cdata->tm_sec = 0;
+							
+				if (setenv("TZ", field[FTZ], 1) != 0)
+					ERR_EXIT("ERR: TZ setenv fail field_to_member");
+				tzset();
+						
+				dret = strtod(field[FLAT], &endptr);
+				if (errno != ERANGE)
+					cdata->dlat = dret;
+				else
+					cdata->dlat = 0.0;
+						
+				dret = strtod(field[FLON], &endptr);
+				if (errno != ERANGE)
+					cdata->dlon = dret;
+				else
+					cdata->dlon = 0.0;
+				
+				lret = strtol(field[FDST], &endptr, 10);
+				if (lret > 0)
+					cdata->tm_isdst = YDST;
+				else if (lret == 0)
+					cdata->tm_isdst = NDST;
+					
+				free(buffer);
+				fclose(fp);
+				
+				menu_done = 1;
+				break;
+			case 'h': case KEY_LEFT:
+				memcpy(io->filepath, xdg_path, strlen(xdg_path) + 1);
+				snprintf(cur_dir, MAXBUF, "charts/");
+				
+				break;
+			case 'q': case 27:
+				menu_done = 1;
+				break;
+		}
+		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT || ch == 'm')
+		{
+			unpost_menu(load_menu);
+			set_menu_items(load_menu, NULL);
+			for (size_t i = 0; i < icount; ++i)
+			{
+				free_item(item_load[i]);
+				free(name[i]);
+				free(desc[i]);
+			}
+			
+			werase(load_win);
+			wnoutrefresh(load_win);
+			mvwprintw(load_win, 1, 1, " %s", cur_dir);
+			mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
+			
+			icount = name_to_item(io, item_load, name, desc);
+			set_menu_items(load_menu, item_load);
+			
+			width = 25;
+			height = (int)icount + header;
+			
+			starty = (LINES - height) / 2;
+			startx = (COLS - width) / 2;
+			
+			wresize(load_win, height, width);
+			wresize(load_subwin, height - header, width -2);
+			mvwin(load_win, starty, startx);
+			mvwin(load_subwin, starty, startx);
+		}
+		box(load_win, 0, 0);
+		post_menu(load_menu);
+		doupdate();
+	}
+	
+	unpost_menu(load_menu);
+	free_menu(load_menu);
+	for (size_t j = 0; j < icount; ++j)
+	{
+		free_item(item_load[j]);
+		free(name[j]);
+		free(desc[j]);
+	}
+	free(name);
+	free(desc);
+	free(item_load);
+	
+	werase(load_win);
+	wrefresh(load_win);
+	delwin(load_subwin);
+	delwin(load_win);
+}
+
 void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 {
 	xdg_check(xdg_path, "charts");
 	memcpy(io->filepath, xdg_path, strlen(xdg_path)+1);
 	
-	MENU *load_menu;
-	WINDOW *load_win;
-	WINDOW *load_subwin;
-		
-	struct dirent *entry;
-	struct stat st;
+	size_t cnt = file_count(xdg_path, 1);
 	
-	char *newpath = malloc(MAXPATH);
-	if (!newpath)
-		ERR_EXIT("load_chart newpath malloc");
-	
-	int load_done = 0;
-	while (!load_done)
-	{
-		size_t i = 0;
-		size_t cnt = file_count(xdg_path, 1);
-		
-		char fn_buf[MAXBUF] = {0};
-		int max_width = 0;
-		
-		ITEM **item_load = calloc(cnt, sizeof(ITEM *));
-		if (!item_load)
-			ERR_EXIT("load_chart item_load calloc");
+	ITEM **item_load = calloc(cnt, sizeof(ITEM *));
+	if (!item_load)
+		ERR_EXIT("load_chart item_load calloc");
 
-		char **file_name = calloc(cnt, sizeof(char *));
-		if (!file_name)
-			ERR_EXIT("load_chart file_name calloc");
-		
-		char **file_desc = calloc(cnt, sizeof(char *));
-		if (!file_desc)
-			ERR_EXIT("load_chart file_desc calloc");
+	char **name = calloc(cnt, sizeof(char *));
+	if (!name)
+		ERR_EXIT("load_chart file_name calloc");
 	
-		DIR *chart_dir = opendir(io->filepath);
-		if (!chart_dir)
-			ERR_EXIT("ERR: load_chart chart_dir");
-		
-		while ((entry = readdir(chart_dir)) != NULL)
-		{
-			// hide the up and down directory,
-			//to restrict to only the charts dir
-			
-			if (strcmp(entry->d_name, ".") != 0 &&
-			strcmp(entry->d_name, "..") != 0)
-			{
-				snprintf(fn_buf, sizeof(fn_buf), "%s/%s",
-				io->filepath,
-				entry->d_name
-				);
-				if (stat(fn_buf, &st) == -1)
-					ERR_EXIT("load_chat stat");
-				
-				file_name[i] = malloc(sizeof(fn_buf));
-				if (!file_name[i])
-					ERR_EXIT("load_chart file_name[i] malloc");
-				
-				file_desc[i] = malloc(sizeof(fn_buf));
-				if (!file_desc[i])
-					ERR_EXIT("load_chart file_desc[i] malloc");
-				
-				snprintf(file_desc[i], sizeof(fn_buf), "%s",
-				entry->d_name);
-				
-				if (S_ISDIR(st.st_mode))
-					snprintf(file_name[i], sizeof(fn_buf), "[%s]",
-					entry->d_name);
-				else
-					snprintf(file_name[i], sizeof(fn_buf), " %s",
-					entry->d_name);
-					
-				// menu window width
-				int len = (int)strlen(file_name[i]) + 1;
-				if (len > max_width)
-					max_width = len;
-					
-				item_load[i] = new_item(file_name[i], file_desc[i]);
-				i++;
-			}
-		}
-		if (i == 0)
-		{
-			item_load[0] = new_item("empty dir", " ");
-			max_width = 10;
-			i = 1;
-		}
-		
-		item_load[i] = NULL;
-		closedir(chart_dir);
-		
-		// window dimensions	
-		int width = max_width + 4;
-		if (max_width < 18)
-			max_width = 18;
-			
-		int height = (int)i + 2;
-		
-		if (width > COLS)
-			width = COLS - 2;
-		if (height > LINES)
-			height = 18;
-			
-		int starty = (LINES - height) / 2;
-		int startx = (COLS - width) / 2;
-		
-		load_win = newwin(height, width, starty, startx);
-		if (!load_win)
-			ERR_EXIT("ERR: load_win newwin");
-			
-		load_subwin = derwin(load_win, height - 2, width - 2, 1, 1);
-		
-		wbkgdset(load_win, COLOR_PAIR(M_COLOR));
-		
-		keypad(load_win, TRUE);
-		
-		box(load_win, 0, 0);
-		load_menu = new_menu(item_load);
-		if (!load_menu)
-			ERR_EXIT("ERR: load_menu new_menu");
-		
-		set_menu_win(load_menu, load_win);
-		set_menu_sub(load_menu, load_subwin);
-		set_menu_back(load_menu, COLOR_PAIR(M_COLOR));
-		set_menu_fore(load_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
-		menu_opts_off(load_menu, O_NONCYCLIC);
-		menu_opts_off(load_menu, O_SHOWDESC);
-		
-		int iret = post_menu(load_menu);
-		if (iret != E_OK)
-			ERR_EXIT("ERR: post_menu(load_menu)");
-		
-		ITEM *cur = NULL;
-		const char *selected = NULL;
-		char *buffer = NULL;
-		
-		FILE *fp;
-		char field[FMAX][562] = {0};
-		
-		char *endptr = NULL;
-		long lret;
-		double dret;
-		errno = 0;
-		
-		int count = 0;
-		int menu_done = 0;
-		int ch = 0;
-		while (!menu_done && (ch = wgetch(load_win)))
-		{
-			switch(ch)
-			{
-				case 'j': case KEY_DOWN:
-					menu_driver(load_menu, REQ_DOWN_ITEM);
-					break;
-				case 'k': case KEY_UP:
-					menu_driver(load_menu, REQ_UP_ITEM);
-					break;
-				case 'l': case KEY_RIGHT: case '\n':
-					cur = current_item(load_menu);
-					selected = item_description(cur);
-					
-					snprintf(io->filename, MAXBUF, "%s", selected);
-					
-					snprintf(newpath, MAXPATH,
-					"%s/%s", io->filepath, selected);
-			
-					// if file path is a directory
-					if (stat(newpath, &st) == 0 &&
-					S_ISDIR(st.st_mode))
-					{
-						// copy new file path to open
-						memcpy(io->filepath, newpath, strlen(newpath) + 1);
-						
-						werase(load_win);
-						menu_done = 1 ;
-						break;
-					}
-					
-					// load selected file
-					
-					buffer = malloc(MAXBUF);
-					if (!buffer)
-						ERR_EXIT("load_chart case l buffer");
-					
-					fp = fopen(newpath, "r");
-					if (fp == NULL)
-						ERR_EXIT("load_chart fopen fail");
-					
-					while (fgets(buffer, MAXBUF, fp) != NULL && count < FMAX)
-					{
-						buffer[strcspn(buffer, "\n")] = 0;
-						memcpy(field[count++], buffer, strlen(buffer) + 1);
-					}
-						
-					memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
-					memcpy(cdata->state, field[FSTATE], strlen(field[FSTATE]) + 1);
-					memcpy(cdata->country, field[FCOUNTRY], strlen(field[FCOUNTRY]) + 1);
-								
-					lret = strtol(field[FYEAR], &endptr, 10);
-					if (errno != ERANGE)
-						cdata->tm_year = (int)lret;
-					else
-						cdata->tm_year = 1970;
-								
-					lret = strtol(field[FMONTH], &endptr, 10);
-					if (errno != ERANGE && lret != -1)
-						cdata->tm_mon = (int)lret;
-					else
-						cdata->tm_mon = 1;
-								
-					lret = strtol(field[FDAY], &endptr, 10);
-					if (errno != ERANGE && lret != -1)
-						cdata->tm_mday = (int)lret;
-					else
-						cdata->tm_mday = 1;
-								
-					lret = strtol(field[FHOUR], &endptr, 10);
-					if (errno != ERANGE && lret != -1) 
-						cdata->tm_hour = (int)lret;
-					else
-						cdata->tm_hour = 1;
-									
-					lret = strtol(field[FMIN], &endptr, 10);
-					if (errno != ERANGE && lret != -1)
-						cdata->tm_min = (int)lret;
-					else
-						cdata->tm_min = 1;
-						
-					lret = strtol(field[FSEC], &endptr, 10);
-					if (errno != ERANGE && lret != -1)
-						cdata->tm_sec = (int)lret;
-					else
-						cdata->tm_sec = 0;
-								
-					if (setenv("TZ", field[FTZ], 1) != 0)
-						ERR_EXIT("ERR: TZ setenv fail field_to_member");
-					tzset();
-							
-					dret = strtod(field[FLAT], &endptr);
-					if (errno != ERANGE)
-						cdata->dlat = dret;
-					else
-						cdata->dlat = 0.0;
-							
-					dret = strtod(field[FLON], &endptr);
-					if (errno != ERANGE)
-						cdata->dlon = dret;
-					else
-						cdata->dlon = 0.0;
-					
-					lret = strtol(field[FDST], &endptr, 10);
-					if (lret > 0)
-						cdata->tm_isdst = YDST;
-					else if (lret == 0)
-						cdata->tm_isdst = NDST;
-						
-					free(buffer);
-					fclose(fp);
-					
-					load_done = 1;
-					menu_done = 1;
-					break;
-				case 'h': case KEY_LEFT:
-					//return to homepath
-					memcpy(io->filepath, xdg_path, strlen(xdg_path) + 1);
-					
-					werase(load_win);
-					menu_done = 1;
-					break;
-				case 'q': case 27:
-					load_done = 1;
-					menu_done = 1;
-					werase(load_win);
-					break;
-				default:
-					ch = wgetch(load_win);
-			}
-			wrefresh(load_win);
-		}
-		
-		unpost_menu(load_menu);
-		free_menu(load_menu);
-		for (size_t j = 0; j < cnt; ++j)
-		{
-			free_item(item_load[j]);
-			free(file_name[j]);
-			free(file_desc[j]);
-		}
-		free(file_name);
-		free(file_desc);
-		free(item_load);
-		
-		werase(load_win);
-		wrefresh(load_win);
-		delwin(load_subwin);
-		delwin(load_win);
-	} // end of load_done loop
-	free(newpath);
+	char **desc = calloc(cnt, sizeof(char *));
+	if (!desc)
+		ERR_EXIT("load_chart file_desc calloc");
+	
+	print_load_menu(cdata, io, item_load, name, desc, xdg_path);
 }
-
