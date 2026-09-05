@@ -2,6 +2,7 @@
 DEPENDENCIES
 
 ncurses
+iana timezone database
 
 KEYBINDS
 
@@ -23,10 +24,9 @@ r			redraw chart
 q			exit astro  
 
 w			save chart  
-	m		makedir  
+	m		make dir  
+	enter	choose dir
 	esc		cancel  
-	esc/q	choose dir
-	enter	save named chart
 	
 e		 	load chart  
 	l/enter	choose  
@@ -62,7 +62,7 @@ swisseph/ephe/ 		: $XDG_DATA_HOME/astro
 charts/ 			: $XDG_DATA_HOME/astro
  
 OPTIONAL
-to set default IANA timezone and location
+to set default iana timezone and location
 
 config				: $XDG_CONFIG_HOME/astro  
 
