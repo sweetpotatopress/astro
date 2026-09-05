@@ -301,7 +301,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 	return save;
 }
 
-static void savefile_name(struct cdata *cdata, struct io *io)
+static void save_file_name(struct cdata *cdata, struct io *io)
 {
 	FIELD *save_field[2];
 	struct stat buff;
@@ -502,7 +502,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 		ERR_EXIT("save_chart file_desc calloc");
 	
 	if (print_save_menu(io, item_save, name, desc, xdg_path) == 1)
-		savefile_name(cdata, io);
+		save_file_name(cdata, io);
 }
 
 void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
