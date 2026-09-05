@@ -12,6 +12,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
+#pragma once
+
 #define ELEMENT 0
 #define RULER 1
 #define EXALT 2

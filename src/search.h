@@ -12,5 +12,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
+#pragma once
+
 void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
 struct cdata *cdata, char xdg_path[]);

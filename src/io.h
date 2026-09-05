@@ -12,6 +12,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
+#pragma once
+
 #define FCITY 0
 #define FSTATE 1
 #define FCOUNTRY 2
