@@ -126,12 +126,6 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 		}
 	}
 	
-	if (i == 0)
-	{
-		item[0] = new_item("save here?", " ");
-		i = 1;
-	}
-	
 	item[i] = NULL;
 	closedir(dir);
 	return i;
@@ -139,16 +133,17 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 
 static void print_save_menu(struct io *io, ITEM **item_save, char **name, char **desc, char *xdg_path)
 {
-	size_t h = name_to_item(io, item_save, name, desc);
+	size_t icount = name_to_item(io, item_save, name, desc);
 	
+	int header = 4;
 	int width = 25;
-	int height = h + 3;
+	int height = (int)icount + header;
 	
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
 	
 	WINDOW *save_win = newwin(height, width, starty, startx);
-	WINDOW *save_subwin = derwin(save_win, height - 2, width - 2, 1, 1);
+	WINDOW *save_subwin = derwin(save_win, height - header, width - 2, 3, 1);
 	MENU *save_menu = new_menu(item_save);
 	
 	box(save_win, 0, 0);
@@ -162,11 +157,17 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 	set_menu_win(save_menu, save_win);
 	set_menu_sub(save_menu, save_subwin);
 	
+	mvwprintw(save_win, 1, 1, " charts");
+	mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
 	post_menu(save_menu);
 	wrefresh(save_win);
 	
 	struct stat st;
 	ITEM *cur = NULL;
+	char *cur_dir = malloc(MAXBUF * sizeof(char));
+	if (!cur_dir)
+		ERR_EXIT("cur_dir");
+	snprintf(cur_dir, MAXBUF, "charts");
 	const char *selected = NULL;
 	char *mdir = NULL;
 	
@@ -174,6 +175,9 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 	int menu_done = 0, ch = 0;
 	while (!menu_done && (ch = wgetch(save_win)))
 	{
+		cur = current_item(save_menu);
+		selected = item_description(cur);
+	
 		switch(ch)
 		{
 			case 'j': case KEY_DOWN:
@@ -182,32 +186,38 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 			case 'k': case KEY_UP:
 				menu_driver(save_menu, REQ_UP_ITEM);
 				break;
-			case 'l': case KEY_RIGHT: case '\n':
-				cur = current_item(save_menu);
-				selected = item_description(cur);
-				
-				snprintf(newpath, MAXPATH,
-				"%s/%s/", io->filepath, selected);
-		
-				//if file path is a directory
+			case '\n':
+				snprintf(newpath, MAXPATH, "%s/%s/", io->filepath, selected);
 				if (stat(newpath, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
-					//copy new file path to open
 					memcpy(io->filepath, newpath, strlen(newpath) + 1);
-					unpost_menu(save_menu);
-					werase(save_win);
+					snprintf(cur_dir, MAXBUF, "/%s", selected);
+				}
+				mvwprintw(save_win, 1, 1, "save to %s?", selected);
+				if ((ch = wgetch(save_win)) == '\n')
+					menu_done = 1;
+				else
+				{
+					mvwhline(save_win, 1, 1, ' ',  width - 2);
+					wrefresh(save_win);
+					mvwprintw(save_win, 1, 1, "canceled save");
+				}
+				break;
+			case 'l': case KEY_RIGHT:
+				snprintf(newpath, MAXPATH, "%s/%s/", io->filepath, selected);
+				if (stat(newpath, &st) == 0 &&
+				S_ISDIR(st.st_mode))
+				{
+					memcpy(io->filepath, newpath, strlen(newpath) + 1);
+					snprintf(cur_dir, MAXBUF, "/%s", selected);
 					break;
 				}
-				
-				menu_done = 1;
 				break;
 			case 'h': case KEY_LEFT:
-				//return to homepath
 				memcpy(io->filepath, xdg_path, strlen(xdg_path) + 1);
-				unpost_menu(save_menu);
-				werase(save_win);
-				
+				snprintf(cur_dir, MAXBUF, "charts/");
+			
 				break;
 			case 'm':
 				mdir = calloc(1, 128);
@@ -225,7 +235,6 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 				if (mkdir(newpath, 0755) == -1)
 					ERR_EXIT("save_menu mkdir fail");
 				
-				// open the new dir
 				memcpy(io->filepath, newpath, strlen(newpath) + 1);	
 				
 				free(mdir);
@@ -235,31 +244,50 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 				menu_done = 1;
 				break;
 		}
-		if (ch == 'h' || ch == 'l' || ch == '\n')
+		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT)
 		{
-			for (size_t i = 0; i < h; ++i)
+			unpost_menu(save_menu);
+			set_menu_items(save_menu, NULL); // ncurses doesnt free connected items
+			for (size_t i = 0; i < icount; ++i)
 			{
 				free_item(item_save[i]);
 				free(name[i]);
 				free(desc[i]);
 			}
-		
-			h = name_to_item(io, item_save, name, desc);
+			
+			werase(save_win);
+			wnoutrefresh(save_win);
+			mvwprintw(save_win, 1, 1, " %s", cur_dir);
+			mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
+			
+			icount = name_to_item(io, item_save, name, desc);
 			set_menu_items(save_menu, item_save);
+			
+			width = 25;
+			height = (int)icount + header;
+	
+			starty = (LINES - height) / 2;
+			startx = (COLS - width) / 2;
+		
+			mvwin(save_win, starty, startx);
+			mvwin(save_subwin, starty, startx);
+			wresize(save_win, height, width);
+			wresize(save_subwin, height - header, width -2);
 		}
 		box(save_win, 0, 0);
 		post_menu(save_menu);
-		wrefresh(save_win);
+		doupdate();
 	}
 	
 	unpost_menu(save_menu);
 	free_menu(save_menu);
-	for (size_t i = 0; i < h; ++i)
+	for (size_t i = 0; i < icount; ++i)
 	{
 		free_item(item_save[i]);
 		free(name[i]);
 		free(desc[i]);
 	}
+	free(cur_dir);
 	free(desc);
 	free(name);
 	free(item_save);
@@ -289,9 +317,7 @@ static void savefile_name(struct cdata *cdata, struct io *io)
 	startx = (maxx - width) / 2;
 	
 	WINDOW *save_win = newwin(height, width, starty, startx);
-	//only call derwin once
-	WINDOW *save_subwin = 
-	derwin(save_win, height - 2, width - 2, 0, 0);
+	WINDOW *save_subwin = derwin(save_win, height - 2, width - 2, 0, 0);
 	
 	wbkgdset(save_win, COLOR_PAIR(M_COLOR));
 	
@@ -343,6 +369,13 @@ static void savefile_name(struct cdata *cdata, struct io *io)
 				wrefresh(save_win);
 				delwin(save_subwin);
 				delwin(save_win);
+				
+				unpost_form(save_form);
+				set_form_fields(save_form, NULL);
+				for (int i = 0; i < 2; ++i)
+					free_field(save_field[i]);
+				free_form(save_form);
+	
 				return;
 				break;
 			default:
@@ -437,6 +470,7 @@ static void savefile_name(struct cdata *cdata, struct io *io)
 		wrefresh(save_win);
 		free_form(save_form);
 		
+		set_form_fields(save_form, NULL);
 		for (size_t j = 0; j < 2; ++j)
 			free_field(save_field[j]);
 		delwin(save_subwin);
