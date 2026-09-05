@@ -398,7 +398,7 @@ static void savefile_name(struct cdata *cdata, struct io *io)
 	if (!fn_copy)
 		ERR_EXIT("save_chart fn_copy malloc");
 		
-	memcpy(fn_copy, filename, (size_t)len);
+	memcpy(fn_copy, filename, (size_t)len +1);
 	
 	while (len > 0 && fn_copy[len - 1] == ' ')
 		len--;
@@ -485,9 +485,9 @@ static void savefile_name(struct cdata *cdata, struct io *io)
 void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 {
 	xdg_check(xdg_path, "charts");
-	memcpy(io->filepath, xdg_path, strlen(xdg_path));
+	memcpy(io->filepath, xdg_path, strlen(xdg_path)+1);
 	
-	size_t size = file_count(xdg_path, 1);
+	size_t size = file_count(xdg_path, 1) + 1;
 	
 	ITEM **item_save = calloc(size, sizeof(ITEM *));
 	if (!item_save)
@@ -508,7 +508,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 {
 	xdg_check(xdg_path, "charts");
-	memcpy(io->filepath, xdg_path, strlen(xdg_path));
+	memcpy(io->filepath, xdg_path, strlen(xdg_path)+1);
 	
 	MENU *load_menu;
 	WINDOW *load_win;
