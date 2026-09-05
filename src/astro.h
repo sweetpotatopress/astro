@@ -140,7 +140,6 @@ struct cdata {
 
 struct io {
 	char *filepath;
-	char *filename;
 	char *cur_chart;
 };
 

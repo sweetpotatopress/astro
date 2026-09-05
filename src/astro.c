@@ -118,13 +118,9 @@ int main()
 		io[i]->filepath = calloc(1, MAXBUF);
 		if (!io[i]->filepath)
 			ERR_EXIT("main io->filepath malloc");
-		io[i]->filename = calloc(1, MAXBUF);
-		if (!io[i]->filename)
-			ERR_EXIT("main io->filename malloc");
 		io[i]->cur_chart = calloc(1, MAXBUF);
 		if (!io[i]->cur_chart)
 			ERR_EXIT("main io->cur_chart malloc");
-	
 	}
 	
 	xdg_check(xdg_path, "ephe");
@@ -338,7 +334,6 @@ int main()
 		free(cdata[i]);
 		free(pxx[i]);
 		free(io[i]->filepath);
-		free(io[i]->filename);
 		free(io[i]->cur_chart);
 		free(io[i]);
 	}
