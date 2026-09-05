@@ -121,6 +121,10 @@ int main()
 		io[i]->filename = calloc(1, MAXBUF);
 		if (!io[i]->filename)
 			ERR_EXIT("main io->filename malloc");
+		io[i]->cur_chart = calloc(1, MAXBUF);
+		if (!io[i]->cur_chart)
+			ERR_EXIT("main io->cur_chart malloc");
+	
 	}
 	
 	xdg_check(xdg_path, "ephe");
@@ -236,10 +240,10 @@ int main()
 					in_cdata(in_cdata_win, in_cdata_subwin,
 					io[cur_chart], cdata[cur_chart], xdg_path, mode);
 			
-					free(io[cur_chart]->filename);
-					io[cur_chart]->filename = calloc(1, MAXBUF);
-					if (!io[cur_chart]->filename)
-						ERR_EXIT("case i io->filename calloc");
+					free(io[cur_chart]->cur_chart);
+					io[cur_chart]->cur_chart = calloc(1, MAXBUF);
+					if (!io[cur_chart]->cur_chart)
+						ERR_EXIT("case i io->cur_chart calloc");
 		
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
@@ -335,6 +339,7 @@ int main()
 		free(pxx[i]);
 		free(io[i]->filepath);
 		free(io[i]->filename);
+		free(io[i]->cur_chart);
 		free(io[i]);
 	}
 	

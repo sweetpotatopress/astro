@@ -574,8 +574,6 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 			case 'l': case KEY_RIGHT: case '\n':
 				if ((int)icount == 0)
 					break;
-			
-				snprintf(io->filename, MAXBUF, "%s", selected);
 				
 				snprintf(newpath, MAXBUF,
 				"%s/%s", io->filepath, selected);
@@ -589,6 +587,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 					break;
 				}
 				
+				snprintf(io->cur_chart, MAXBUF, "%s", selected);
 				buffer = malloc(MAXBUF);
 				if (!buffer)
 					ERR_EXIT("load_chart case l buffer");

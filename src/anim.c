@@ -33,8 +33,8 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 	int starty = (LINES / 2) - 4;
 	int startx = (COLS / 2) - 4;
 	
-	if(io->filename)
-		mvwprintw(main_win, starty, startx, "%s", io->filename);
+	if(io->cur_chart)
+		mvwprintw(main_win, starty, startx, "%s", io->cur_chart);
 	
 	starty += 1;
 	if (cdata->state && !isdigit((unsigned char)cdata->state[0]) &&
