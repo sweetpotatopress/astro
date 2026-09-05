@@ -25,7 +25,7 @@
 #include "indat.h"
 #include "init.h"
 
-#define VERSION 0.74.6
+#define VERSION 0.74.7
 
 int main()
 {
