@@ -508,7 +508,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 }
 
 
-void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char **name, char **desc, char xdg_path[])
+static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char **name, char **desc, char xdg_path[])
 {
 	size_t icount = name_to_item(io, item_load, name, desc);
 	
