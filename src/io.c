@@ -160,17 +160,17 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 	
 	mvwprintw(save_win, 1, 1, " charts");
 	mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
+	
 	post_menu(save_menu);
 	wrefresh(save_win);
-	
-	char cur_dir[MAXBUF] = {0};
-	snprintf(cur_dir, MAXBUF, "charts");
 	
 	struct stat st;
 	const char *selected = NULL;
 	ITEM *cur = NULL;
 	char *mdir = NULL;
 	char newpath[MAXPATH] = {0};
+	char cur_dir[MAXBUF] = {0};
+	snprintf(cur_dir, MAXBUF, "charts");
 	
 	int menu_done = 0, ch = 0;
 	while (!menu_done && (ch = wgetch(save_win)))
@@ -228,8 +228,8 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 					ERR_EXIT("save_chart mdir case m");
 				
 				echo();
-				wprintw(save_win, "dir name?");
-				mvwgetnstr(save_win, 1, 1, mdir, 127);
+				mvwprintw(save_win, 1, 1, "dir name?:");
+				mvwgetnstr(save_win, 1, 12, mdir, 127);
 				noecho();
 				
 				snprintf(newpath, MAXPATH,
@@ -238,16 +238,15 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 				if (mkdir(newpath, 0755) == -1)
 					ERR_EXIT("save_menu mkdir fail");
 				
-				memcpy(io->filepath, newpath, strlen(newpath) + 1);	
+				snprintf(cur_dir, MAXBUF, "%s/", mdir);
 				
 				free(mdir);
-				menu_done = 1;
 				break;
 			case 'q': case 27:
 				menu_done = 1;
 				break;
 		}
-		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT)
+		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT || ch == 'm')
 		{
 			unpost_menu(save_menu);
 			set_menu_items(save_menu, NULL); // ncurses doesnt free connected items
