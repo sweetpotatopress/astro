@@ -194,7 +194,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 					memcpy(io->filepath, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, "/%s", selected);
 				}
-				mvwprintw(save_win, 1, 1, "save to %s?", selected);
+				mvwprintw(save_win, 1, 1, "save to %s?", cur_dir);
 				if ((ch = wgetch(save_win)) == '\n')
 				{
 					save = 1;
