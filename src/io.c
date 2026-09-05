@@ -97,7 +97,7 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 	if (!dir)
 		ERR_EXIT("wahhhh");
 	
-	size_t i = 0;
+	size_t count = 0;
 	while ((entry = readdir(dir)) != NULL)
 	{
 		if (strcmp(entry->d_name, ".") != 0 &&
@@ -105,33 +105,33 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 		{
 			snprintf(fn_buf, sizeof(fn_buf), "%s/%s", io->filepath, entry->d_name);
 			
-			name[i] = malloc(MAXBUF);
-			if (!name[i])
+			name[count] = malloc(MAXBUF);
+			if (!name[count])
 				ERR_EXIT("S_ISDIR save_chart file_name");
 				
-			desc[i] = malloc(MAXBUF);
-			if (!desc[i])
+			desc[count] = malloc(MAXBUF);
+			if (!desc[count])
 				ERR_EXIT("S_ISDIR save_chart file_desc");
 		
 			if (stat(fn_buf, &st) == -1)
 				ERR_EXIT("no stat 4 u");
-			snprintf(desc[i], sizeof(fn_buf), "%s", entry->d_name);
+			snprintf(desc[count], sizeof(fn_buf), "%s", entry->d_name);
 			if (S_ISDIR(st.st_mode))
-				snprintf(name[i], sizeof(fn_buf), "[%s]", entry->d_name);
+				snprintf(name[count], sizeof(fn_buf), "[%s]", entry->d_name);
 			else
-				snprintf(name[i], sizeof(fn_buf), " %s", entry->d_name);
+				snprintf(name[count], sizeof(fn_buf), " %s", entry->d_name);
 				
-			item[i] = new_item(name[i], desc[i]);
-			++i;
+			item[count] = new_item(name[count], desc[count]);
+			++count;
 		}
 	}
+	item[count] = NULL;
 	
-	item[i] = NULL;
 	closedir(dir);
-	return i;
+	return count;
 }
 
-static void print_save_menu(struct io *io, ITEM **item_save, char **name, char **desc, char *xdg_path)
+static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **desc, char *xdg_path)
 {
 	size_t icount = name_to_item(io, item_save, name, desc);
 	
@@ -141,6 +141,7 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 	
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
+	int save = 0;
 	
 	WINDOW *save_win = newwin(height, width, starty, startx);
 	WINDOW *save_subwin = derwin(save_win, height - header, width - 2, 3, 1);
@@ -162,16 +163,15 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 	post_menu(save_menu);
 	wrefresh(save_win);
 	
-	struct stat st;
-	ITEM *cur = NULL;
-	char *cur_dir = malloc(MAXBUF * sizeof(char));
-	if (!cur_dir)
-		ERR_EXIT("cur_dir");
+	char cur_dir[MAXBUF] = {0};
 	snprintf(cur_dir, MAXBUF, "charts");
-	const char *selected = NULL;
-	char *mdir = NULL;
 	
+	struct stat st;
+	const char *selected = NULL;
+	ITEM *cur = NULL;
+	char *mdir = NULL;
 	char newpath[MAXPATH] = {0};
+	
 	int menu_done = 0, ch = 0;
 	while (!menu_done && (ch = wgetch(save_win)))
 	{
@@ -196,7 +196,10 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 				}
 				mvwprintw(save_win, 1, 1, "save to %s?", selected);
 				if ((ch = wgetch(save_win)) == '\n')
+				{
+					save = 1;
 					menu_done = 1;
+				}
 				else
 				{
 					mvwhline(save_win, 1, 1, ' ',  width - 2);
@@ -287,7 +290,6 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 		free(name[i]);
 		free(desc[i]);
 	}
-	free(cur_dir);
 	free(desc);
 	free(name);
 	free(item_save);
@@ -296,6 +298,8 @@ static void print_save_menu(struct io *io, ITEM **item_save, char **name, char *
 	wrefresh(save_win);
 	delwin(save_subwin);
 	delwin(save_win);
+	
+	return save;
 }
 
 static void savefile_name(struct cdata *cdata, struct io *io)
@@ -484,23 +488,22 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	xdg_check(xdg_path, "charts");
 	memcpy(io->filepath, xdg_path, strlen(xdg_path));
 	
-	size_t cnt = file_count(xdg_path, 1);
+	size_t size = file_count(xdg_path, 1);
 	
-	ITEM **item_save = calloc(cnt, sizeof(ITEM *));
+	ITEM **item_save = calloc(size, sizeof(ITEM *));
 	if (!item_save)
 		ERR_EXIT("**item_save calloc");
 
-	char **file_name = calloc(cnt, sizeof(char *));
-	if (!file_name)
+	char **name = calloc(size, sizeof(char *));
+	if (!name)
 		ERR_EXIT("save_chart file_name calloc");
 	
-	char **file_desc = calloc(cnt, sizeof(char *));
-	if (!file_desc)
+	char **desc = calloc(size, sizeof(char *));
+	if (!desc)
 		ERR_EXIT("save_chart file_desc calloc");
 	
-	print_save_menu(io, item_save, file_name, file_desc, xdg_path);
-	
-	savefile_name(cdata, io);
+	if (print_save_menu(io, item_save, name, desc, xdg_path) == 1)
+		savefile_name(cdata, io);
 }
 
 void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
