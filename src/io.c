@@ -159,6 +159,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 	set_menu_sub(save_menu, save_subwin);
 	
 	mvwprintw(save_win, 1, 1, " charts");
+	mvwprintw(save_win, 1, width - 4, "{s}");
 	mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
 	
 	post_menu(save_menu);
@@ -260,6 +261,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 			werase(save_win);
 			wnoutrefresh(save_win);
 			mvwprintw(save_win, 1, 1, " %s", cur_dir);
+			mvwprintw(save_win, 1, width - 4, "{s}");
 			mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
 			
 			icount = name_to_item(io, item_save, name, desc);
@@ -534,6 +536,7 @@ void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char 
 	set_menu_sub(load_menu, load_subwin);
 	
 	mvwprintw(load_win, 1, 1, " charts/");
+	mvwprintw(load_win, 1, width - 4, "{l}");
 	mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
 	
 	post_menu(load_menu);
@@ -542,6 +545,7 @@ void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char 
 	struct stat st;
 	const char *selected = NULL;
 	ITEM *cur = NULL;
+	
 	char *buffer = NULL;
 	char field[FMAX][MAXBUF] = {0};
 	char newpath[MAXBUF] = {0};
@@ -577,14 +581,11 @@ void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char 
 				if (stat(newpath, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
-					// copy new file path to open
 					memcpy(io->filepath, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, " /%s", selected);
 					
 					break;
 				}
-				
-				// load selected file
 				
 				buffer = malloc(MAXBUF);
 				if (!buffer)
@@ -609,36 +610,42 @@ void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char 
 					cdata->tm_year = (int)lret;
 				else
 					cdata->tm_year = 1970;
+				errno = 0;
 							
 				lret = strtol(field[FMONTH], &endptr, 10);
 				if (errno != ERANGE && lret != -1)
 					cdata->tm_mon = (int)lret;
 				else
 					cdata->tm_mon = 1;
+				errno = 0;
 							
 				lret = strtol(field[FDAY], &endptr, 10);
 				if (errno != ERANGE && lret != -1)
 					cdata->tm_mday = (int)lret;
 				else
 					cdata->tm_mday = 1;
+				errno = 0;
 							
 				lret = strtol(field[FHOUR], &endptr, 10);
 				if (errno != ERANGE && lret != -1) 
 					cdata->tm_hour = (int)lret;
 				else
 					cdata->tm_hour = 1;
+				errno = 0;
 								
 				lret = strtol(field[FMIN], &endptr, 10);
 				if (errno != ERANGE && lret != -1)
 					cdata->tm_min = (int)lret;
 				else
 					cdata->tm_min = 1;
+				errno = 0;
 					
 				lret = strtol(field[FSEC], &endptr, 10);
 				if (errno != ERANGE && lret != -1)
 					cdata->tm_sec = (int)lret;
 				else
 					cdata->tm_sec = 0;
+				errno = 0;
 							
 				if (setenv("TZ", field[FTZ], 1) != 0)
 					ERR_EXIT("ERR: TZ setenv fail field_to_member");
@@ -649,21 +656,24 @@ void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char 
 					cdata->dlat = dret;
 				else
 					cdata->dlat = 0.0;
+				errno = 0;
 						
 				dret = strtod(field[FLON], &endptr);
 				if (errno != ERANGE)
 					cdata->dlon = dret;
 				else
 					cdata->dlon = 0.0;
+				errno = 0;
 				
 				lret = strtol(field[FDST], &endptr, 10);
 				if (lret > 0)
 					cdata->tm_isdst = YDST;
 				else if (lret == 0)
 					cdata->tm_isdst = NDST;
+				errno = 0;
 					
-				free(buffer);
 				fclose(fp);
+				free(buffer);
 				
 				menu_done = 1;
 				break;
@@ -690,6 +700,7 @@ void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char 
 			werase(load_win);
 			wnoutrefresh(load_win);
 			mvwprintw(load_win, 1, 1, " %s", cur_dir);
+			mvwprintw(load_win, 1, width - 4, "{l}");
 			mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
 			
 			icount = name_to_item(io, item_load, name, desc);
@@ -734,17 +745,17 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	xdg_check(xdg_path, "charts");
 	memcpy(io->filepath, xdg_path, strlen(xdg_path)+1);
 	
-	size_t cnt = file_count(xdg_path, 1);
+	size_t count = file_count(xdg_path, 1) + 1;
 	
-	ITEM **item_load = calloc(cnt, sizeof(ITEM *));
+	ITEM **item_load = calloc(count, sizeof(ITEM *));
 	if (!item_load)
 		ERR_EXIT("load_chart item_load calloc");
 
-	char **name = calloc(cnt, sizeof(char *));
+	char **name = calloc(count, sizeof(char *));
 	if (!name)
 		ERR_EXIT("load_chart file_name calloc");
 	
-	char **desc = calloc(cnt, sizeof(char *));
+	char **desc = calloc(count, sizeof(char *));
 	if (!desc)
 		ERR_EXIT("load_chart file_desc calloc");
 	
