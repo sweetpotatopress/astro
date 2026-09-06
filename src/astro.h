@@ -147,5 +147,4 @@ enum mode { NORMAL, INSERT };
 
 void *ecalloc(size_t n, size_t size);
 void *erealloc(void *p, size_t size);
-void enanosleep(unsigned int ms);
 void config_parse(struct cdata *cdata, char xdg_path[]);

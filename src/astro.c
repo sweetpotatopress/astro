@@ -43,14 +43,6 @@ void *erealloc(void *p, size_t size)
 	return p;
 }
 
-void enanosleep(unsigned int ms)
-{
-	struct timespec ts;
-	ts.tv_sec = ms / 1000;
-	ts.tv_nsec = (ms % 1000) * 1000000;
-	nanosleep(&ts, NULL);
-}
-
 int main()
 {
 	IANA_CHECK();
