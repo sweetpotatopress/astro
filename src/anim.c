@@ -93,6 +93,10 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 		mvwprintw(main_win, starty, startx, "DST UTC%+02d", utc);
 	else
 		mvwprintw(main_win, starty, startx, "UTC%+02d", utc);
+		
+	starty += 1;
+	if (cdata->timezone)
+		mvwprintw(main_win, starty, startx, "%s", cdata->timezone);
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)

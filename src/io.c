@@ -616,6 +616,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 				if (setenv("TZ", field[FTZ], 1) != 0)
 					ERR_EXIT("ERR: TZ setenv fail field_to_member");
 				tzset();
+				memcpy(cdata->timezone, field[FTZ], strlen(field[FTZ]) + 1);
 						
 				dret = strtod(field[FLAT], &endptr);
 				if (errno != ERANGE)

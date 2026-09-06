@@ -13,6 +13,7 @@
 // along with this program. if not, see <https://www.gnu.org/licenses/>
  
 #include <stdlib.h>
+#include <time.h>
 #include "swephexp.h"
 #include "astro.h"
 #include "table.h"
@@ -272,6 +273,9 @@ void new_chart(NEW_CHART_PARAM())
 	planet, cdata, pxx);
 	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata,
 	pl_sym, zo_sym, cur_chart);
+	if (setenv("TZ", cdata->timezone, 1) != 0)
+		ERR_EXIT("ERR: new_chart setenv");
+	tzset();
 	cur_chart_data(main_win, io, cdata);
 	
 	if (*left_trig > 0)

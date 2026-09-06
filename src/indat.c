@@ -172,6 +172,7 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 		case TIMEZONE:
 			if (setenv("TZ", buffer, 1) != 0)
 				ERR_EXIT("ERR: TZ setenv fail field_to_member");
+			memcpy(cdata->timezone, buffer, strlen(buffer) + 1);
 			tzset();
 			break;
 			
