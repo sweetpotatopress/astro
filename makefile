@@ -4,20 +4,18 @@ CFLAGS    ?= -Wall -Wextra -Wpedantic -Isrc -Iswisseph \
              -Wdouble-promotion -Wtype-limits \
              -Wold-style-declaration \
              -Wformat-security -Wformat-nonliteral \
-             -Wjump-misses-init -Wuninitialized \
-             -Wmissing-field-initializers \
+             -Wuninitialized -Wmissing-field-initializers \
              -Wunused-variable -Wunused-function -Wunused-parameter \
-             -Wshadow -Wno-implicit-fallthrough \
+             -Wshadow -Wno-implicit-fallthrough -Werror=implicit-function-declaration \
              -Wredundant-decls -Wfloat-equal \
-             -Wnull-dereference \
-             -Waddress -Wimplicit-function-declaration \
-             -fanalyzer -O3
+             -Wnull-dereference -Waddress \
+             -O3 -std=c99 -D_POSIX_C_SOURCE=200809L
              
 TARGET		= astro
 SRCS		= $(wildcard src/*.c)
 INSTALL_DIR = /usr/local/bin
 
-SWE_CFLAGS	= -g -Wall -fPIC
+SWE_CFLAGS	= -g -Wall -fPIC -std=c99 -D_POSIX_C_SOURCE=200809L
 SWE_DIR     = swisseph
 SWE_SRCS	:= $(wildcard swisseph/*.c)
 SWE_OBJS	:= $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
@@ -55,10 +53,10 @@ all: $(SWE_DEPS)
 	    -lpanel -lmenu -lform -lncurses -ltinfo
 
 debug: $(SWE_DEPS)
-	@echo "-o--o-debug build (sanitizers) --o--/-"
+	@echo "-o--o-debug build --o--/-"
 	$(CC) \
 	  $(CFLAGS) \
-	  -g3 -fno-omit-frame-pointer \
+	  -g3 -fno-omit-frame-pointer -fanalyzer \
 	  -fsanitize=undefined,address,leak,bounds \
 	  -fno-sanitize-recover=undefined \
 	  -o $(TARGET) $(SRCS) \
@@ -69,29 +67,28 @@ $(SWE_DIR)/%.o: $(SWE_DIR)/%.c
 	$(CC) $(SWE_CFLAGS) -c $< -o $@
 		
 $(SWE_A): $(SWE_OBJS)
-	/bin/ar rcs $@ $(SWE_OBJS)
-	/bin/rm -f $(SWE_OBJS)
+	ar rcs $@ $(SWE_OBJS)
+	rm -f $(SWE_OBJS)
 
 install: all
 	@echo "-x--o installing astro --oo-"
-	/bin/mkdir -p "$(INSTALL_DIR)"
-	/bin/cp "$(TARGET)" "$(INSTALL_DIR)/$(TARGET)"
+	mkdir -p "$(INSTALL_DIR)"
+	cp "$(TARGET)" "$(INSTALL_DIR)/$(TARGET)"
 
 	@echo "-x--o creating data directories --oo-"
-	/bin/mkdir -p "$(CONFIG_DIR)"; \
-	/bin/mkdir -p "$(CHARTS_DIR)"; \
-	/bin/chown -R $(REAL_USER):$(REAL_USER) "$(CONFIG_DIR)"; \
-	/bin/chown -R $(REAL_USER):$(REAL_USER) "$(DATA_DIR)"
+	mkdir -p "$(CONFIG_DIR)"; \
+	mkdir -p "$(CHARTS_DIR)"; \
+	chown -R $(REAL_USER):$(REAL_USER) "$(CONFIG_DIR)"; \
+	chown -R $(REAL_USER):$(REAL_USER) "$(DATA_DIR)"
 
-	/bin/cp -r "$(SWE_DIR)/ephe" "$(DATA_DIR)/"; \
-	/bin/cp city-db "$(DATA_DIR)/city-db"
+	cp -r "$(SWE_DIR)/ephe" "$(DATA_DIR)/"; \
+	cp city-db "$(DATA_DIR)/city-db"
 
 swe-install: $(SWE_A)
 	@echo "--o-installing swiss ephemeris x<--o-"
-
-	/bin/mkdir -p "$(CHARTS_DIR)" "$(EPHE_DIR)"; \
-	/bin/chown -R $(REAL_USER):$(REAL_USER) "$(DATA_DIR)"; \
-	/bin/cp -r "$(SWE_DIR)/ephe" "$(DATA_DIR)/"
+	mkdir -p "$(CHARTS_DIR)" "$(EPHE_DIR)"; \
+	chown -R $(REAL_USER):$(REAL_USER) "$(DATA_DIR)"; \
+	cp -r "$(SWE_DIR)/ephe" "$(DATA_DIR)/"
 
 clean:
 	rm -f "$(TARGET)"
