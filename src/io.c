@@ -514,7 +514,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 	const char *selected = NULL;
 	ITEM *cur = NULL;
 	
-	char *buffer = ecalloc(1,MAXBUF);
+	char buffer[MAXBUF] = {0};
 	char field[FMAX][MAXBUF] = {0};
 	char newpath[MAXBUF] = {0};
 	char cur_dir[MAXBUF] = {0};
@@ -564,7 +564,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 				while (fgets(buffer, MAXBUF, fp) != NULL && count < FMAX)
 				{
 					buffer[strcspn(buffer, "\n")] = 0;
-					memcpy(field[count++], buffer, strlen(buffer) + 1);
+					snprintf(field[count++], MAXBUF, "%s", buffer);
 				}
 					
 				memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
@@ -639,7 +639,6 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 				errno = 0;
 					
 				fclose(fp);
-				free(buffer);
 				
 				menu_done = 1;
 				break;
