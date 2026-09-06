@@ -30,6 +30,7 @@
 int main()
 {
 	IANA_CHECK();
+	
 	// sun, moon, mercury, venus, mars, jupiter,
 	// saturn, uranus, neptune, pluto, south, north node
 	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
@@ -235,12 +236,9 @@ int main()
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,
 					io[cur_chart], cdata[cur_chart], xdg_path, mode);
+					
+					memset(io[cur_chart]->cur_chart, 0, MAXBUF);
 			
-					free(io[cur_chart]->cur_chart);
-					io[cur_chart]->cur_chart = calloc(1, MAXBUF);
-					if (!io[cur_chart]->cur_chart)
-						ERR_EXIT("case i io->cur_chart calloc");
-		
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
