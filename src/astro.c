@@ -13,6 +13,7 @@
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
 #include <unistd.h>
+#include <time.h>
 #include <ncurses.h>
 #include <panel.h>
 #include "swephexp.h"
@@ -40,6 +41,14 @@ void *erealloc(void *p, size_t size)
 	if (!(p = realloc(p, size)))
 		ERR_EXIT("\nrealloc: out of memory\n");
 	return p;
+}
+
+void enanosleep(unsigned int ms)
+{
+	struct timespec ts;
+	ts.tv_sec = ms / 1000;
+	ts.tv_nsec = (ms % 1000) * 1000000;
+	nanosleep(&ts, NULL);
 }
 
 int main()

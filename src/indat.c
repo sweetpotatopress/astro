@@ -13,6 +13,7 @@
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
 #include <ncurses.h>
+#include <strings.h>
 #include <form.h>
 #include <errno.h>
 #include <time.h>

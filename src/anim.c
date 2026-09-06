@@ -115,7 +115,7 @@ void realtime_chart(NEW_CHART_PARAM())
 	
 		for (int i = 0; i < 10; ++i)
 		{
-			usleep(10000);
+			enanosleep(10);
 			if (ch == 9 || ch == 'q')
 				break;
 			if (ch == 'p' && *left_trig == 0)
@@ -463,7 +463,7 @@ void animate_chart(NEW_CHART_PARAM())
 				break;
 			}
 		flushinp();
-		usleep(8666);
+		enanosleep(10);
 		switch(i)
 		{
 			case SECOND:
