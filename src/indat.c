@@ -70,7 +70,7 @@ static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 
 static void buff_trim(FIELD *current, char *buffer)
 {
-	char *fbuf = field_buffer(current, 0);
+	char *f = field_buffer(current, 0);
 	int len = 0;
 	field_info(current, NULL, &len, NULL, NULL, NULL, NULL);
 	
@@ -80,17 +80,11 @@ static void buff_trim(FIELD *current, char *buffer)
 		return;
 	}
 	
-	memcpy(buffer, fbuf, (size_t)len);
+	memcpy(buffer, f, (size_t)len);
 	
-	// decrement one to be in bounds, trim
-	--len;
-	while(len >= 0 && buffer[len] == ' ')
-	{
-		if (buffer[len] == '\n')
-			buffer[len] = 0;
+	while(len > 0 && buffer[len - 1] == ' ')
 		--len;
-	}
-	buffer[len + 1] = '\0';
+	buffer[len] = '\0';
 }
 
 static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_form, FIELD *cdata_field[])
@@ -103,8 +97,7 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 	double dret;
 	errno = 0;
 	
-	char *buffer = ecalloc(1,MAXBUF);
-	
+	char buffer[MAXBUF] = {0};
 	buff_trim(current, buffer);
 	
 	switch(index)
@@ -197,7 +190,6 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 				cdata->dlon = 0.0;
 			break;
 	}
-	free(buffer);
 }
 
 static void validate_fields(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata, char xdg_path[])
