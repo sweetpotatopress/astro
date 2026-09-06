@@ -80,9 +80,7 @@ static char *xstrtok(char *s, const char *delim)
 static char *xstrdup(const char *s)
 {
 	size_t l = strlen(s);
-	char *d = malloc(l+1);
-	if (!d)
-		ERR_EXIT("ERR:xstrdup");
+	char *d = ecalloc(1,l+1);
 	return memcpy(d, s, l+1);
 }
 
@@ -95,9 +93,7 @@ static ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t l
 		
 	size_t count = last - first;
 		
-	ITEM **range = calloc(count + 1, sizeof *range);
-	if (!range)
-		ERR_EXIT("range calloc");
+	ITEM **range = ecalloc(count + 1, sizeof *range);
 		
 	for (size_t i = 0; i < count; ++i)
 		range[i] = items[first + i];
@@ -228,16 +224,10 @@ struct cdata *cdata, char xdg_path[])
 	
 	char *field[SMAX] = {0};
 	for (int i = 0; i < SMAX; ++i)
-	{
-		field[i] = calloc(MAXBUF, sizeof(*field[i]));
-		if (!field[i])
-			ERR_EXIT("field[i] calloc");
-	}
+		field[i] = ecalloc(MAXBUF, sizeof(*field[i]));
 	
 	size_t tmpmax = 16;
-	struct cdata **search_result = calloc(tmpmax, sizeof(struct cdata *));
-	if (!search_result)
-		ERR_EXIT("city_search search_result calloc");
+	struct cdata **search_result = ecalloc(tmpmax, sizeof(struct cdata *));
 	
 	size_t search_count = 0;
 	
@@ -267,15 +257,11 @@ struct cdata *cdata, char xdg_path[])
 			if(search_count >= tmpmax)
 			{
 				tmpmax *= 2;
-				struct cdata **tmp = realloc(search_result, tmpmax * sizeof(*search_result));
-				if (!tmp)
-					ERR_EXIT("city_search realloc");
+				struct cdata **tmp = erealloc(search_result, tmpmax * sizeof(*search_result));
 				search_result = tmp;
 			}
 			
-			search_result[search_count] = malloc(sizeof(*search_result[search_count]));
-			if (!search_result[search_count])
-				ERR_EXIT("search_result[count] malloc");
+			search_result[search_count] = ecalloc(1,sizeof(*search_result[search_count]));
 				
 			search_result[search_count]->city = xstrdup(field[ASCIINAME]);
 			search_result[search_count]->country = xstrdup(field[COUNTRYCODE]);
@@ -293,13 +279,9 @@ struct cdata *cdata, char xdg_path[])
 	}
 	fclose(fp);
 	
-	char **full_result = calloc(search_count, sizeof(char *));
-	if (!full_result)
-		ERR_EXIT("print_menu full_result calloc");
+	char **full_result = ecalloc(search_count, sizeof(char *));
 	
-	ITEM **item_result = calloc(search_count, sizeof(ITEM *));
-	if (!item_result)
-		ERR_EXIT("print_menu citties calloc");
+	ITEM **item_result = ecalloc(search_count, sizeof(ITEM *));
 		
 	if (search_count == 0)
 	{
@@ -310,9 +292,7 @@ struct cdata *cdata, char xdg_path[])
 	
 	for (size_t i = 0; i < search_count; ++i)
 	{
-		full_result[i] = malloc(MAXBUF);
-		if(!full_result[i])
-			ERR_EXIT("print_menu full_result[i] malloc");
+		full_result[i] = ecalloc(1,MAXBUF);
 	
 		snprintf(full_result[i], MAXBUF,
 		"%-25.25s %.2s %-2.2s %-8s %-8s",

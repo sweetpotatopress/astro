@@ -145,4 +145,6 @@ struct io {
 
 enum mode { NORMAL, INSERT };
 
+void *ecalloc(size_t n, size_t size);
+void *erealloc(void *p, size_t size);
 void config_parse(struct cdata *cdata, char xdg_path[]);

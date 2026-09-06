@@ -105,13 +105,8 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 		{
 			snprintf(buf, sizeof(buf), "%s/%s", io->filepath, entry->d_name);
 			
-			name[count] = malloc(MAXBUF);
-			if (!name[count])
-				ERR_EXIT("name alloc failure");
-				
-			desc[count] = malloc(MAXBUF);
-			if (!desc[count])
-				ERR_EXIT("desc alloc failure");
+			name[count] = ecalloc(1,MAXBUF);
+			desc[count] = ecalloc(1,MAXBUF);
 		
 			if (stat(buf, &st) == -1)
 				ERR_EXIT("no stat 4 u");
@@ -224,9 +219,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 			
 				break;
 			case 'm':
-				mdir = calloc(1, 128);
-				if (!mdir)
-					ERR_EXIT("save_chart mdir case m");
+				mdir = ecalloc(1, 128);
 				
 				echo();
 				mvwprintw(save_win, 1, 1, "dir name?:");
@@ -474,17 +467,9 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	
 	size_t size = file_count(xdg_path, 1) + 1;
 	
-	ITEM **item_save = calloc(size, sizeof(ITEM *));
-	if (!item_save)
-		ERR_EXIT("**item_save calloc");
-
-	char **name = calloc(size, sizeof(char *));
-	if (!name)
-		ERR_EXIT("save_chart file_name calloc");
-	
-	char **desc = calloc(size, sizeof(char *));
-	if (!desc)
-		ERR_EXIT("save_chart file_desc calloc");
+	ITEM **item_save = ecalloc(size, sizeof(ITEM *));
+	char **name = ecalloc(size, sizeof(char *));
+	char **desc = ecalloc(size, sizeof(char *));
 	
 	if (print_save_menu(io, item_save, name, desc, xdg_path) == 1)
 		save_file_name(cdata, io);
@@ -529,7 +514,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 	const char *selected = NULL;
 	ITEM *cur = NULL;
 	
-	char *buffer = NULL;
+	char *buffer = ecalloc(1,MAXBUF);
 	char field[FMAX][MAXBUF] = {0};
 	char newpath[MAXBUF] = {0};
 	char cur_dir[MAXBUF] = {0};
@@ -571,9 +556,6 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 				}
 				
 				snprintf(io->cur_chart, MAXBUF, "%s", selected);
-				buffer = malloc(MAXBUF);
-				if (!buffer)
-					ERR_EXIT("load_chart case l buffer");
 				
 				fp = fopen(newpath, "r");
 				if (fp == NULL)
@@ -731,17 +713,9 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	
 	size_t count = file_count(xdg_path, 1) + 1;
 	
-	ITEM **item_load = calloc(count, sizeof(ITEM *));
-	if (!item_load)
-		ERR_EXIT("load_chart item_load calloc");
-
-	char **name = calloc(count, sizeof(char *));
-	if (!name)
-		ERR_EXIT("load_chart file_name calloc");
-	
-	char **desc = calloc(count, sizeof(char *));
-	if (!desc)
-		ERR_EXIT("load_chart file_desc calloc");
+	ITEM **item_load = ecalloc(count, sizeof(ITEM *));
+	char **name = ecalloc(count, sizeof(char *));
+	char **desc = ecalloc(count, sizeof(char *));
 	
 	print_load_menu(cdata, io, item_load, name, desc, xdg_path);
 }

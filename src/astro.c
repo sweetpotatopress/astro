@@ -27,6 +27,21 @@
 
 #define VERSION 0.74.7
 
+void *ecalloc(size_t n, size_t size)
+{
+	void *p;
+	if (!(p = calloc(n, size)))
+		ERR_EXIT("\ncalloc: out of memory\n");
+	return p;
+}
+
+void *erealloc(void *p, size_t size)
+{
+	if (!(p = realloc(p, size)))
+		ERR_EXIT("\nrealloc: out of memory\n");
+	return p;
+}
+
 int main()
 {
 	IANA_CHECK();
@@ -58,9 +73,7 @@ int main()
 	double luna_eclipse[CHARTMAX][EMAX] = {0};
 	double sol_eclipse[CHARTMAX][EMAX] = {0};
 	
-	struct zxx *zxx = calloc(1, sizeof(*zxx));
-	if (!zxx)
-		ERR_EXIT("main zxx calloc");
+	struct zxx *zxx = ecalloc(1, sizeof(*zxx));
 		
 	int *zodiac[] = {
 		0,
@@ -73,55 +86,32 @@ int main()
 		
 	zxx_init(zodiac); // fills essential dignities
 	
-	struct pxx **pxx = calloc(CHARTMAX, sizeof(*pxx));
-	if (!pxx)
-		ERR_EXIT("main pxx");
+	struct pxx **pxx = ecalloc(CHARTMAX, sizeof(*pxx));
+	
 	for (int i = 0; i < CHARTMAX; ++i)
-	{
-		pxx[i] = calloc(1, sizeof(*pxx[i]));
-		if (!pxx[i])
-			ERR_EXIT("ERR: pxx[i] calloc");
-	}
+		pxx[i] = ecalloc(1, sizeof(*pxx[i]));
 		
 	double *planet[SPXXMAX];
 	planet_init(planet, cur_chart, pxx);
 	
-	struct cdata **cdata = calloc(CHARTMAX, sizeof(*cdata));
-	if (!cdata)
-		ERR_EXIT("main Location calloc");
+	struct cdata **cdata = ecalloc(CHARTMAX, sizeof(*cdata));
+	
 	for (int i = 0; i < CHARTMAX; ++i)
 	{
-		cdata[i] = calloc(1, sizeof(*cdata[i]));
-		if (!cdata[i])
-			ERR_EXIT("ERR: cdata[i] calloc");
-		cdata[i]->city = calloc(1, MAXBUF);
-		if (!cdata[i]->city)
-			ERR_EXIT("ERR: main cdata->city malloc");
-		cdata[i]->state = calloc(1, MAXBUF);
-		if (!cdata[i]->state)
-			ERR_EXIT("ERR: main cdata->state malloc");
-		cdata[i]->country = calloc(1, MAXBUF);
-		if (!cdata[i]->country)
-			ERR_EXIT("ERR: main cdata->country malloc");
-		cdata[i]->timezone = calloc(1, MAXBUF);
-		if (!cdata[i]->timezone)
-			ERR_EXIT("ERR: main cdata->timezone malloc");
+		cdata[i] = ecalloc(1, sizeof(*cdata[i]));
+		cdata[i]->city = ecalloc(1, MAXBUF);
+		cdata[i]->state = ecalloc(1, MAXBUF);
+		cdata[i]->country = ecalloc(1, MAXBUF);
+		cdata[i]->timezone = ecalloc(1, MAXBUF);
 	}
 
-	struct io **io = calloc(CHARTMAX, sizeof(*io));
-	if (!io)
-		ERR_EXIT("mai io calloc");
+	struct io **io = ecalloc(CHARTMAX, sizeof(*io));
+	
 	for (int i = 0; i < CHARTMAX; ++i)
 	{
-		io[i] = calloc(1, sizeof(*io[i]));
-		if (!io[i])
-			ERR_EXIT("ERR: io[i] calloc");
-		io[i]->filepath = calloc(1, MAXBUF);
-		if (!io[i]->filepath)
-			ERR_EXIT("main io->filepath malloc");
-		io[i]->cur_chart = calloc(1, MAXBUF);
-		if (!io[i]->cur_chart)
-			ERR_EXIT("main io->cur_chart malloc");
+		io[i] = ecalloc(1, sizeof(*io[i]));
+		io[i]->filepath = ecalloc(1, MAXBUF);
+		io[i]->cur_chart = ecalloc(1, MAXBUF);
 	}
 	
 	xdg_check(xdg_path, "ephe");

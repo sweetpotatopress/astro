@@ -31,9 +31,7 @@ static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 		return;
 	tzset();
 	
-	struct tm *gettime = malloc(sizeof(struct tm));
-	if (!gettime)
-		ERR_EXIT("set_locatime() gettime malloc");
+	struct tm *gettime = ecalloc(1,sizeof(struct tm));
 		
 	time_t now = time(NULL);
 	localtime_r(&now, gettime);
@@ -105,9 +103,7 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 	double dret;
 	errno = 0;
 	
-	char *buffer = malloc(MAXBUF);
-	if (!buffer)
-		ERR_EXIT("field_to_member buffer");
+	char *buffer = ecalloc(1,MAXBUF);
 	
 	buff_trim(current, buffer);
 	
