@@ -92,10 +92,10 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 {
 	struct dirent *entry;
 	struct stat st;
-	char fn_buf[MAXBUF] = {0};
+	char buf[MAXBUF] = {0};
 	DIR *dir = opendir(io->filepath);
 	if (!dir)
-		ERR_EXIT("wahhhh");
+		ERR_EXIT("name_to_item opendir failure");
 	
 	size_t count = 0;
 	while ((entry = readdir(dir)) != NULL)
@@ -103,23 +103,23 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 		if (strcmp(entry->d_name, ".") != 0 &&
 		strcmp(entry->d_name, "..") != 0)
 		{
-			snprintf(fn_buf, sizeof(fn_buf), "%s/%s", io->filepath, entry->d_name);
+			snprintf(buf, sizeof(buf), "%s/%s", io->filepath, entry->d_name);
 			
 			name[count] = malloc(MAXBUF);
 			if (!name[count])
-				ERR_EXIT("S_ISDIR save_chart file_name");
+				ERR_EXIT("name alloc failure");
 				
 			desc[count] = malloc(MAXBUF);
 			if (!desc[count])
-				ERR_EXIT("S_ISDIR save_chart file_desc");
+				ERR_EXIT("desc alloc failure");
 		
-			if (stat(fn_buf, &st) == -1)
+			if (stat(buf, &st) == -1)
 				ERR_EXIT("no stat 4 u");
-			snprintf(desc[count], sizeof(fn_buf), "%s", entry->d_name);
+			snprintf(desc[count], sizeof(buf), "%s", entry->d_name);
 			if (S_ISDIR(st.st_mode))
-				snprintf(name[count], sizeof(fn_buf), "[%s]", entry->d_name);
+				snprintf(name[count], sizeof(buf), "[%s]", entry->d_name);
 			else
-				snprintf(name[count], sizeof(fn_buf), " %s", entry->d_name);
+				snprintf(name[count], sizeof(buf), " %s", entry->d_name);
 				
 			item[count] = new_item(name[count], desc[count]);
 			++count;
@@ -305,21 +305,14 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 
 static void save_file_name(struct cdata *cdata, struct io *io)
 {
-	FIELD *save_field[2];
 	struct stat buff;
-	FORM *save_form;
 	char *tz_name = getenv("TZ");
-	char fn_buf[MAXBUF] = {0};
 	
-	int ch = 0;
-	int starty, startx, maxy, maxx;
 	int height = 5;
 	int width = 30;
 	
-	getmaxyx(stdscr, maxy, maxx);
-	
-	starty = (maxy - height) / 2;
-	startx = (maxx - width) / 2;
+	int starty = (LINES- height) / 2;
+	int startx = (COLS - width) / 2;
 	
 	WINDOW *save_win = newwin(height, width, starty, startx);
 	WINDOW *save_subwin = derwin(save_win, height - 2, width - 2, 0, 0);
@@ -329,6 +322,7 @@ static void save_file_name(struct cdata *cdata, struct io *io)
 	cbreak();
 	keypad(save_win, TRUE);
 	
+	FIELD *save_field[2];
 	save_field[0] = new_field(1, 25, 2, 2, 0, 0);
 	set_field_back(save_field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(save_field[0], O_STATIC);
@@ -336,7 +330,7 @@ static void save_file_name(struct cdata *cdata, struct io *io)
 	
 	save_field[1] = NULL;
 	
-	save_form = new_form(save_field);
+	FORM *save_form = new_form(save_field);
 	set_form_win(save_form, save_win);
 	set_form_sub(save_form, save_subwin);
 	
@@ -348,7 +342,7 @@ static void save_file_name(struct cdata *cdata, struct io *io)
 	wrefresh(save_win);
 	pos_form_cursor(save_form);
 	
-	int done = 0;
+	int done = 0, ch = 0;
 	while(!done && (ch = wgetch(save_win)))
 	{
 		switch (ch)
@@ -391,29 +385,21 @@ static void save_file_name(struct cdata *cdata, struct io *io)
 	}
 	
 	char *filename = field_buffer(save_field[0], 0);
-	
-	// get field length, trim blank space from field_buffer, add null 0
+	char fn[MAXBUF] = {0};
+	char newpath[MAXBUF] = {0};
 	int len = 0;
+	
 	field_info(save_field[0], NULL, &len, NULL, NULL, NULL, NULL);
 	
-	char *fn_copy = malloc((size_t)len + 1);
-	if (!fn_copy)
-		ERR_EXIT("save_chart fn_copy malloc");
-		
-	memcpy(fn_copy, filename, (size_t)len +1);
+	snprintf(fn, MAXBUF, "%s", filename);
 	
-	while (len > 0 && fn_copy[len - 1] == ' ')
+	while (len > 0 && fn[len - 1] == ' ')
 		len--;
-	fn_copy[len] = '\0';
+	fn[len] = '\0';
 	
-	// create file path 
-	snprintf(fn_buf, MAXBUF, "%s/%s",
-	io->filepath,
-	fn_copy
-	);
+	snprintf(newpath, MAXBUF, "%s/%s", io->filepath, fn);
 	
-	// if file exists with same name, ask to overwrite
-	if (stat(fn_buf, &buff) == 0)
+	if (stat(newpath, &buff) == 0)
 	{
 		werase(save_win);
 		mvwprintw(save_win, 1, 1,
@@ -448,11 +434,10 @@ static void save_file_name(struct cdata *cdata, struct io *io)
 		}
 	}
 
-	FILE *ifp = fopen(fn_buf, "w");
+	FILE *ifp = fopen(newpath, "w");
 	if (!ifp)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
-	// copy data to file, \n delimited
 	fprintf(ifp, "%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f\n%d",
 		cdata->city,
 		cdata->state,
@@ -466,22 +451,20 @@ static void save_file_name(struct cdata *cdata, struct io *io)
 		tz_name,
 		cdata->dlat,
 		cdata->dlon,
-		cdata->tm_isdst
-		);
+		cdata->tm_isdst);
 		
 		fclose(ifp);
 		unpost_form(save_form);
 		werase(save_win);
 		wrefresh(save_win);
-		free_form(save_form);
 		
 		set_form_fields(save_form, NULL);
 		for (size_t j = 0; j < 2; ++j)
 			free_field(save_field[j]);
+		free_form(save_form);
+		
 		delwin(save_subwin);
 		delwin(save_win);
-		
-		free(fn_copy);
 }
 
 void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
