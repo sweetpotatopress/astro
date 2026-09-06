@@ -47,10 +47,10 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 	starty += 1;
 	if (cdata->state && !isdigit((unsigned char)cdata->state[0]) &&
 	strlen(cdata->state) > 1)
-		mvwprintw(main_win, starty, startx, "%s, %s, %s", cdata->city, cdata->state, cdata->country);
+		mvwprintw(main_win, starty, startx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
 		
 	else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
-		mvwprintw(main_win, starty, startx, "%s, %s", cdata->city, cdata->country);
+		mvwprintw(main_win, starty, startx, "%.22s, %s", cdata->city, cdata->country);
 		
 	starty += 1;
 	const char *month[] = 
@@ -96,7 +96,7 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 		
 	starty += 1;
 	if (cdata->timezone)
-		mvwprintw(main_win, starty, startx, "%s", cdata->timezone);
+		mvwprintw(main_win, starty, startx, "%.30s", cdata->timezone);
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)
