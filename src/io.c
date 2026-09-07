@@ -153,7 +153,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 	set_menu_win(save_menu, save_win);
 	set_menu_sub(save_menu, save_subwin);
 	
-	mvwprintw(save_win, 1, 1, " charts");
+	mvwprintw(save_win, 1, 1, " /charts");
 	mvwprintw(save_win, 1, width - 4, "{s}");
 	mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
 	
@@ -165,8 +165,8 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 	ITEM *cur = NULL;
 	char *mdir = NULL;
 	char newpath[MAXPATH] = {0};
-	char cur_dir[MAXBUF] = {0};
-	snprintf(cur_dir, MAXBUF, "charts");
+	char cur_dir[MAXPATH] = {0};
+	snprintf(cur_dir, MAXBUF, " /charts");
 	
 	int menu_done = 0, ch = 0;
 	while (!menu_done && (ch = wgetch(save_win)))
@@ -183,7 +183,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 				menu_driver(save_menu, REQ_UP_ITEM);
 				break;
 			case '\n':
-				snprintf(newpath, MAXPATH, "%s/%s/", io->filepath, selected);
+				snprintf(newpath, MAXPATH, "%s/%s", io->filepath, selected);
 				if (stat(newpath, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
@@ -204,18 +204,26 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 				}
 				break;
 			case 'l': case KEY_RIGHT:
-				snprintf(newpath, MAXPATH, "%s/%s/", io->filepath, selected);
+				snprintf(newpath, MAXPATH, "%s/%s", io->filepath, selected);
 				if (stat(newpath, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
 					memcpy(io->filepath, newpath, strlen(newpath) + 1);
-					snprintf(cur_dir, MAXBUF, "/%s", selected);
+					snprintf(cur_dir, MAXBUF, " /%s", selected);
 					break;
 				}
 				break;
-			case 'h': case KEY_LEFT:
-				memcpy(io->filepath, xdg_path, strlen(xdg_path) + 1);
-				snprintf(cur_dir, MAXBUF, "charts/");
+			case 'h': case KEY_LEFT: 
+			{
+				if (strcmp(io->filepath, xdg_path) == 0)
+					break;
+				char *l = strrchr(io->filepath, '/');
+				char a[128] = {0};
+				*l = '\0';
+				l = strrchr(io->filepath, '/');
+				memcpy(a, l, strlen(l) + 1);
+				snprintf(cur_dir, MAXBUF, " %s", a);
+			}
 			
 				break;
 			case 'm':
@@ -253,7 +261,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 			
 			werase(save_win);
 			wnoutrefresh(save_win);
-			mvwprintw(save_win, 1, 1, " %s", cur_dir);
+			mvwprintw(save_win, 1, 1, "%s", cur_dir);
 			mvwprintw(save_win, 1, width - 4, "{s}");
 			mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
 			
@@ -476,7 +484,7 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 }
 
 
-static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char **name, char **desc, char xdg_path[])
+static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char **name, char **desc, char *xdg_path)
 {
 	size_t icount = name_to_item(io, item_load, name, desc);
 	
@@ -503,7 +511,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 	set_menu_win(load_menu, load_win);
 	set_menu_sub(load_menu, load_subwin);
 	
-	mvwprintw(load_win, 1, 1, " charts/");
+	mvwprintw(load_win, 1, 1, " /charts");
 	mvwprintw(load_win, 1, width - 4, "{l}");
 	mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
 	
@@ -518,7 +526,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 	char field[FMAX][MAXBUF] = {0};
 	char newpath[MAXBUF] = {0};
 	char cur_dir[MAXBUF] = {0};
-	snprintf(cur_dir, MAXBUF, " charts/");
+	snprintf(cur_dir, MAXBUF, " /charts");
 	
 	char *endptr = NULL;
 	long lret;
@@ -644,9 +652,16 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 				menu_done = 1;
 				break;
 			case 'h': case KEY_LEFT:
-				memcpy(io->filepath, xdg_path, strlen(xdg_path) + 1);
-				snprintf(cur_dir, MAXBUF, "charts/");
-				
+			{
+				if (strcmp(io->filepath, xdg_path) == 0)
+					break;
+				char *l = strrchr(io->filepath, '/');
+				char a[128] = {0};
+				*l = '\0';
+				l = strrchr(io->filepath, '/');
+				memcpy(a, l, strlen(l) + 1);
+				snprintf(cur_dir, MAXBUF, " %s", a);
+			}
 				break;
 			case 'q': case 27:
 				menu_done = 1;
@@ -665,7 +680,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 			
 			werase(load_win);
 			wnoutrefresh(load_win);
-			mvwprintw(load_win, 1, 1, " %s", cur_dir);
+			mvwprintw(load_win, 1, 1, "%s", cur_dir);
 			mvwprintw(load_win, 1, width - 4, "{l}");
 			mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
 			
