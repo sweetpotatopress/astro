@@ -35,7 +35,7 @@
 #define EMAX 9
 
 int sect(struct pxx *pxx);
-int months(int month, int year);
+int leapyear(int month, int year);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);
 void retro_station(double jd_ut, double *planet[]);
 void calculate_utc(struct cdata *cdata);

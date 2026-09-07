@@ -313,7 +313,7 @@ void animate_chart(NEW_CHART_PARAM())
 	
 	mvwprintw(main_win, starty, startx, "(hour)");
 	
-	int max_day = 0; // months() return flag
+	int max_day = 0; // leapyear() return flag
 	size_t i = HOUR; // time inc/dec
 	
 	struct tm temp = {0};
@@ -358,7 +358,7 @@ void animate_chart(NEW_CHART_PARAM())
 							temp.tm_mon = 0;
 							++temp.tm_year;
 						}
-						max_day = months(temp.tm_mon, temp.tm_year);
+						max_day = leapyear(temp.tm_mon, temp.tm_year);
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
@@ -398,7 +398,7 @@ void animate_chart(NEW_CHART_PARAM())
 							temp.tm_mon = 11;
 							--temp.tm_year;
 						}
-						max_day = months(temp.tm_mon, temp.tm_year);
+						max_day = leapyear(temp.tm_mon, temp.tm_year);
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
