@@ -108,9 +108,6 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 			form_driver(cdata_form, REQ_VALIDATION);
 			
 			buff_trim(current, buffer);
-			
-			memcpy(cdata->city, buffer, strlen(buffer) + 1);
-			
 			break;
 			
 		case YEAR:
@@ -200,7 +197,6 @@ static void validate_fields(FIELD *cdata_field[], FORM *cdata_form, struct cdata
 	FIELD *current = current_field(cdata_form);
 	char buffer[MAXBUF] = {0};
 	buff_trim(current, buffer);
-	memcpy(cdata->city, buffer, strlen(buffer) + 1);
 		
 	for (int i = 1; i < FIELDMAX; i++)
 	{

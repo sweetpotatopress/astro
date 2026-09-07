@@ -241,10 +241,10 @@ int main()
 					break;
 				case 'i':
 					mode = INSERT;
+					cdata_init(cdata[cur_chart]);
 					in_cdata(in_cdata_win, in_cdata_subwin,
 					cdata[cur_chart], xdg_path, mode);
 					
-					cdata_init(cdata[cur_chart]);
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();

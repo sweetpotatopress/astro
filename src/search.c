@@ -183,11 +183,11 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 					set_field_buffer(cdata_field[LATITUDE], 0, search_result[iret]->latitude);
 					set_field_buffer(cdata_field[LONGITUDE], 0, search_result[iret]->longitude);
 					
-					memcpy(cdata->state, search_result[iret]->state,
-					strlen(search_result[iret]->state) + 1);
+					memcpy(cdata->city, search_result[iret]->city, strlen(search_result[iret]->city) + 1);
 					
-					memcpy(cdata->country, search_result[iret]->country,
-					strlen(search_result[iret]->country) + 1);
+					memcpy(cdata->state, search_result[iret]->state, strlen(search_result[iret]->state) + 1);
+					
+					memcpy(cdata->country, search_result[iret]->country, strlen(search_result[iret]->country) + 1);
 					
 					werase(city_win);
 					menu_done = 1;

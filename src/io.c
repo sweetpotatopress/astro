@@ -309,7 +309,6 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 static void save_file_name(struct cdata *cdata, char *filepath)
 {
 	struct stat buff;
-	char *tz_name = getenv("TZ");
 	
 	int height = 5;
 	int width = 30;
@@ -451,7 +450,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 		cdata->tm_hour,
 		cdata->tm_min,
 		cdata->tm_sec,
-		tz_name,
+		cdata->timezone,
 		cdata->dlat,
 		cdata->dlon,
 		cdata->tm_isdst);
