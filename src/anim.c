@@ -89,7 +89,7 @@ void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
 	if (utc < - 12)
 		utc += 24;
 		
-	if (cdata->tm_isdst > 0)
+	if (cdata->tm_isdst == YDST)
 		mvwprintw(main_win, starty, startx, "DST UTC%+02d", utc);
 	else
 		mvwprintw(main_win, starty, startx, "UTC%+02d", utc);

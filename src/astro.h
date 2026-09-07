@@ -69,8 +69,8 @@
 #define WATER 5
 
 // dst trigger
-#define NDST 2
-#define YDST 3
+#define NDST 0
+#define YDST 1
 
 // planet data
 #define LONG 0

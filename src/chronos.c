@@ -34,6 +34,7 @@ void set_localtime(struct cdata *cdata)
 	cdata->tm_min = gt.tm_min;
 	cdata->tm_sec = gt.tm_sec;
 	cdata->tm_wday = gt.tm_wday;
+	cdata->tm_isdst = gt.tm_isdst;
 }
 
 void weekday_check(struct cdata *cdata)
@@ -114,22 +115,12 @@ void calculate_utc(struct cdata *cdata)
 	tm_in.tm_hour = cdata->tm_hour;
 	tm_in.tm_min = cdata->tm_min;
 	tm_in.tm_sec = cdata->tm_sec;
-	if (cdata->tm_isdst == 3)
+	if (cdata->tm_isdst == YDST)
 		tm_in.tm_isdst = 1;
-	else if (cdata->tm_isdst == 2)
+	else if (cdata->tm_isdst == NDST)
 		tm_in.tm_isdst = 0;
-	else
-		tm_in.tm_isdst = -1;
 	
 	time_t t = mktime(&tm_in);
-	struct tm *result = localtime(&t);
-	
-	if (cdata->tm_isdst == 3)
-		cdata->tm_isdst = 1;
-	else if (cdata->tm_isdst == 2)
-		cdata->tm_isdst = 0;
-	else
-		cdata->tm_isdst = result->tm_isdst;
 	
 	struct tm *tm_utc = gmtime(&t);
 	

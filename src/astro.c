@@ -216,9 +216,9 @@ int main()
 					chart_done = 1;
 					break;
 				case 'd':
-					if (cdata[cur_chart]->tm_isdst == 0)
+					if (cdata[cur_chart]->tm_isdst == NDST)
 						cdata[cur_chart]->tm_isdst = YDST;
-					else if (cdata[cur_chart]->tm_isdst >= 1)
+					else if (cdata[cur_chart]->tm_isdst >= YDST)
 						cdata[cur_chart]->tm_isdst = NDST;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
