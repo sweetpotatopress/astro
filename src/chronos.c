@@ -288,7 +288,7 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const double eclipse_calc = 0.06;
+	const double eclipse_calc = 0.00001;
 	const int iter = 32;
 	const int multi = 8;
 	
