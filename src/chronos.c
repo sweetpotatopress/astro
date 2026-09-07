@@ -288,7 +288,7 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const double eclipse_calc = 1.0;
+	const double eclipse_calc = 0.06;
 	const int iter = 32;
 	const int multi = 8;
 	
@@ -300,14 +300,14 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 		
 		if (sol_eclipse[E_INIT] > 0)
 		{
-			double ens_jul = fabs(sol_eclipse[EN_FJUL] - jd_ut);
+			double ens_jul = sol_eclipse[EN_FJUL] - jd_ut;
 			sol_eclipse[EN_JUL] = ens_jul;
-			double eps_jul = fabs(sol_eclipse[EP_FJUL] - jd_ut);
+			double eps_jul = jd_ut - sol_eclipse[EP_FJUL];
 			sol_eclipse[EP_JUL] = eps_jul;
 			
-			double enl_jul = fabs(luna_eclipse[EN_FJUL] - jd_ut);
+			double enl_jul = luna_eclipse[EN_FJUL] - jd_ut;
 			luna_eclipse[EN_JUL] = enl_jul;
-			double epl_jul = fabs(luna_eclipse[EP_FJUL] - jd_ut);
+			double epl_jul = jd_ut - luna_eclipse[EP_FJUL];
 			luna_eclipse[EP_JUL] = epl_jul;
 		}
 		
