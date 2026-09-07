@@ -241,7 +241,6 @@ int main()
 					break;
 				case 'i':
 					mode = INSERT;
-					cdata[cur_chart]->tm_isdst = -1;
 					cdata_init(cdata[cur_chart]);
 					in_cdata(in_cdata_win, in_cdata_subwin,
 					cdata[cur_chart], xdg_path, mode);

@@ -27,6 +27,7 @@ void cdata_init(struct cdata *cdata)
 	memset(cdata->city, 0, MAXBUF);
 	memset(cdata->country, 0, MAXBUF);
 	memset(cdata->state, 0, MAXBUF);
+	cdata->tm_isdst = -1;
 }
 
 void calc_init(double *planet[], double *sol_eclipse)
