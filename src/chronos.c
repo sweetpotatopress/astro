@@ -215,6 +215,7 @@ void retro_station(double jd_ut, double *planet[])
 {
 	const int station = 7;
 	const double is_retro = 0.0;
+	const double station_calc = 0.00001;
 	
 	const int iter = 32;
 	const int multi = 16;
@@ -227,16 +228,16 @@ void retro_station(double jd_ut, double *planet[])
 		{
 			limit[i] = (multi * i);
 			
-			if (planet[ipl][NEXT_JUL] - jd_ut > 0.05 ||
-			planet[ipl][PREV_JUL] - jd_ut < -0.05)
+			if (planet[ipl][NEXT_JUL] - jd_ut > station_calc ||
+			planet[ipl][PREV_JUL] - jd_ut < -station_calc)
 			{
 				double nr = planet[ipl][NEXT_JUL] - jd_ut;
 				planet[ipl][NEXT_S] = nr;
 				double pr = planet[ipl][PREV_JUL] - jd_ut;
 				planet[ipl][PREV_S] = pr;
 			}
-			if (fabs(planet[ipl][NEXT_S] - limit[i]) <= 0.0006 || 
-			fabs(planet[ipl][PREV_S] - limit[i]) <= 0.0006)
+			if (fabs(planet[ipl][NEXT_S] - limit[i]) <= station_calc || 
+			fabs(planet[ipl][PREV_S] - limit[i]) <= station_calc)
 			{
 				planet[ipl][RET_INIT] = 0;
 				break;
