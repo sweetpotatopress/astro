@@ -36,13 +36,13 @@ static void enanosleep(unsigned int ms)
 	nanosleep(&ts, NULL);
 }
 
-void cur_chart_data(WINDOW *main_win, struct io *io, struct cdata *cdata)
+void cur_chart_data(WINDOW *main_win, struct cdata *cdata)
 {	
 	int starty = (LINES / 2) - 4;
 	int startx = (COLS / 2) - 4;
 	
-	if(io->cur_chart)
-		mvwprintw(main_win, starty, startx, "%s", io->cur_chart);
+	if(cdata->chart_name)
+		mvwprintw(main_win, starty, startx, "%s", cdata->chart_name);
 	
 	starty += 1;
 	if (cdata->state && !isdigit((unsigned char)cdata->state[0]) &&

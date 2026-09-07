@@ -104,6 +104,7 @@ int main()
 		cdata[i]->state = ecalloc(1, MAXBUF);
 		cdata[i]->country = ecalloc(1, MAXBUF);
 		cdata[i]->timezone = ecalloc(1, MAXBUF);
+		cdata[i]->chart_name = ecalloc(1, MAXBUF);
 	}
 
 	struct io **io = ecalloc(CHARTMAX, sizeof(*io));
@@ -112,7 +113,6 @@ int main()
 	{
 		io[i] = ecalloc(1, sizeof(*io[i]));
 		io[i]->filepath = ecalloc(1, MAXBUF);
-		io[i]->cur_chart = ecalloc(1, MAXBUF);
 	}
 	
 	xdg_check(xdg_path, "ephe");
@@ -211,6 +211,15 @@ int main()
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
+				case 'R':
+					set_localtime(cdata[cur_chart]);
+					config_parse(cdata[cur_chart], xdg_path);
+					cdata_init(cdata[cur_chart]);
+					calc_init(planet, sol_eclipse[cur_chart]);
+					planet_init(planet, cur_chart, pxx);
+					new_chart(NEW_CHART_MAIN());
+					doupdate();
+					break;
 				case 'q':
 					main_done = 1;
 					chart_done = 1;
@@ -228,8 +237,7 @@ int main()
 					in_cdata(in_cdata_win, in_cdata_subwin,
 					io[cur_chart], cdata[cur_chart], xdg_path, mode);
 					
-					memset(io[cur_chart]->cur_chart, 0, MAXBUF);
-			
+					cdata_init(cdata[cur_chart]);
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
@@ -320,10 +328,10 @@ int main()
 		free(cdata[i]->city);
 		free(cdata[i]->country);
 		free(cdata[i]->timezone);
+		free(cdata[i]->chart_name);
 		free(cdata[i]);
 		free(pxx[i]);
 		free(io[i]->filepath);
-		free(io[i]->cur_chart);
 		free(io[i]);
 	}
 	

@@ -14,6 +14,7 @@
  
 #pragma once
 
+void cdata_init(struct cdata *cdata);
 void calc_init(double *planet[], double *sol_eclipse);
 void planet_init(double *planet[], int cur_chart, struct pxx **pxx);
 void zxx_init(int *zodiac[]);

@@ -565,7 +565,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 					break;
 				}
 				
-				snprintf(io->cur_chart, MAXBUF, "%s", selected);
+				snprintf(cdata->chart_name, MAXBUF, "%s", selected);
 				
 				fp = fopen(newpath, "r");
 				if (fp == NULL)

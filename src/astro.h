@@ -42,7 +42,7 @@
 		
 #define NEW_CHART_MAIN() main_win, left_win, right_win, \
 		&left_panel, &right_panel,\
-		io[cur_chart], cdata[cur_chart], pxx[cur_chart],\
+		cdata[cur_chart], pxx[cur_chart],\
 		&left_trig, &right_trig, cusp[cur_chart], sign_cusp[cur_chart], planet, zodiac, \
 		luna_eclipse[cur_chart], sol_eclipse[cur_chart], \
 		pl_sym, zo_sym, moon, cur_chart
@@ -121,6 +121,7 @@ struct cdata {
 	char *timezone;
 	char *latitude;
 	char *longitude;
+	char *chart_name;
 	double dlat;
 	double dlon;
 	double utc_hour; //0.0 .. 23.999999;
@@ -140,7 +141,6 @@ struct cdata {
 
 struct io {
 	char *filepath;
-	char *cur_chart;
 };
 
 enum mode { NORMAL, INSERT };

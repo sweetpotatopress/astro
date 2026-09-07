@@ -21,6 +21,14 @@
 #include "anim.h"
 #include "draw.h"
 
+void cdata_init(struct cdata *cdata)
+{
+	memset(cdata->chart_name, 0, MAXBUF);
+	memset(cdata->city, 0, MAXBUF);
+	memset(cdata->country, 0, MAXBUF);
+	memset(cdata->state, 0, MAXBUF);
+}
+
 void calc_init(double *planet[], double *sol_eclipse)
 {
 	for (int ipl = SE_MERCURY; ipl <= SE_PLUTO; ++ipl)
@@ -277,7 +285,7 @@ void new_chart(NEW_CHART_PARAM())
 	planet, cdata, pxx);
 	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata,
 	pl_sym, zo_sym, cur_chart);
-	cur_chart_data(main_win, io, cdata);
+	cur_chart_data(main_win, cdata);
 	
 	if (*left_trig > 0)
 	{
