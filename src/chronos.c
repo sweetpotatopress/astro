@@ -115,10 +115,7 @@ void calculate_utc(struct cdata *cdata)
 	tm_in.tm_hour = cdata->tm_hour;
 	tm_in.tm_min = cdata->tm_min;
 	tm_in.tm_sec = cdata->tm_sec;
-	if (cdata->tm_isdst == YDST)
-		tm_in.tm_isdst = 1;
-	else if (cdata->tm_isdst == NDST)
-		tm_in.tm_isdst = 0;
+	tm_in.tm_sec = cdata->tm_isdst;
 	
 	time_t t = mktime(&tm_in);
 	
