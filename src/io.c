@@ -219,9 +219,11 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 					break;
 				char *l = strrchr(io->filepath, '/');
 				char a[128] = {0};
-				*l = '\0';
+				if(l)
+					*l = '\0';
 				l = strrchr(io->filepath, '/');
-				memcpy(a, l, strlen(l) + 1);
+				if(l)
+					memcpy(a, l, strlen(l) + 1);
 				snprintf(cur_dir, MAXBUF, " %s", a);
 			}
 			
@@ -657,9 +659,11 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 					break;
 				char *l = strrchr(io->filepath, '/');
 				char a[128] = {0};
-				*l = '\0';
+				if(l)
+					*l = '\0';
 				l = strrchr(io->filepath, '/');
-				memcpy(a, l, strlen(l) + 1);
+				if(l)
+					memcpy(a, l, strlen(l) + 1);
 				snprintf(cur_dir, MAXBUF, " %s", a);
 			}
 				break;
