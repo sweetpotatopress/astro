@@ -43,9 +43,24 @@ void *erealloc(void *p, size_t size)
 	return p;
 }
 
+static void iana_check()
+{
+	const char *iana_path[] = { 
+	"/usr/share/zoneinfo/America/New_York",
+	"/usr/share/lib/zoneinfo/America/New_York",
+	"/usr/local/share/zoneinfo/America/New_York",
+	"/usr/local/etc/zoneinfo/America/New_York"}; 
+	int c = 1; 
+	for (int i = 0; i < 4; ++i) 
+		if (access(iana_path[i], F_OK) == 0) 
+			c = 0; 
+	if (c)
+		ERR_EXIT("ERR: no IANA timezone data installed");
+}
+
 int main()
 {
-	IANA_CHECK();
+	iana_check();
 	
 	// sun, moon, mercury, venus, mars, jupiter,
 	// saturn, uranus, neptune, pluto, south, north node
