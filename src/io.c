@@ -88,12 +88,12 @@ static size_t file_count(const char *path, const int r)
 	return count;
 }
 
-static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
+static size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc)
 {
 	struct dirent *entry;
 	struct stat st;
 	char buf[MAXBUF] = {0};
-	DIR *dir = opendir(io->filepath);
+	DIR *dir = opendir(filepath);
 	if (!dir)
 		ERR_EXIT("name_to_item opendir failure");
 	
@@ -103,7 +103,7 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 		if (strcmp(entry->d_name, ".") != 0 &&
 		strcmp(entry->d_name, "..") != 0)
 		{
-			snprintf(buf, sizeof(buf), "%s/%s", io->filepath, entry->d_name);
+			snprintf(buf, sizeof(buf), "%s/%s", filepath, entry->d_name);
 			
 			name[count] = ecalloc(1,MAXBUF);
 			desc[count] = ecalloc(1,MAXBUF);
@@ -126,9 +126,9 @@ static size_t name_to_item(struct io *io, ITEM **item, char **name, char **desc)
 	return count;
 }
 
-static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **desc, char *xdg_path)
+static int print_save_menu(char *filepath, ITEM **item_save, char **name, char **desc, char *xdg_path)
 {
-	size_t icount = name_to_item(io, item_save, name, desc);
+	size_t icount = name_to_item(filepath, item_save, name, desc);
 	
 	int header = 4;
 	int width = 25;
@@ -183,11 +183,11 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 				menu_driver(save_menu, REQ_UP_ITEM);
 				break;
 			case '\n':
-				snprintf(newpath, MAXPATH, "%s/%s", io->filepath, selected);
+				snprintf(newpath, MAXPATH, "%s/%s", filepath, selected);
 				if (stat(newpath, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
-					memcpy(io->filepath, newpath, strlen(newpath) + 1);
+					memcpy(filepath, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, "/%s", selected);
 				}
 				mvwprintw(save_win, 1, 1, "save to %s?", cur_dir);
@@ -204,24 +204,24 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 				}
 				break;
 			case 'l': case KEY_RIGHT:
-				snprintf(newpath, MAXPATH, "%s/%s", io->filepath, selected);
+				snprintf(newpath, MAXPATH, "%s/%s", filepath, selected);
 				if (stat(newpath, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
-					memcpy(io->filepath, newpath, strlen(newpath) + 1);
+					memcpy(filepath, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, " /%s", selected);
 					break;
 				}
 				break;
 			case 'h': case KEY_LEFT: 
 			{
-				if (strcmp(io->filepath, xdg_path) == 0)
+				if (strcmp(filepath, xdg_path) == 0)
 					break;
-				char *l = strrchr(io->filepath, '/');
+				char *l = strrchr(filepath, '/');
 				char a[128] = {0};
 				if(l)
 					*l = '\0';
-				l = strrchr(io->filepath, '/');
+				l = strrchr(filepath, '/');
 				if(l)
 					memcpy(a, l, strlen(l) + 1);
 				snprintf(cur_dir, MAXBUF, " %s", a);
@@ -237,7 +237,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 				noecho();
 				
 				snprintf(newpath, MAXPATH,
-				"%s/%s/", io->filepath, mdir);
+				"%s/%s/", filepath, mdir);
 				
 				if (mkdir(newpath, 0755) == -1)
 					ERR_EXIT("save_menu mkdir fail");
@@ -267,7 +267,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 			mvwprintw(save_win, 1, width - 4, "{s}");
 			mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
 			
-			icount = name_to_item(io, item_save, name, desc);
+			icount = name_to_item(filepath, item_save, name, desc);
 			set_menu_items(save_menu, item_save);
 			
 			width = 25;
@@ -306,7 +306,7 @@ static int print_save_menu(struct io *io, ITEM **item_save, char **name, char **
 	return save;
 }
 
-static void save_file_name(struct cdata *cdata, struct io *io)
+static void save_file_name(struct cdata *cdata, char *filepath)
 {
 	struct stat buff;
 	char *tz_name = getenv("TZ");
@@ -400,7 +400,7 @@ static void save_file_name(struct cdata *cdata, struct io *io)
 		len--;
 	fn[len] = '\0';
 	
-	snprintf(newpath, MAXBUF, "%s/%s", io->filepath, fn);
+	snprintf(newpath, MAXBUF, "%s/%s", filepath, fn);
 	
 	if (stat(newpath, &buff) == 0)
 	{
@@ -470,10 +470,11 @@ static void save_file_name(struct cdata *cdata, struct io *io)
 		delwin(save_win);
 }
 
-void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
+void save_chart(struct cdata *cdata, char xdg_path[])
 {
+	char filepath[MAXPATH] = {0};
 	xdg_check(xdg_path, "charts");
-	memcpy(io->filepath, xdg_path, strlen(xdg_path)+1);
+	memcpy(filepath, xdg_path, strlen(xdg_path)+1);
 	
 	size_t size = file_count(xdg_path, 1) + 1;
 	
@@ -481,14 +482,14 @@ void save_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	char **name = ecalloc(size, sizeof(char *));
 	char **desc = ecalloc(size, sizeof(char *));
 	
-	if (print_save_menu(io, item_save, name, desc, xdg_path) == 1)
-		save_file_name(cdata, io);
+	if (print_save_menu(filepath, item_save, name, desc, xdg_path) == 1)
+		save_file_name(cdata, filepath);
 }
 
 
-static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load, char **name, char **desc, char *xdg_path)
+static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_load, char **name, char **desc, char *xdg_path)
 {
-	size_t icount = name_to_item(io, item_load, name, desc);
+	size_t icount = name_to_item(filepath, item_load, name, desc);
 	
 	int header = 4;
 	int width = 25;
@@ -554,12 +555,12 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 					break;
 				
 				snprintf(newpath, MAXBUF,
-				"%s/%s", io->filepath, selected);
+				"%s/%s", filepath, selected);
 		
 				if (stat(newpath, &st) == 0 &&
 				S_ISDIR(st.st_mode))
 				{
-					memcpy(io->filepath, newpath, strlen(newpath) + 1);
+					memcpy(filepath, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, " /%s", selected);
 					
 					break;
@@ -655,13 +656,13 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 				break;
 			case 'h': case KEY_LEFT:
 			{
-				if (strcmp(io->filepath, xdg_path) == 0)
+				if (strcmp(filepath, xdg_path) == 0)
 					break;
-				char *l = strrchr(io->filepath, '/');
+				char *l = strrchr(filepath, '/');
 				char a[128] = {0};
 				if(l)
 					*l = '\0';
-				l = strrchr(io->filepath, '/');
+				l = strrchr(filepath, '/');
 				if(l)
 					memcpy(a, l, strlen(l) + 1);
 				snprintf(cur_dir, MAXBUF, " %s", a);
@@ -688,7 +689,7 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 			mvwprintw(load_win, 1, width - 4, "{l}");
 			mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
 			
-			icount = name_to_item(io, item_load, name, desc);
+			icount = name_to_item(filepath, item_load, name, desc);
 			set_menu_items(load_menu, item_load);
 			
 			width = 25;
@@ -725,10 +726,11 @@ static void print_load_menu(struct cdata *cdata, struct io *io, ITEM **item_load
 	delwin(load_win);
 }
 
-void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
+void load_chart(struct cdata *cdata, char xdg_path[])
 {
+	char filepath[MAXPATH] = {0};
 	xdg_check(xdg_path, "charts");
-	memcpy(io->filepath, xdg_path, strlen(xdg_path)+1);
+	memcpy(filepath, xdg_path, strlen(xdg_path)+1);
 	
 	size_t count = file_count(xdg_path, 1) + 1;
 	
@@ -736,5 +738,5 @@ void load_chart(struct cdata *cdata, struct io *io, char xdg_path[])
 	char **name = ecalloc(count, sizeof(char *));
 	char **desc = ecalloc(count, sizeof(char *));
 	
-	print_load_menu(cdata, io, item_load, name, desc, xdg_path);
+	print_load_menu(cdata, filepath, item_load, name, desc, xdg_path);
 }

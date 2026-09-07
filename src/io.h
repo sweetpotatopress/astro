@@ -30,5 +30,5 @@
 #define FMAX 13
 
 void xdg_check(char xdg_path[], const char *s);
-void load_chart(struct cdata *cdata, struct io *io, char xdg_path[]);
-void save_chart(struct cdata *cdata, struct io *io, char xdg_path[]);
+void load_chart(struct cdata *cdata, char xdg_path[]);
+void save_chart(struct cdata *cdata, char xdg_path[]);

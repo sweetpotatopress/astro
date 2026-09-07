@@ -248,7 +248,7 @@ static void field_label(WINDOW *in_cdata_win)
 }
 	
 void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
-struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
+struct cdata *cdata, char xdg_path[], enum mode mode)
 {
 	FIELD *cdata_field[FIELDMAX + 1];
 	FORM *cdata_form;
@@ -374,12 +374,12 @@ struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode)
 						
 					case 'w':
 						validate_fields(cdata_field, cdata_form, cdata, xdg_path);
-						save_chart(cdata, io, xdg_path);
+						save_chart(cdata, xdg_path);
 						mode = NORMAL;
 						break;
 						
 					case 'e':
-						load_chart(cdata, io, xdg_path);
+						load_chart(cdata, xdg_path);
 						mode = NORMAL;
 						cdata_entry = 1;
 						break;

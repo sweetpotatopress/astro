@@ -107,14 +107,6 @@ int main()
 		cdata[i]->chart_name = ecalloc(1, MAXBUF);
 	}
 
-	struct io **io = ecalloc(CHARTMAX, sizeof(*io));
-	
-	for (int i = 0; i < CHARTMAX; ++i)
-	{
-		io[i] = ecalloc(1, sizeof(*io[i]));
-		io[i]->filepath = ecalloc(1, MAXBUF);
-	}
-	
 	xdg_check(xdg_path, "ephe");
 	
 	if (strlen(xdg_path) > 255)
@@ -235,7 +227,7 @@ int main()
 				case 'i':
 					mode = INSERT;
 					in_cdata(in_cdata_win, in_cdata_subwin,
-					io[cur_chart], cdata[cur_chart], xdg_path, mode);
+					cdata[cur_chart], xdg_path, mode);
 					
 					cdata_init(cdata[cur_chart]);
 					calc_init(planet, sol_eclipse[cur_chart]);
@@ -243,12 +235,12 @@ int main()
 					doupdate();
 					break;
 				case 'w':
-					save_chart(cdata[cur_chart], io[cur_chart], xdg_path);
+					save_chart(cdata[cur_chart], xdg_path);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata[cur_chart], io[cur_chart], xdg_path);
+					load_chart(cdata[cur_chart], xdg_path);
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
@@ -331,13 +323,10 @@ int main()
 		free(cdata[i]->chart_name);
 		free(cdata[i]);
 		free(pxx[i]);
-		free(io[i]->filepath);
-		free(io[i]);
 	}
 	
 	free(cdata);
 	free(pxx);
-	free(io);
 	free(zxx);
 	
 	return 0;

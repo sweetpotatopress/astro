@@ -40,4 +40,4 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define FIELDMAX 11
 
 void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
-struct io *io, struct cdata *cdata, char xdg_path[], enum mode mode);
+struct cdata *cdata, char xdg_path[], enum mode mode);

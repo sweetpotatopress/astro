@@ -139,10 +139,6 @@ struct cdata {
 	int moonphase;
 };
 
-struct io {
-	char *filepath;
-};
-
 enum mode { NORMAL, INSERT };
 
 void *ecalloc(size_t n, size_t size);
