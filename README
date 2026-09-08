@@ -1,4 +1,6 @@
 --o https://sweetpotato.press --o
+irc.libera.chat #astro
+--- --- --- --- --- --- --- 
 DEPENDENCIES
 
 ncurses
@@ -10,7 +12,7 @@ enter		animate chart
 	h/l 	time increment  
 	k/j 	up/down  
 
-s			solar return  
+s			solar return
 	k/j		up/down year  
 	s/q/esc	exit mode  
 
@@ -21,6 +23,7 @@ o 			toggle right table
 tab			live update  
 d			toggle dst
 r			redraw chart  
+R			redraw config chart
 q			exit astro  
 
 w			save chart  
