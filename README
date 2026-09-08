@@ -1,5 +1,5 @@
 --o https://sweetpotato.press --o
-irc.libera.chat #astro
+~:o irc.libera.chat #astro
 --- --- --- --- --- --- --- 
 DEPENDENCIES
 
@@ -16,8 +16,8 @@ s			solar return
 	k/j		up/down year  
 	s/q/esc	exit mode  
 
-p			toggle left table
 o 			toggle right table
+p			toggle left table
 0...9		select chart number
 
 tab			live update  
