@@ -253,7 +253,7 @@ void calc_return(struct cdata *cdata, double base_degree)
 		
 		cpt(cdata, &temp, result, &t, 1);
 		
-		if (fabs(differ) < 0.0003)
+		if (fabs(differ) < 0.0001157407407)
 			break;
 	}
 }
