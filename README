@@ -12,19 +12,16 @@ enter		animate chart
 	h/l 	time increment  
 	k/j 	up/down  
 
-s			solar return
-	k/j		up/down year  
-	s/q/esc	exit mode  
-
-o 			toggle right table
-p			toggle left table
 0...9		select chart number
-
+s			solar return
 tab			live update  
 d			toggle dst
 r			redraw chart  
 R			redraw config chart
 q			exit astro  
+
+o 			toggle right table
+p			toggle left table
 
 w			save chart  
 	m		make dir  
