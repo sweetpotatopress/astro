@@ -13,6 +13,8 @@
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
 #include <time.h>
+#include <form.h>
+#include <errno.h>
 #include "swephexp.h"
 #include "astro.h"
 #include "chronos.h"
@@ -196,24 +198,13 @@ static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t 
 	}
 }
 
-void solar_return(NEW_CHART_PARAM())
+void calc_return(struct cdata *cdata, double base_degree)
 {
-	struct tm gettime = {0};
-	double base_degree = pxx->dsun[LONG];
-	time_t now = time(NULL);
-	localtime_r(&now, &gettime);
-	
 	struct tm temp = {0};
 	struct tm *result = NULL;
 	time_t t = 0;
 
-	cdata->year = gettime.tm_year+1900;
-
 	cpt(cdata, &temp, result, &t, 0);
-	
-	wattron(main_win, COLOR_PAIR(AIR));
-	mvwprintw(main_win, 0, COLS - 14, "*solar return");
-	wattroff(main_win, COLOR_PAIR(AIR));
 	
 	int iflag = SEFLG_SWIEPH;
 	double xx[6];
@@ -223,7 +214,6 @@ void solar_return(NEW_CHART_PARAM())
 	for(;;)
 	{
 		calculate_utc(cdata);
-		weekday_check(cdata);
 	
 		double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
 		cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
@@ -234,9 +224,7 @@ void solar_return(NEW_CHART_PARAM())
 		
 		differ = base_degree - temp_degree;
 			
-		if (differ > 0 && differ <= 0.0000115)
-			break;
-		if (differ >= 0)	
+		if (differ > 0)	
 		{
 			if (differ > 2.0)
 				t+= 86400;
@@ -249,7 +237,7 @@ void solar_return(NEW_CHART_PARAM())
 			else
 				t += 1;
 		}
-		if (differ < 0)
+		else if (differ < 0)
 		{
 			if (differ < -2.0)
 				t-= 86400;
@@ -262,17 +250,117 @@ void solar_return(NEW_CHART_PARAM())
 			else
 				t -= 1;
 		}
-			
+		
 		cpt(cdata, &temp, result, &t, 1);
+		
+		if (fabs(differ) < 0.0003)
+			break;
+	}
+}
+	
+void solar_return(NEW_CHART_PARAM())
+{
+	double base_degree = pxx->dsun[LONG];
+	
+	int height = 5;
+	int width = 30;
+	
+	int starty = (LINES- height) / 2;
+	int startx = (COLS - width) / 2;
+	
+	WINDOW *sr_win = newwin(height, width, starty, startx);
+	WINDOW *sr_subwin = derwin(sr_win, height - 2, width - 2, 0, 0);
+	
+	wbkgdset(sr_win, COLOR_PAIR(M_COLOR));
+	
+	cbreak();
+	keypad(sr_win, TRUE);	
+	
+	FIELD *sr_field[2];
+	sr_field[0] = new_field(1, 25, 2, 2, 0, 0);
+	set_field_back(sr_field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(sr_field[0], O_STATIC);
+	field_opts_off(sr_field[0], O_AUTOSKIP);
+	set_field_type(sr_field[0], TYPE_INTEGER, 0, -12998, 16799);
+	
+	sr_field[1] = NULL;
+	
+	FORM *sr_form = new_form(sr_field);
+	set_form_win(sr_form, sr_win);
+	set_form_sub(sr_form, sr_subwin);
+	
+	post_form(sr_form);
+	box(sr_win, 0, 0);
+	mvwaddstr(sr_win, 1, 1, "-o--year?-o");
+	
+	set_current_field(sr_form, sr_field[0]);
+	wrefresh(sr_win);
+	pos_form_cursor(sr_form);
+	
+	int done = 0, ch = 0;
+	while(!done && (ch = wgetch(sr_win)))
+	{
+		switch (ch)
+		{
+			case '\n':
+				form_driver(sr_form, REQ_VALIDATION);
+				done = 1;
+				break;
+			case KEY_BACKSPACE:
+				form_driver(sr_form, REQ_DEL_PREV);
+				break;
+			case KEY_LEFT:
+				form_driver(sr_form, REQ_LEFT_CHAR);
+				break;
+			case KEY_RIGHT:
+				form_driver(sr_form, REQ_RIGHT_CHAR);
+				break;
+			case 27:
+				done = 1;
+				werase(sr_subwin);
+				wrefresh(sr_subwin);
+				werase(sr_win);
+				wrefresh(sr_win);
+				delwin(sr_subwin);
+				delwin(sr_win);
+				
+				unpost_form(sr_form);
+				set_form_fields(sr_form, NULL);
+				for (int i = 0; i < 2; ++i)
+					free_field(sr_field[i]);
+				free_form(sr_form);
+	
+				break;
+			default:
+				form_driver(sr_form, ch);
+				break;
+		}
+		wrefresh(sr_win);
 	}
 	
-	new_chart(NEW_CHART_ARG());
+	char *endptr = NULL;
+	long iret;
+	errno = 0;
 	
-	wattron(main_win, COLOR_PAIR(AIR));
-	mvwprintw(main_win, 0, COLS - 14, "*solar return");
-	wattroff(main_win, COLOR_PAIR(AIR));
-			
-	mvwprintw(main_win, 0, COLS - 14, "              ");
+	char *sr_year = field_buffer(sr_field[0], 0);
+	int len = 0;
+	
+	field_info(sr_field[0], NULL, &len, NULL, NULL, NULL, NULL);
+	
+	while (len > 0 && sr_year[len - 1] == ' ')
+		len--;
+	sr_year[len] = '\0';
+	
+	iret = strtol(sr_year, &endptr, 10);
+	if (errno != ERANGE)
+		cdata->year = (int)iret;
+	else
+		cdata->year = 1970;
+	
+	calc_return(cdata, base_degree);
+	
+	new_chart(NEW_CHART_ARG());
+	doupdate();
 }
 
 void animate_chart(NEW_CHART_PARAM())
