@@ -198,7 +198,7 @@ static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t 
 	}
 }
 
-void calc_return(struct cdata *cdata, double base_degree)
+static void calc_return(struct cdata *cdata, double base_degree)
 {
 	struct tm temp = {0};
 	struct tm *result = NULL;
@@ -253,7 +253,7 @@ void calc_return(struct cdata *cdata, double base_degree)
 		
 		cpt(cdata, &temp, result, &t, 1);
 		
-		if (fabs(differ) < 0.0001157407407)
+		if (fabs(differ) < 0.00001157407407)
 			break;
 	}
 }
@@ -317,19 +317,6 @@ void solar_return(NEW_CHART_PARAM())
 				break;
 			case 27:
 				done = 1;
-				werase(sr_subwin);
-				wrefresh(sr_subwin);
-				werase(sr_win);
-				wrefresh(sr_win);
-				delwin(sr_subwin);
-				delwin(sr_win);
-				
-				unpost_form(sr_form);
-				set_form_fields(sr_form, NULL);
-				for (int i = 0; i < 2; ++i)
-					free_field(sr_field[i]);
-				free_form(sr_form);
-	
 				break;
 			default:
 				form_driver(sr_form, ch);
@@ -356,6 +343,19 @@ void solar_return(NEW_CHART_PARAM())
 		cdata->year = (int)iret;
 	else
 		cdata->year = 1970;
+
+	werase(sr_subwin);
+	wrefresh(sr_subwin);
+	werase(sr_win);
+	wrefresh(sr_win);
+	delwin(sr_subwin);
+	delwin(sr_win);
+				
+	unpost_form(sr_form);
+	set_form_fields(sr_form, NULL);
+	for (int i = 0; i < 2; ++i)
+		free_field(sr_field[i]);
+	free_form(sr_form);
 	
 	calc_return(cdata, base_degree);
 	
