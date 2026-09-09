@@ -60,36 +60,36 @@ void cur_chart_data(WINDOW *main_win, struct cdata *cdata)
 	const char *weekday[] = 
 	{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
 	
-	if(cdata->tm_year && cdata->tm_mon && cdata->tm_mday)
+	if(cdata->year && cdata->mon && cdata->mday)
 		mvwprintw(main_win, starty, startx, "%s.%02d.%02d, %s",
-		month[cdata->tm_mon], cdata->tm_mday, cdata->tm_year, weekday[cdata->tm_wday]);
+		month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
 		
 	starty += 1;
-	if (cdata->tm_hour >= 0)
+	if (cdata->hour >= 0)
 	{
-		int hour = cdata->tm_hour;
+		int hour = cdata->hour;
 		if (hour == 12)
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dPM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
 		else if (hour > 12)	
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dPM", cdata->tm_hour - 12, cdata->tm_min, cdata->tm_sec);
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
 		else if (hour == 0)
-			mvwprintw(main_win, starty, startx, "12:%02d:%02dAM", cdata->tm_min, cdata->tm_sec);
+			mvwprintw(main_win, starty, startx, "12:%02d:%02dAM", cdata->min, cdata->sec);
 		else if (hour > 0 && hour < 12)
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dAM", cdata->tm_hour, cdata->tm_min, cdata->tm_sec);
+			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
 	}
 	starty += 1;
 	int utc;
 	
 	if ((int)cdata->utc_hour == 0)
-		utc = cdata->tm_hour - 24;
+		utc = cdata->hour - 24;
 	else
-		utc = cdata->tm_hour - (int)cdata->utc_hour;
+		utc = cdata->hour - (int)cdata->utc_hour;
 	if (utc > 14)
 		utc -= 24;
 	if (utc < - 12)
 		utc += 24;
 		
-	if (cdata->tm_isdst == YDST)
+	if (cdata->isdst == YDST)
 		mvwprintw(main_win, starty, startx, "DST UTC%+02d", utc);
 	else
 		mvwprintw(main_win, starty, startx, "UTC%+02d", utc);
@@ -172,28 +172,27 @@ static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t 
 {
 	if (!x)
 	{
-		temp->tm_year = cdata->tm_year - 1900;
-		temp->tm_mon = cdata->tm_mon - 1;
-		temp->tm_mday = cdata->tm_mday;
-		temp->tm_hour = cdata->tm_hour;
-		temp->tm_min = cdata->tm_min;
-		temp->tm_sec = cdata->tm_sec;
-		temp->tm_isdst = cdata->tm_isdst;
-		temp->tm_wday = cdata->tm_wday;
+		temp->tm_year = cdata->year - 1900;
+		temp->tm_mon = cdata->mon - 1;
+		temp->tm_mday = cdata->mday;
+		temp->tm_hour = cdata->hour;
+		temp->tm_min = cdata->min;
+		temp->tm_sec = cdata->sec;
+		temp->tm_isdst = cdata->isdst;
 		
 		*t = mktime(temp);
 	}
 	if (x)
 	{	
 		result = localtime(t);
-		cdata->tm_year = result->tm_year + 1900;
-		cdata->tm_mon = result->tm_mon + 1;
-		cdata->tm_mday = result->tm_mday;
-		cdata->tm_hour = result->tm_hour;
-		cdata->tm_min = result->tm_min;
-		cdata->tm_sec = result->tm_sec;
-		cdata->tm_isdst = result->tm_isdst;
-		cdata->tm_wday = result->tm_wday;
+		cdata->year = result->tm_year + 1900;
+		cdata->mon = result->tm_mon + 1;
+		cdata->mday = result->tm_mday;
+		cdata->hour = result->tm_hour;
+		cdata->min = result->tm_min;
+		cdata->sec = result->tm_sec;
+		cdata->isdst = result->tm_isdst;
+		cdata->wday = result->tm_wday;
 	}
 }
 
@@ -203,106 +202,76 @@ void solar_return(NEW_CHART_PARAM())
 	double base_degree = pxx->dsun[LONG];
 	time_t now = time(NULL);
 	localtime_r(&now, &gettime);
+	
+	struct tm temp = {0};
+	struct tm *result = NULL;
+	time_t t = 0;
 
-	int current_year = gettime.tm_year+1900;
-	int diff = current_year - cdata->tm_year;
+	cdata->year = gettime.tm_year+1900;
+
+	cpt(cdata, &temp, result, &t, 0);
 	
 	wattron(main_win, COLOR_PAIR(AIR));
 	mvwprintw(main_win, 0, COLS - 14, "*solar return");
 	wattroff(main_win, COLOR_PAIR(AIR));
 	
-	int solar_done = 0, ch = 'f', first_run = 1;
-	while (!solar_done)
+	int iflag = SEFLG_SWIEPH;
+	double xx[6];
+	char serr[AS_MAXCH];
+	double differ;
+	
+	for(;;)
 	{
-		if (!first_run)
-		{
-			ch = wgetch(main_win);
-			if (!ch)
-				break;
-		}
-		else 
-			first_run = 0;
-			
-		switch(ch)
-		{
-			case 'f':
-				cdata->tm_year += diff;
-				ch = 0;
-				break;
-			case 'j': case KEY_DOWN:
-				--cdata->tm_year;
-				break;
-			case 'k': case KEY_UP:
-				++cdata->tm_year;
-				break;
-			case 'q': case 's': case 27:
-				solar_done = 1;
-				break;
-		}
-		flushinp();
-		
-		calc_init(planet, sol_eclipse);
-		
-		int iflag = SEFLG_SWIEPH;
-		double xx[6];
-		char serr[AS_MAXCH];
-		
 		calculate_utc(cdata);
 		weekday_check(cdata);
-		
+	
 		double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
 		cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
-		
-		swe_calc_ut(jd_ut, SE_SUN, iflag, xx, serr);
-				
-		double temp_degree = xx[LONG];
-		int iter = 3;
-		
-		while (--iter > 0)
-		{
-			while (temp_degree < base_degree)
-			{
-				if (base_degree - temp_degree > 1.0)
-					++cdata->tm_mday;
-					
-				else if (base_degree - temp_degree > 0.02)
-					++cdata->tm_hour;
-					
-				else if (base_degree - temp_degree > 0.0006)
-					++cdata->tm_min;
-				else
-					++cdata->tm_sec;
-					
-				new_chart(NEW_CHART_ARG());
-				temp_degree = pxx->dsun[LONG];
-			}
-			while (temp_degree > base_degree)
-			{
-				if (temp_degree - base_degree > 1.0)
-					--cdata->tm_mday;
-					
-				else if (temp_degree - base_degree > 0.02)
-					--cdata->tm_hour;
-				else if (temp_degree - base_degree > 0.0006)
-					--cdata->tm_min;
-				else
-					--cdata->tm_sec;
-					
-				new_chart(NEW_CHART_ARG());
-				temp_degree = pxx->dsun[LONG];
-			}
-			struct tm temp = {0};
-			struct tm *result = NULL;
-			time_t t = 0;
 	
-			cpt(cdata, &temp, result, &t, 0);
-			cpt(cdata, &temp, result, &t, 1);
-			new_chart(NEW_CHART_ARG());
-			wattron(main_win, COLOR_PAIR(AIR));
-			mvwprintw(main_win, 0, COLS - 14, "*solar return");
-			wattroff(main_win, COLOR_PAIR(AIR));
+		swe_calc_ut(jd_ut, SE_SUN, iflag, xx, serr);
+			
+		double temp_degree = xx[LONG];
+		
+		differ = base_degree - temp_degree;
+			
+		if (differ > 0 && differ <= 0.0000115)
+			break;
+		if (differ >= 0)	
+		{
+			if (differ > 2.0)
+				t+= 86400;
+				
+			else if (differ > 0.1)
+				t += 3600;
+					
+			else if (differ > 0.002)
+				t += 60;
+			else
+				t += 1;
 		}
+		if (differ < 0)
+		{
+			if (differ < -2.0)
+				t-= 86400;
+				
+			else if (differ < -0.1)
+				t -= 3600;
+					
+			else if (differ < -0.002)
+				t -= 60;
+			else
+				t -= 1;
+		}
+			
+		cpt(cdata, &temp, result, &t, 1);
 	}
+	
+	new_chart(NEW_CHART_ARG());
+	
+	wattron(main_win, COLOR_PAIR(AIR));
+	mvwprintw(main_win, 0, COLS - 14, "*solar return");
+	wattroff(main_win, COLOR_PAIR(AIR));
+			
 	mvwprintw(main_win, 0, COLS - 14, "              ");
 }
 

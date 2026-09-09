@@ -27,29 +27,29 @@ void set_localtime(struct cdata *cdata)
 		
 	localtime_r(&now, &gt);
 	
-	cdata->tm_year = gt.tm_year+1900;
-	cdata->tm_mon = gt.tm_mon + 1;
-	cdata->tm_mday = gt.tm_mday;
-	cdata->tm_hour = gt.tm_hour;
-	cdata->tm_min = gt.tm_min;
-	cdata->tm_sec = gt.tm_sec;
-	cdata->tm_wday = gt.tm_wday;
-	cdata->tm_isdst = gt.tm_isdst;
+	cdata->year = gt.tm_year+1900;
+	cdata->mon = gt.tm_mon + 1;
+	cdata->mday = gt.tm_mday;
+	cdata->hour = gt.tm_hour;
+	cdata->min = gt.tm_min;
+	cdata->sec = gt.tm_sec;
+	cdata->wday = gt.tm_wday;
+	cdata->isdst = gt.tm_isdst;
 }
 
 void weekday_check(struct cdata *cdata)
 {
 	struct tm gt = {0};
 	
-	gt.tm_year = cdata->tm_year - 1900;
-	gt.tm_mon = cdata->tm_mon - 1;
-	gt.tm_mday = cdata->tm_mday;
-	gt.tm_hour = cdata->tm_hour - 1;
-	gt.tm_min = cdata->tm_min;
-	gt.tm_sec = cdata->tm_sec;
+	gt.tm_year = cdata->year - 1900;
+	gt.tm_mon = cdata->mon - 1;
+	gt.tm_mday = cdata->mday;
+	gt.tm_hour = cdata->hour - 1;
+	gt.tm_min = cdata->min;
+	gt.tm_sec = cdata->sec;
 	
 	mktime(&gt);
-	cdata->tm_wday = gt.tm_wday;
+	cdata->wday = gt.tm_wday;
 }
 
 int leapyear(int month, int year)
@@ -109,13 +109,13 @@ void lots(struct pxx *pxx)
 void calculate_utc(struct cdata *cdata)
 {
 	struct tm tm_in = {0};
-	tm_in.tm_year = cdata->tm_year - 1900;
-	tm_in.tm_mon = cdata->tm_mon - 1;
-	tm_in.tm_mday = cdata->tm_mday;
-	tm_in.tm_hour = cdata->tm_hour;
-	tm_in.tm_min = cdata->tm_min;
-	tm_in.tm_sec = cdata->tm_sec;
-	tm_in.tm_sec = cdata->tm_isdst;
+	tm_in.tm_year = cdata->year - 1900;
+	tm_in.tm_mon = cdata->mon - 1;
+	tm_in.tm_mday = cdata->mday;
+	tm_in.tm_hour = cdata->hour;
+	tm_in.tm_min = cdata->min;
+	tm_in.tm_sec = cdata->sec;
+	tm_in.tm_sec = cdata->isdst;
 	
 	time_t t = mktime(&tm_in);
 	

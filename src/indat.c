@@ -113,57 +113,57 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 		case YEAR:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE)
-				cdata->tm_year = (int)iret;
+				cdata->year = (int)iret;
 			else
-				cdata->tm_year = 1970;
+				cdata->year = 1970;
 			break;
 			
 		case MONTH:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
-				cdata->tm_mon = (int)iret;
+				cdata->mon = (int)iret;
 			else
-				cdata->tm_mon = 1;
+				cdata->mon = 1;
 			break;
 			
 		case DAY: 
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
-				cdata->tm_mday = (int)iret;
+				cdata->mday = (int)iret;
 			else
-				cdata->tm_mday = 1;
+				cdata->mday = 1;
 			break;
 			
 		case HOUR:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1 && iret <= 12) 
-				cdata->tm_hour = (int)iret;
+				cdata->hour = (int)iret;
 			else
-				cdata->tm_hour = 1;
+				cdata->hour = 1;
 			break;
 			
 		case MINUTE:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
-				cdata->tm_min = (int)iret;
+				cdata->min = (int)iret;
 			else
-				cdata->tm_min = 1;
+				cdata->min = 1;
 			break;
 			
 		case SECOND:
 			iret = strtol(buffer, &endptr, 10);
 			if (errno != ERANGE && iret != -1)
-				cdata->tm_sec = (int)iret;
+				cdata->sec = (int)iret;
 			else
-				cdata->tm_sec = 1;
+				cdata->sec = 1;
 			break;
 		
 		case AMPM:
 			if ((!strcasecmp(buffer, "p") || !strcasecmp(buffer, "pm"))
-			&& cdata->tm_hour != 12)
-				cdata->tm_hour += 12;
-			if (cdata->tm_hour >= 24)
-				cdata->tm_hour = 0;
+			&& cdata->hour != 12)
+				cdata->hour += 12;
+			if (cdata->hour >= 24)
+				cdata->hour = 0;
 			break;
 			
 		case TIMEZONE:

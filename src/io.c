@@ -444,16 +444,16 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 		cdata->city,
 		cdata->state,
 		cdata->country,
-		cdata->tm_year,
-		cdata->tm_mon,
-		cdata->tm_mday,
-		cdata->tm_hour,
-		cdata->tm_min,
-		cdata->tm_sec,
+		cdata->year,
+		cdata->mon,
+		cdata->mday,
+		cdata->hour,
+		cdata->min,
+		cdata->sec,
 		cdata->timezone,
 		cdata->dlat,
 		cdata->dlon,
-		cdata->tm_isdst);
+		cdata->isdst);
 		
 		fclose(ifp);
 		unpost_form(save_form);
@@ -583,44 +583,44 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 							
 				lret = strtol(field[FYEAR], &endptr, 10);
 				if (errno != ERANGE)
-					cdata->tm_year = (int)lret;
+					cdata->year = (int)lret;
 				else
-					cdata->tm_year = 1970;
+					cdata->year = 1970;
 				errno = 0;
 							
 				lret = strtol(field[FMONTH], &endptr, 10);
 				if (errno != ERANGE && lret != -1)
-					cdata->tm_mon = (int)lret;
+					cdata->mon = (int)lret;
 				else
-					cdata->tm_mon = 1;
+					cdata->mon = 1;
 				errno = 0;
 							
 				lret = strtol(field[FDAY], &endptr, 10);
 				if (errno != ERANGE && lret != -1)
-					cdata->tm_mday = (int)lret;
+					cdata->mday = (int)lret;
 				else
-					cdata->tm_mday = 1;
+					cdata->mday = 1;
 				errno = 0;
 							
 				lret = strtol(field[FHOUR], &endptr, 10);
 				if (errno != ERANGE && lret != -1) 
-					cdata->tm_hour = (int)lret;
+					cdata->hour = (int)lret;
 				else
-					cdata->tm_hour = 1;
+					cdata->hour = 1;
 				errno = 0;
 								
 				lret = strtol(field[FMIN], &endptr, 10);
 				if (errno != ERANGE && lret != -1)
-					cdata->tm_min = (int)lret;
+					cdata->min = (int)lret;
 				else
-					cdata->tm_min = 1;
+					cdata->min = 1;
 				errno = 0;
 					
 				lret = strtol(field[FSEC], &endptr, 10);
 				if (errno != ERANGE && lret != -1)
-					cdata->tm_sec = (int)lret;
+					cdata->sec = (int)lret;
 				else
-					cdata->tm_sec = 0;
+					cdata->sec = 0;
 				errno = 0;
 							
 				if (setenv("TZ", field[FTZ], 1) != 0)
@@ -644,9 +644,9 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 				
 				lret = strtol(field[FDST], &endptr, 10);
 				if (lret > 0)
-					cdata->tm_isdst = YDST;
+					cdata->isdst = YDST;
 				else if (lret == 0)
-					cdata->tm_isdst = NDST;
+					cdata->isdst = NDST;
 				errno = 0;
 					
 				fclose(fp);
