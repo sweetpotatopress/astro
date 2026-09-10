@@ -209,7 +209,7 @@ static void calc_return(struct cdata *cdata, double base_degree)
 	int iflag = SEFLG_SWIEPH;
 	double xx[6];
 	char serr[AS_MAXCH];
-	double differ;
+	double diff;
 	
 	for(;;)
 	{
@@ -220,40 +220,18 @@ static void calc_return(struct cdata *cdata, double base_degree)
 	
 		swe_calc_ut(jd_ut, SE_SUN, iflag, xx, serr);
 			
-		double temp_degree = xx[LONG];
+		diff = base_degree - xx[LONG];
 		
-		differ = base_degree - temp_degree;
+		time_t step = 
+			fabs(diff) > 2.0 ? 86400 :
+			fabs(diff) > 0.1 ? 3600 :
+			fabs(diff) > 0.002 ? 60 : 1;
 			
-		if (differ > 0)	
-		{
-			if (differ > 2.0)
-				t+= 86400;
-				
-			else if (differ > 0.1)
-				t += 3600;
-					
-			else if (differ > 0.002)
-				t += 60;
-			else
-				t += 1;
-		}
-		else if (differ < 0)
-		{
-			if (differ < -2.0)
-				t-= 86400;
-				
-			else if (differ < -0.1)
-				t -= 3600;
-					
-			else if (differ < -0.002)
-				t -= 60;
-			else
-				t -= 1;
-		}
+		t+= (diff > 0.0 ? step : -step);
 		
 		cpt(cdata, &temp, result, &t, 1);
 		
-		if (fabs(differ) < 0.00001157407407)
+		if (fabs(diff) < 0.00001157407407)
 			break;
 	}
 }
@@ -297,7 +275,7 @@ void solar_return(NEW_CHART_PARAM())
 	wrefresh(sr_win);
 	pos_form_cursor(sr_form);
 	
-	int done = 0, ch = 0;
+	int done = 0, ch = 0, c = 0;
 	while(!done && (ch = wgetch(sr_win)))
 	{
 		switch (ch)
@@ -316,6 +294,7 @@ void solar_return(NEW_CHART_PARAM())
 				form_driver(sr_form, REQ_RIGHT_CHAR);
 				break;
 			case 27:
+				c = 1;
 				done = 1;
 				break;
 			default:
@@ -325,24 +304,27 @@ void solar_return(NEW_CHART_PARAM())
 		wrefresh(sr_win);
 	}
 	
-	char *endptr = NULL;
-	long iret;
-	errno = 0;
-	
-	char *sr_year = field_buffer(sr_field[0], 0);
-	int len = 0;
-	
-	field_info(sr_field[0], NULL, &len, NULL, NULL, NULL, NULL);
-	
-	while (len > 0 && sr_year[len - 1] == ' ')
-		len--;
-	sr_year[len] = '\0';
-	
-	iret = strtol(sr_year, &endptr, 10);
-	if (errno != ERANGE)
-		cdata->year = (int)iret;
-	else
-		cdata->year = 1970;
+	if (!c)
+	{
+		char *endptr = NULL;
+		long iret;
+		errno = 0;
+		
+		char *sr_year = field_buffer(sr_field[0], 0);
+		int len = 0;
+		
+		field_info(sr_field[0], NULL, &len, NULL, NULL, NULL, NULL);
+		
+		while (len > 0 && sr_year[len - 1] == ' ')
+			len--;
+		sr_year[len] = '\0';
+		
+		iret = strtol(sr_year, &endptr, 10);
+		if (errno != ERANGE)
+			cdata->year = (int)iret;
+		else
+			cdata->year = 1970;
+	}
 
 	werase(sr_subwin);
 	wrefresh(sr_subwin);
