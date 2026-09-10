@@ -38,25 +38,21 @@ void xdg_check(char xdg_path[], const char *s)
 	if (strcmp("config", s) == 0)
 	{
 		if (!xdg_config || xdg_config[0] == '\0')
-			snprintf(xdg_path, MAXBUF,
-			"%s/.config/astro/%s", home_dir, s);
+			snprintf(xdg_path, MAXBUF, "%s/.config/astro/%s", home_dir, s);
 		else
-			snprintf(xdg_path, MAXBUF,
-			"%s/astro/%s", xdg_config, s);
+			snprintf(xdg_path, MAXBUF, "%s/astro/%s", xdg_config, s);
 	}
 	
 	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
 	{
 		if (!xdg_data || xdg_data[0] == '\0')
-			snprintf(xdg_path, MAXBUF,
-			"%s/.local/share/astro/%s", home_dir, s);
+			snprintf(xdg_path, MAXBUF, "%s/.local/share/astro/%s", home_dir, s);
 		else
-			snprintf(xdg_path, MAXBUF,
-			"%s/astro/%s", xdg_data, s);
+			snprintf(xdg_path, MAXBUF, "%s/astro/%s", xdg_data, s);
 	}
 	
 	else
-		ERR_EXIT("const char *s incorrect");
+		ERR_EXIT("xdg_path() string error");
 }
 
 static size_t file_count(const char *path, const int r)
@@ -100,8 +96,7 @@ static size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc
 	size_t count = 0;
 	while ((entry = readdir(dir)) != NULL)
 	{
-		if (strcmp(entry->d_name, ".") != 0 &&
-		strcmp(entry->d_name, "..") != 0)
+		if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
 		{
 			snprintf(buf, sizeof(buf), "%s/%s", filepath, entry->d_name);
 			
@@ -198,8 +193,7 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 				break;
 			case '\n':
 				snprintf(newpath, MAXPATH, "%s/%s", filepath, selected);
-				if (stat(newpath, &st) == 0 &&
-				S_ISDIR(st.st_mode))
+				if (stat(newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
 					memcpy(filepath, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, "/%s", selected);
@@ -219,8 +213,7 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 				break;
 			case 'l': case KEY_RIGHT:
 				snprintf(newpath, MAXPATH, "%s/%s", filepath, selected);
-				if (stat(newpath, &st) == 0 &&
-				S_ISDIR(st.st_mode))
+				if (stat(newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
 					memcpy(filepath, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, " /%s", selected);
@@ -240,8 +233,7 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 				mvwgetnstr(save_win, 1, 12, mdir, 127);
 				noecho();
 				
-				snprintf(newpath, MAXPATH,
-				"%s/%s/", filepath, mdir);
+				snprintf(newpath, MAXPATH, "%s/%s/", filepath, mdir);
 				
 				if (mkdir(newpath, 0755) == -1)
 					ERR_EXIT("save_menu mkdir fail");
@@ -419,8 +411,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 		{
 			case 'y':
 				werase(save_win);
-				mvwprintw(save_win, 2, 1,
-				"overwritten!--o-");
+				mvwprintw(save_win, 2, 1, "overwritten!--o-");
 				box(save_win, 0, 0);
 				wrefresh(save_win);
 				delwin(save_subwin);
@@ -429,8 +420,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 				break;
 			case 'n':
 				werase(save_win);
-				mvwprintw(save_win, 2, 1, 
-				"your file is safe >w<");
+				mvwprintw(save_win, 2, 1, "your file is safe >w<");
 				box(save_win, 0, 0);
 				wrefresh(save_win);
 				delwin(save_subwin);
@@ -564,12 +554,10 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 				snprintf(newpath, MAXBUF,
 				"%s/%s", filepath, selected);
 		
-				if (stat(newpath, &st) == 0 &&
-				S_ISDIR(st.st_mode))
+				if (stat(newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
 					memcpy(filepath, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, " /%s", selected);
-					
 					break;
 				}
 				
