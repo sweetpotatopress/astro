@@ -32,82 +32,70 @@ static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 		return;
 	tzset();
 	
-	struct tm *gettime = ecalloc(1,sizeof(struct tm));
+	struct tm gettime;
 		
 	time_t now = time(NULL);
-	localtime_r(&now, gettime);
+	localtime_r(&now, &gettime);
 	
-	if (gettime->tm_hour == 0)
-		gettime->tm_hour = 12;
+	if (gettime.tm_hour == 0)
+		gettime.tm_hour = 12;
 	
-	if (gettime->tm_hour > 12)
+	if (gettime.tm_hour > 12)
 	{
-		gettime->tm_hour -= 12;
+		gettime.tm_hour -= 12;
 		set_field_buffer(cdata_field[AMPM], 0, "pm");
 	}
 	else
 		set_field_buffer(cdata_field[AMPM], 0, "am");
 	
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_year+1900);
+	snprintf(buff, sizeof(buff), "%d", gettime.tm_year+1900);
 	set_field_buffer(cdata_field[YEAR], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_mon + 1);
+	snprintf(buff, sizeof(buff), "%d", gettime.tm_mon + 1);
 	set_field_buffer(cdata_field[MONTH], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_mday);
+	snprintf(buff, sizeof(buff), "%d", gettime.tm_mday);
 	set_field_buffer(cdata_field[DAY], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_hour);
+	snprintf(buff, sizeof(buff), "%d", gettime.tm_hour);
 	set_field_buffer(cdata_field[HOUR], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_min);
+	snprintf(buff, sizeof(buff), "%d", gettime.tm_min);
 	set_field_buffer(cdata_field[MINUTE], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime->tm_sec);
+	snprintf(buff, sizeof(buff), "%d", gettime.tm_sec);
 	set_field_buffer(cdata_field[SECOND], 0, buff);
-	
-	free(gettime);
 }
 
-static void buff_trim(FIELD *current, char *buffer)
+static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_form, FIELD *cdata_field[])
 {
+	char *endptr = NULL;
+	long iret;
+	double dret;
+	errno = 0;
+	
+	FIELD *current = current_field(cdata_form);
+	int index = field_index(current);
+	
+	char buffer[MAXBUF] = {0};
 	char *f = field_buffer(current, 0);
 	int len = 0;
 	field_info(current, NULL, &len, NULL, NULL, NULL, NULL);
 	
 	if (len <= 0)
-	{
 		buffer[0] = '\0';
-		return;
-	}
 	
 	memcpy(buffer, f, (size_t)len);
 	
 	while(len > 0 && buffer[len - 1] == ' ')
 		--len;
 	buffer[len] = '\0';
-}
-
-static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_form, FIELD *cdata_field[])
-{
-	FIELD *current = current_field(cdata_form);
-	int index = field_index(current);
-	
-	char *endptr = NULL;
-	long iret;
-	double dret;
-	errno = 0;
-	
-	char buffer[MAXBUF] = {0};
-	buff_trim(current, buffer);
 	
 	switch(index)
 	{
 		case CITY:
 			city_search(cdata_field, cdata_form, buffer, cdata, xdg_path);
 			form_driver(cdata_form, REQ_VALIDATION);
-			
-			buff_trim(current, buffer);
 			break;
 			
 		case YEAR:
@@ -191,34 +179,9 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 	}
 }
 
-static void validate_fields(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata, char xdg_path[])
+static void field_label(WINDOW *win)
 {
-	set_current_field(cdata_form, cdata_field[0]);
-	FIELD *current = current_field(cdata_form);
-	char buffer[MAXBUF] = {0};
-	buff_trim(current, buffer);
-		
-	for (int i = 1; i < FIELDMAX; i++)
-	{
-		set_current_field(cdata_form, cdata_field[i]);
-		form_driver(cdata_form, REQ_VALIDATION);
-		field_to_member(cdata, xdg_path, cdata_form, cdata_field);
-	}
-}
-
-static void clear_fields(FIELD *cdata_field[], FORM *cdata_form)
-{
-	for (int i = 0; i < FIELDMAX; i++)
-	{
-		set_current_field(cdata_form, cdata_field[i]);
-		form_driver(cdata_form, REQ_CLR_FIELD);
-	}
-	set_current_field(cdata_form, cdata_field[CITY]);
-}
-
-static void field_label(WINDOW *in_cdata_win)
-{
-	const char *labels[] = {
+	const char *label[] = {
 		"city search:",
 		"year:",
 		"month:",
@@ -228,21 +191,15 @@ static void field_label(WINDOW *in_cdata_win)
 		"second:",
 		"am/pm:",
 		"timezone:",
-		"lat.",
-		"long.",
-		NULL
-	};
-	
-	int starty = 1;
-	int startx = 1;
-	
-	for (size_t i = CITY; i < FIELDMAX; ++i, starty += 2)
-			mvwprintw(in_cdata_win, starty, startx, "%s", labels[i]);
-			
-	box(in_cdata_win, 0, 0);
-	wrefresh(in_cdata_win);
+		"latitude:",
+		"longitude:",
+		NULL };
+		
+	int y = 1, x = 1;
+	for (size_t i = CITY; i < FIELDMAX; ++i, y += 2)
+		mvwprintw(win, y, x, "%s", label[i]);
 }
-	
+
 void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
 struct cdata *cdata, char xdg_path[])
 {
@@ -333,9 +290,11 @@ struct cdata *cdata, char xdg_path[])
 	set_current_field(cdata_form, cdata_field[CITY]);
 	
 	field_label(in_cdata_win);
+	box(in_cdata_win, 0, 0);
+	wrefresh(in_cdata_win);
 	pos_form_cursor(cdata_form);
 	
-	int cdata_entry = 0, cancel = 0, ch = 0;
+	int cdata_entry = 0, ch = 0;
 	while(!cdata_entry && (ch = wgetch(in_cdata_win)))
 	{
 		switch (ch)
@@ -345,8 +304,6 @@ struct cdata *cdata, char xdg_path[])
 				field_to_member(cdata, xdg_path, cdata_form, cdata_field);
 				form_driver(cdata_form, REQ_NEXT_FIELD);
 			
-				field_label(in_cdata_win);
-				
 				form_driver(cdata_form, REQ_END_LINE);
 				break;
 				
@@ -373,7 +330,12 @@ struct cdata *cdata, char xdg_path[])
 				break;
 			
 			case KEY_F(1):
-				clear_fields(cdata_field, cdata_form);
+				for (int i = 0; i < FIELDMAX; i++)
+				{
+					set_current_field(cdata_form, cdata_field[i]);
+					form_driver(cdata_form, REQ_CLR_FIELD);
+				}
+				set_current_field(cdata_form, cdata_field[CITY]);
 				break;
 				
 			case 9: // tab
@@ -388,10 +350,15 @@ struct cdata *cdata, char xdg_path[])
 				form_driver(cdata_form, ch);
 				break;
 		}
+		box(in_cdata_win, 0, 0);
 		wrefresh(in_cdata_win);
 	}
-	if (ch != 'e' && cancel != 1)
-		validate_fields(cdata_field, cdata_form, cdata, xdg_path);
+	for (int i = 1; i < FIELDMAX; i++)
+	{
+		set_current_field(cdata_form, cdata_field[i]);
+		form_driver(cdata_form, REQ_VALIDATION);
+		field_to_member(cdata, xdg_path, cdata_form, cdata_field);
+	}
 
 	unpost_form(cdata_form);
 	werase(in_cdata_win);
