@@ -16,6 +16,7 @@ enter		animate chart
 s			solar return
 tab			live update  
 d			toggle dst
+
 r			redraw chart  
 R			redraw config chart
 q			exit astro  
@@ -33,25 +34,10 @@ e		 	load chart
 	esc		cancel  
  
 i			input chart data  
-
-INPUT CHART DATA
-
-i			INSERT mode  
-
 	F1		clear fields  
 	tab		fill local time  
 	arrows	navigate  
 	\		draw chart
-
-esc			NORMAL mode  
-
-	enter	draw chart 
-	w		save chart  
-	e		load chart  
-	
-	k/j		up/down  
-	h/l		left/right  
-	q		exit data input  
 
 DATA DIRECTORIES
 
