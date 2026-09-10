@@ -322,6 +322,9 @@ int main()
 			}
 		}
 	}
+	del_panel(right_panel);
+	del_panel(left_panel);
+	del_panel(main_panel);
 	delwin(main_win);
 	endwin();
 	swe_close();
