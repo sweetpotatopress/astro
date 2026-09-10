@@ -244,7 +244,7 @@ static void field_label(WINDOW *in_cdata_win)
 }
 	
 void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
-struct cdata *cdata, char xdg_path[], enum mode mode)
+struct cdata *cdata, char xdg_path[])
 {
 	FIELD *cdata_field[FIELDMAX + 1];
 	FORM *cdata_form;
@@ -338,122 +338,54 @@ struct cdata *cdata, char xdg_path[], enum mode mode)
 	int cdata_entry = 0, cancel = 0, ch = 0;
 	while(!cdata_entry && (ch = wgetch(in_cdata_win)))
 	{
-		switch(mode)
-		{	
-			case NORMAL:
-				switch (ch)
-				{
-					case 27:
-						break;
-						
-					case 'i':
-						mode = INSERT;
-						break;
-						
-					case 'j': case KEY_DOWN:
-						form_driver(cdata_form, REQ_NEXT_FIELD);
-						form_driver(cdata_form, REQ_END_LINE);
-						break;
-						
-					case 'k': case KEY_UP:
-						form_driver(cdata_form, REQ_PREV_FIELD);
-						form_driver(cdata_form, REQ_END_LINE);
-						break;
-						
-					case 'h': case KEY_LEFT:
-						form_driver(cdata_form, REQ_LEFT_CHAR);
-						break;
-						
-					case 'l': case KEY_RIGHT:
-						form_driver(cdata_form, REQ_RIGHT_CHAR);
-						break;
-						
-					case 'w':
-						validate_fields(cdata_field, cdata_form, cdata, xdg_path);
-						save_chart(cdata, xdg_path);
-						mode = NORMAL;
-						break;
-						
-					case 'e':
-						load_chart(cdata, xdg_path);
-						mode = NORMAL;
-						cdata_entry = 1;
-						break;
-						
-					case KEY_F(1):
-						clear_fields(cdata_field, cdata_form);
-						break;
-						
-					case 9: // tab
-						setfield_localtime(cdata_field, cdata);
-						break;
-						
-					case '\n':
-						cdata_entry = 1;
-						break;
-						
-					case 'q':
-						cancel = 1;
-						cdata_entry = 1;
-						break;
-				}
+		switch (ch)
+		{
+			 case '\n':
+				form_driver(cdata_form, REQ_VALIDATION);
+				field_to_member(cdata, xdg_path, cdata_form, cdata_field);
+				form_driver(cdata_form, REQ_NEXT_FIELD);
+			
+				field_label(in_cdata_win);
+				
+				form_driver(cdata_form, REQ_END_LINE);
 				break;
 				
-			case INSERT:
-				switch (ch)
-				{
-					 case '\n':
-						form_driver(cdata_form, REQ_VALIDATION);
-						field_to_member(cdata, xdg_path, cdata_form, cdata_field);
-						form_driver(cdata_form, REQ_NEXT_FIELD);
-					
-						field_label(in_cdata_win);
-						
-						form_driver(cdata_form, REQ_END_LINE);
-						break;
-						
-					case KEY_DOWN: case ';':
-						form_driver(cdata_form, REQ_NEXT_FIELD);
-						form_driver(cdata_form, REQ_END_LINE);
-						break;
-						
-					case KEY_UP: case '\'':
-						form_driver(cdata_form, REQ_PREV_FIELD);
-						form_driver(cdata_form, REQ_END_LINE);
-						break;
-						
-					case KEY_LEFT:
-						form_driver(cdata_form, REQ_LEFT_CHAR);
-						break;
-						
-					case KEY_RIGHT:
-						form_driver(cdata_form, REQ_RIGHT_CHAR);
-						break;
-						
-					case KEY_BACKSPACE:
-						form_driver(cdata_form, REQ_DEL_PREV);
-						break;
-					
-					case KEY_F(1):
-						clear_fields(cdata_field, cdata_form);
-						break;
-						
-					case 9: // tab
-						setfield_localtime(cdata_field, cdata);
-						break;
-						
-					case 27: // esc
-						mode = NORMAL;
-						break;
-						
-					case '\\':
-						cdata_entry = 1;
-						break;	
-						
-					default:
-						form_driver(cdata_form, ch);
-						break;
-				}
+			case KEY_DOWN: case ';':
+				form_driver(cdata_form, REQ_NEXT_FIELD);
+				form_driver(cdata_form, REQ_END_LINE);
+				break;
+				
+			case KEY_UP: case '\'':
+				form_driver(cdata_form, REQ_PREV_FIELD);
+				form_driver(cdata_form, REQ_END_LINE);
+				break;
+				
+			case KEY_LEFT:
+				form_driver(cdata_form, REQ_LEFT_CHAR);
+				break;
+				
+			case KEY_RIGHT:
+				form_driver(cdata_form, REQ_RIGHT_CHAR);
+				break;
+				
+			case KEY_BACKSPACE:
+				form_driver(cdata_form, REQ_DEL_PREV);
+				break;
+			
+			case KEY_F(1):
+				clear_fields(cdata_field, cdata_form);
+				break;
+				
+			case 9: // tab
+				setfield_localtime(cdata_field, cdata);
+				break;
+				
+			case '\\': case 27:
+				cdata_entry = 1;
+				break;	
+				
+			default:
+				form_driver(cdata_form, ch);
 				break;
 		}
 		wrefresh(in_cdata_win);
