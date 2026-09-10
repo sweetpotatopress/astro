@@ -217,11 +217,11 @@ int main()
 					doupdate();
 					break;
 				case 'R':
-					set_localtime(cdata[cur_chart]);
-					config_parse(cdata[cur_chart], xdg_path);
 					cdata_init(cdata[cur_chart]);
 					calc_init(planet, sol_eclipse[cur_chart]);
 					planet_init(planet, cur_chart, pxx);
+					config_parse(cdata[cur_chart], xdg_path);
+					set_localtime(cdata[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
