@@ -126,6 +126,18 @@ static size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc
 	return count;
 }
 
+static void back_dir(char *filepath, char *cur_dir)
+{
+	char *last = strrchr(filepath, '/');
+	char name[128] = {0};
+	if(last)
+		*last = '\0';
+	last = strrchr(filepath, '/');
+		if(last)
+	memcpy(name, last, strlen(last) + 1);
+	snprintf(cur_dir, MAXBUF, " %s", name);
+}
+
 static int print_save_menu(char *filepath, ITEM **item_save, char **name, char **desc, char *xdg_path)
 {
 	size_t icount = name_to_item(filepath, item_save, name, desc);
@@ -216,19 +228,9 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 				}
 				break;
 			case 'h': case KEY_LEFT: 
-			{
 				if (strcmp(filepath, xdg_path) == 0)
 					break;
-				char *l = strrchr(filepath, '/');
-				char a[128] = {0};
-				if(l)
-					*l = '\0';
-				l = strrchr(filepath, '/');
-				if(l)
-					memcpy(a, l, strlen(l) + 1);
-				snprintf(cur_dir, MAXBUF, " %s", a);
-			}
-			
+				back_dir(filepath, cur_dir);
 				break;
 			case 'm':
 				mdir = ecalloc(1, 128);
@@ -660,18 +662,9 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 				menu_done = 1;
 				break;
 			case 'h': case KEY_LEFT:
-			{
 				if (strcmp(filepath, xdg_path) == 0)
 					break;
-				char *l = strrchr(filepath, '/');
-				char a[128] = {0};
-				if(l)
-					*l = '\0';
-				l = strrchr(filepath, '/');
-				if(l)
-					memcpy(a, l, strlen(l) + 1);
-				snprintf(cur_dir, MAXBUF, " %s", a);
-			}
+				back_dir(filepath, cur_dir);
 				break;
 			case 'q': case 27:
 				menu_done = 1;
