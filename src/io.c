@@ -133,6 +133,8 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 	int header = 4;
 	int width = 25;
 	int height = (int)icount + header;
+	if (icount > 16)
+		height = 16 + header;
 	
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
@@ -272,6 +274,8 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 			
 			width = 25;
 			height = (int)icount + header;
+			if (icount > 16)
+				height = 16 + header;
 	
 			starty = (LINES - height) / 2;
 			startx = (COLS - width) / 2;
@@ -493,6 +497,8 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 	int header = 4;
 	int width = 25;
 	int height = (int)icount + header;
+	if (icount > 16)
+		height = 16 + header;
 	
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
@@ -693,6 +699,8 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 			
 			width = 25;
 			height = (int)icount + header;
+			if (icount > 16)
+				height = 16 + header;
 			
 			starty = (LINES - height) / 2;
 			startx = (COLS - width) / 2;
