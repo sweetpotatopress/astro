@@ -198,7 +198,7 @@ int radius, int cy, int cx)
 		
 		mvwaddstr(win, y, x, ascmc_sym[j]);
 		
-		degree_color(win, y-1, x, i, planet, zodiac);
+		degree_color(win, y-1, x-1, i, planet, zodiac);
 	}
 }
 

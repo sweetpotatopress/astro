@@ -238,42 +238,42 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 {
 	curs_set(0);
 	werase(win);
-	int radius = ((COLS / 2 < LINES) ? COLS / 2 : LINES) - 5;
 	
-	int offsetx = 0;
-	if ((COLS - LINES) > 60)
-		offsetx += 9;
-	else
-		offsetx = 0;
+	int win_h, win_w;
+	getmaxyx(win, win_h, win_w);
+	
+	int cy = (win_h / 2);
+	int cx = (win_w / 2);
+	if ((win_w - win_h) > 60)
+		cx += 9;
 		
-	int cy = (LINES / 2);
-	int cx = (COLS / 2) + offsetx;
+	const int radius = ((win_w / 2 < win_h) ? win_w / 2 : win_h) - 5;
+	const int out_r = radius + 4;
+	const int in_r = (radius / 2) - 1;
+	const int house_r = radius + 4;
+	const int zo_r = radius + 3;
+	const int pl_r = radius - 5;
+	const int as_r = (radius / 2) + 4;
 	
-	// zo
-	draw_circle(win, radius + 4, cy, cx, '`');
-	// out
+	draw_circle(win, out_r, cy, cx, '`');
 	draw_circle(win, radius, cy, cx,'.');
-	// in
-	draw_circle(win, (radius / 2) - 1, cy, cx, '.');
+	draw_circle(win, in_r, cy, cx, '.');
 	
-	draw_house(win, cusp, radius + 4, cy, cx, '`');
+	draw_house(win, cusp, house_r, cy, cx, '`');
 	
-	zo_pos(win, sign_cusp, radius + 3, cy, cx, pxx,
-	zo_sym, zodiac);
+	zo_pos(win, sign_cusp, zo_r, cy, cx, pxx, zo_sym, zodiac);
 	
-	planet_pos(win, sign_cusp, planet, zodiac,
-	radius - 5, cy, cx, pl_sym);
+	planet_pos(win, sign_cusp, planet, zodiac, pl_r, cy, cx, pl_sym);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(win, sign_cusp, planet, zodiac,
-		(radius / 2) + 4, cy, cx);
+		ascmc_pos(win, sign_cusp, planet, zodiac, as_r, cy, cx);
 	
 	// status bar
-	int bar_end = 20;
-	mvwhline(win, 1, COLS - bar_end, '-', COLS);
-	mvwvline(win, 0, COLS - bar_end, ':', 1);
+	const int bar_end = 20;
+	mvwhline(win, 1, win_w - bar_end, '-', COLS);
+	mvwvline(win, 0, win_w - bar_end, ':', 1);
 	
-	mvwprintw(win, 0, COLS - (bar_end - 2), "%d :", cur_chart);
+	mvwprintw(win, 0, win_w - (bar_end - 2), "%d :", cur_chart);
 }
 
 void new_chart(NEW_CHART_PARAM())
@@ -282,22 +282,18 @@ void new_chart(NEW_CHART_PARAM())
 		ERR_EXIT("ERR: new_chart setenv");
 	tzset();
 	
-	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse,
-	planet, cdata, pxx);
-	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata,
-	pl_sym, zo_sym, cur_chart);
+	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
+	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata, pl_sym, zo_sym, cur_chart);
 	cur_chart_data(main_win, cdata);
 	
 	if (*left_trig > 0)
 	{
-		left_table(left_win, planet, zodiac, pxx, cdata,
-		pl_sym, zo_sym, moon);
+		left_table(left_win, planet, zodiac, pxx, cdata, pl_sym, zo_sym, moon);
 		show_panel(*left_panel);
 	}
 	if (*right_trig > 0)
 	{
-		right_table(right_win, luna_eclipse, sol_eclipse,
-		planet, zodiac, zo_sym, pl_sym);
+		right_table(right_win, luna_eclipse, sol_eclipse, planet, zodiac, zo_sym, pl_sym);
 		show_panel(*right_panel);
 	}	
 	update_panels();
