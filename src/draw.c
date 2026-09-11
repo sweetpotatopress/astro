@@ -153,7 +153,8 @@ int radius, int centery, int centerx, const char *pl_sym[])
 		double cos_rad = cos(zo_pos_radian);
 		double sin_rad = sin(zo_pos_radian);
 		
-		int x = centerx - (int)(radius * cos_rad);
+		int sym_len = (int)strlen(pl_sym[i]);
+		int x = (centerx - (int)(radius * cos_rad)) - sym_len / 2;
 		int y = centery + (int)(radius * sin_rad * 0.5);
 		
 		degree_color(win, y-1, x, i, planet, zodiac);
@@ -175,7 +176,7 @@ int radius, int centery, int centerx, const char *pl_sym[])
 		else if ((int)planet[i][STATION] == STATION_D)
 		{
 			wattron(win, COLOR_PAIR(EARTH));
-			mvwaddstr(win, y, x -2, "sd");
+			mvwaddstr(win, y, x-2, "sd");
 			wattroff(win, COLOR_PAIR(EARTH));
 		}
 	}
