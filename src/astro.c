@@ -80,6 +80,7 @@ int main()
 	
 	int cur_chart = 1;
 	int right_trig = 1, left_trig = 1;
+	int roff = 0;
 		
 	double cusp[CHARTMAX][13] = {0};
 	double sign_cusp[CHARTMAX][13] = {0};
@@ -210,6 +211,11 @@ int main()
 					calc_init(planet, sol_eclipse[cur_chart]);
 					realtime_chart(NEW_CHART_MAIN());
 					doupdate();
+					break;
+				case 't':
+					transit(NEW_CHART_MAIN(), cdata, pxx);
+					calc_init(planet, sol_eclipse[cur_chart]);
+					planet_init(planet, cur_chart, pxx);
 					break;
 				case 'r':
 					calc_init(planet, sol_eclipse[cur_chart]);

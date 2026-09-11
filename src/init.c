@@ -140,7 +140,7 @@ void zxx_init(int *zodiac[])
 			zodiac[z][d] = zodia[z][d];
 }
 
-static void pxx_init(double cusp[], double sign_cusp[],
+void pxx_init(double cusp[], double sign_cusp[],
 double *luna_eclipse, double *sol_eclipse, double *planet[],
 struct cdata *cdata, struct pxx *pxx)
 {
@@ -234,7 +234,7 @@ struct cdata *cdata, struct pxx *pxx)
 }
 
 static void draw_chart(WINDOW *win, double cusp[], double sign_cusp[], double *planet[], int *zodiac[],
-struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[], int cur_chart)
+struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[], int cur_chart, int roff)
 {
 	curs_set(0);
 	werase(win);
@@ -247,7 +247,7 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	if ((win_w - win_h) > 60)
 		cx += 9;
 		
-	const int radius = ((win_w / 2 < win_h) ? win_w / 2 : win_h) - 5;
+	const int radius = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 5) - roff;
 	const int out_r = radius + 4;
 	const int in_r = (radius / 2) - 1;
 	const int house_r = radius + 4;
@@ -283,7 +283,7 @@ void new_chart(NEW_CHART_PARAM())
 	tzset();
 	
 	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
-	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata, pl_sym, zo_sym, cur_chart);
+	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata, pl_sym, zo_sym, cur_chart, *roff);
 	cur_chart_data(main_win, cdata);
 	
 	if (*left_trig > 0)

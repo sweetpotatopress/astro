@@ -21,14 +21,14 @@
 	cdata, pxx, \
 	left_trig, right_trig, cusp, sign_cusp, planet, zodiac, \
 	luna_eclipse, sol_eclipse, \
-	pl_sym, zo_sym, moon, cur_chart
+	pl_sym, zo_sym, moon, cur_chart, roff
 	
 #define NEW_CHART_PARAM() WINDOW *main_win, WINDOW *left_win, WINDOW *right_win, \
 PANEL **left_panel, PANEL **right_panel, \
 struct cdata *cdata, struct pxx *pxx, \
 int *left_trig, int *right_trig, double cusp[], double sign_cusp[], double *planet[], int *zodiac[], \
 double *luna_eclipse, double *sol_eclipse, \
-const char *pl_sym[], const char *zo_sym[], const char *moon[], int cur_chart
+const char *pl_sym[], const char *zo_sym[], const char *moon[], int cur_chart, int *roff
 
 void cur_chart_data(WINDOW *win, struct cdata *cdata);
 
@@ -39,3 +39,5 @@ void animate_chart(NEW_CHART_PARAM());
 void realtime_chart(NEW_CHART_PARAM());
 
 void solar_return(NEW_CHART_PARAM());
+
+void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p);

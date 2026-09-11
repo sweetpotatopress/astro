@@ -170,6 +170,32 @@ void realtime_chart(NEW_CHART_PARAM())
 	nodelay(main_win, FALSE);
 }
 
+void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p)
+{
+	int win_h, win_w;
+	getmaxyx(main_win, win_h, win_w);
+	
+	int cy = (win_h / 2);
+	int cx = (win_w / 2);
+	if ((win_w - win_h) > 60)
+		cx += 9;
+	
+	*roff += 4;
+	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 2);
+	
+	new_chart(NEW_CHART_ARG());
+	planet_init(planet, 11, p);
+	double cu[13];
+	double scu[13];
+	
+	pxx_init(cu, scu, luna_eclipse, sol_eclipse, planet, c[11], p[11]);
+	planet_pos(main_win, sign_cusp, planet, zodiac, pl_r, cy, cx, pl_sym);
+	wnoutrefresh(main_win);
+	doupdate();
+	
+	*roff = 0;
+}
+
 static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)
 {
 	if (!x)

@@ -17,7 +17,7 @@
 
 #define MAXBUF 1024
 #define MAXPATH 2048
-#define CHARTMAX 11
+#define CHARTMAX 20
 
 #define ERR_EXIT(str) do { \
 		fprintf(stderr, "%s\n", str); \
@@ -31,7 +31,7 @@
 		cdata[cur_chart], pxx[cur_chart],\
 		&left_trig, &right_trig, cusp[cur_chart], sign_cusp[cur_chart], planet, zodiac, \
 		luna_eclipse[cur_chart], sol_eclipse[cur_chart], \
-		pl_sym, zo_sym, moon, cur_chart
+		pl_sym, zo_sym, moon, cur_chart, &roff
 
 #define LWINY 40
 #define LWINX 33
