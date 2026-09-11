@@ -246,27 +246,27 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	else
 		offsetx = 0;
 		
-	int centery = (LINES / 2);
-	int centerx = (COLS / 2) + offsetx;
+	int cy = (LINES / 2);
+	int cx = (COLS / 2) + offsetx;
 	
 	// zo
-	draw_circle(win, radius + 4, centery, centerx, '`');
+	draw_circle(win, radius + 4, cy, cx, '`');
 	// out
-	draw_circle(win, radius, centery, centerx,'.');
+	draw_circle(win, radius, cy, cx,'.');
 	// in
-	draw_circle(win, (radius / 2) - 1, centery, centerx, '.');
+	draw_circle(win, (radius / 2) - 1, cy, cx, '.');
 	
-	draw_house(win, cusp, radius + 4, centery, centerx, '`');
+	draw_house(win, cusp, radius + 4, cy, cx, '`');
 	
-	zo_pos(win, sign_cusp, radius + 3, centery, centerx, pxx,
+	zo_pos(win, sign_cusp, radius + 3, cy, cx, pxx,
 	zo_sym, zodiac);
 	
 	planet_pos(win, sign_cusp, planet, zodiac,
-	radius - 5, centery, centerx, pl_sym);
+	radius - 5, cy, cx, pl_sym);
 	
 	if (fabs(cdata->dlat) > 1e-6)
 		ascmc_pos(win, sign_cusp, planet, zodiac,
-		(radius / 2) + 4, centery, centerx);
+		(radius / 2) + 4, cy, cx);
 	
 	// status bar
 	int bar_end = 20;

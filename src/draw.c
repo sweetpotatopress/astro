@@ -84,7 +84,7 @@ double *planet[], int *zodiac[])
 }
 
 void planet_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
-int radius, int centery, int centerx, const char *pl_sym[])
+int radius, int cy, int cx, const char *pl_sym[])
 {
 	const int iter_count = 64;
 	const int max_distance = 11;
@@ -154,8 +154,8 @@ int radius, int centery, int centerx, const char *pl_sym[])
 		double sin_rad = sin(zo_pos_radian);
 		
 		int sym_len = (int)strlen(pl_sym[i]);
-		int x = (centerx - (int)(radius * cos_rad)) - sym_len / 2;
-		int y = centery + (int)(radius * sin_rad * 0.5);
+		int x = (cx - (int)(radius * cos_rad)) - sym_len / 2;
+		int y = cy + (int)(radius * sin_rad * 0.5);
 		
 		degree_color(win, y-1, x, i, planet, zodiac);
 		mvwaddstr(win, y, x, pl_sym[i]);
@@ -183,7 +183,7 @@ int radius, int centery, int centerx, const char *pl_sym[])
 }
 
 void ascmc_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
-int radius, int centery, int centerx)
+int radius, int cy, int cx)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
@@ -193,8 +193,8 @@ int radius, int centery, int centerx)
 	{
 		double rad = (planet[i][LONG] - sign_cusp[1]) * M_PI / 180.0;
 		
-		int x = centerx - (int)(radius * cos(rad));
-		int y = centery + (int)(radius * sin(rad) * 0.5);
+		int x = cx - (int)(radius * cos(rad));
+		int y = cy + (int)(radius * sin(rad) * 0.5);
 		
 		mvwaddstr(win, y, x, ascmc_sym[j]);
 		
@@ -203,7 +203,7 @@ int radius, int centery, int centerx)
 }
 
 void zo_pos(WINDOW *win, double sign_cusp[],
-int radius, int centery, int centerx,
+int radius, int cy, int cx,
 struct pxx *pxx, const char *zo_sym[], int *zodiac[])
 {
 	int asc_sign = (int)(pxx->dasc[LONG] / 30) - 1;
@@ -217,26 +217,26 @@ struct pxx *pxx, const char *zo_sym[], int *zodiac[])
 		
 		double rad = (sign_cusp[i] - sign_inc) * M_PI / 180.0;
 		
-		int x = centerx - (int)(radius * cos(rad));
-		int y = centery + (int)(radius * sin(rad) * 0.5);
+		int x = cx - (int)(radius * cos(rad));
+		int y = cy + (int)(radius * sin(rad) * 0.5);
 		
 		zo_color(win, y, x, sign, zo_sym, zodiac);
 	}
 }
 
 void draw_house(WINDOW *win, double cusp[],
-int radius, int centery, int centerx,
+int radius, int cy, int cx,
 chtype ch)
 {
 	for (int i = ARI; i < ZMAX; ++i)
 	{
 		double rad = cusp[i] * M_PI / 180.0;
 		
-		int edge_x = centerx - (int)(radius * cos(rad));
-		int edge_y = centery + (int)(radius * sin(rad) * 0.5);
+		int edge_x = cx - (int)(radius * cos(rad));
+		int edge_y = cy + (int)(radius * sin(rad) * 0.5);
 		
-		int half_x = centerx - (int)((radius / 2) * cos(rad));
-		int half_y = centery + (int)((radius / 2)  * sin(rad) * 0.5);
+		int half_x = cx - (int)((radius / 2) * cos(rad));
+		int half_y = cy + (int)((radius / 2)  * sin(rad) * 0.5);
 		
 		int dx = edge_x - half_x;
 		int dy = edge_y - half_y;
@@ -258,29 +258,16 @@ void draw_circle(WINDOW *win,
 int radius, int cy, int cx,
 chtype ch)
 {
-	int x = 0;
-	int y = radius;
-	int d = 3 -2 * radius;
+	const double ys = 0.5;
+	const int step = radius * 12;
 	
-	while (x <= y)
+	for (int i = 0; i < step; ++i)
 	{
-		mvwaddch(win, cy + y / 2, cx + x, ch);
-		mvwaddch(win, cy + y / 2, cx - x, ch);
-		mvwaddch(win, cy - y / 2, cx + x, ch);
-		mvwaddch(win, cy - y / 2, cx - x, ch);
+		double angle = 2.0 * M_PI * i / step;
 		
-		mvwaddch(win, cy + x / 2, cx + y, ch);
-		mvwaddch(win, cy + x / 2, cx - y, ch);
-		mvwaddch(win, cy - x / 2, cx + y, ch);
-		mvwaddch(win, cy - x / 2, cx - y, ch);
-	
-		if (d < 0)
-			d = d + 4 * x + 6;
-		else
-		{
-			d = d + 4 * (x - y) + 10;
-			y--;
-		}
-		x++;
+		int x = cx + (int)lround(radius * cos(angle));
+		int y = cy + (int)lround(radius * sin(angle) * ys);
+		
+		mvwaddch(win, y, x, ch);
 	}
 }
