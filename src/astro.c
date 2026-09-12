@@ -166,7 +166,7 @@ int main()
 	{
 		set_localtime(cdata[i]);
 		config_parse(cdata[i], xdg_path);
-		calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[i]);
+		calc_init(planet, cdata[i]->sol_eclipse[i]);
 	}
 	
 	new_chart(NEW_CHART_MAIN());
