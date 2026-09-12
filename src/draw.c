@@ -21,8 +21,7 @@
 #include "chronos.h"
 #include "table.h"
 
-void zo_color(WINDOW *win, int y, int x, int sign,
-const char *zo_sym[], int *zodiac[])
+void zo_color(WINDOW *win, int y, int x, int sign, int *zodiac[], const char **zo_sym)
 {
 	switch(zodiac[sign][ELEMENT])
 	{
@@ -83,8 +82,8 @@ double *planet[], int *zodiac[])
 	}
 }
 
-void planet_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
-int radius, int cy, int cx, const char *pl_sym[])
+void planet_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[], const char **pl_sym,
+int radius, int cy, int cx)
 {
 	const int iter_count = 64;
 	const int max_distance = 11;
@@ -204,7 +203,7 @@ int radius, int cy, int cx)
 
 void zo_pos(WINDOW *win, double sign_cusp[],
 int radius, int cy, int cx,
-struct pxx *pxx, const char *zo_sym[], int *zodiac[])
+struct pxx *pxx, const char **zo_sym, int *zodiac[])
 {
 	int asc_sign = (int)(pxx->dasc[LONG] / 30) - 1;
 	for (int i = ARI; i < ZMAX; ++i)
@@ -220,7 +219,7 @@ struct pxx *pxx, const char *zo_sym[], int *zodiac[])
 		int x = cx - (int)(radius * cos(rad));
 		int y = cy + (int)(radius * sin(rad) * 0.5);
 		
-		zo_color(win, y, x, sign, zo_sym, zodiac);
+		zo_color(win, y, x, sign, zodiac, zo_sym);
 	}
 }
 

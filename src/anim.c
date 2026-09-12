@@ -38,21 +38,21 @@ static void enanosleep(unsigned int ms)
 	nanosleep(&ts, NULL);
 }
 
-void cur_chart_data(WINDOW *main_win, struct cdata *cdata)
+void cur_chart_data(WINDOW *win, struct cdata *cdata)
 {	
 	int starty = (LINES / 2) - 4;
 	int startx = (COLS / 2) - 4;
 	
 	if(cdata->chart_name)
-		mvwprintw(main_win, starty, startx, "%s", cdata->chart_name);
+		mvwprintw(win, starty, startx, "%s", cdata->chart_name);
 	
 	starty += 1;
 	if (cdata->state && !isdigit((unsigned char)cdata->state[0]) &&
 	strlen(cdata->state) > 1)
-		mvwprintw(main_win, starty, startx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
+		mvwprintw(win, starty, startx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
 		
 	else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
-		mvwprintw(main_win, starty, startx, "%.22s, %s", cdata->city, cdata->country);
+		mvwprintw(win, starty, startx, "%.22s, %s", cdata->city, cdata->country);
 		
 	starty += 1;
 	const char *month[] = 
@@ -63,7 +63,7 @@ void cur_chart_data(WINDOW *main_win, struct cdata *cdata)
 	{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
 	
 	if(cdata->year && cdata->mon && cdata->mday)
-		mvwprintw(main_win, starty, startx, "%s.%02d.%02d, %s",
+		mvwprintw(win, starty, startx, "%s.%02d.%02d, %s",
 		month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
 		
 	starty += 1;
@@ -71,13 +71,13 @@ void cur_chart_data(WINDOW *main_win, struct cdata *cdata)
 	{
 		int hour = cdata->hour;
 		if (hour == 12)
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
+			mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
 		else if (hour > 12)	
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
+			mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
 		else if (hour == 0)
-			mvwprintw(main_win, starty, startx, "12:%02d:%02dAM", cdata->min, cdata->sec);
+			mvwprintw(win, starty, startx, "12:%02d:%02dAM", cdata->min, cdata->sec);
 		else if (hour > 0 && hour < 12)
-			mvwprintw(main_win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
+			mvwprintw(win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
 	}
 	starty += 1;
 	int utc;
@@ -92,38 +92,38 @@ void cur_chart_data(WINDOW *main_win, struct cdata *cdata)
 		utc += 24;
 		
 	if (cdata->isdst == YDST)
-		mvwprintw(main_win, starty, startx, "DST UTC%+02d", utc);
+		mvwprintw(win, starty, startx, "DST UTC%+02d", utc);
 	else
-		mvwprintw(main_win, starty, startx, "UTC%+02d", utc);
+		mvwprintw(win, starty, startx, "UTC%+02d", utc);
 		
 	starty += 1;
 	if (cdata->timezone)
-		mvwprintw(main_win, starty, startx, "%.30s", cdata->timezone);
+		mvwprintw(win, starty, startx, "%.30s", cdata->timezone);
 	
 	starty += 1;
 	if (fabs(cdata->dlat) > 1e-6)
-		mvwprintw(main_win, starty, startx, "%f", cdata->dlat);
+		mvwprintw(win, starty, startx, "%f", cdata->dlat);
 	
 	starty += 1;
 	if (fabs(cdata->dlon) > 1e-6)
-		mvwprintw(main_win, starty, startx, "%f", cdata->dlon);
+		mvwprintw(win, starty, startx, "%f", cdata->dlon);
 }
 
 void realtime_chart(NEW_CHART_PARAM())
 {
-	nodelay(main_win, TRUE);
+	nodelay(ui->main_win, TRUE);
 		
 	int ch = 0;
-	while ((ch = wgetch(main_win)) != 9)
+	while ((ch = wgetch(ui->main_win)) != 9)
 	{
 		set_localtime(cdata);
 		new_chart(NEW_CHART_ARG());
 		
-		wattron(main_win, COLOR_PAIR(FIRE));
-		mvwprintw(main_win, 0, COLS - 14, "*live");
-		wattroff(main_win, COLOR_PAIR(FIRE));
+		wattron(ui->main_win, COLOR_PAIR(FIRE));
+		mvwprintw(ui->main_win, 0, COLS - 14, "*live");
+		wattroff(ui->main_win, COLOR_PAIR(FIRE));
 		
-		wnoutrefresh(main_win);
+		wnoutrefresh(ui->main_win);
 		update_panels();
 		doupdate();
 	
@@ -132,31 +132,31 @@ void realtime_chart(NEW_CHART_PARAM())
 			enanosleep(10);
 			if (ch == 9 || ch == 'q')
 				break;
-			if (ch == 'p' && *left_trig == 0)
+			if (ch == 'p' && ui->left_trig == 0)
 			{
-				*left_trig = 1;
-				show_panel(*left_panel);
+				ui->left_trig = 1;
+				show_panel(ui->left_panel);
 				ch = 0;
 				break;
 			}
-			else if (ch == 'p' && *left_trig == 1)
+			else if (ch == 'p' && ui->left_trig == 1)
 			{
-				*left_trig = 0;
-				hide_panel(*left_panel);
+				ui->left_trig = 0;
+				hide_panel(ui->left_panel);
 				ch = 0;
 				break;
 			}
-			if (ch == 'o' && *right_trig == 0)
+			if (ch == 'o' && ui->right_trig == 0)
 			{
-				*right_trig = 1;
-				show_panel(*right_panel);
+				ui->right_trig = 1;
+				show_panel(ui->right_panel);
 				ch = 0;
 				break;
 			}
-			else if (ch == 'o' && *right_trig == 1)
+			else if (ch == 'o' && ui->right_trig == 1)
 			{
-				*right_trig = 0;
-				hide_panel(*right_panel);
+				ui->right_trig = 0;
+				hide_panel(ui->right_panel);
 				ch = 0;
 				break;
 			}
@@ -165,23 +165,23 @@ void realtime_chart(NEW_CHART_PARAM())
 		if (ch == 9 || ch == 'q')
 			break;
 	}
-	wmove(main_win, 0, COLS - 14);
-	wclrtoeol(main_win);
-	nodelay(main_win, FALSE);
+	wmove(ui->main_win, 0, COLS - 14);
+	wclrtoeol(ui->main_win);
+	nodelay(ui->main_win, FALSE);
 }
 
 void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p)
 {
 	int win_h, win_w;
-	getmaxyx(main_win, win_h, win_w);
+	getmaxyx(ui->main_win, win_h, win_w);
 	
 	int cy = (win_h / 2);
 	int cx = (win_w / 2);
 	if ((win_w - win_h) > 60)
 		cx += 9;
 	
-	*roff += 4;
-	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 2);
+	*roff += 3;
+	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
 	
 	new_chart(NEW_CHART_ARG());
 	planet_init(planet, 11, p);
@@ -189,8 +189,8 @@ void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p)
 	double scu[13];
 	
 	pxx_init(cu, scu, luna_eclipse, sol_eclipse, planet, c[11], p[11]);
-	planet_pos(main_win, sign_cusp, planet, zodiac, pl_r, cy, cx, pl_sym);
-	wnoutrefresh(main_win);
+	planet_pos(ui->main_win, sign_cusp, planet, zodiac, ui->sym.pl_sym, pl_r, cy, cx);
+	wnoutrefresh(ui->main_win);
 	doupdate();
 	
 	*roff = 0;
@@ -376,7 +376,7 @@ void animate_chart(NEW_CHART_PARAM())
 	int starty = 0;
 	int startx = COLS - 14;
 	
-	mvwprintw(main_win, starty, startx, "(hour)");
+	mvwprintw(ui->main_win, starty, startx, "(hour)");
 	
 	int max_day = 0; // leapyear() return flag
 	size_t i = HOUR; // time inc/dec
@@ -389,7 +389,7 @@ void animate_chart(NEW_CHART_PARAM())
 	
 	int ch = 0;
 	int anim_done = 0;
-	while(!anim_done && (ch = wgetch(main_win)))
+	while(!anim_done && (ch = wgetch(ui->main_win)))
 	{
 		switch(ch)
 		{
@@ -487,54 +487,50 @@ void animate_chart(NEW_CHART_PARAM())
 				break;
 				
 			case 'p':
-				if (*left_trig)
+				if (ui->left_trig)
 				{
-					hide_panel(*left_panel);
-					*left_trig = 0;
+					hide_panel(ui->left_panel);
+					ui->left_trig = 0;
 				}
 				else
 				{
-					left_table(left_win, planet, zodiac, pxx, cdata,
-					pl_sym, zo_sym, moon);
-					show_panel(*left_panel);
-					*left_trig = 1;
+					left_table(planet, zodiac, pxx, cdata, ui);
+					show_panel(ui->left_panel);
+					ui->left_trig = 1;
 				}
 				
-				if (*right_trig > 0)
+				if (ui->right_trig > 0)
 				{
-					right_table(right_win, luna_eclipse, sol_eclipse,
-					planet, zodiac, zo_sym, pl_sym);
-					show_panel(*right_panel);
+					right_table(luna_eclipse, sol_eclipse, planet, zodiac, ui);
+					show_panel(ui->right_panel);
 				}
 				
-				touchwin(main_win);
-				wnoutrefresh(main_win);
+				touchwin(ui->main_win);
+				wnoutrefresh(ui->main_win);
 				update_panels();
 				doupdate();
 				break;
 				
 			case 'o':
-				if (*right_trig)
+				if (ui->right_trig)
 				{
-					hide_panel(*right_panel);
-					*right_trig = 0;
+					hide_panel(ui->right_panel);
+					ui->right_trig = 0;
 				}
 				else
 				{
-					right_table(right_win, luna_eclipse, sol_eclipse,
-					planet, zodiac, zo_sym, pl_sym);
-					show_panel(*right_panel);
-					*right_trig = 1;
+					right_table(luna_eclipse, sol_eclipse, planet, zodiac, ui);
+					show_panel(ui->right_panel);
+					ui->right_trig = 1;
 				}
 				
-				if (*left_trig > 0)
+				if (ui->left_trig > 0)
 				{
-					left_table(left_win, planet, zodiac, pxx, cdata,
-					pl_sym, zo_sym, moon);
-					show_panel(*left_panel);
+					left_table(planet, zodiac, pxx, cdata, ui);
+					show_panel(ui->left_panel);
 				}
-				touchwin(main_win);
-				wnoutrefresh(main_win);
+				touchwin(ui->main_win);
+				wnoutrefresh(ui->main_win);
 				update_panels();
 				doupdate();
 				break;
@@ -544,43 +540,43 @@ void animate_chart(NEW_CHART_PARAM())
 		switch(i)
 		{
 			case SECOND:
-				wmove(main_win, starty, startx);
-				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "(sec)");
+				wmove(ui->main_win, starty, startx);
+				wclrtoeol(ui->main_win);
+				mvwprintw(ui->main_win, starty, startx, "(sec)");
 				break;
 				
 			case MINUTE:
-				wmove(main_win, starty, startx);
-				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "(min)");
+				wmove(ui->main_win, starty, startx);
+				wclrtoeol(ui->main_win);
+				mvwprintw(ui->main_win, starty, startx, "(min)");
 				break;
 				
 			case HOUR:
-				wmove(main_win, starty, startx);
-				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "(hour)");
+				wmove(ui->main_win, starty, startx);
+				wclrtoeol(ui->main_win);
+				mvwprintw(ui->main_win, starty, startx, "(hour)");
 				break;
 				
 			case DAY:
-				wmove(main_win, starty, startx);
-				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "(day)");
+				wmove(ui->main_win, starty, startx);
+				wclrtoeol(ui->main_win);
+				mvwprintw(ui->main_win, starty, startx, "(day)");
 				break;
 				
 			case MONTH:
-				wmove(main_win, starty, startx);
-				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "(mon)");
+				wmove(ui->main_win, starty, startx);
+				wclrtoeol(ui->main_win);
+				mvwprintw(ui->main_win, starty, startx, "(mon)");
 				break;
 				
 			case YEAR:
-				wmove(main_win, starty, startx);
-				wclrtoeol(main_win);
-				mvwprintw(main_win, starty, startx, "(year)");
+				wmove(ui->main_win, starty, startx);
+				wclrtoeol(ui->main_win);
+				mvwprintw(ui->main_win, starty, startx, "(year)");
 				break;
 		}
 	}
-	wmove(main_win, starty, startx);
-	wclrtoeol(main_win);
-	wnoutrefresh(main_win);
+	wmove(ui->main_win, starty, startx);
+	wclrtoeol(ui->main_win);
+	wnoutrefresh(ui->main_win);
 }

@@ -39,5 +39,4 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define LONGITUDE 10
 #define FIELDMAX 11
 
-void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
-struct cdata *cdata, char xdg_path[]);
+void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[]);

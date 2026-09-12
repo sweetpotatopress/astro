@@ -179,7 +179,7 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 	}
 }
 
-static void field_label(WINDOW *win)
+static void field_label(struct ui *ui)
 {
 	const char *label[] = {
 		"city search:",
@@ -197,22 +197,21 @@ static void field_label(WINDOW *win)
 		
 	int y = 1, x = 1;
 	for (size_t i = CITY; i < FIELDMAX; ++i, y += 2)
-		mvwprintw(win, y, x, "%s", label[i]);
+		mvwprintw(ui->indat_win, y, x, "%s", label[i]);
 }
 
-void in_cdata(WINDOW *in_cdata_win, WINDOW *in_cdata_subwin,
-struct cdata *cdata, char xdg_path[])
+void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 {
 	FIELD *cdata_field[FIELDMAX + 1];
 	FORM *cdata_form;
 	int starty = 0, startx = 13;
 	
-	mvwin(in_cdata_win, (LINES - CWINY) / 2, (COLS - CWINX) / 2);
-	wresize(in_cdata_win, CWINY, CWINX);
+	mvwin(ui->indat_win, (LINES - CWINY) / 2, (COLS - CWINX) / 2);
+	wresize(ui->indat_win, CWINY, CWINX);
 	
 	curs_set(1);
 	
-	keypad(in_cdata_win, TRUE);	
+	keypad(ui->indat_win, TRUE);	
 	
 	cdata_field[CITY] = new_field(1, 25, starty, startx, 0, 0);
 	set_field_back(cdata_field[CITY], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
@@ -282,20 +281,20 @@ struct cdata *cdata, char xdg_path[])
 	cdata_field[FIELDMAX] = NULL;
 
 	cdata_form = new_form(cdata_field);
-	set_form_win(cdata_form, in_cdata_win);
-	set_form_sub(cdata_form, in_cdata_subwin);
+	set_form_win(cdata_form, ui->indat_win);
+	set_form_sub(cdata_form, ui->indat_subwin);
 	
 	post_form(cdata_form);
 	
 	set_current_field(cdata_form, cdata_field[CITY]);
 	
-	field_label(in_cdata_win);
-	box(in_cdata_win, 0, 0);
-	wrefresh(in_cdata_win);
+	field_label(ui);
+	box(ui->indat_win, 0, 0);
+	wrefresh(ui->indat_win);
 	pos_form_cursor(cdata_form);
 	
 	int cdata_entry = 0, ch = 0;
-	while(!cdata_entry && (ch = wgetch(in_cdata_win)))
+	while(!cdata_entry && (ch = wgetch(ui->indat_win)))
 	{
 		switch (ch)
 		{
@@ -350,8 +349,8 @@ struct cdata *cdata, char xdg_path[])
 				form_driver(cdata_form, ch);
 				break;
 		}
-		box(in_cdata_win, 0, 0);
-		wrefresh(in_cdata_win);
+		box(ui->indat_win, 0, 0);
+		wrefresh(ui->indat_win);
 	}
 	for (int i = 1; i < FIELDMAX; i++)
 	{
@@ -361,11 +360,11 @@ struct cdata *cdata, char xdg_path[])
 	}
 
 	unpost_form(cdata_form);
-	werase(in_cdata_win);
-	wrefresh(in_cdata_win);
+	werase(ui->indat_win);
+	wrefresh(ui->indat_win);
 	free_form(cdata_form);
 	
 	for (int i = CITY; i < FIELDMAX; ++i)
 		free_field(cdata_field[i]);
-	delwin(in_cdata_win);
+	delwin(ui->indat_win);
 }

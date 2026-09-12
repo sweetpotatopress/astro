@@ -64,8 +64,5 @@ struct zxx {
 	int ipis[MAXZXX];
 };
 
-void left_table(WINDOW *left_win, double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *cdata,
-const char *pl_sym[], const char *zo_sym[], const char *moon[]);
-
-void right_table(WINDOW *right_win, double *luna_eclipse, double *sol_eclipse,
-double *planet[], int *zodiac[], const char *zo_sym[], const char *pl_sym[]);
+void left_table(double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *cdata, struct ui *ui);
+void right_table(double *luna_eclipse, double *sol_eclipse, double *planet[], int *zodiac[], struct ui *ui);

@@ -14,6 +14,7 @@
 #pragma once
 
 #include <ncurses.h>
+#include <panel.h>
 
 #define MAXBUF 1024
 #define MAXPATH 2048
@@ -26,12 +27,10 @@
 		exit(EXIT_FAILURE); \
 		} while (0)
 
-#define NEW_CHART_MAIN() main_win, left_win, right_win, \
-		&left_panel, &right_panel,\
-		cdata[cur_chart], pxx[cur_chart],\
-		&left_trig, &right_trig, cusp[cur_chart], sign_cusp[cur_chart], planet, zodiac, \
+#define NEW_CHART_MAIN() cdata[cur_chart], pxx[cur_chart], ui, \
+		cusp[cur_chart], sign_cusp[cur_chart], planet, zodiac, \
 		luna_eclipse[cur_chart], sol_eclipse[cur_chart], \
-		pl_sym, zo_sym, moon, cur_chart, &roff
+		cur_chart, &roff
 
 #define LWINY 40
 #define LWINX 33
@@ -123,6 +122,30 @@ struct cdata {
 	int utc_mon;
 	int utc_mday;
 	int moonphase;
+};
+
+#define PL_SYM_MAX 12
+#define ZO_SYM_MAX 13
+#define MOON_MAX 8
+
+struct ui_sym {
+	const char *pl_sym[PL_SYM_MAX];
+	const char *zo_sym[ZO_SYM_MAX];
+	const char *moon[MOON_MAX];
+};
+
+struct ui {
+	WINDOW *main_win;
+	WINDOW *left_win;
+	WINDOW *right_win;
+	WINDOW *indat_win;
+	WINDOW *indat_subwin;
+	PANEL *main_panel;
+	PANEL *left_panel;
+	PANEL *right_panel;
+	bool left_trig;
+	bool right_trig;
+	struct ui_sym sym;
 };
 
 void *ecalloc(size_t n, size_t size);

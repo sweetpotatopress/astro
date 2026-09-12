@@ -88,21 +88,20 @@ static void dignity_check(int *zodiac[], double *planet[], int result[PLMAX][MAX
 	}
 }
 
-void mutual_reception(WINDOW *left_win, int starty, int planet, int result[PLMAX][MAXZXX])
+void mutual_reception(WINDOW *win, int starty, int planet, int result[PLMAX][MAXZXX])
 {
 	for (int c = 0; c < PLMAX; ++c)
 	{
 		if (result[planet][RULER] == c && result[c][RULER] == planet && c != planet)
 		{
-			wattron(left_win, COLOR_PAIR(AIR));
-			mvwprintw(left_win, starty, 5, "+");
-			wattroff(left_win, COLOR_PAIR(AIR));
+			wattron(win, COLOR_PAIR(AIR));
+			mvwprintw(win, starty, 5, "+");
+			wattroff(win, COLOR_PAIR(AIR));
 		}
 	}
 }
 
-void left_table(WINDOW *left_win, double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *cdata,
-const char *pl_sym[], const char *zo_sym[], const char *moon[])
+void left_table(double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *cdata, struct ui *ui)
 {
 	const char *name[17] = { 
 	"su", "mo", "me", "ve",
@@ -113,10 +112,10 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 	
 	int p_count = 18;
 	
-	mvwin(left_win, 0, 0);
-	wresize(left_win, 44, 33);
+	mvwin(ui->left_win, 0, 0);
+	wresize(ui->left_win, 44, 33);
 	
-	werase(left_win);
+	werase(ui->left_win);
 	
 	int starty = 1, startx = 2;
 	int j = 0;
@@ -136,32 +135,32 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			snprintf(buff, sizeof(buff),
 			"%-3s %3d.%02d : %6s %02d*%02d`",
 			name[i], full_deg, minute,
-			pl_sym[i], deg, minute);
+			ui->sym.pl_sym[i], deg, minute);
 			
-			mvwprintw(left_win, starty, startx, "%s ", buff);
+			mvwprintw(ui->left_win, starty, startx, "%s ", buff);
 			
 			if (planet[i][RETRO] > 0)
 			{
-				wattron(left_win, COLOR_PAIR(FIRE));
-				mvwprintw(left_win, starty, startx + 12, "r");
-				wattroff(left_win, COLOR_PAIR(FIRE));
+				wattron(ui->left_win, COLOR_PAIR(FIRE));
+				mvwprintw(ui->left_win, starty, startx + 12, "r");
+				wattroff(ui->left_win, COLOR_PAIR(FIRE));
 			}
 				
 			if ((int)planet[i][STATION] == STATION_R)
 			{
-				wattron(left_win, COLOR_PAIR(EARTH));
-				mvwaddstr(left_win, starty, startx + 12, "sr");
-				wattroff(left_win, COLOR_PAIR(EARTH));
+				wattron(ui->left_win, COLOR_PAIR(EARTH));
+				mvwaddstr(ui->left_win, starty, startx + 12, "sr");
+				wattroff(ui->left_win, COLOR_PAIR(EARTH));
 			}
 			else if ((int)planet[i][STATION] == STATION_D)
 			{
-				wattron(left_win, COLOR_PAIR(EARTH));
-				mvwaddstr(left_win, starty, startx + 12, "sd");
-				wattroff(left_win, COLOR_PAIR(EARTH));
+				wattron(ui->left_win, COLOR_PAIR(EARTH));
+				mvwaddstr(ui->left_win, starty, startx + 12, "sd");
+				wattroff(ui->left_win, COLOR_PAIR(EARTH));
 			}
 			
 			int color_x = startx + (int)strlen(buff) + 1;
-			zo_color(left_win, starty, color_x, sign, zo_sym, zodiac);
+			zo_color(ui->left_win, starty, color_x, sign, zodiac, ui->sym.zo_sym);
 			
 			starty += 1;
 		}
@@ -170,7 +169,7 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		{
 			if (i == 12 || i == 16)
 			{
-				mvwprintw(left_win, starty, startx,
+				mvwprintw(ui->left_win, starty, startx,
 				"------------------------------");
 				starty += 1;
 			}
@@ -184,22 +183,22 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 			"%-10s %3d.%02d : %02d*%02d`",
 			points[j], full_deg, minute, deg, minute);
 			
-			mvwprintw(left_win, starty, startx, "%s", point_buff);
+			mvwprintw(ui->left_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
-			zo_color(left_win, starty, color_x, sign, zo_sym, zodiac);
+			zo_color(ui->left_win, starty, color_x, sign, zodiac, ui->sym.zo_sym);
 	
 			starty += 1;
 			j++;
 		}
 	}
-	mvwprintw(left_win, starty, startx,
+	mvwprintw(ui->left_win, starty, startx,
 	"------------------------------");
 	++starty;
 			
-	mvwprintw(left_win, starty, startx, "pl:rul:exa:tri:bou:dec:det:fal:");
+	mvwprintw(ui->left_win, starty, startx, "pl:rul:exa:tri:bou:dec:det:fal:");
 	++starty;
-	mvwprintw(left_win, starty, startx,
+	mvwprintw(ui->left_win, starty, startx,
 	"--:---:---:---:---:---:---:-xx");
 	++starty;
 	
@@ -214,84 +213,81 @@ const char *pl_sym[], const char *zo_sym[], const char *moon[])
 		
 		if (ipl == 12)
 		{
-			mvwprintw(left_win, starty, startx,
+			mvwprintw(ui->left_win, starty, startx,
 			"--:---:---:---:---:---:---:---");
 			++starty;
 		}
 		
-		mvwprintw(left_win, starty, startx, "%-2s:", 
+		mvwprintw(ui->left_win, starty, startx, "%-2s:", 
 		name[ipl]);
 		startx += 4;
 		for (int i = 0; i < 7; ++i)
 		{
 			if (ipl == result[ipl][dig[i]] && i < 5)
 			{
-				wattron(left_win, COLOR_PAIR(EARTH));
-				mvwprintw(left_win, starty, startx, "%-2s", 
+				wattron(ui->left_win, COLOR_PAIR(EARTH));
+				mvwprintw(ui->left_win, starty, startx, "%-2s", 
 				name[result[ipl][dig[i]]]);
-				wattroff(left_win, COLOR_PAIR(EARTH));
+				wattroff(ui->left_win, COLOR_PAIR(EARTH));
 				
 				startx += 2;
-				mvwprintw(left_win, starty, startx, ":");
+				mvwprintw(ui->left_win, starty, startx, ":");
 				startx += 2;
 			}
 			else if (ipl == result[ipl][dig[i]] && i >= 5)
 			{
-				wattron(left_win, COLOR_PAIR(FIRE));
-				mvwprintw(left_win, starty, startx, "%-2s", 
+				wattron(ui->left_win, COLOR_PAIR(FIRE));
+				mvwprintw(ui->left_win, starty, startx, "%-2s", 
 				name[result[ipl][dig[i]]]);
-				wattroff(left_win, COLOR_PAIR(FIRE));
+				wattroff(ui->left_win, COLOR_PAIR(FIRE));
 				
 				startx += 2;
-				mvwprintw(left_win, starty, startx, ":");
+				mvwprintw(ui->left_win, starty, startx, ":");
 				startx += 2;
 			}
 			else
 			{
-				mvwprintw(left_win, starty, startx, "%-2s:", 
+				mvwprintw(ui->left_win, starty, startx, "%-2s:", 
 				name[result[ipl][dig[i]]]);
 				startx += 4;
 			}
-			mutual_reception(left_win, starty, ipl, result);
+			mutual_reception(ui->left_win, starty, ipl, result);
 		}
 		startx = 2;
 		++starty;
 		++ipl;
 	}
-	mvwprintw(left_win, starty, startx,
+	mvwprintw(ui->left_win, starty, startx,
 	"------------------------------");
 	
 	++starty;
 	
-	mvwprintw(left_win, starty, startx, 
-	"moon phase: %s", moon[cdata->moonphase]);
+	mvwprintw(ui->left_win, starty, startx, 
+	"moon phase: %s", ui->sym.moon[cdata->moonphase]);
 }
 
-void right_table(WINDOW *right_win,
-double *luna_eclipse, double *sol_eclipse,
-double *planet[], int *zodiac[],
-const char *zo_sym[], const char *pl_sym[])
+void right_table(double *luna_eclipse, double *sol_eclipse, double *planet[], int *zodiac[], struct ui *ui)
 {
 	size_t p_count = 10;
 	
-	mvwin(right_win, LINES - 11, COLS - 24);
-	wresize(right_win, 11, 24);
+	mvwin(ui->right_win, LINES - 11, COLS - 24);
+	wresize(ui->right_win, 11, 24);
 	
-	werase(right_win);
+	werase(ui->right_win);
 	
-	mvwprintw(right_win, 0, 0, "(()");
-	zo_color(right_win, 0, 4, (int)luna_eclipse[EN_SIGN], zo_sym, zodiac);
-	mvwprintw(right_win, 0, 8, "%2.f", luna_eclipse[EN_JUL]);
+	mvwprintw(ui->right_win, 0, 0, "(()");
+	zo_color(ui->right_win, 0, 4, (int)luna_eclipse[EN_SIGN], zodiac, ui->sym.zo_sym);
+	mvwprintw(ui->right_win, 0, 8, "%2.f", luna_eclipse[EN_JUL]);
  
-	zo_color(right_win, 0, 13, (int)luna_eclipse[EP_SIGN], zo_sym, zodiac);
-	mvwprintw(right_win, 0, 17, "-%2.f", luna_eclipse[EP_JUL]);
+	zo_color(ui->right_win, 0, 13, (int)luna_eclipse[EP_SIGN], zodiac, ui->sym.zo_sym);
+	mvwprintw(ui->right_win, 0, 17, "-%2.f", luna_eclipse[EP_JUL]);
 	
-	mvwprintw(right_win, 1, 0, "(o)");
-	zo_color(right_win, 1, 4, (int)sol_eclipse[EN_SIGN], zo_sym, zodiac);
-	mvwprintw(right_win, 1, 8, "%2.f", sol_eclipse[EN_JUL]);
+	mvwprintw(ui->right_win, 1, 0, "(o)");
+	zo_color(ui->right_win, 1, 4, (int)sol_eclipse[EN_SIGN], zodiac, ui->sym.zo_sym);
+	mvwprintw(ui->right_win, 1, 8, "%2.f", sol_eclipse[EN_JUL]);
  
-	zo_color(right_win, 1, 13, (int)sol_eclipse[EP_SIGN], zo_sym, zodiac);
-	mvwprintw(right_win, 1, 17, "-%2.f", sol_eclipse[EP_JUL]);
+	zo_color(ui->right_win, 1, 13, (int)sol_eclipse[EP_SIGN], zodiac, ui->sym.zo_sym);
+	mvwprintw(ui->right_win, 1, 17, "-%2.f", sol_eclipse[EP_JUL]);
    
     size_t i = 2, j = SE_MERCURY;
 	for (; i < p_count; ++i, ++j)
@@ -299,24 +295,24 @@ const char *zo_sym[], const char *pl_sym[])
 		char header[MAXBUF];
 		snprintf(header, sizeof(header), "%-6s%6s  %4s %4s", 
 		"planet", "speed", "next", "prev");
-		mvwprintw(right_win, 2, 0, "%s", header);
+		mvwprintw(ui->right_win, 2, 0, "%s", header);
 	
 		char buff[MAXBUF];
 		
 		if (planet[j][LONG_S] > 0.0)
 		{
 			snprintf(buff, sizeof(buff), "%-6s%2.0f*%-2.02d'  %-4.0f %-4.0f",
-			pl_sym[j], planet[j][DEGREE_S], (int)planet[j][MIN_S],
+			ui->sym.pl_sym[j], planet[j][DEGREE_S], (int)planet[j][MIN_S],
 			planet[j][NEXT_S], planet[j][PREV_S]);
 		}
 		
 		else
 		{
 			snprintf(buff, sizeof(buff), "%-6s-%1.0f*%-2.02d'  %-4.0f %-4.0f",
-			pl_sym[j], planet[j][DEGREE_S], (int)planet[j][MIN_S],
+			ui->sym.pl_sym[j], planet[j][DEGREE_S], (int)planet[j][MIN_S],
 			planet[j][NEXT_S], planet[j][PREV_S]);
 		}
 		
-		mvwprintw(right_win, (int)i + 1, 0, "%s", buff);
+		mvwprintw(ui->right_win, (int)i + 1, 0, "%s", buff);
 	}
 }

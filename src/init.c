@@ -234,7 +234,7 @@ struct cdata *cdata, struct pxx *pxx)
 }
 
 static void draw_chart(WINDOW *win, double cusp[], double sign_cusp[], double *planet[], int *zodiac[],
-struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[], int cur_chart, int roff)
+struct pxx *pxx, struct cdata *cdata, struct ui *ui, int cur_chart, int roff)
 {
 	curs_set(0);
 	werase(win);
@@ -261,9 +261,9 @@ struct pxx *pxx, struct cdata *cdata,  const char *pl_sym[], const char *zo_sym[
 	
 	draw_house(win, cusp, house_r, cy, cx, '`');
 	
-	zo_pos(win, sign_cusp, zo_r, cy, cx, pxx, zo_sym, zodiac);
+	zo_pos(win, sign_cusp, zo_r, cy, cx, pxx, ui->sym.zo_sym, zodiac);
 	
-	planet_pos(win, sign_cusp, planet, zodiac, pl_r, cy, cx, pl_sym);
+	planet_pos(win, sign_cusp, planet, zodiac, ui->sym.pl_sym, pl_r, cy, cx);
 	
 	if (fabs(cdata->dlat) > 1e-6)
 		ascmc_pos(win, sign_cusp, planet, zodiac, as_r, cy, cx);
@@ -283,18 +283,18 @@ void new_chart(NEW_CHART_PARAM())
 	tzset();
 	
 	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
-	draw_chart(main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata, pl_sym, zo_sym, cur_chart, *roff);
-	cur_chart_data(main_win, cdata);
+	draw_chart(ui->main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata, ui, cur_chart, *roff);
+	cur_chart_data(ui->main_win, cdata);
 	
-	if (*left_trig > 0)
+	if (ui->left_trig > 0)
 	{
-		left_table(left_win, planet, zodiac, pxx, cdata, pl_sym, zo_sym, moon);
-		show_panel(*left_panel);
+		left_table(planet, zodiac, pxx, cdata, ui);
+		show_panel(ui->left_panel);
 	}
-	if (*right_trig > 0)
+	if (ui->right_trig > 0)
 	{
-		right_table(right_win, luna_eclipse, sol_eclipse, planet, zodiac, zo_sym, pl_sym);
-		show_panel(*right_panel);
+		right_table(luna_eclipse, sol_eclipse, planet, zodiac, ui);
+		show_panel(ui->right_panel);
 	}	
 	update_panels();
 }

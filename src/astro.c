@@ -62,26 +62,9 @@ int main()
 {
 	iana_check();
 	
-	// sun, moon, mercury, venus, mars, jupiter,
-	// saturn, uranus, neptune, pluto, south, north node
-	const char *pl_sym[] = {"(o)", "(()", "(-o<)",
-	"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
-	"(P)", "(u)", "(^)"};
-
-	// the swiss ephemeris skips 0 for some reason
-	const char *zo_sym[] = {0, "ari", "tau", "gem", "can",
-	"leo", "vir", "lib", "sco", "sag",
-	"cap", "aqu", "pis"};
-
-	const char *moon[] = {"new", "crescent", "quarter", "gibbous", "full",
-	"2nd gibbous", "2nd quarter", "2nd crescent"};
-	
 	char xdg_path[MAXBUF] = {0};
 	
-	int cur_chart = 1;
-	int right_trig = 1, left_trig = 1;
-	int roff = 0;
-		
+	int cur_chart = 1, roff = 0;
 	double cusp[CHARTMAX][13] = {0};
 	double sign_cusp[CHARTMAX][13] = {0};
 	
@@ -138,39 +121,55 @@ int main()
 	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
 	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
 	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
+	
+	struct ui *ui = ecalloc(1, sizeof(*ui));
+	
+	ui->sym = (struct ui_sym) {
+		.pl_sym = { "(o)", "(()", "(-o<)",
+		"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
+		"(P)", "(u)", "(^)" },
+	
+		.zo_sym = { "err", "ari", "tau", "gem", "can",
+		"leo", "vir", "lib", "sco", "sag",
+		"cap", "aqu", "pis" },
+	
+		.moon = { "new", "crescent", "quarter", "gibbous", "full",
+		"2nd gibbous", "2nd quarter", "2nd crescent" }
+	};
+	
+	ui->left_trig = 1;
+	ui->right_trig = 1;
+	
+	ui->main_win = newwin(LINES, COLS, 0, 0);
+	ui->main_panel = new_panel(ui->main_win);
 
-	PANEL *main_panel;
-	WINDOW *main_win = newwin(LINES, COLS, 0, 0);
-	main_panel = new_panel(main_win);
-	hide_panel(main_panel);
+	hide_panel(ui->main_panel);
 	
-	wbkgdset(main_win, COLOR_PAIR(M_COLOR));
+	wbkgdset(ui->main_win, COLOR_PAIR(M_COLOR));
 	
-	WINDOW *in_cdata_win = newwin(CWINY, CWINX, CWIN_Y, CWIN_X);
-	WINDOW *in_cdata_subwin = derwin(in_cdata_win, CWINY-2, CWINX-2, 1, 1);
+	ui->indat_win = newwin(CWINY, CWINX, CWIN_Y, CWIN_X);
+	ui->indat_subwin = derwin(ui->indat_win, CWINY-2, CWINX-2, 1, 1);
 	
-	wbkgdset(in_cdata_win, COLOR_PAIR(M_COLOR));
+	wbkgdset(ui->indat_win, COLOR_PAIR(M_COLOR));
 	
-	PANEL *left_panel;
-	WINDOW *left_win = newwin(LWINY, LWINX, LWIN_Y, LWIN_X);
-	left_panel = new_panel(left_win);
-	hide_panel(left_panel);
+	ui->left_win = newwin(LWINY, LWINX, LWIN_Y, LWIN_X);
+	ui->left_panel = new_panel(ui->left_win);
+	hide_panel(ui->left_panel);
 	
-	wbkgdset(left_win, COLOR_PAIR(M_COLOR));
+	wbkgdset(ui->left_win, COLOR_PAIR(M_COLOR));
 	
-	PANEL *right_panel;
-	WINDOW *right_win = newwin(RWINY, RWINX, RWIN_Y, RWIN_X);
-	right_panel = new_panel(right_win);
-	hide_panel(right_panel);
+	ui->right_win = newwin(RWINY, RWINX, RWIN_Y, RWIN_X);
+	ui->right_panel = new_panel(ui->right_win);
+	hide_panel(ui->right_panel);
 	
-	wbkgdset(right_win, COLOR_PAIR(M_COLOR));
+	wbkgdset(ui->right_win, COLOR_PAIR(M_COLOR));
 	
-	keypad(main_win, TRUE);
+	keypad(ui->main_win, TRUE);
 	keypad(stdscr, TRUE);
 
 	werase(stdscr);
 	wrefresh(stdscr);
-	show_panel(main_panel);
+	show_panel(ui->main_panel);
 	
 	for (int i = 1; i < CHARTMAX; ++i)
 	{
@@ -187,7 +186,7 @@ int main()
 	{
 		int chart_done = 0, ch = 0;
 		while(!chart_done && !main_done &&
-		(ch = wgetch(main_win)))
+		(ch = wgetch(ui->main_win)))
 		{
 			if (isdigit(ch))
 			{
@@ -245,8 +244,7 @@ int main()
 					break;
 				case 'i':
 					cdata_init(cdata[cur_chart]);
-					in_cdata(in_cdata_win, in_cdata_subwin,
-					cdata[cur_chart], xdg_path);
+					in_cdata(cdata[cur_chart], ui, xdg_path);
 					
 					calc_init(planet, sol_eclipse[cur_chart]);
 					new_chart(NEW_CHART_MAIN());
@@ -268,58 +266,54 @@ int main()
 					solar_return(NEW_CHART_MAIN());
 					break;
 				case 'p':
-					if (!left_trig)
+					if (!ui->left_trig)
 					{
-						left_table(left_win, planet, zodiac, pxx[cur_chart], cdata[cur_chart],
-						pl_sym, zo_sym, moon);
-						show_panel(left_panel);
-						left_trig = 1;
+						left_table(planet, zodiac, pxx[cur_chart], cdata[cur_chart], ui);
+						show_panel(ui->left_panel);
+						ui->left_trig = 1;
 					}
 					else
 					{
-						hide_panel(left_panel);
+						hide_panel(ui->left_panel);
 						clear();
 						refresh();
-						left_trig = 0;
+						ui->left_trig = 0;
 					}
 					
-					if (right_trig > 0)
+					if (ui->right_trig > 0)
 					{
-						right_table(right_win, luna_eclipse[cur_chart], sol_eclipse[cur_chart],
-						planet, zodiac, zo_sym, pl_sym);
-						show_panel(right_panel);
+						right_table(luna_eclipse[cur_chart], sol_eclipse[cur_chart], planet, zodiac, ui);
+						show_panel(ui->right_panel);
 					}
 					
-					touchwin(main_win);
-					wnoutrefresh(main_win);
+					touchwin(ui->main_win);
+					wnoutrefresh(ui->main_win);
 					update_panels();
 					doupdate();
 					break;
 				case 'o':
-					if (!right_trig)
+					if (!ui->right_trig)
 					{
-						right_table(right_win, luna_eclipse[cur_chart], sol_eclipse[cur_chart],
-						planet, zodiac, zo_sym, pl_sym);
-						show_panel(right_panel);
-						right_trig = 1;
+						right_table(luna_eclipse[cur_chart], sol_eclipse[cur_chart], planet, zodiac, ui);
+						show_panel(ui->right_panel);
+						ui->right_trig = 1;
 					}
 					else
 					{
-						hide_panel(right_panel);
+						hide_panel(ui->right_panel);
 						clear();
 						refresh();
-						right_trig = 0;
+						ui->right_trig = 0;
 					}	
 					
-					if (left_trig > 0)
+					if (ui->left_trig > 0)
 					{
-						left_table(left_win, planet, zodiac, pxx[cur_chart], cdata[cur_chart],
-						pl_sym, zo_sym, moon);
-						show_panel(left_panel);
+						left_table(planet, zodiac, pxx[cur_chart], cdata[cur_chart], ui);
+						show_panel(ui->left_panel);
 					}
 					
-					touchwin(main_win);
-					wnoutrefresh(main_win);
+					touchwin(ui->main_win);
+					wnoutrefresh(ui->main_win);
 					update_panels();
 					doupdate();
 					break;
@@ -328,10 +322,10 @@ int main()
 			}
 		}
 	}
-	del_panel(right_panel);
-	del_panel(left_panel);
-	del_panel(main_panel);
-	delwin(main_win);
+	del_panel(ui->right_panel);
+	del_panel(ui->left_panel);
+	del_panel(ui->main_panel);
+	delwin(ui->main_win);
 	endwin();
 	swe_close();
 	
@@ -349,6 +343,7 @@ int main()
 	free(cdata);
 	free(pxx);
 	free(zxx);
+	free(ui);
 	
 	return 0;
 } 
