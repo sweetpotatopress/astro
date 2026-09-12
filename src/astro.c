@@ -116,7 +116,7 @@ int main()
 		"2nd gibbous", "2nd quarter", "2nd crescent" }
 	};
 	
-	ui->cur_chart = 1;
+	ui->cc = 1;
 	ui->roff = 0;
 	
 	ui->left_trig = 1;
@@ -152,7 +152,7 @@ int main()
 		pxx[i] = ecalloc(1, sizeof(*pxx[i]));
 		
 	double *planet[SPXXMAX];
-	planet_init(planet, ui->cur_chart, pxx);
+	planet_init(planet, ui->cc, pxx);
 	
 	keypad(ui->main_win, TRUE);
 	show_panel(ui->main_panel);
@@ -161,10 +161,10 @@ int main()
 	{
 		set_localtime(cdata[i]);
 		config_parse(cdata[i], xdg_path);
-		calc_init(planet, cdata[i]->sol_eclipse[i]);
+		calc_init(planet, cdata[i]->se[i]);
 	}
 	
-	new_chart(NEW_CHART_MAIN());
+	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 	doupdate();
 	
 	int main_done = 0, t = 0;
@@ -176,55 +176,56 @@ int main()
 		{
 			if (isdigit(ch))
 			{
-				ui->cur_chart = ch - '0';
-				if (ui->cur_chart >= CHARTMAX || ui->cur_chart <= 0)
-					ui->cur_chart = 10;
+				ui->cc = ch - '0';
+				if (ui->cc >= CHARTMAX || ui->cc <= 0)
+					ui->cc = 10;
 					
-				calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-				planet_init(planet, ui->cur_chart, pxx);
-				new_chart(NEW_CHART_MAIN());
+				calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+				planet_init(planet, ui->cc, pxx);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				
 				doupdate();
 			}
 			
 			switch(ch)
 			{
 				case '\n':
-					animate_chart(NEW_CHART_MAIN());
+					animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 9: // tab
-					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-					realtime_chart(NEW_CHART_MAIN());
+					calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+					realtime_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 't':
 					if (!t)
 					{
-						transit(NEW_CHART_MAIN(), cdata, pxx);
-						calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-						planet_init(planet, ui->cur_chart, pxx);
+						transit(cdata, pxx, ui, planet, zodiac);
+						calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+						planet_init(planet, ui->cc, pxx);
 						t = 1;
 					}
 					else
 					{
-						calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-						new_chart(NEW_CHART_MAIN());
+						calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+						new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 						doupdate();
 						t = 0;
 					}
 					break;
 				case 'r':
-					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-					new_chart(NEW_CHART_MAIN());
+					calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 'R':
-					cdata_init(cdata[ui->cur_chart]);
-					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-					planet_init(planet, ui->cur_chart, pxx);
-					config_parse(cdata[ui->cur_chart], xdg_path);
-					set_localtime(cdata[ui->cur_chart]);
-					new_chart(NEW_CHART_MAIN());
+					cdata_init(cdata[ui->cc]);
+					calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+					planet_init(planet, ui->cc, pxx);
+					config_parse(cdata[ui->cc], xdg_path);
+					set_localtime(cdata[ui->cc]);
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 'q':
@@ -232,40 +233,40 @@ int main()
 					chart_done = 1;
 					break;
 				case 'd':
-					if (cdata[ui->cur_chart]->isdst == NDST)
-						cdata[ui->cur_chart]->isdst = YDST;
-					else if (cdata[ui->cur_chart]->isdst >= YDST)
-						cdata[ui->cur_chart]->isdst = NDST;
-					new_chart(NEW_CHART_MAIN());
+					if (cdata[ui->cc]->isdst == NDST)
+						cdata[ui->cc]->isdst = YDST;
+					else if (cdata[ui->cc]->isdst >= YDST)
+						cdata[ui->cc]->isdst = NDST;
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 'i':
-					cdata_init(cdata[ui->cur_chart]);
-					in_cdata(cdata[ui->cur_chart], ui, xdg_path);
+					cdata_init(cdata[ui->cc]);
+					in_cdata(cdata[ui->cc], ui, xdg_path);
 					
-					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-					new_chart(NEW_CHART_MAIN());
+					calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 'w':
-					save_chart(cdata[ui->cur_chart], xdg_path);
-					new_chart(NEW_CHART_MAIN());
+					save_chart(cdata[ui->cc], xdg_path);
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata[ui->cur_chart], xdg_path);
-					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-					new_chart(NEW_CHART_MAIN());
+					load_chart(cdata[ui->cc], xdg_path);
+					calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 's':
-					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-					solar_return(NEW_CHART_MAIN());
+					calc_init(planet, cdata[ui->cc]->se[ui->cc]);
+					solar_return(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					break;
 				case 'p':
 					if (!ui->left_trig)
 					{
-						left_table(planet, zodiac, pxx[ui->cur_chart], cdata[ui->cur_chart], ui);
+						left_table(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 						show_panel(ui->left_panel);
 						ui->left_trig = 1;
 					}
@@ -279,9 +280,7 @@ int main()
 					
 					if (ui->right_trig > 0)
 					{
-						right_table(cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart],
-									cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart],
-									planet, zodiac, ui);
+						right_table(cdata[ui->cc], ui, planet, zodiac);
 						show_panel(ui->right_panel);
 					}
 					
@@ -293,9 +292,7 @@ int main()
 				case 'o':
 					if (!ui->right_trig)
 					{
-						right_table(cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart],
-									cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart],
-									planet, zodiac, ui);
+						right_table(cdata[ui->cc], ui, planet, zodiac);
 						show_panel(ui->right_panel);
 						ui->right_trig = 1;
 					}
@@ -309,7 +306,7 @@ int main()
 					
 					if (ui->left_trig > 0)
 					{
-						left_table(planet, zodiac, pxx[ui->cur_chart], cdata[ui->cur_chart], ui);
+						left_table(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 						show_panel(ui->left_panel);
 					}
 					

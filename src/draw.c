@@ -21,28 +21,28 @@
 #include "chronos.h"
 #include "table.h"
 
-void zo_color(WINDOW *win, int y, int x, int sign, int *zodiac[], const char **zo_sym)
+void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[])
 {
 	switch(zodiac[sign][ELEMENT])
 	{
 		case FIRE:
 			wattron(win, COLOR_PAIR(FIRE));
-			mvwaddstr(win, y, x, zo_sym[sign]);
+			mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
 			wattroff(win, COLOR_PAIR(FIRE));
 			break;
 		case EARTH:
 			wattron(win, COLOR_PAIR(EARTH));
-			mvwaddstr(win, y, x, zo_sym[sign]);
+			mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
 			wattroff(win, COLOR_PAIR(EARTH));
 			break;
 		case AIR:
 			wattron(win, COLOR_PAIR(AIR));
-			mvwaddstr(win, y, x, zo_sym[sign]);
+			mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
 			wattroff(win, COLOR_PAIR(AIR));
 			break;
 		case WATER:
 			wattron(win, COLOR_PAIR(WATER));
-			mvwaddstr(win, y, x, zo_sym[sign]);
+			mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
 			wattroff(win, COLOR_PAIR(WATER));
 			break;
 	}
@@ -82,7 +82,7 @@ double *planet[], int *zodiac[])
 	}
 }
 
-void planet_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[], const char **pl_sym,
+void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet, int **zodiac,
 int radius, int cy, int cx)
 {
 	const int iter_count = 64;
@@ -145,19 +145,19 @@ int radius, int cy, int cx)
 	
 	for (int i = 0; i < pcount; ++i)
 	{
-		int zo_sign = (int)(sign_cusp[1] / 30.0);
+		int zo_sign = (int)(cdata->sign_cusp[ui->cc][1] / 30.0);
 		double as_sign = zo_sign * 30.0;
 	
 		double zo_pos_radian = (adjusted_pos[i] - as_sign) * M_PI / 180;
 		double cos_rad = cos(zo_pos_radian);
 		double sin_rad = sin(zo_pos_radian);
 		
-		int sym_len = (int)strlen(pl_sym[i]);
+		int sym_len = (int)strlen(ui->sym.pl_sym[i]);
 		int x = (cx - (int)(radius * cos_rad)) - sym_len / 2;
 		int y = cy + (int)(radius * sin_rad * 0.5);
 		
 		degree_color(win, y-1, x, i, planet, zodiac);
-		mvwaddstr(win, y, x, pl_sym[i]);
+		mvwaddstr(win, y, x, ui->sym.pl_sym[i]);
 	
 		if (planet[i][RETRO] > 0 && i != SE_TRUE_NODE)
 		{
@@ -181,8 +181,8 @@ int radius, int cy, int cx)
 	}
 }
 
-void ascmc_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
-int radius, int cy, int cx)
+void ascmc_pos(WINDOW *win, struct cdata *cdata, double *planet[], int *zodiac[],
+int radius, int cy, int cx, int cc)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
@@ -190,7 +190,7 @@ int radius, int cy, int cx)
 	int i = 12;
 	for (j = 0; i < 16; ++i, ++j)
 	{
-		double rad = (planet[i][LONG] - sign_cusp[1]) * M_PI / 180.0;
+		double rad = (planet[i][LONG] - cdata->sign_cusp[cc][1]) * M_PI / 180.0;
 		
 		int x = cx - (int)(radius * cos(rad));
 		int y = cy + (int)(radius * sin(rad) * 0.5);
@@ -201,9 +201,8 @@ int radius, int cy, int cx)
 	}
 }
 
-void zo_pos(WINDOW *win, double sign_cusp[],
-int radius, int cy, int cx,
-struct pxx *pxx, const char **zo_sym, int *zodiac[])
+void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui,
+int radius, int cy, int cx, int **zodiac)
 {
 	int asc_sign = (int)(pxx->dasc[LONG] / 30) - 1;
 	for (int i = ARI; i < ZMAX; ++i)
@@ -214,22 +213,22 @@ struct pxx *pxx, const char **zo_sym, int *zodiac[])
 
 		int sign_inc = (((int)pxx->dasc[LONG] / 30) * 30) + 15;
 		
-		double rad = (sign_cusp[i] - sign_inc) * M_PI / 180.0;
+		double rad = (cdata->sign_cusp[ui->cc][i] - sign_inc) * M_PI / 180.0;
 		
 		int x = cx - (int)(radius * cos(rad));
 		int y = cy + (int)(radius * sin(rad) * 0.5);
 		
-		zo_color(win, y, x, sign, zodiac, zo_sym);
+		zo_color(win, ui, y, x, sign, zodiac);
 	}
 }
 
-void draw_house(WINDOW *win, double cusp[],
-int radius, int cy, int cx,
+void draw_house(WINDOW *win, struct cdata *cdata,
+int radius, int cy, int cx, int cc,
 chtype ch)
 {
 	for (int i = ARI; i < ZMAX; ++i)
 	{
-		double rad = cusp[i] * M_PI / 180.0;
+		double rad = cdata->cusp[cc][i] * M_PI / 180.0;
 		
 		int edge_x = cx - (int)(radius * cos(rad));
 		int edge_y = cy + (int)(radius * sin(rad) * 0.5);

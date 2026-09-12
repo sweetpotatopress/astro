@@ -30,25 +30,25 @@ void cdata_init(struct cdata *cdata)
 	cdata->isdst = -1;
 }
 
-void calc_init(double *planet[], double *sol_eclipse)
+void calc_init(double *planet[], double *se)
 {
 	for (int ipl = SE_MERCURY; ipl <= SE_PLUTO; ++ipl)
 		planet[ipl][RET_INIT] = 0;
-	sol_eclipse[E_INIT] = 0;
+	se[E_INIT] = 0;
 }
 
-void planet_init(double *planet[], int cur_chart, struct pxx **pxx)
+void planet_init(double *planet[], int cc, struct pxx **pxx)
 {
 	double *new_planet[] = {
-		pxx[cur_chart]->dsun, pxx[cur_chart]->dmoon,
-		pxx[cur_chart]->dmerc, pxx[cur_chart]->dven,
-		pxx[cur_chart]->dmars, pxx[cur_chart]->djup,
-		pxx[cur_chart]->dsat, pxx[cur_chart]->dura,
-		pxx[cur_chart]->dnep, pxx[cur_chart]->dplu,
-		pxx[cur_chart]->dmnod, pxx[cur_chart]->dtnod,
-		pxx[cur_chart]->dasc, pxx[cur_chart]->dmc,
-		pxx[cur_chart]->ddsc, pxx[cur_chart]->dic,
-		pxx[cur_chart]->dfor, pxx[cur_chart]->dspir};
+		pxx[cc]->dsun, pxx[cc]->dmoon,
+		pxx[cc]->dmerc, pxx[cc]->dven,
+		pxx[cc]->dmars, pxx[cc]->djup,
+		pxx[cc]->dsat, pxx[cc]->dura,
+		pxx[cc]->dnep, pxx[cc]->dplu,
+		pxx[cc]->dmnod, pxx[cc]->dtnod,
+		pxx[cc]->dasc, pxx[cc]->dmc,
+		pxx[cc]->ddsc, pxx[cc]->dic,
+		pxx[cc]->dfor, pxx[cc]->dspir};
 		
 	memcpy(planet, new_planet, sizeof(new_planet));
 }
@@ -140,9 +140,7 @@ void zxx_init(int *zodiac[])
 			zodiac[z][d] = zodia[z][d];
 }
 
-void pxx_init(double cusp[], double sign_cusp[],
-double *luna_eclipse, double *sol_eclipse, double *planet[],
-struct cdata *cdata, struct pxx *pxx)
+void pxx_init(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet)
 {
 	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	int ipl, iret;
@@ -173,15 +171,15 @@ struct cdata *cdata, struct pxx *pxx)
 
 	retro_station(jd_ut, planet);
 	
-	eclipse(jd_ut, luna_eclipse, sol_eclipse);
+	eclipse(jd_ut, cdata->le[ui->cc], cdata->se[ui->cc]);
 	
 	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
-	'W', sign_cusp, ascmc);
+	'W', cdata->sign_cusp[ui->cc], ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
 	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
-	ihsy, cusp, ascmc);
+	ihsy, cdata->cusp[ui->cc], ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
@@ -233,8 +231,8 @@ struct cdata *cdata, struct pxx *pxx)
 	cdata->moonphase = phase;
 }
 
-static void draw_chart(WINDOW *win, double cusp[], double sign_cusp[], double *planet[], int *zodiac[],
-struct pxx *pxx, struct cdata *cdata, struct ui *ui)
+static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, 
+double **planet, int **zodiac)
 {
 	curs_set(0);
 	werase(win);
@@ -259,41 +257,41 @@ struct pxx *pxx, struct cdata *cdata, struct ui *ui)
 	draw_circle(win, radius, cy, cx,'.');
 	draw_circle(win, in_r, cy, cx, '.');
 	
-	draw_house(win, cusp, house_r, cy, cx, '`');
+	draw_house(win, cdata, house_r, cy, cx, ui->cc, '`');
 	
-	zo_pos(win, sign_cusp, zo_r, cy, cx, pxx, ui->sym.zo_sym, zodiac);
+	zo_pos(win, cdata, pxx, ui, zo_r, cy, cx, zodiac);
 	
-	planet_pos(win, sign_cusp, planet, zodiac, ui->sym.pl_sym, pl_r, cy, cx);
+	planet_pos(win, cdata, ui, planet, zodiac, pl_r, cy, cx);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(win, sign_cusp, planet, zodiac, as_r, cy, cx);
+		ascmc_pos(win, cdata, planet, zodiac, as_r, cy, cx, ui->cc);
 	
 	// status bar
 	const int bar_end = 20;
 	mvwhline(win, 1, win_w - bar_end, '-', COLS);
 	mvwvline(win, 0, win_w - bar_end, ':', 1);
 	
-	mvwprintw(win, 0, win_w - (bar_end - 2), "%d :", ui->cur_chart);
+	mvwprintw(win, 0, win_w - (bar_end - 2), "%d :", ui->cc);
 }
 
-void new_chart(NEW_CHART_PARAM())
+void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	if (setenv("TZ", cdata->timezone, 1) != 0)
 		ERR_EXIT("ERR: new_chart setenv");
 	tzset();
 	
-	pxx_init(cusp, sign_cusp, luna_eclipse, sol_eclipse, planet, cdata, pxx);
-	draw_chart(ui->main_win, cusp, sign_cusp, planet, zodiac, pxx, cdata, ui);
-	cur_chart_data(ui->main_win, cdata);
+	pxx_init(cdata, pxx, ui, planet);
+	draw_chart(ui->main_win, cdata, pxx, ui, planet, zodiac);
+	cc_data(ui->main_win, cdata);
 	
 	if (ui->left_trig > 0)
 	{
-		left_table(planet, zodiac, pxx, cdata, ui);
+		left_table(cdata, pxx, ui, planet, zodiac);
 		show_panel(ui->left_panel);
 	}
 	if (ui->right_trig > 0)
 	{
-		right_table(luna_eclipse, sol_eclipse, planet, zodiac, ui);
+		right_table(cdata, ui, planet, zodiac);
 		show_panel(ui->right_panel);
 	}	
 	update_panels();

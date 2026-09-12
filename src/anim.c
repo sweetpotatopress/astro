@@ -38,7 +38,7 @@ static void enanosleep(unsigned int ms)
 	nanosleep(&ts, NULL);
 }
 
-void cur_chart_data(WINDOW *win, struct cdata *cdata)
+void cc_data(WINDOW *win, struct cdata *cdata)
 {	
 	int starty = (LINES / 2) - 4;
 	int startx = (COLS / 2) - 4;
@@ -63,7 +63,7 @@ void cur_chart_data(WINDOW *win, struct cdata *cdata)
 	{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
 	
 	if(cdata->year && cdata->mon && cdata->mday)
-		mvwprintw(win, starty, startx, "%s.%02d.%02d, %s",
+		mvwprintw(win, starty, startx, "%s.%02d.%02d, %s", 
 		month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
 		
 	starty += 1;
@@ -109,7 +109,7 @@ void cur_chart_data(WINDOW *win, struct cdata *cdata)
 		mvwprintw(win, starty, startx, "%f", cdata->dlon);
 }
 
-void realtime_chart(NEW_CHART_PARAM())
+void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	nodelay(ui->main_win, TRUE);
 		
@@ -117,7 +117,7 @@ void realtime_chart(NEW_CHART_PARAM())
 	while ((ch = wgetch(ui->main_win)) != 9)
 	{
 		set_localtime(cdata);
-		new_chart(NEW_CHART_ARG());
+		new_chart(cdata, pxx, ui, planet, zodiac);
 		
 		wattron(ui->main_win, COLOR_PAIR(FIRE));
 		mvwprintw(ui->main_win, 0, COLS - 14, "*live");
@@ -170,7 +170,7 @@ void realtime_chart(NEW_CHART_PARAM())
 	nodelay(ui->main_win, FALSE);
 }
 
-void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p)
+void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
 { // initial hack WIP
 	int win_h, win_w;
 	getmaxyx(ui->main_win, win_h, win_w);
@@ -183,16 +183,17 @@ void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p)
 	ui->roff += 3;
 	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
 	
-	new_chart(NEW_CHART_ARG());
-	planet_init(planet, 11, p);
-	double cu[13];
-	double scu[13];
+	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+	planet_init(planet, 11, pxx);
 	
-	pxx_init(cu, scu, luna_eclipse, sol_eclipse, planet, c[11], p[11]);
-	planet_pos(ui->main_win, sign_cusp, planet, zodiac, ui->sym.pl_sym, pl_r, cy, cx);
+	pxx_init(cdata[11], pxx[11], ui, planet);
+	planet_pos(ui->main_win, cdata[ui->cc], ui, planet, zodiac, pl_r, cy, cx);
+	int old = ui->cc;
+	ui->cc = 11;
 	wnoutrefresh(ui->main_win);
 	doupdate();
-	
+				
+	ui->cc = old;
 	ui->roff = 0;
 }
 
@@ -262,7 +263,7 @@ static void calc_return(struct cdata *cdata, double base_degree)
 	}
 }
 	
-void solar_return(NEW_CHART_PARAM())
+void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	double base_degree = pxx->dsun[LONG];
 	
@@ -367,11 +368,11 @@ void solar_return(NEW_CHART_PARAM())
 	
 	calc_return(cdata, base_degree);
 	
-	new_chart(NEW_CHART_ARG());
+	new_chart(cdata, pxx, ui, planet, zodiac);
 	doupdate();
 }
 
-void animate_chart(NEW_CHART_PARAM())
+void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	int starty = 0;
 	int startx = COLS - 14;
@@ -427,19 +428,19 @@ void animate_chart(NEW_CHART_PARAM())
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
-						calc_init(planet, sol_eclipse);
+						calc_init(planet, cdata->se[ui->cc]);
 						break;
 					case YEAR:
 						temp.tm_year++;
 						if (temp.tm_year > 16799)
 							temp.tm_year = -12998;
 						t = mktime(&temp);
-						calc_init(planet, sol_eclipse);
+						calc_init(planet, cdata->se[ui->cc]);
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);
 				
-				new_chart(NEW_CHART_ARG());
+				new_chart(cdata, pxx, ui, planet, zodiac);
 				break;
 				
 			case 'j': case KEY_DOWN:
@@ -467,19 +468,19 @@ void animate_chart(NEW_CHART_PARAM())
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
-						calc_init(planet, sol_eclipse);
+						calc_init(planet, cdata->se[ui->cc]);
 						break;
 					case YEAR:
 						--temp.tm_year;
 						if (temp.tm_year < -12998)
 							temp.tm_year = 16799;
 						t = mktime(&temp);
-						calc_init(planet, sol_eclipse);
+						calc_init(planet, cdata->se[ui->cc]);
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);
 				
-				new_chart(NEW_CHART_ARG());
+				new_chart(cdata, pxx, ui, planet, zodiac);
 				break;
 		
 			case '\n':
@@ -494,14 +495,14 @@ void animate_chart(NEW_CHART_PARAM())
 				}
 				else
 				{
-					left_table(planet, zodiac, pxx, cdata, ui);
+					left_table(cdata, pxx, ui, planet, zodiac);
 					show_panel(ui->left_panel);
 					ui->left_trig = 1;
 				}
 				
 				if (ui->right_trig > 0)
 				{
-					right_table(luna_eclipse, sol_eclipse, planet, zodiac, ui);
+					right_table(cdata, ui, planet, zodiac);
 					show_panel(ui->right_panel);
 				}
 				
@@ -519,14 +520,14 @@ void animate_chart(NEW_CHART_PARAM())
 				}
 				else
 				{
-					right_table(luna_eclipse, sol_eclipse, planet, zodiac, ui);
+					right_table(cdata, ui, planet, zodiac);
 					show_panel(ui->right_panel);
 					ui->right_trig = 1;
 				}
 				
 				if (ui->left_trig > 0)
 				{
-					left_table(planet, zodiac, pxx, cdata, ui);
+					left_table(cdata, pxx, ui, planet, zodiac);
 					show_panel(ui->left_panel);
 				}
 				touchwin(ui->main_win);

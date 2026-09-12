@@ -64,5 +64,5 @@ struct zxx {
 	int ipis[MAXZXX];
 };
 
-void left_table(double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *cdata, struct ui *ui);
-void right_table(double *luna_eclipse, double *sol_eclipse, double *planet[], int *zodiac[], struct ui *ui);
+void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void right_table(struct cdata *cdata, struct ui *ui, double **planet, int **zodiac);

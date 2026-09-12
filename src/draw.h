@@ -16,26 +16,11 @@
 
 #include <panel.h>
 
-void zo_color(WINDOW *win, int y, int x, int sign,
-int *zodiac[], const char **zo_sym);
+void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[]);
+void degree_color(WINDOW *win, int y, int x, int count, double *planet[], int *zodiac[]);
+void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet, int **zodiac, int radius, int cy, int cx);
+void ascmc_pos(WINDOW *win, struct cdata *cdata, double **planet, int **zodiac, int radius, int cy, int cx, int cc);
+void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, int radius, int cy, int cx, int **zodiac);
+void draw_house(WINDOW *win, struct cdata *cdata, int radius, int cy, int cx, int cc, chtype ch);
+void draw_circle(WINDOW *win, int radius, int cy, int cx, chtype ch);
 
-void degree_color(WINDOW *win, int y, int x, int count,
-double *planet[], int *zodiac[]);
-
-void planet_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[], const char **pl_sym,
-int radius, int centery, int centerx);
-
-void ascmc_pos(WINDOW *win, double sign_cusp[], double *planet[], int *zodiac[],
-int radius, int centery, int centerx);
-
-void zo_pos(WINDOW *win, double sign_cusp[],
-int radius, int centery, int centerx,
-struct pxx *pxx, const char **zo_sym, int *zodiac[]);
-
-void draw_house(WINDOW *win, double cusp[],
-int radius, int centery, int centerx,
-chtype ch);
-
-void draw_circle(WINDOW *win,
-int radius, int cy, int cx,
-chtype ch);

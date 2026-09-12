@@ -101,7 +101,7 @@ void mutual_reception(WINDOW *win, int starty, int planet, int result[PLMAX][MAX
 	}
 }
 
-void left_table(double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *cdata, struct ui *ui)
+void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	const char *name[17] = { 
 	"su", "mo", "me", "ve",
@@ -160,7 +160,7 @@ void left_table(double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *
 			}
 			
 			int color_x = startx + (int)strlen(buff) + 1;
-			zo_color(ui->left_win, starty, color_x, sign, zodiac, ui->sym.zo_sym);
+			zo_color(ui->left_win, ui, starty, color_x, sign, zodiac);
 			
 			starty += 1;
 		}
@@ -186,7 +186,7 @@ void left_table(double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *
 			mvwprintw(ui->left_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
-			zo_color(ui->left_win, starty, color_x, sign, zodiac, ui->sym.zo_sym);
+			zo_color(ui->left_win, ui, starty, color_x, sign, zodiac);
 	
 			starty += 1;
 			j++;
@@ -266,7 +266,7 @@ void left_table(double *planet[], int *zodiac[], struct pxx *pxx, struct cdata *
 	"moon phase: %s", ui->sym.moon[cdata->moonphase]);
 }
 
-void right_table(double *luna_eclipse, double *sol_eclipse, double *planet[], int *zodiac[], struct ui *ui)
+void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodiac[])
 {
 	size_t p_count = 10;
 	
@@ -276,18 +276,18 @@ void right_table(double *luna_eclipse, double *sol_eclipse, double *planet[], in
 	werase(ui->right_win);
 	
 	mvwprintw(ui->right_win, 0, 0, "(()");
-	zo_color(ui->right_win, 0, 4, (int)luna_eclipse[EN_SIGN], zodiac, ui->sym.zo_sym);
-	mvwprintw(ui->right_win, 0, 8, "%2.f", luna_eclipse[EN_JUL]);
+	zo_color(ui->right_win, ui, 0, 4, (int)cdata->le[ui->cc][EN_SIGN], zodiac);
+	mvwprintw(ui->right_win, 0, 8, "%2.f", cdata->le[ui->cc][EN_JUL]);
  
-	zo_color(ui->right_win, 0, 13, (int)luna_eclipse[EP_SIGN], zodiac, ui->sym.zo_sym);
-	mvwprintw(ui->right_win, 0, 17, "-%2.f", luna_eclipse[EP_JUL]);
+	zo_color(ui->right_win, ui, 0, 13, (int)cdata->le[ui->cc][EP_SIGN], zodiac);
+	mvwprintw(ui->right_win, 0, 17, "-%2.f", cdata->le[ui->cc][EP_JUL]);
 	
 	mvwprintw(ui->right_win, 1, 0, "(o)");
-	zo_color(ui->right_win, 1, 4, (int)sol_eclipse[EN_SIGN], zodiac, ui->sym.zo_sym);
-	mvwprintw(ui->right_win, 1, 8, "%2.f", sol_eclipse[EN_JUL]);
+	zo_color(ui->right_win, ui, 1, 4, (int)cdata->se[ui->cc][EN_SIGN], zodiac);
+	mvwprintw(ui->right_win, 1, 8, "%2.f", cdata->se[ui->cc][EN_JUL]);
  
-	zo_color(ui->right_win, 1, 13, (int)sol_eclipse[EP_SIGN], zodiac, ui->sym.zo_sym);
-	mvwprintw(ui->right_win, 1, 17, "-%2.f", sol_eclipse[EP_JUL]);
+	zo_color(ui->right_win, ui, 1, 13, (int)cdata->se[ui->cc][EP_SIGN], zodiac);
+	mvwprintw(ui->right_win, 1, 17, "-%2.f", cdata->se[ui->cc][EP_JUL]);
    
     size_t i = 2, j = SE_MERCURY;
 	for (; i < p_count; ++i, ++j)

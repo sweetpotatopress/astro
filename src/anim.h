@@ -16,22 +16,8 @@
 
 #include <panel.h>
 
-#define NEW_CHART_ARG() cdata, pxx, ui, \
-	cusp, sign_cusp, planet, zodiac, \
-	luna_eclipse, sol_eclipse 
-	
-#define NEW_CHART_PARAM() struct cdata *cdata, struct pxx *pxx, struct ui *ui, \
-double cusp[], double sign_cusp[], double *planet[], int *zodiac[], \
-double *luna_eclipse, double *sol_eclipse \
-
-void cur_chart_data(WINDOW *win, struct cdata *cdata);
-
-void new_chart(NEW_CHART_PARAM());
-
-void animate_chart(NEW_CHART_PARAM());
-
-void realtime_chart(NEW_CHART_PARAM());
-
-void solar_return(NEW_CHART_PARAM());
-
-void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p);
+void cc_data(WINDOW *win, struct cdata *cdata);
+void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac);
