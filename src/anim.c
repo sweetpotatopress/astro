@@ -171,7 +171,7 @@ void realtime_chart(NEW_CHART_PARAM())
 }
 
 void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p)
-{
+{ // initial hack WIP
 	int win_h, win_w;
 	getmaxyx(ui->main_win, win_h, win_w);
 	
