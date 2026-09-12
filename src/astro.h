@@ -27,9 +27,14 @@
 		exit(EXIT_FAILURE); \
 		} while (0)
 
-#define NEW_CHART_MAIN() cdata[ui->cur_chart], pxx[ui->cur_chart], ui, \
-		cdata[ui->cur_chart]->cusp[ui->cur_chart], cdata[ui->cur_chart]->sign_cusp[ui->cur_chart], planet, zodiac, \
-		cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart], cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart] 
+#define NEW_CHART_MAIN() \
+		cdata[ui->cur_chart], \
+		pxx[ui->cur_chart], ui, \
+		cdata[ui->cur_chart]->cusp[ui->cur_chart], \
+		cdata[ui->cur_chart]->sign_cusp[ui->cur_chart], \
+		planet, zodiac, \
+		cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart], \
+		cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart] 
 
 #define LWINY 40
 #define LWINX 33

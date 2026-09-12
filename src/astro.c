@@ -43,7 +43,7 @@ void *erealloc(void *p, size_t size)
 	return p;
 }
 
-static void iana_check()
+int main()
 {
 	const char *iana_path[] = { 
 	"/usr/share/zoneinfo/America/New_York",
@@ -56,11 +56,6 @@ static void iana_check()
 			c = 0; 
 	if (c)
 		ERR_EXIT("ERR: no IANA timezone data installed");
-}
-
-int main()
-{
-	iana_check();
 
 	initscr();
 	set_escdelay(25);
@@ -172,7 +167,7 @@ int main()
 	new_chart(NEW_CHART_MAIN());
 	doupdate();
 	
-	int main_done = 0;
+	int main_done = 0, t = 0;
 	while (!main_done)
 	{
 		int chart_done = 0, ch = 0;
@@ -203,9 +198,20 @@ int main()
 					doupdate();
 					break;
 				case 't':
-					transit(NEW_CHART_MAIN(), cdata, pxx);
-					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
-					planet_init(planet, ui->cur_chart, pxx);
+					if (!t)
+					{
+						transit(NEW_CHART_MAIN(), cdata, pxx);
+						calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
+						planet_init(planet, ui->cur_chart, pxx);
+						t = 1;
+					}
+					else
+					{
+						calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
+						new_chart(NEW_CHART_MAIN());
+						doupdate();
+						t = 0;
+					}
 					break;
 				case 'r':
 					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
@@ -273,7 +279,9 @@ int main()
 					
 					if (ui->right_trig > 0)
 					{
-						right_table(cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart], cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart], planet, zodiac, ui);
+						right_table(cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart],
+									cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart],
+									planet, zodiac, ui);
 						show_panel(ui->right_panel);
 					}
 					
@@ -285,7 +293,9 @@ int main()
 				case 'o':
 					if (!ui->right_trig)
 					{
-						right_table(cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart], cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart], planet, zodiac, ui);
+						right_table(cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart],
+									cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart],
+									planet, zodiac, ui);
 						show_panel(ui->right_panel);
 						ui->right_trig = 1;
 					}
