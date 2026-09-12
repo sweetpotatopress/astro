@@ -103,6 +103,8 @@ void mutual_reception(WINDOW *win, int starty, int planet, int result[PLMAX][MAX
 
 void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
+	if (ui->cc == 11)
+		return;
 	const char *name[17] = { 
 	"su", "mo", "me", "ve",
 	"ma", "ju", "sa", "ur",
@@ -268,6 +270,8 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 
 void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodiac[])
 {
+	if (ui->cc == 11)
+		return;
 	size_t p_count = 10;
 	
 	mvwin(ui->right_win, LINES - 11, COLS - 24);
@@ -276,18 +280,18 @@ void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodi
 	werase(ui->right_win);
 	
 	mvwprintw(ui->right_win, 0, 0, "(()");
-	zo_color(ui->right_win, ui, 0, 4, (int)cdata->le[ui->cc][EN_SIGN], zodiac);
-	mvwprintw(ui->right_win, 0, 8, "%2.f", cdata->le[ui->cc][EN_JUL]);
+	zo_color(ui->right_win, ui, 0, 4, (int)cdata->le[EN_SIGN], zodiac);
+	mvwprintw(ui->right_win, 0, 8, "%2.f", cdata->le[EN_JUL]);
  
-	zo_color(ui->right_win, ui, 0, 13, (int)cdata->le[ui->cc][EP_SIGN], zodiac);
-	mvwprintw(ui->right_win, 0, 17, "-%2.f", cdata->le[ui->cc][EP_JUL]);
+	zo_color(ui->right_win, ui, 0, 13, (int)cdata->le[EP_SIGN], zodiac);
+	mvwprintw(ui->right_win, 0, 17, "-%2.f", cdata->le[EP_JUL]);
 	
 	mvwprintw(ui->right_win, 1, 0, "(o)");
-	zo_color(ui->right_win, ui, 1, 4, (int)cdata->se[ui->cc][EN_SIGN], zodiac);
-	mvwprintw(ui->right_win, 1, 8, "%2.f", cdata->se[ui->cc][EN_JUL]);
+	zo_color(ui->right_win, ui, 1, 4, (int)cdata->se[EN_SIGN], zodiac);
+	mvwprintw(ui->right_win, 1, 8, "%2.f", cdata->se[EN_JUL]);
  
-	zo_color(ui->right_win, ui, 1, 13, (int)cdata->se[ui->cc][EP_SIGN], zodiac);
-	mvwprintw(ui->right_win, 1, 17, "-%2.f", cdata->se[ui->cc][EP_JUL]);
+	zo_color(ui->right_win, ui, 1, 13, (int)cdata->se[EP_SIGN], zodiac);
+	mvwprintw(ui->right_win, 1, 17, "-%2.f", cdata->se[EP_JUL]);
    
     size_t i = 2, j = SE_MERCURY;
 	for (; i < p_count; ++i, ++j)

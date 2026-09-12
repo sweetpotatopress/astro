@@ -128,10 +128,11 @@ struct cdata {
 	int utc_mon;
 	int utc_mday;
 	int moonphase;
-	double cusp[CHARTMAX][13];
-	double sign_cusp[CHARTMAX][13];
-	double le[CHARTMAX][EMAX];
-	double se[CHARTMAX][EMAX];
+	double cusp[13];
+	double sign_cusp[13];
+	double t_cusp;
+	double le[EMAX];
+	double se[EMAX];
 };
 
 #define PL_SYM_MAX 12
@@ -156,6 +157,7 @@ struct ui {
 	bool left_trig;
 	bool right_trig;
 	int cc;
+	int bcc;
 	int roff;
 	struct ui_sym sym;
 };

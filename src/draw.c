@@ -145,7 +145,11 @@ int radius, int cy, int cx)
 	
 	for (int i = 0; i < pcount; ++i)
 	{
-		int zo_sign = (int)(cdata->sign_cusp[ui->cc][1] / 30.0);
+		int zo_sign;
+		if (ui->cc == 11)
+			zo_sign = (int)(cdata->t_cusp / 30.0);
+		else
+			zo_sign = (int)(cdata->sign_cusp[1] / 30.0);
 		double as_sign = zo_sign * 30.0;
 	
 		double zo_pos_radian = (adjusted_pos[i] - as_sign) * M_PI / 180;
@@ -182,7 +186,7 @@ int radius, int cy, int cx)
 }
 
 void ascmc_pos(WINDOW *win, struct cdata *cdata, double *planet[], int *zodiac[],
-int radius, int cy, int cx, int cc)
+int radius, int cy, int cx)
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
@@ -190,7 +194,7 @@ int radius, int cy, int cx, int cc)
 	int i = 12;
 	for (j = 0; i < 16; ++i, ++j)
 	{
-		double rad = (planet[i][LONG] - cdata->sign_cusp[cc][1]) * M_PI / 180.0;
+		double rad = (planet[i][LONG] - cdata->sign_cusp[1]) * M_PI / 180.0;
 		
 		int x = cx - (int)(radius * cos(rad));
 		int y = cy + (int)(radius * sin(rad) * 0.5);
@@ -213,7 +217,7 @@ int radius, int cy, int cx, int **zodiac)
 
 		int sign_inc = (((int)pxx->dasc[LONG] / 30) * 30) + 15;
 		
-		double rad = (cdata->sign_cusp[ui->cc][i] - sign_inc) * M_PI / 180.0;
+		double rad = (cdata->sign_cusp[i] - sign_inc) * M_PI / 180.0;
 		
 		int x = cx - (int)(radius * cos(rad));
 		int y = cy + (int)(radius * sin(rad) * 0.5);
@@ -222,13 +226,11 @@ int radius, int cy, int cx, int **zodiac)
 	}
 }
 
-void draw_house(WINDOW *win, struct cdata *cdata,
-int radius, int cy, int cx, int cc,
-chtype ch)
+void draw_house(WINDOW *win, struct cdata *cdata, int radius, int cy, int cx, chtype ch)
 {
 	for (int i = ARI; i < ZMAX; ++i)
 	{
-		double rad = cdata->cusp[cc][i] * M_PI / 180.0;
+		double rad = cdata->cusp[i] * M_PI / 180.0;
 		
 		int edge_x = cx - (int)(radius * cos(rad));
 		int edge_y = cy + (int)(radius * sin(rad) * 0.5);

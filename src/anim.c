@@ -172,29 +172,67 @@ void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double 
 
 void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
 { // initial hack WIP
-	int win_h, win_w;
-	getmaxyx(ui->main_win, win_h, win_w);
-	
-	int cy = (win_h / 2);
-	int cx = (win_w / 2);
-	if ((win_w - win_h) > 60)
-		cx += 9;
-	
+	ui->bcc = ui->cc;
 	ui->roff += 3;
-	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
+	cdata[11]->t_cusp = cdata[ui->bcc]->sign_cusp[1];
 	
-	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-	planet_init(planet, 11, pxx);
-	
-	pxx_init(cdata[11], pxx[11], ui, planet);
-	planet_pos(ui->main_win, cdata[ui->cc], ui, planet, zodiac, pl_r, cy, cx);
-	int old = ui->cc;
+	new_chart(cdata[ui->bcc], pxx[ui->bcc], ui, planet, zodiac);
 	ui->cc = 11;
-	wnoutrefresh(ui->main_win);
+	planet_init(planet, ui->cc, pxx);
+	pxx_init(cdata[ui->cc], pxx[ui->cc], planet);
 	doupdate();
+	animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				
-	ui->cc = old;
+	ui->cc = ui->bcc;
 	ui->roff = 0;
+}
+
+static void tcc_data(WINDOW *win, struct cdata *cdata)
+{	
+	int starty = 2;
+	int startx = COLS - 20;
+	
+	starty += 1;
+	const char *month[] = 
+	{ "err", "jan", "feb", "mar", "apr", "may", "jun",
+	"jul", "aug", "sep", "oct", "nov", "dec" };
+	
+	const char *weekday[] = 
+	{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
+	
+	if(cdata->year && cdata->mon && cdata->mday)
+		mvwprintw(win, starty, startx, "%s.%02d.%02d, %s", 
+		month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
+		
+	starty += 1;
+	if (cdata->hour >= 0)
+	{
+		int hour = cdata->hour;
+		if (hour == 12)
+			mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
+		else if (hour > 12)	
+			mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
+		else if (hour == 0)
+			mvwprintw(win, starty, startx, "12:%02d:%02dAM", cdata->min, cdata->sec);
+		else if (hour > 0 && hour < 12)
+			mvwprintw(win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
+	}
+	starty += 1;
+	int utc;
+	
+	if ((int)cdata->utc_hour == 0)
+		utc = cdata->hour - 24;
+	else
+		utc = cdata->hour - (int)cdata->utc_hour;
+	if (utc > 14)
+		utc -= 24;
+	if (utc < - 12)
+		utc += 24;
+		
+	if (cdata->isdst == YDST)
+		mvwprintw(win, starty, startx, "DST UTC%+02d", utc);
+	else
+		mvwprintw(win, starty, startx, "UTC%+02d", utc);
 }
 
 static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)
@@ -372,12 +410,45 @@ void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **
 	doupdate();
 }
 
+static void arrange_panel(struct ui *ui, PANEL *t_panel)
+{
+	top_panel(ui->main_panel);
+	top_panel(t_panel);
+	
+	if (ui->left_trig)
+		top_panel(ui->left_panel);
+	if (ui->right_trig)
+		top_panel(ui->right_panel);
+}
+
 void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
+	WINDOW *t_win = newwin(LINES, COLS, 0, 0);
+	PANEL *t_panel = new_panel(t_win);
+	
 	int starty = 0;
 	int startx = COLS - 14;
+	int win_h, win_w;
+	getmaxyx(ui->main_win, win_h, win_w);
+	
+	int cy = (win_h / 2);
+	int cx = (win_w / 2);
+	if ((win_w - win_h) > 60)
+		cx += 9;
+	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
 	
 	mvwprintw(ui->main_win, starty, startx, "(hour)");
+	if (ui->cc == 11)
+	{
+		overwrite(ui->main_win, t_win);
+		pxx_init(cdata, pxx, planet);
+		planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
+		tcc_data(t_win, cdata);
+		arrange_panel(ui, t_panel);
+					
+		update_panels();
+		doupdate();
+	}
 	
 	int max_day = 0; // leapyear() return flag
 	size_t i = HOUR; // time inc/dec
@@ -428,19 +499,34 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
-						calc_init(planet, cdata->se[ui->cc]);
+						calc_init(planet, cdata->se);
 						break;
 					case YEAR:
 						temp.tm_year++;
 						if (temp.tm_year > 16799)
 							temp.tm_year = -12998;
 						t = mktime(&temp);
-						calc_init(planet, cdata->se[ui->cc]);
+						calc_init(planet, cdata->se);
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);
 				
-				new_chart(cdata, pxx, ui, planet, zodiac);
+				if (ui->cc == 11)
+				{
+					overwrite(ui->main_win, t_win);
+					pxx_init(cdata, pxx, planet);
+					planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
+					tcc_data(t_win, cdata);
+					arrange_panel(ui, t_panel);
+					
+					update_panels();
+					doupdate();
+				}
+				else
+				{
+					top_panel(ui->main_panel);
+					new_chart(cdata, pxx, ui, planet, zodiac);
+				}
 				break;
 				
 			case 'j': case KEY_DOWN:
@@ -468,19 +554,34 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
-						calc_init(planet, cdata->se[ui->cc]);
+						calc_init(planet, cdata->se);
 						break;
 					case YEAR:
 						--temp.tm_year;
 						if (temp.tm_year < -12998)
 							temp.tm_year = 16799;
 						t = mktime(&temp);
-						calc_init(planet, cdata->se[ui->cc]);
+						calc_init(planet, cdata->se);
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);
 				
-				new_chart(cdata, pxx, ui, planet, zodiac);
+				if (ui->cc == 11)
+				{
+					overwrite(ui->main_win, t_win);
+					pxx_init(cdata, pxx, planet);
+					planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
+					tcc_data(t_win, cdata);
+					arrange_panel(ui, t_panel);
+	
+					update_panels();
+					doupdate();
+				}
+				else
+				{
+					top_panel(ui->main_panel);
+					new_chart(cdata, pxx, ui, planet, zodiac);
+				}
 				break;
 		
 			case '\n':
@@ -488,6 +589,10 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				break;
 				
 			case 'p':
+				if (ui->cc == 11)
+					top_panel(t_panel);
+				else
+					top_panel(ui->main_panel);
 				if (ui->left_trig)
 				{
 					hide_panel(ui->left_panel);
@@ -497,6 +602,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				{
 					left_table(cdata, pxx, ui, planet, zodiac);
 					show_panel(ui->left_panel);
+					top_panel(ui->left_panel);
 					ui->left_trig = 1;
 				}
 				
@@ -504,15 +610,18 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				{
 					right_table(cdata, ui, planet, zodiac);
 					show_panel(ui->right_panel);
+					top_panel(ui->right_panel);
 				}
 				
-				touchwin(ui->main_win);
-				wnoutrefresh(ui->main_win);
 				update_panels();
 				doupdate();
 				break;
 				
 			case 'o':
+				if (ui->cc == 11)
+					top_panel(t_panel);
+				else
+					top_panel(ui->main_panel);
 				if (ui->right_trig)
 				{
 					hide_panel(ui->right_panel);
@@ -522,6 +631,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				{
 					right_table(cdata, ui, planet, zodiac);
 					show_panel(ui->right_panel);
+					top_panel(ui->right_panel);
 					ui->right_trig = 1;
 				}
 				
@@ -529,9 +639,8 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				{
 					left_table(cdata, pxx, ui, planet, zodiac);
 					show_panel(ui->left_panel);
+					top_panel(ui->left_panel);
 				}
-				touchwin(ui->main_win);
-				wnoutrefresh(ui->main_win);
 				update_panels();
 				doupdate();
 				break;
@@ -576,7 +685,19 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				mvwprintw(ui->main_win, starty, startx, "(year)");
 				break;
 		}
+		if (ui->cc == 11)
+		{
+			copywin(ui->main_win, t_win, 
+			starty, startx,
+			starty, startx,
+			starty, startx + 5,
+			FALSE);
+			update_panels();
+			doupdate();
+		}
 	}
+	del_panel(t_panel);
+	delwin(t_win);
 	wmove(ui->main_win, starty, startx);
 	wclrtoeol(ui->main_win);
 	wnoutrefresh(ui->main_win);

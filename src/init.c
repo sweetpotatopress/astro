@@ -140,7 +140,7 @@ void zxx_init(int *zodiac[])
 			zodiac[z][d] = zodia[z][d];
 }
 
-void pxx_init(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet)
+void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 {
 	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	int ipl, iret;
@@ -171,15 +171,15 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 
 	retro_station(jd_ut, planet);
 	
-	eclipse(jd_ut, cdata->le[ui->cc], cdata->se[ui->cc]);
+	eclipse(jd_ut, cdata->le, cdata->se);
 	
 	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
-	'W', cdata->sign_cusp[ui->cc], ascmc);
+	'W', cdata->sign_cusp, ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
 	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
-	ihsy, cdata->cusp[ui->cc], ascmc);
+	ihsy, cdata->cusp, ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
@@ -257,14 +257,14 @@ double **planet, int **zodiac)
 	draw_circle(win, radius, cy, cx,'.');
 	draw_circle(win, in_r, cy, cx, '.');
 	
-	draw_house(win, cdata, house_r, cy, cx, ui->cc, '`');
+	draw_house(win, cdata, house_r, cy, cx, '`');
 	
 	zo_pos(win, cdata, pxx, ui, zo_r, cy, cx, zodiac);
 	
 	planet_pos(win, cdata, ui, planet, zodiac, pl_r, cy, cx);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(win, cdata, planet, zodiac, as_r, cy, cx, ui->cc);
+		ascmc_pos(win, cdata, planet, zodiac, as_r, cy, cx);
 	
 	// status bar
 	const int bar_end = 20;
@@ -280,7 +280,7 @@ void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 		ERR_EXIT("ERR: new_chart setenv");
 	tzset();
 	
-	pxx_init(cdata, pxx, ui, planet);
+	pxx_init(cdata, pxx, planet);
 	draw_chart(ui->main_win, cdata, pxx, ui, planet, zodiac);
 	cc_data(ui->main_win, cdata);
 	

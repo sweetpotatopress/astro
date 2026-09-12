@@ -18,5 +18,5 @@ void cdata_init(struct cdata *cdata);
 void calc_init(double *planet[], double *sol_eclipse);
 void planet_init(double *planet[], int cur_chart, struct pxx **pxx);
 void zxx_init(int *zodiac[]);
-void pxx_init(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet);
+void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet);
 void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
