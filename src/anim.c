@@ -180,7 +180,7 @@ void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p)
 	if ((win_w - win_h) > 60)
 		cx += 9;
 	
-	*roff += 3;
+	ui->roff += 3;
 	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
 	
 	new_chart(NEW_CHART_ARG());
@@ -193,7 +193,7 @@ void transit(NEW_CHART_PARAM(), struct cdata **c, struct pxx **p)
 	wnoutrefresh(ui->main_win);
 	doupdate();
 	
-	*roff = 0;
+	ui->roff = 0;
 }
 
 static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)

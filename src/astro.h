@@ -27,10 +27,9 @@
 		exit(EXIT_FAILURE); \
 		} while (0)
 
-#define NEW_CHART_MAIN() cdata[cur_chart], pxx[cur_chart], ui, \
-		cusp[cur_chart], sign_cusp[cur_chart], planet, zodiac, \
-		luna_eclipse[cur_chart], sol_eclipse[cur_chart], \
-		cur_chart, &roff
+#define NEW_CHART_MAIN() cdata[ui->cur_chart], pxx[ui->cur_chart], ui, \
+		cdata[ui->cur_chart]->cusp[ui->cur_chart], cdata[ui->cur_chart]->sign_cusp[ui->cur_chart], planet, zodiac, \
+		cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart], cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart] 
 
 #define LWINY 40
 #define LWINX 33
@@ -99,6 +98,17 @@ struct pxx {
 	double dspir[MAXPXX];
 };
 
+#define E_INIT 0
+#define EN_JUL 1
+#define EN_FJUL 2
+#define EN_OBS 3
+#define EN_SIGN 4
+#define EP_JUL 5
+#define EP_FJUL 6
+#define EP_OBS 7
+#define EP_SIGN 8
+#define EMAX 9
+
 struct cdata {
 	char *city;
 	char *state;
@@ -122,6 +132,10 @@ struct cdata {
 	int utc_mon;
 	int utc_mday;
 	int moonphase;
+	double cusp[CHARTMAX][13];
+	double sign_cusp[CHARTMAX][13];
+	double luna_eclipse[CHARTMAX][EMAX];
+	double sol_eclipse[CHARTMAX][EMAX];
 };
 
 #define PL_SYM_MAX 12
@@ -145,6 +159,8 @@ struct ui {
 	PANEL *right_panel;
 	bool left_trig;
 	bool right_trig;
+	int cur_chart;
+	int roff;
 	struct ui_sym sym;
 };
 

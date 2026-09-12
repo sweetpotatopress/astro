@@ -61,15 +61,37 @@ static void iana_check()
 int main()
 {
 	iana_check();
+
+	initscr();
+	set_escdelay(25);
+	start_color();
+	cbreak();
+	noecho();
+
+	init_pair(M_COLOR, COLOR_WHITE,  COLOR_BLACK);
+	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
+	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
+	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
+	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
 	
 	char xdg_path[MAXBUF] = {0};
+	xdg_check(xdg_path, "ephe");
 	
-	int cur_chart = 1, roff = 0;
-	double cusp[CHARTMAX][13] = {0};
-	double sign_cusp[CHARTMAX][13] = {0};
+	if (strlen(xdg_path) > 255)
+		ERR_EXIT("XDG_DATA_HOME path too long");
+	swe_set_ephe_path(xdg_path);
 	
-	double luna_eclipse[CHARTMAX][EMAX] = {0};
-	double sol_eclipse[CHARTMAX][EMAX] = {0};
+	struct cdata **cdata = ecalloc(CHARTMAX, sizeof(*cdata));
+	
+	for (int i = 0; i < CHARTMAX; ++i)
+	{
+		cdata[i] = ecalloc(1, sizeof(*cdata[i]));
+		cdata[i]->city = ecalloc(1, MAXBUF);
+		cdata[i]->state = ecalloc(1, MAXBUF);
+		cdata[i]->country = ecalloc(1, MAXBUF);
+		cdata[i]->timezone = ecalloc(1, MAXBUF);
+		cdata[i]->chart_name = ecalloc(1, MAXBUF);
+	}
 	
 	struct zxx *zxx = ecalloc(1, sizeof(*zxx));
 		
@@ -83,45 +105,7 @@ int main()
 		zxx->iaqu, zxx->ipis};
 		
 	zxx_init(zodiac); // fills essential dignities
-	
-	struct pxx **pxx = ecalloc(CHARTMAX, sizeof(*pxx));
-	
-	for (int i = 0; i < CHARTMAX; ++i)
-		pxx[i] = ecalloc(1, sizeof(*pxx[i]));
-		
-	double *planet[SPXXMAX];
-	planet_init(planet, cur_chart, pxx);
-	
-	struct cdata **cdata = ecalloc(CHARTMAX, sizeof(*cdata));
-	
-	for (int i = 0; i < CHARTMAX; ++i)
-	{
-		cdata[i] = ecalloc(1, sizeof(*cdata[i]));
-		cdata[i]->city = ecalloc(1, MAXBUF);
-		cdata[i]->state = ecalloc(1, MAXBUF);
-		cdata[i]->country = ecalloc(1, MAXBUF);
-		cdata[i]->timezone = ecalloc(1, MAXBUF);
-		cdata[i]->chart_name = ecalloc(1, MAXBUF);
-	}
 
-	xdg_check(xdg_path, "ephe");
-	
-	if (strlen(xdg_path) > 255)
-		ERR_EXIT("XDG_DATA_HOME path too long");
-	swe_set_ephe_path(xdg_path);
-	
-	initscr();
-	set_escdelay(25);
-	start_color();
-	cbreak();
-	noecho();
-
-	init_pair(M_COLOR, COLOR_WHITE,  COLOR_BLACK);
-	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
-	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
-	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
-	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
-	
 	struct ui *ui = ecalloc(1, sizeof(*ui));
 	
 	ui->sym = (struct ui_sym) {
@@ -136,6 +120,9 @@ int main()
 		.moon = { "new", "crescent", "quarter", "gibbous", "full",
 		"2nd gibbous", "2nd quarter", "2nd crescent" }
 	};
+	
+	ui->cur_chart = 1;
+	ui->roff = 0;
 	
 	ui->left_trig = 1;
 	ui->right_trig = 1;
@@ -164,18 +151,22 @@ int main()
 	
 	wbkgdset(ui->right_win, COLOR_PAIR(M_COLOR));
 	
+	struct pxx **pxx = ecalloc(CHARTMAX, sizeof(*pxx));
+	
+	for (int i = 0; i < CHARTMAX; ++i)
+		pxx[i] = ecalloc(1, sizeof(*pxx[i]));
+		
+	double *planet[SPXXMAX];
+	planet_init(planet, ui->cur_chart, pxx);
+	
 	keypad(ui->main_win, TRUE);
-	keypad(stdscr, TRUE);
-
-	werase(stdscr);
-	wrefresh(stdscr);
 	show_panel(ui->main_panel);
 	
 	for (int i = 1; i < CHARTMAX; ++i)
 	{
 		set_localtime(cdata[i]);
 		config_parse(cdata[i], xdg_path);
-		calc_init(planet, sol_eclipse[i]);
+		calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[i]);
 	}
 	
 	new_chart(NEW_CHART_MAIN());
@@ -190,12 +181,12 @@ int main()
 		{
 			if (isdigit(ch))
 			{
-				cur_chart = ch - '0';
-				if (cur_chart >= CHARTMAX || cur_chart <= 0)
-					cur_chart = 10;
+				ui->cur_chart = ch - '0';
+				if (ui->cur_chart >= CHARTMAX || ui->cur_chart <= 0)
+					ui->cur_chart = 10;
 					
-				calc_init(planet, sol_eclipse[cur_chart]);
-				planet_init(planet, cur_chart, pxx);
+				calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
+				planet_init(planet, ui->cur_chart, pxx);
 				new_chart(NEW_CHART_MAIN());
 				doupdate();
 			}
@@ -207,26 +198,26 @@ int main()
 					doupdate();
 					break;
 				case 9: // tab
-					calc_init(planet, sol_eclipse[cur_chart]);
+					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
 					realtime_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 't':
 					transit(NEW_CHART_MAIN(), cdata, pxx);
-					calc_init(planet, sol_eclipse[cur_chart]);
-					planet_init(planet, cur_chart, pxx);
+					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
+					planet_init(planet, ui->cur_chart, pxx);
 					break;
 				case 'r':
-					calc_init(planet, sol_eclipse[cur_chart]);
+					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'R':
-					cdata_init(cdata[cur_chart]);
-					calc_init(planet, sol_eclipse[cur_chart]);
-					planet_init(planet, cur_chart, pxx);
-					config_parse(cdata[cur_chart], xdg_path);
-					set_localtime(cdata[cur_chart]);
+					cdata_init(cdata[ui->cur_chart]);
+					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
+					planet_init(planet, ui->cur_chart, pxx);
+					config_parse(cdata[ui->cur_chart], xdg_path);
+					set_localtime(cdata[ui->cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
@@ -235,40 +226,40 @@ int main()
 					chart_done = 1;
 					break;
 				case 'd':
-					if (cdata[cur_chart]->isdst == NDST)
-						cdata[cur_chart]->isdst = YDST;
-					else if (cdata[cur_chart]->isdst >= YDST)
-						cdata[cur_chart]->isdst = NDST;
+					if (cdata[ui->cur_chart]->isdst == NDST)
+						cdata[ui->cur_chart]->isdst = YDST;
+					else if (cdata[ui->cur_chart]->isdst >= YDST)
+						cdata[ui->cur_chart]->isdst = NDST;
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'i':
-					cdata_init(cdata[cur_chart]);
-					in_cdata(cdata[cur_chart], ui, xdg_path);
+					cdata_init(cdata[ui->cur_chart]);
+					in_cdata(cdata[ui->cur_chart], ui, xdg_path);
 					
-					calc_init(planet, sol_eclipse[cur_chart]);
+					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'w':
-					save_chart(cdata[cur_chart], xdg_path);
+					save_chart(cdata[ui->cur_chart], xdg_path);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 'e':
-					load_chart(cdata[cur_chart], xdg_path);
-					calc_init(planet, sol_eclipse[cur_chart]);
+					load_chart(cdata[ui->cur_chart], xdg_path);
+					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
 					new_chart(NEW_CHART_MAIN());
 					doupdate();
 					break;
 				case 's':
-					calc_init(planet, sol_eclipse[cur_chart]);
+					calc_init(planet, cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart]);
 					solar_return(NEW_CHART_MAIN());
 					break;
 				case 'p':
 					if (!ui->left_trig)
 					{
-						left_table(planet, zodiac, pxx[cur_chart], cdata[cur_chart], ui);
+						left_table(planet, zodiac, pxx[ui->cur_chart], cdata[ui->cur_chart], ui);
 						show_panel(ui->left_panel);
 						ui->left_trig = 1;
 					}
@@ -282,7 +273,7 @@ int main()
 					
 					if (ui->right_trig > 0)
 					{
-						right_table(luna_eclipse[cur_chart], sol_eclipse[cur_chart], planet, zodiac, ui);
+						right_table(cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart], cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart], planet, zodiac, ui);
 						show_panel(ui->right_panel);
 					}
 					
@@ -294,7 +285,7 @@ int main()
 				case 'o':
 					if (!ui->right_trig)
 					{
-						right_table(luna_eclipse[cur_chart], sol_eclipse[cur_chart], planet, zodiac, ui);
+						right_table(cdata[ui->cur_chart]->luna_eclipse[ui->cur_chart], cdata[ui->cur_chart]->sol_eclipse[ui->cur_chart], planet, zodiac, ui);
 						show_panel(ui->right_panel);
 						ui->right_trig = 1;
 					}
@@ -308,7 +299,7 @@ int main()
 					
 					if (ui->left_trig > 0)
 					{
-						left_table(planet, zodiac, pxx[cur_chart], cdata[cur_chart], ui);
+						left_table(planet, zodiac, pxx[ui->cur_chart], cdata[ui->cur_chart], ui);
 						show_panel(ui->left_panel);
 					}
 					

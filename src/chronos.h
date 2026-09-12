@@ -23,17 +23,6 @@
 #define NEXT_E 0
 #define PREV_E 1
 
-#define E_INIT 0
-#define EN_JUL 1
-#define EN_FJUL 2
-#define EN_OBS 3
-#define EN_SIGN 4
-#define EP_JUL 5
-#define EP_FJUL 6
-#define EP_OBS 7
-#define EP_SIGN 8
-#define EMAX 9
-
 int sect(struct pxx *pxx);
 int leapyear(int month, int year);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);

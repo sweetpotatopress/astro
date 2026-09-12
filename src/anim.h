@@ -18,13 +18,11 @@
 
 #define NEW_CHART_ARG() cdata, pxx, ui, \
 	cusp, sign_cusp, planet, zodiac, \
-	luna_eclipse, sol_eclipse, \
-	cur_chart, roff
+	luna_eclipse, sol_eclipse 
 	
 #define NEW_CHART_PARAM() struct cdata *cdata, struct pxx *pxx, struct ui *ui, \
 double cusp[], double sign_cusp[], double *planet[], int *zodiac[], \
-double *luna_eclipse, double *sol_eclipse, \
-int cur_chart, int *roff
+double *luna_eclipse, double *sol_eclipse \
 
 void cur_chart_data(WINDOW *win, struct cdata *cdata);
 
