@@ -180,6 +180,7 @@ int main()
 				if (ui->cc >= CHARTMAX || ui->cc <= 0)
 					ui->cc = 10;
 					
+				set_localtime(cdata[TRANSIT]);
 				calc_init(planet, cdata[ui->cc]->se);
 				planet_init(planet, ui->cc, pxx);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
