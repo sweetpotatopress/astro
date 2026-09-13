@@ -26,7 +26,7 @@
 #include "indat.h"
 #include "init.h"
 
-#define VERSION 0.75.5
+#define VERSION "0.75.5"
 
 void *ecalloc(size_t n, size_t size)
 {
@@ -43,8 +43,21 @@ void *erealloc(void *p, size_t size)
 	return p;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	int opt;
+	while ((opt = getopt(argc, argv, "v")) != -1)
+	{
+		switch (opt)
+		{
+			case 'v':
+				puts(VERSION);
+				return EXIT_SUCCESS;
+			default:
+				return EXIT_FAILURE;
+		}
+	}
+	
 	const char *iana_path[] = { 
 	"/usr/share/zoneinfo/America/New_York",
 	"/usr/share/lib/zoneinfo/America/New_York",
