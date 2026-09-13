@@ -379,8 +379,14 @@ void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **
 	doupdate();
 }
 
-static void arrange_panel(struct ui *ui, PANEL *t_panel)
+static void arrange_panel(struct cdata *cdata, struct pxx *pxx, struct ui *ui, PANEL *t_panel, WINDOW *t_win,
+double **planet, int **zodiac, const int pl_r, int cy, int cx)
 {
+	overwrite(ui->main_win, t_win);
+	pxx_init(cdata, pxx, planet);
+	planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
+	cc_data(t_win, cdata, ui);
+					
 	top_panel(ui->main_panel);
 	top_panel(t_panel);
 	
@@ -388,6 +394,9 @@ static void arrange_panel(struct ui *ui, PANEL *t_panel)
 		top_panel(ui->left_panel);
 	if (ui->right_trig)
 		top_panel(ui->right_panel);
+		
+	update_panels();
+	doupdate();
 }
 
 void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
@@ -408,16 +417,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	
 	mvwprintw(ui->main_win, starty, startx, "(hour)");
 	if (ui->cc == TRANSIT)
-	{
-		overwrite(ui->main_win, t_win);
-		pxx_init(cdata, pxx, planet);
-		planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
-		cc_data(t_win, cdata, ui);
-		arrange_panel(ui, t_panel);
-					
-		update_panels();
-		doupdate();
-	}
+		arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac, pl_r, cy, cx);
 	
 	int max_day = 0; // leapyear() return flag
 	size_t i = HOUR; // time inc/dec
@@ -481,16 +481,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				cpt(cdata, &temp, result, &t, 1);
 				
 				if (ui->cc == TRANSIT)
-				{
-					overwrite(ui->main_win, t_win);
-					pxx_init(cdata, pxx, planet);
-					planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
-					cc_data(t_win, cdata, ui);
-					arrange_panel(ui, t_panel);
-					
-					update_panels();
-					doupdate();
-				}
+					arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac, pl_r, cy, cx);
 				else
 				{
 					top_panel(ui->main_panel);
@@ -536,16 +527,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				cpt(cdata, &temp, result, &t, 1);
 				
 				if (ui->cc == TRANSIT)
-				{
-					overwrite(ui->main_win, t_win);
-					pxx_init(cdata, pxx, planet);
-					planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
-					cc_data(t_win, cdata, ui);
-					arrange_panel(ui, t_panel);
-	
-					update_panels();
-					doupdate();
-				}
+					arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac, pl_r, cy, cx);
 				else
 				{
 					top_panel(ui->main_panel);
