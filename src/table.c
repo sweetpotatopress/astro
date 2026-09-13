@@ -103,7 +103,7 @@ void mutual_reception(WINDOW *win, int starty, int planet, int result[PLMAX][MAX
 
 void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
-	if (ui->cc == 11)
+	if (ui->cc == TRANSIT)
 		return;
 	const char *name[17] = { 
 	"su", "mo", "me", "ve",
@@ -270,7 +270,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 
 void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodiac[])
 {
-	if (ui->cc == 11)
+	if (ui->cc == TRANSIT)
 		return;
 	size_t p_count = 10;
 	

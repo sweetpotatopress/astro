@@ -18,7 +18,7 @@
 
 #define MAXBUF 1024
 #define MAXPATH 2048
-#define CHARTMAX 20
+#define CHARTMAX 12
 
 #define ERR_EXIT(str) do { \
 		fprintf(stderr, "%s\n", str); \
@@ -130,14 +130,15 @@ struct cdata {
 	int moonphase;
 	double cusp[13];
 	double sign_cusp[13];
-	double t_cusp;
-	double le[EMAX];
-	double se[EMAX];
+	double t_cusp; // transit cusp
+	double le[EMAX]; // lunar eclipse
+	double se[EMAX]; // solar eclipse
 };
 
 #define PL_SYM_MAX 12
 #define ZO_SYM_MAX 13
 #define MOON_MAX 8
+#define TRANSIT 11
 
 struct ui_sym {
 	const char *pl_sym[PL_SYM_MAX];
@@ -156,9 +157,9 @@ struct ui {
 	PANEL *right_panel;
 	bool left_trig;
 	bool right_trig;
-	int cc;
-	int bcc;
-	int roff;
+	int cc; // current chart
+	int bcc; // previous chart
+	int roff; // radius offset
 	struct ui_sym sym;
 };
 

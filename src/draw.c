@@ -146,7 +146,7 @@ int radius, int cy, int cx)
 	for (int i = 0; i < pcount; ++i)
 	{
 		int zo_sign;
-		if (ui->cc == 11)
+		if (ui->cc == TRANSIT)
 			zo_sign = (int)(cdata->t_cusp / 30.0);
 		else
 			zo_sign = (int)(cdata->sign_cusp[1] / 30.0);

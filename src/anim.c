@@ -171,13 +171,13 @@ void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double 
 }
 
 void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
-{ // initial hack WIP
+{
 	ui->bcc = ui->cc;
 	ui->roff += 3;
-	cdata[11]->t_cusp = cdata[ui->bcc]->sign_cusp[1];
+	cdata[TRANSIT]->t_cusp = cdata[ui->bcc]->sign_cusp[1];
 	
 	new_chart(cdata[ui->bcc], pxx[ui->bcc], ui, planet, zodiac);
-	ui->cc = 11;
+	ui->cc = TRANSIT;
 	planet_init(planet, ui->cc, pxx);
 	pxx_init(cdata[ui->cc], pxx[ui->cc], planet);
 	doupdate();
@@ -438,7 +438,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
 	
 	mvwprintw(ui->main_win, starty, startx, "(hour)");
-	if (ui->cc == 11)
+	if (ui->cc == TRANSIT)
 	{
 		overwrite(ui->main_win, t_win);
 		pxx_init(cdata, pxx, planet);
@@ -511,7 +511,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				}
 				cpt(cdata, &temp, result, &t, 1);
 				
-				if (ui->cc == 11)
+				if (ui->cc == TRANSIT)
 				{
 					overwrite(ui->main_win, t_win);
 					pxx_init(cdata, pxx, planet);
@@ -566,7 +566,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				}
 				cpt(cdata, &temp, result, &t, 1);
 				
-				if (ui->cc == 11)
+				if (ui->cc == TRANSIT)
 				{
 					overwrite(ui->main_win, t_win);
 					pxx_init(cdata, pxx, planet);
@@ -584,12 +584,12 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				}
 				break;
 		
-			case '\n':
+			case '\n': case 'q': case 't':
 				anim_done = 1;
 				break;
 				
 			case 'p':
-				if (ui->cc == 11)
+				if (ui->cc == TRANSIT)
 					top_panel(t_panel);
 				else
 					top_panel(ui->main_panel);
@@ -618,7 +618,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				break;
 				
 			case 'o':
-				if (ui->cc == 11)
+				if (ui->cc == TRANSIT)
 					top_panel(t_panel);
 				else
 					top_panel(ui->main_panel);
@@ -685,7 +685,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				mvwprintw(ui->main_win, starty, startx, "(year)");
 				break;
 		}
-		if (ui->cc == 11)
+		if (ui->cc == TRANSIT)
 		{
 			copywin(ui->main_win, t_win, 
 			starty, startx,
