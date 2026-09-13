@@ -282,7 +282,7 @@ void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 	
 	pxx_init(cdata, pxx, planet);
 	draw_chart(ui->main_win, cdata, pxx, ui, planet, zodiac);
-	cc_data(ui->main_win, cdata);
+	cc_data(ui->main_win, cdata, ui);
 	
 	if (ui->left_trig > 0)
 	{

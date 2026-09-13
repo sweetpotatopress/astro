@@ -38,75 +38,92 @@ static void enanosleep(unsigned int ms)
 	nanosleep(&ts, NULL);
 }
 
-void cc_data(WINDOW *win, struct cdata *cdata)
+void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 {	
-	int starty = (LINES / 2) - 4;
-	int startx = (COLS / 2) - 4;
-	
-	if(cdata->chart_name)
-		mvwprintw(win, starty, startx, "%s", cdata->chart_name);
-	
-	starty += 1;
-	if (cdata->state && !isdigit((unsigned char)cdata->state[0]) &&
-	strlen(cdata->state) > 1)
-		mvwprintw(win, starty, startx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
-		
-	else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
-		mvwprintw(win, starty, startx, "%.22s, %s", cdata->city, cdata->country);
-		
-	starty += 1;
-	const char *month[] = 
-	{ "err", "jan", "feb", "mar", "apr", "may", "jun",
-	"jul", "aug", "sep", "oct", "nov", "dec" };
-	
-	const char *weekday[] = 
-	{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
-	
-	if(cdata->year && cdata->mon && cdata->mday)
-		mvwprintw(win, starty, startx, "%s.%02d.%02d, %s", 
-		month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
-		
-	starty += 1;
-	if (cdata->hour >= 0)
+	int starty, startx;
+	int count = (ui->cc == TRANSIT) ? 2 : 1;
+	for (int i = 0; i < count; ++i)
 	{
-		int hour = cdata->hour;
-		if (hour == 12)
-			mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
-		else if (hour > 12)	
-			mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
-		else if (hour == 0)
-			mvwprintw(win, starty, startx, "12:%02d:%02dAM", cdata->min, cdata->sec);
-		else if (hour > 0 && hour < 12)
-			mvwprintw(win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
+		if (ui->cc == TRANSIT)
+		{
+			i++;
+			starty = 1;
+			startx = COLS - 20;
+		}
+		else
+		{
+			starty = (LINES / 2) - 4;
+			startx = (COLS / 2) - 4;
+		}
+		
+		if(cdata->chart_name)
+			mvwprintw(win, starty, startx, "%s", cdata->chart_name);
+		
+		starty += 1;
+		if (cdata->state && !isdigit((unsigned char)cdata->state[0]) &&
+		strlen(cdata->state) > 1 && i < 1)
+			mvwprintw(win, starty, startx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
+			
+		else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0 &&
+		i < 1)
+			mvwprintw(win, starty, startx, "%.22s, %s", cdata->city, cdata->country);
+			
+		starty += 1;
+		const char *month[] = 
+		{ "err", "jan", "feb", "mar", "apr", "may", "jun",
+		"jul", "aug", "sep", "oct", "nov", "dec" };
+		
+		const char *weekday[] = 
+		{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
+		
+		if(cdata->year && cdata->mon && cdata->mday)
+			mvwprintw(win, starty, startx, "%s.%02d.%02d, %s", 
+			month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
+			
+		starty += 1;
+		if (cdata->hour >= 0)
+		{
+			int hour = cdata->hour;
+			if (hour == 12)
+				mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
+			else if (hour > 12)	
+				mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
+			else if (hour == 0)
+				mvwprintw(win, starty, startx, "12:%02d:%02dAM", cdata->min, cdata->sec);
+			else if (hour > 0 && hour < 12)
+				mvwprintw(win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
+		}
+		starty += 1;
+		int utc;
+		
+		if ((int)cdata->utc_hour == 0)
+			utc = cdata->hour - 24;
+		else
+			utc = cdata->hour - (int)cdata->utc_hour;
+		if (utc > 14)
+			utc -= 24;
+		if (utc < - 12)
+			utc += 24;
+			
+		if (cdata->isdst == YDST)
+			mvwprintw(win, starty, startx, "DST UTC%+02d", utc);
+		else
+			mvwprintw(win, starty, startx, "UTC%+02d", utc);
+		if (i > 0)
+			return;
+			
+		starty += 1;
+		if (cdata->timezone)
+			mvwprintw(win, starty, startx, "%.30s", cdata->timezone);
+		
+		starty += 1;
+		if (fabs(cdata->dlat) > 1e-6)
+			mvwprintw(win, starty, startx, "%f", cdata->dlat);
+		
+		starty += 1;
+		if (fabs(cdata->dlon) > 1e-6)
+			mvwprintw(win, starty, startx, "%f", cdata->dlon);
 	}
-	starty += 1;
-	int utc;
-	
-	if ((int)cdata->utc_hour == 0)
-		utc = cdata->hour - 24;
-	else
-		utc = cdata->hour - (int)cdata->utc_hour;
-	if (utc > 14)
-		utc -= 24;
-	if (utc < - 12)
-		utc += 24;
-		
-	if (cdata->isdst == YDST)
-		mvwprintw(win, starty, startx, "DST UTC%+02d", utc);
-	else
-		mvwprintw(win, starty, startx, "UTC%+02d", utc);
-		
-	starty += 1;
-	if (cdata->timezone)
-		mvwprintw(win, starty, startx, "%.30s", cdata->timezone);
-	
-	starty += 1;
-	if (fabs(cdata->dlat) > 1e-6)
-		mvwprintw(win, starty, startx, "%f", cdata->dlat);
-	
-	starty += 1;
-	if (fabs(cdata->dlon) > 1e-6)
-		mvwprintw(win, starty, startx, "%f", cdata->dlon);
 }
 
 void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
@@ -185,54 +202,6 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 				
 	ui->cc = ui->bcc;
 	ui->roff = 0;
-}
-
-static void tcc_data(WINDOW *win, struct cdata *cdata)
-{	
-	int starty = 2;
-	int startx = COLS - 20;
-	
-	starty += 1;
-	const char *month[] = 
-	{ "err", "jan", "feb", "mar", "apr", "may", "jun",
-	"jul", "aug", "sep", "oct", "nov", "dec" };
-	
-	const char *weekday[] = 
-	{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
-	
-	if(cdata->year && cdata->mon && cdata->mday)
-		mvwprintw(win, starty, startx, "%s.%02d.%02d, %s", 
-		month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
-		
-	starty += 1;
-	if (cdata->hour >= 0)
-	{
-		int hour = cdata->hour;
-		if (hour == 12)
-			mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
-		else if (hour > 12)	
-			mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
-		else if (hour == 0)
-			mvwprintw(win, starty, startx, "12:%02d:%02dAM", cdata->min, cdata->sec);
-		else if (hour > 0 && hour < 12)
-			mvwprintw(win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
-	}
-	starty += 1;
-	int utc;
-	
-	if ((int)cdata->utc_hour == 0)
-		utc = cdata->hour - 24;
-	else
-		utc = cdata->hour - (int)cdata->utc_hour;
-	if (utc > 14)
-		utc -= 24;
-	if (utc < - 12)
-		utc += 24;
-		
-	if (cdata->isdst == YDST)
-		mvwprintw(win, starty, startx, "DST UTC%+02d", utc);
-	else
-		mvwprintw(win, starty, startx, "UTC%+02d", utc);
 }
 
 static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)
@@ -443,7 +412,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		overwrite(ui->main_win, t_win);
 		pxx_init(cdata, pxx, planet);
 		planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
-		tcc_data(t_win, cdata);
+		cc_data(t_win, cdata, ui);
 		arrange_panel(ui, t_panel);
 					
 		update_panels();
@@ -516,7 +485,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 					overwrite(ui->main_win, t_win);
 					pxx_init(cdata, pxx, planet);
 					planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
-					tcc_data(t_win, cdata);
+					cc_data(t_win, cdata, ui);
 					arrange_panel(ui, t_panel);
 					
 					update_panels();
@@ -571,7 +540,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 					overwrite(ui->main_win, t_win);
 					pxx_init(cdata, pxx, planet);
 					planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
-					tcc_data(t_win, cdata);
+					cc_data(t_win, cdata, ui);
 					arrange_panel(ui, t_panel);
 	
 					update_panels();
