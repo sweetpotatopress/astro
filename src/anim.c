@@ -193,7 +193,7 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	ui->bcc = ui->cc;
 	cdata[TRANSIT]->t_cusp = cdata[ui->bcc]->sign_cusp[1];
 	
-	wheel_init(ui->main_win, ui, 3, 10, 4);
+	wheel_init(ui->main_win, ui, 3, 0, 0);
 	new_chart(cdata[ui->bcc], pxx[ui->bcc], ui, planet, zodiac);
 	ui->cc = TRANSIT;
 	planet_init(planet, ui->cc, pxx);
@@ -202,12 +202,12 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				
 	ui->cc = ui->bcc;
-	wheel_init(ui->main_win, ui, 0, 10, 4);
+	wheel_init(ui->main_win, ui, 0, 0, 0);
 }
 
 void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int key)
 {
-	wheel_init(ui->main_win, ui, 3, 10, 4);
+	wheel_init(ui->main_win, ui, 3, 0, 0);
 	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 	
 	planet_init(planet, key, pxx);
@@ -216,7 +216,7 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	double tmp = cdata[key]->sign_cusp[1];
 	cdata[key]->sign_cusp[1] = cdata[ui->cc]->sign_cusp[1];
 	
-	wheel_init(ui->main_win, ui, 0, 1, 4);
+	wheel_init(ui->main_win, ui, 0, 9, 0);
 	planet_pos(ui->main_win, cdata[key], ui, planet, zodiac);
 	
 	ui->bcc = ui->cc;
@@ -228,7 +228,7 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	
 	wnoutrefresh(ui->main_win);
 	doupdate();
-	wheel_init(ui->main_win, ui, 0, 10, 4);
+	wheel_init(ui->main_win, ui, 0, 0, 0);
 }
 		
 static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)
@@ -411,7 +411,7 @@ double **planet, int **zodiac)
 {
 	overwrite(ui->main_win, t_win);
 	pxx_init(cdata, pxx, planet);
-	wheel_init(ui->main_win, ui, 0, 1, 4);
+	wheel_init(ui->main_win, ui, 0, 9, 0);
 	planet_pos(t_win, cdata, ui, planet, zodiac);
 	cc_data(t_win, cdata, ui);
 					

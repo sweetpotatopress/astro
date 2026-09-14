@@ -247,8 +247,8 @@ void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao)
 	ui->hr = ui->radius + 4;
 	ui->zr = ui->radius + 3;
 	
-	ui->pr = (full_radius - po) - ro;
-	ui->ar = (ui->radius / 2) + ao;
+	ui->pr = ((full_radius - 10) + po) - ro;
+	ui->ar = ((ui->radius / 2) + 4) + ao;
 }
 
 static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, 
