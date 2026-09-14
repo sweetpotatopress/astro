@@ -195,9 +195,11 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	
 	wheel_init(ui->main_win, ui, 3, 0, 0);
 	new_chart(cdata[ui->bcc], pxx[ui->bcc], ui, planet, zodiac);
+	
 	ui->cc = TRANSIT;
 	planet_init(planet, ui->cc, pxx);
 	pxx_init(cdata[ui->cc], pxx[ui->cc], planet);
+	
 	doupdate();
 	animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				
