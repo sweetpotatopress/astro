@@ -361,6 +361,8 @@ int main(int argc, char *argv[])
 	del_panel(ui->left_panel);
 	del_panel(ui->main_panel);
 	delwin(ui->main_win);
+	delwin(ui->right_win);
+	delwin(ui->left_win);
 	endwin();
 	swe_close();
 	
