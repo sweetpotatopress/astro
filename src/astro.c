@@ -43,6 +43,21 @@ void *erealloc(void *p, size_t size)
 	return p;
 }
 
+static void iana_check(void)
+{
+	const char *iana_path[] = { 
+	"/usr/share/zoneinfo/America/New_York",
+	"/usr/share/lib/zoneinfo/America/New_York",
+	"/usr/local/share/zoneinfo/America/New_York",
+	"/usr/local/etc/zoneinfo/America/New_York"}; 
+	int c = 1; 
+	for (int i = 0; i < 4; ++i) 
+		if (access(iana_path[i], F_OK) == 0) 
+			c = 0; 
+	if (c)
+		ERR_EXIT("ERR: no IANA timezone data installed");
+}
+
 int main(int argc, char *argv[])
 {
 	int opt;
@@ -58,17 +73,14 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	const char *iana_path[] = { 
-	"/usr/share/zoneinfo/America/New_York",
-	"/usr/share/lib/zoneinfo/America/New_York",
-	"/usr/local/share/zoneinfo/America/New_York",
-	"/usr/local/etc/zoneinfo/America/New_York"}; 
-	int c = 1; 
-	for (int i = 0; i < 4; ++i) 
-		if (access(iana_path[i], F_OK) == 0) 
-			c = 0; 
-	if (c)
-		ERR_EXIT("ERR: no IANA timezone data installed");
+	iana_check();
+	
+	char xdg_path[MAXBUF] = {0};
+	xdg_check(xdg_path, "ephe");
+	
+	if (strlen(xdg_path) > 255)
+		ERR_EXIT("XDG_DATA_HOME path too long");
+	swe_set_ephe_path(xdg_path);
 
 	initscr();
 	set_escdelay(25);
@@ -94,14 +106,7 @@ int main(int argc, char *argv[])
 	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
 	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
 	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
-	
-	char xdg_path[MAXBUF] = {0};
-	xdg_check(xdg_path, "ephe");
-	
-	if (strlen(xdg_path) > 255)
-		ERR_EXIT("XDG_DATA_HOME path too long");
-	swe_set_ephe_path(xdg_path);
-	
+
 	struct cdata **cdata = ecalloc(CHARTMAX, sizeof(*cdata));
 	
 	for (int i = 0; i < CHARTMAX; ++i)
