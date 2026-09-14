@@ -67,6 +67,7 @@ void config_parse(struct cdata *cdata, char xdg_path[])
 	dret = strtod(field[LAT_DEF], &endptr);
 	if (errno != ERANGE)
 		cdata->dlat = dret;
+	errno = 0;
 	dret = strtod(field[LON_DEF], &endptr);
 	if (errno != ERANGE)
 		cdata->dlon = dret;
