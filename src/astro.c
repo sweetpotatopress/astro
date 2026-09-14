@@ -143,7 +143,6 @@ int main(int argc, char *argv[])
 	};
 	
 	ui->cc = 1;
-	ui->roff = 0;
 	
 	ui->left_trig = 1;
 	ui->right_trig = 1;
@@ -190,6 +189,7 @@ int main(int argc, char *argv[])
 		ecst_init(planet, cdata[i]->se);
 	}
 	
+	wheel_init(ui->main_win, ui, 0, 10, 4);
 	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 	doupdate();
 	
@@ -246,6 +246,7 @@ int main(int argc, char *argv[])
 					break;
 				case 'r':
 					ecst_init(planet, cdata[ui->cc]->se);
+					wheel_init(ui->main_win, ui, 0, 10, 4);
 					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
@@ -255,6 +256,7 @@ int main(int argc, char *argv[])
 					planet_init(planet, ui->cc, pxx);
 					config_parse(cdata[ui->cc], xdg_path);
 					set_localtime(cdata[ui->cc]);
+					wheel_init(ui->main_win, ui, 0, 10, 4);
 					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;

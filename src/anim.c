@@ -191,9 +191,9 @@ void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double 
 void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui->bcc = ui->cc;
-	ui->roff += 3;
 	cdata[TRANSIT]->t_cusp = cdata[ui->bcc]->sign_cusp[1];
 	
+	wheel_init(ui->main_win, ui, 3, 10, 4);
 	new_chart(cdata[ui->bcc], pxx[ui->bcc], ui, planet, zodiac);
 	ui->cc = TRANSIT;
 	planet_init(planet, ui->cc, pxx);
@@ -202,21 +202,12 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				
 	ui->cc = ui->bcc;
-	ui->roff = 0;
+	wheel_init(ui->main_win, ui, 0, 10, 4);
 }
 
 void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int key)
 {
-	int win_h, win_w;
-	getmaxyx(ui->main_win, win_h, win_w);
-	
-	int cy = (win_h / 2);
-	int cx = (win_w / 2);
-	if ((win_w - win_h) > 60)
-		cx += 9;
-	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
-	
-	ui->roff += 3;
+	wheel_init(ui->main_win, ui, 3, 10, 4);
 	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 	
 	planet_init(planet, key, pxx);
@@ -225,7 +216,8 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	double tmp = cdata[key]->sign_cusp[1];
 	cdata[key]->sign_cusp[1] = cdata[ui->cc]->sign_cusp[1];
 	
-	planet_pos(ui->main_win, cdata[key], ui, planet, zodiac, pl_r, cy, cx);
+	wheel_init(ui->main_win, ui, 0, 1, 4);
+	planet_pos(ui->main_win, cdata[key], ui, planet, zodiac);
 	
 	ui->bcc = ui->cc;
 	ui->cc = TRANSIT;
@@ -233,10 +225,10 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	ui->cc = ui->bcc;
 	
 	cdata[key]->sign_cusp[1] = tmp;
-	ui->roff = 0;
 	
 	wnoutrefresh(ui->main_win);
 	doupdate();
+	wheel_init(ui->main_win, ui, 0, 10, 4);
 }
 		
 static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)
@@ -415,11 +407,12 @@ void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **
 }
 
 static void arrange_panel(struct cdata *cdata, struct pxx *pxx, struct ui *ui, PANEL *t_panel, WINDOW *t_win,
-double **planet, int **zodiac, const int pl_r, int cy, int cx)
+double **planet, int **zodiac)
 {
 	overwrite(ui->main_win, t_win);
 	pxx_init(cdata, pxx, planet);
-	planet_pos(t_win, cdata, ui, planet, zodiac, pl_r, cy, cx);
+	wheel_init(ui->main_win, ui, 0, 1, 4);
+	planet_pos(t_win, cdata, ui, planet, zodiac);
 	cc_data(t_win, cdata, ui);
 					
 	top_panel(ui->main_panel);
@@ -441,18 +434,10 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	
 	int starty = 0;
 	int startx = COLS - 14;
-	int win_h, win_w;
-	getmaxyx(ui->main_win, win_h, win_w);
-	
-	int cy = (win_h / 2);
-	int cx = (win_w / 2);
-	if ((win_w - win_h) > 60)
-		cx += 9;
-	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
 	
 	mvwprintw(ui->main_win, starty, startx, "(hour)");
 	if (ui->cc == TRANSIT)
-		arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac, pl_r, cy, cx);
+		arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac);
 	
 	int max_day = 0; // leapyear() return flag
 	size_t i = HOUR; // time inc/dec
@@ -516,7 +501,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				cpt(cdata, &temp, result, &t, 1);
 				
 				if (ui->cc == TRANSIT)
-					arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac, pl_r, cy, cx);
+					arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac);
 				else
 				{
 					top_panel(ui->main_panel);
@@ -562,7 +547,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				cpt(cdata, &temp, result, &t, 1);
 				
 				if (ui->cc == TRANSIT)
-					arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac, pl_r, cy, cx);
+					arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac);
 				else
 				{
 					top_panel(ui->main_panel);

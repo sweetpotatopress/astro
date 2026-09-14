@@ -231,47 +231,51 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	cdata->moonphase = phase;
 }
 
+void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao)
+{
+	getmaxyx(win, ui->win_h, ui->win_w);
+	
+	ui->cy = (ui->win_h / 2);
+	ui->cx = (ui->win_w / 2);
+	if ((ui->win_w - ui->win_h) > 60)
+		ui->cx += 9;
+	
+	int full_radius = (((ui->win_w / 2 < ui->win_h) ? ui->win_w / 2 : ui->win_h));
+	ui->radius = (full_radius - 5) - ro;
+	ui->or = ui->radius + 4;
+	ui->ir = (ui->radius / 2) - 1;
+	ui->hr = ui->radius + 4;
+	ui->zr = ui->radius + 3;
+	
+	ui->pr = (full_radius - po) - ro;
+	ui->ar = (ui->radius / 2) + ao;
+}
+
 static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, 
 double **planet, int **zodiac)
 {
 	curs_set(0);
 	werase(win);
 	
-	int win_h, win_w;
-	getmaxyx(win, win_h, win_w);
+	draw_circle(win, ui, ui->or, '`');
+	draw_circle(win, ui, ui->radius, '.');
+	draw_circle(win, ui, ui->ir, '.');
 	
-	int cy = (win_h / 2);
-	int cx = (win_w / 2);
-	if ((win_w - win_h) > 60)
-		cx += 9;
-		
-	const int radius = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 5) - ui->roff;
-	const int out_r = radius + 4;
-	const int in_r = (radius / 2) - 1;
-	const int house_r = radius + 4;
-	const int zo_r = radius + 3;
-	const int pl_r = radius - 5;
-	const int as_r = (radius / 2) + 4;
+	draw_house(win, cdata, ui, '`');
 	
-	draw_circle(win, out_r, cy, cx, '`');
-	draw_circle(win, radius, cy, cx,'.');
-	draw_circle(win, in_r, cy, cx, '.');
+	zo_pos(win, cdata, pxx, ui, zodiac);
 	
-	draw_house(win, cdata, house_r, cy, cx, '`');
-	
-	zo_pos(win, cdata, pxx, ui, zo_r, cy, cx, zodiac);
-	
-	planet_pos(win, cdata, ui, planet, zodiac, pl_r, cy, cx);
+	planet_pos(win, cdata, ui, planet, zodiac);
 	
 	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(win, cdata, planet, zodiac, as_r, cy, cx);
+		ascmc_pos(win, cdata, ui, planet, zodiac);
 	
 	// status bar
 	const int bar_end = 20;
-	mvwhline(win, 1, win_w - bar_end, '-', COLS);
-	mvwvline(win, 0, win_w - bar_end, ':', 1);
+	mvwhline(win, 1, ui->win_w - bar_end, '-', COLS);
+	mvwvline(win, 0, ui->win_w - bar_end, ':', 1);
 	
-	mvwprintw(win, 0, win_w - (bar_end - 2), "%d :", ui->cc);
+	mvwprintw(win, 0, ui->win_w - (bar_end - 2), "%d :", ui->cc);
 }
 
 void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)

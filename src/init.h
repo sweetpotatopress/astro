@@ -20,3 +20,4 @@ void planet_init(double *planet[], int cur_chart, struct pxx **pxx);
 void zxx_init(int *zodiac[]);
 void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet);
 void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao);

@@ -159,7 +159,17 @@ struct ui {
 	bool right_trig;
 	int cc; // current chart
 	int bcc; // previous chart
-	int roff; // radius offset
+	int win_h;
+	int win_w;
+	int cy; // center y
+	int cx; // center x
+	int radius;
+	int or; // outer radius
+	int ir; // inner radius
+	int hr; // house radius
+	int zr; // zodiac radius
+	int pr; // planet radius
+	int ar; // angle radius
 	struct ui_sym sym;
 };
 
