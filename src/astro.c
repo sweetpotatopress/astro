@@ -75,6 +75,19 @@ int main(int argc, char *argv[])
 	start_color();
 	cbreak();
 	noecho();
+	keypad(stdscr, TRUE);
+	
+	// alt + 1-0
+	define_key("\0331", 1001);
+	define_key("\0332", 1002);
+	define_key("\0333", 1003);
+	define_key("\0334", 1004);
+	define_key("\0335", 1005);
+	define_key("\0336", 1006);
+	define_key("\0337", 1007);
+	define_key("\0338", 1008);
+	define_key("\0339", 1009);
+	define_key("\0330", 1000);
 
 	init_pair(M_COLOR, COLOR_WHITE,  COLOR_BLACK);
 	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
@@ -197,7 +210,18 @@ int main(int argc, char *argv[])
 				calc_init(planet, cdata[ui->cc]->se);
 				planet_init(planet, ui->cc, pxx);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-				
+				doupdate();
+			}
+			if (ch >= 1000 && ch <= 1009)
+			{
+				int key = ch - 1000;
+				if (key == 0)
+					key = 10;
+				synastry(cdata, pxx, ui, planet, zodiac, key);
+				getch();
+				calc_init(planet, cdata[ui->cc]->se);
+				planet_init(planet, ui->cc, pxx);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 			}
 			

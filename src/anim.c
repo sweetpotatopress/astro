@@ -47,7 +47,7 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		if (ui->cc == TRANSIT)
 		{
 			i++;
-			starty = 1;
+			starty = 2;
 			startx = COLS - 20;
 		}
 		else
@@ -59,14 +59,15 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		if(cdata->chart_name)
 			mvwprintw(win, starty, startx, "%s", cdata->chart_name);
 		
-		starty += 1;
-		if (cdata->state && !isdigit((unsigned char)cdata->state[0]) &&
-		strlen(cdata->state) > 1 && i < 1)
-			mvwprintw(win, starty, startx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
+		if (ui->cc != TRANSIT)
+		{
+			starty += 1;
+			if (cdata->state && !isdigit((unsigned char)cdata->state[0]) && strlen(cdata->state) > 1)
+				mvwprintw(win, starty, startx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
 			
-		else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0 &&
-		i < 1)
-			mvwprintw(win, starty, startx, "%.22s, %s", cdata->city, cdata->country);
+			else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
+				mvwprintw(win, starty, startx, "%.22s, %s", cdata->city, cdata->country);
+		}
 			
 		starty += 1;
 		const char *month[] = 
@@ -204,6 +205,40 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	ui->roff = 0;
 }
 
+void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int key)
+{
+	int win_h, win_w;
+	getmaxyx(ui->main_win, win_h, win_w);
+	
+	int cy = (win_h / 2);
+	int cx = (win_w / 2);
+	if ((win_w - win_h) > 60)
+		cx += 9;
+	const int pl_r = (((win_w / 2 < win_h) ? win_w / 2 : win_h) - 1);
+	
+	ui->roff += 3;
+	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+	
+	planet_init(planet, key, pxx);
+	pxx_init(cdata[key], pxx[key], planet);
+	
+	double tmp = cdata[key]->sign_cusp[1];
+	cdata[key]->sign_cusp[1] = cdata[ui->cc]->sign_cusp[1];
+	
+	planet_pos(ui->main_win, cdata[key], ui, planet, zodiac, pl_r, cy, cx);
+	
+	ui->bcc = ui->cc;
+	ui->cc = TRANSIT;
+	cc_data(ui->main_win, cdata[key], ui);
+	ui->cc = ui->bcc;
+	
+	cdata[key]->sign_cusp[1] = tmp;
+	ui->roff = 0;
+	
+	wnoutrefresh(ui->main_win);
+	doupdate();
+}
+		
 static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)
 {
 	if (!x)
