@@ -21,7 +21,7 @@
 #include "anim.h"
 #include "draw.h"
 
-void cdata_init(struct cdata *cdata)
+void cdata_clear(struct cdata *cdata)
 {
 	memset(cdata->chart_name, 0, MAXBUF);
 	memset(cdata->city, 0, MAXBUF);
@@ -30,7 +30,7 @@ void cdata_init(struct cdata *cdata)
 	cdata->isdst = -1;
 }
 
-void calc_init(double *planet[], double *se)
+void ecst_init(double *planet[], double *se)
 {
 	for (int ipl = SE_MERCURY; ipl <= SE_PLUTO; ++ipl)
 		planet[ipl][RET_INIT] = 0;

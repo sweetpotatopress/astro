@@ -503,14 +503,14 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
-						calc_init(planet, cdata->se);
+						ecst_init(planet, cdata->se);
 						break;
 					case YEAR:
 						temp.tm_year++;
 						if (temp.tm_year > 16799)
 							temp.tm_year = -12998;
 						t = mktime(&temp);
-						calc_init(planet, cdata->se);
+						ecst_init(planet, cdata->se);
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);
@@ -549,14 +549,14 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
-						calc_init(planet, cdata->se);
+						ecst_init(planet, cdata->se);
 						break;
 					case YEAR:
 						--temp.tm_year;
 						if (temp.tm_year < -12998)
 							temp.tm_year = 16799;
 						t = mktime(&temp);
-						calc_init(planet, cdata->se);
+						ecst_init(planet, cdata->se);
 					break;
 				}
 				cpt(cdata, &temp, result, &t, 1);

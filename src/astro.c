@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 	{
 		set_localtime(cdata[i]);
 		config_parse(cdata[i], xdg_path);
-		calc_init(planet, cdata[i]->se);
+		ecst_init(planet, cdata[i]->se);
 	}
 	
 	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 					ui->cc = 10;
 					
 				set_localtime(cdata[TRANSIT]);
-				calc_init(planet, cdata[ui->cc]->se);
+				ecst_init(planet, cdata[ui->cc]->se);
 				planet_init(planet, ui->cc, pxx);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
@@ -219,8 +219,8 @@ int main(int argc, char *argv[])
 					key = 10;
 				synastry(cdata, pxx, ui, planet, zodiac, key);
 				getch();
-				calc_init(planet, cdata[ui->cc]->se);
 				planet_init(planet, ui->cc, pxx);
+				ecst_init(planet, cdata[ui->cc]->se);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 			}
@@ -233,25 +233,25 @@ int main(int argc, char *argv[])
 					doupdate();
 					break;
 				case 9: // tab
-					calc_init(planet, cdata[ui->cc]->se);
+					ecst_init(planet, cdata[ui->cc]->se);
 					realtime_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 't':
 					transit(cdata, pxx, ui, planet, zodiac);
-					calc_init(planet, cdata[ui->cc]->se);
+					ecst_init(planet, cdata[ui->cc]->se);
 					planet_init(planet, ui->cc, pxx);
 					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 'r':
-					calc_init(planet, cdata[ui->cc]->se);
+					ecst_init(planet, cdata[ui->cc]->se);
 					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 'R':
-					cdata_init(cdata[ui->cc]);
-					calc_init(planet, cdata[ui->cc]->se);
+					cdata_clear(cdata[ui->cc]);
+					ecst_init(planet, cdata[ui->cc]->se);
 					planet_init(planet, ui->cc, pxx);
 					config_parse(cdata[ui->cc], xdg_path);
 					set_localtime(cdata[ui->cc]);
@@ -271,10 +271,10 @@ int main(int argc, char *argv[])
 					doupdate();
 					break;
 				case 'i':
-					cdata_init(cdata[ui->cc]);
+					cdata_clear(cdata[ui->cc]);
 					in_cdata(cdata[ui->cc], ui, xdg_path);
 					
-					calc_init(planet, cdata[ui->cc]->se);
+					ecst_init(planet, cdata[ui->cc]->se);
 					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
@@ -285,12 +285,12 @@ int main(int argc, char *argv[])
 					break;
 				case 'e':
 					load_chart(cdata[ui->cc], xdg_path);
-					calc_init(planet, cdata[ui->cc]->se);
+					ecst_init(planet, cdata[ui->cc]->se);
 					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
 				case 's':
-					calc_init(planet, cdata[ui->cc]->se);
+					ecst_init(planet, cdata[ui->cc]->se);
 					solar_return(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					break;
 				case 'p':
