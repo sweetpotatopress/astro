@@ -13,8 +13,9 @@ enter		animate chart
 	k/j 	up/down  
 
 0...9		select chart number
-s			solar return
 t			transits
+alt+0...9	synastry with selected chart
+s			solar return
 tab			live update  
 d			toggle dst
 
@@ -68,7 +69,7 @@ next retrograde/ next station	[DONE]
 element colors					[DONE] 
 solar return					[DONE] 
 essential dignities				[DONE]
-synastry/ transit view 
+synastry/ transit view 			[DONE]
 secondary progressions
 aspects
 planet day/hour
