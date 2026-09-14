@@ -440,7 +440,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac);
 	
 	int max_day = 0; // daycount() return flag
-	size_t i = HOUR; // time inc/dec
+	size_t inc = HOUR;
 	
 	struct tm temp = {0};
 	struct tm *result = NULL;
@@ -455,16 +455,16 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		switch(ch)
 		{
 			case 'h': case KEY_LEFT:
-				if (i != SECOND)
-					++i;
+				if (inc != SECOND)
+					++inc;
 				break;
 				
 			case 'l': case KEY_RIGHT:
-				if (i != YEAR) // time inc/dec
-					--i;
+				if (inc != YEAR)
+					--inc;
 				break;
 			case 'k': case KEY_UP:
-				switch(i)
+				switch(inc)
 				{
 					case SECOND:
 						t += 1;
@@ -510,7 +510,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				break;
 				
 			case 'j': case KEY_DOWN:
-				switch(i)
+				switch(inc)
 				{
 					case SECOND:
 						t -= 1;
@@ -618,7 +618,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 			}
 		flushinp();
 		enanosleep(10);
-		switch(i)
+		switch(inc)
 		{
 			case SECOND:
 				wmove(ui->main_win, starty, startx);
