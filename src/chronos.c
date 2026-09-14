@@ -52,7 +52,7 @@ void weekday_check(struct cdata *cdata)
 	cdata->wday = gt.tm_wday;
 }
 
-int leapyear(int month, int year)
+int daycount(int month, int year)
 {
 	const int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	

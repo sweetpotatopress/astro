@@ -439,7 +439,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	if (ui->cc == TRANSIT)
 		arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac);
 	
-	int max_day = 0; // leapyear() return flag
+	int max_day = 0; // daycount() return flag
 	size_t i = HOUR; // time inc/dec
 	
 	struct tm temp = {0};
@@ -484,7 +484,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 							temp.tm_mon = 0;
 							++temp.tm_year;
 						}
-						max_day = leapyear(temp.tm_mon, temp.tm_year);
+						max_day = daycount(temp.tm_mon, temp.tm_year);
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);
@@ -530,7 +530,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 							temp.tm_mon = 11;
 							--temp.tm_year;
 						}
-						max_day = leapyear(temp.tm_mon, temp.tm_year);
+						max_day = daycount(temp.tm_mon, temp.tm_year);
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						t = mktime(&temp);

@@ -24,7 +24,7 @@
 #define PREV_E 1
 
 int sect(struct pxx *pxx);
-int leapyear(int month, int year);
+int daycount(int month, int year);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);
 void retro_station(double jd_ut, double *planet[]);
 void calculate_utc(struct cdata *cdata);
