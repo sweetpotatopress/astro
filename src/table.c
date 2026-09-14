@@ -88,7 +88,7 @@ static void dignity_check(int *zodiac[], double *planet[], int result[PLMAX][MAX
 	}
 }
 
-void mutual_reception(WINDOW *win, int starty, int planet, int result[PLMAX][MAXZXX])
+static void mutual_reception(WINDOW *win, int starty, int planet, int result[PLMAX][MAXZXX])
 {
 	for (int c = 0; c < PLMAX; ++c)
 	{
