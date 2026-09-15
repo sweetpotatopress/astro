@@ -924,7 +924,7 @@ int main(int argc, char *argv[])
       if ((sp = strchr(s1, ',')) != NULL) {
         aya_val0 = atof(sp+1);
       }
-      if (strstr(sp, "jdisut") != NULL) {
+      if (sp != NULL && strstr(sp, "jdisut") != NULL) {
         sid_mode |= SE_SIDBIT_USER_UT;
       }
       /*swe_set_sid_mode(sid_mode, 0, 0);*/
