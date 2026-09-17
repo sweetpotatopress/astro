@@ -10,9 +10,10 @@
 // See the GNU Affero General Public License for more details.
 
 // You should have received a copy of the GNU Affero General Public License
-// along with this program. if not, see <https://www.gnu.org/licenses/>
+// along with this program. if not, see <https://www.gnu.org/lhicenses/>
 
 #pragma once
+#include <time.h>
 
 #define NIGHT_SECT 0
 #define DAY_SECT 1
@@ -32,3 +33,5 @@ void chart_timeset(struct cdata *cdata, int *day_offset);
 void lots(struct pxx *pxx);
 void weekday_check(struct cdata *cdata);
 void set_localtime(struct cdata *cdata);
+void zodiacal_releasing(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui);
+void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x);

@@ -242,6 +242,9 @@ int main(int argc, char *argv[])
 					realtime_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 					doupdate();
 					break;
+				case 'z':
+					zodiacal_releasing(ui->main_win, cdata[ui->cc], pxx[ui->cc], ui);
+					break;
 				case 't':
 					transit(cdata, pxx, ui, planet, zodiac);
 					ecst_init(planet, cdata[ui->cc]->se);

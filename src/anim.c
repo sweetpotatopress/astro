@@ -233,34 +233,6 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	wheel_init(ui->main_win, ui, 0, 0, 0);
 }
 		
-static void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x)
-{
-	if (!x)
-	{
-		temp->tm_year = cdata->year - 1900;
-		temp->tm_mon = cdata->mon - 1;
-		temp->tm_mday = cdata->mday;
-		temp->tm_hour = cdata->hour;
-		temp->tm_min = cdata->min;
-		temp->tm_sec = cdata->sec;
-		temp->tm_isdst = cdata->isdst;
-		
-		*t = mktime(temp);
-	}
-	if (x)
-	{	
-		result = localtime(t);
-		cdata->year = result->tm_year + 1900;
-		cdata->mon = result->tm_mon + 1;
-		cdata->mday = result->tm_mday;
-		cdata->hour = result->tm_hour;
-		cdata->min = result->tm_min;
-		cdata->sec = result->tm_sec;
-		cdata->isdst = result->tm_isdst;
-		cdata->wday = result->tm_wday;
-	}
-}
-
 static void calc_return(struct cdata *cdata, double base_degree)
 {
 	struct tm temp = {0};
