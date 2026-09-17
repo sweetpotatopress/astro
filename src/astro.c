@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 					doupdate();
 					break;
 				case 'z':
-					zodiacal_releasing(ui->main_win, cdata[ui->cc], pxx[ui->cc], ui);
+					zodiacal_releasing(cdata[ui->cc], pxx[ui->cc], ui);
 					break;
 				case 't':
 					transit(cdata, pxx, ui, planet, zodiac);
