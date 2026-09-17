@@ -105,9 +105,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 		tmp->mday += (int)(pl_period[sign] * year);
 		if (++sign >= 12)
 			sign = 1;
-		cpt(tmp, &temp, result, &t, 0);
-		
-		cpt(tmp, &temp, result, &t, 1);
+		cpt(tmp, &temp, result, &t, 2);
 		
 		calculate_utc(tmp);
 		
@@ -145,10 +143,11 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 			if (++sign >= 12)
 				sign = 1;
 			
-			cpt(tmp, &temp, result, &t, 0);
-			cpt(tmp, &temp, result, &t, 1);
+			cpt(tmp, &temp, result, &t, 2);
 			calculate_utc(tmp);
 			next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
+			if (next_jd >= end->jd_ut)
+				break;
 			
 			snprintf(date, 32, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
 			struct node *child = node_create(date, next_jd, sign);

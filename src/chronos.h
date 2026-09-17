@@ -34,4 +34,4 @@ void lots(struct pxx *pxx);
 void weekday_check(struct cdata *cdata);
 void set_localtime(struct cdata *cdata);
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui);
-void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, bool x);
+void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, int x);
