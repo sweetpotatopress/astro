@@ -72,7 +72,7 @@ void node_free(struct node *node)
 
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 {
-	int y = 23, x = 80;
+	int y = 25, x = 80;
 	WINDOW *win = newwin(y, x, (LINES - y)/2, (COLS - x)/2);
 	double next_jd = 0.0;
 	
@@ -125,7 +125,6 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 	struct node *start = l1;
 	struct node *end = l1->children[0];
 	int item = 0;
-	int lb = 0;
 	bool done = 0;
 	while (!done)
 	{
@@ -138,6 +137,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 			int zyear, zmon, zday;
 			double zhour;
 			sign = start->sign;
+			int lb = start->sign;
 			struct node *cur = node_create(start->date, start->jd_ut, sign);
 			layers[i] = cur;
 			
@@ -150,8 +150,15 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 			while(end->jd_ut > next_jd)
 			{
 				tmp->mday += (int)(pl_period[sign] * inc[i+1]);
-				if (++sign >= 12)
+				if (++sign > 12)
 					sign = 1;
+				if (lb == sign)
+				{
+					sign += 6;
+					if (sign > 12)
+						sign -= 12;
+				}
+				
 				
 				cpt(tmp, &temp, result, &t, 2);
 				calculate_utc(tmp);
