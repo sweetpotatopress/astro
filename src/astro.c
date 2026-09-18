@@ -244,6 +244,8 @@ int main(int argc, char *argv[])
 					break;
 				case 'z':
 					zodiacal_releasing(cdata[ui->cc], pxx[ui->cc], ui);
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+					doupdate();
 					break;
 				case 't':
 					transit(cdata, pxx, ui, planet, zodiac);

@@ -72,13 +72,15 @@ void node_free(struct node *node)
 
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 {
-	WINDOW *win = newwin(30, 80, LINES/2, COLS/2);
+	int y = 23, x = 80;
+	WINDOW *win = newwin(y, x, (LINES - y)/2, (COLS - x)/2);
 	double next_jd = 0.0;
 	
-	double year = 360;
-	double month = year / 12;
-	double week = month / 12;
-	double day = week / 12;
+	double inc[4] = {0};
+	inc[0] = 360;
+	inc[1] = inc[0] / 12;
+	inc[2] = inc[1] / 12;
+	inc[3] = inc[2] / 12;
 
 	int pl_period[] = { 0,
 	15, 8, 20, 25,
@@ -100,9 +102,10 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 	l1->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
 	char date[32];
 
-	for (int i = 0; (next_jd - l1->jd_ut) < 120 * year; ++i)
+	for (int i = 0; (next_jd - l1->jd_ut) < 120 * inc[0]; ++i)
 	{
-		tmp->mday += (int)(pl_period[sign] * year);
+
+		tmp->mday += (int)(pl_period[sign] * inc[0]);
 		if (++sign >= 12)
 			sign = 1;
 		cpt(tmp, &temp, result, &t, 2);
@@ -116,10 +119,13 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 		struct node *child = node_create(date, next_jd, sign);
 		add_child(l1, child);
 	}
+	
+	struct node *layers[3] = { NULL, NULL, NULL };
 	int sy, sx;
 	struct node *start = l1;
 	struct node *end = l1->children[0];
 	int item = 0;
+	int lb = 0;
 	bool done = 0;
 	while (!done)
 	{
@@ -127,36 +133,43 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 		sy = 0;
 		sx = 3;
 		node_print(win, l1, &sy, &sx);
-		sign = start->sign;
-		struct node *l2 = node_create(start->date, start->jd_ut, sign);
-		int zyear, zmon, zday;
-		double zhour;
-		swe_revjul(start->jd_ut, SE_GREG_CAL, &zyear, &zmon, &zday, &zhour);
-		tmp->year = zyear;
-		tmp->mon = zmon;
-		tmp->mday = zday;
-		next_jd = 0.0;
-		
-		while(end->jd_ut > next_jd)
+		for (int i = 0; i < 3; ++i)
 		{
-			tmp->mday += (int)lround(pl_period[sign] * month);
-			if (++sign >= 12)
-				sign = 1;
+			int zyear, zmon, zday;
+			double zhour;
+			sign = start->sign;
+			struct node *cur = node_create(start->date, start->jd_ut, sign);
+			layers[i] = cur;
 			
-			cpt(tmp, &temp, result, &t, 2);
-			calculate_utc(tmp);
-			next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
-			if (next_jd >= end->jd_ut)
-				break;
+			swe_revjul(start->jd_ut, SE_GREG_CAL, &zyear, &zmon, &zday, &zhour);
+			tmp->year = zyear;
+			tmp->mon = zmon;
+			tmp->mday = zday;
+			next_jd = 0.0;
 			
-			snprintf(date, 32, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
-			struct node *child = node_create(date, next_jd, sign);
-			add_child(l2, child);
+			while(end->jd_ut > next_jd)
+			{
+				tmp->mday += (int)(pl_period[sign] * inc[i+1]);
+				if (++sign >= 12)
+					sign = 1;
+				
+				cpt(tmp, &temp, result, &t, 2);
+				calculate_utc(tmp);
+				next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
+				if (next_jd >= end->jd_ut)
+					break;
+				
+				snprintf(date, 32, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
+				struct node *child = node_create(date, next_jd, sign);
+				add_child(layers[i], child);
+			}
+			sy = 0;
+			sx += 18;
+			node_print(win, cur, &sy, &sx);
+			start = cur;
+			end = cur->children[0];
 		}
-		
-		sy = 0;
-		sx += 18;
-		node_print(win, l2, &sy, &sx);
+	
 		const char *select = "->";
 		mvwprintw(win, item, 0, "%s", select);
 		wrefresh(win);
@@ -191,7 +204,9 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 				done = 1;
 				break;
 		}
-		node_free(l2);
+		node_free(layers[0]);
+		node_free(layers[1]);
+		node_free(layers[2]);
 	}
 	werase(win);
 	wrefresh(win);
