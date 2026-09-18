@@ -95,12 +95,12 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 	struct cdata *tmp = ecalloc(1, sizeof(*cdata));
 	memcpy(tmp, cdata, sizeof(*cdata));
 	
-	char root_date[32];
-	snprintf(root_date, 32, "%s: %d.%d.%d", ui->sym.zo_sym[sign], cdata->year, cdata->mon, cdata->mday);
+	char root[MAXBUF];
+	snprintf(root, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], cdata->year, cdata->mon, cdata->mday);
 	
-	struct node *l1 = node_create(root_date, 0.0, sign);
+	struct node *l1 = node_create(root, 0.0, sign);
 	l1->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
-	char date[32];
+	char date[MAXBUF];
 
 	for (int i = 0; (next_jd - l1->jd_ut) < 120 * inc[0]; ++i)
 	{
@@ -115,7 +115,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 		next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, 
 		tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
 		
-		snprintf(date, 32, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
+		snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
 		struct node *child = node_create(date, next_jd, sign);
 		add_child(l1, child);
 	}
@@ -159,14 +159,13 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 						sign -= 12;
 				}
 				
-				
 				cpt(tmp, &temp, result, &t, 2);
 				calculate_utc(tmp);
 				next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
 				if (next_jd >= end->jd_ut)
 					break;
 				
-				snprintf(date, 32, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
+				snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
 				struct node *child = node_create(date, next_jd, sign);
 				add_child(layers[i], child);
 			}
