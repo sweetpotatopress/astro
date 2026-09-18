@@ -135,6 +135,7 @@ void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double 
 	while ((ch = wgetch(ui->main_win)) != 9)
 	{
 		set_localtime(cdata);
+		wheel_init(ui->main_win, ui, 0, 0, 0);
 		new_chart(cdata, pxx, ui, planet, zodiac);
 		
 		wattron(ui->main_win, COLOR_PAIR(FIRE));
