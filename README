@@ -16,6 +16,11 @@ enter		animate chart
 t			transits
 alt+0...9	synastry with selected chart
 s			solar return
+
+z			zodiacal releasing
+	l/h		switch lot
+	j/k		up or down period
+	
 tab			live update  
 d			toggle dst
 
