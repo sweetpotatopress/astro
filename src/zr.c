@@ -21,6 +21,9 @@
 #include "astro.h"
 #include "chronos.h"
 
+#define FORTUNE 0
+#define SPIRIT 1
+
 struct node {
 	char *date;
 	double jd_ut;
@@ -71,10 +74,11 @@ static void node_free(struct node *node)
 
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 {
-	int y = 26, x = 76;
+	int y = 28, x = 76;
 	WINDOW *win = newwin(y, x, (LINES - y)/2, (COLS - x)/2);
-	WINDOW *subwin = derwin(win, y - 1, x - 1, 1, 1);
+	WINDOW *subwin = derwin(win, y - 2, x - 1, 2, 1);
 	wbkgdset(win, COLOR_PAIR(M_COLOR));
+	keypad(win, TRUE);
 	
 	// year, month, week, day
 	double inc[4] = {0};
@@ -88,133 +92,157 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 	19, 20, 8, 15,
 	12, 27, 30, 12 };
 	
-	int sign = (int)(pxx->dfor[LONG] / 30)+ 1;
-	
 	time_t t = 0;
 	struct tm temp = {0};
 	struct tm *result = NULL;
 	struct cdata *tmp = ecalloc(1, sizeof(*cdata));
-	memcpy(tmp, cdata, sizeof(*cdata));
-	
-	char root[MAXBUF];
-	snprintf(root, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], cdata->year, cdata->mon, cdata->mday);
-	
-	struct node *l1 = node_create(root, 0.0, sign);
-	l1->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
-	
-	char date[MAXBUF];
-	double next_jd = 0.0;
-
-	while ((next_jd - l1->jd_ut) < 120 * inc[0])
-	{
-		tmp->mday += (int)(pl_period[sign] * inc[0]);
-		if (++sign > 12)
-			sign = 1;
-		cpt(tmp, &temp, result, &t, 2);
-		
-		calculate_utc(tmp);
-		
-		next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, 
-		tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
-		
-		snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
-		struct node *child = node_create(date, next_jd, sign);
-		add_child(l1, child);
-	}
-	
-	int sy, sx, item = 0;
-	struct node *layers[3] = { NULL, NULL, NULL };
-	struct node *start = l1;
-	struct node *end = l1->children[0];
+	int sign_switch = FORTUNE;
 	
 	bool done = 0;
-	while (!done)
+	while(!done)
 	{
-		werase(win);
-		sy = 0, sx = 3;
-		node_print(subwin, ui, l1, &sy, &sx);
-		for (int i = 0; i < 3; ++i)
+		memcpy(tmp, cdata, sizeof(*cdata));
+		int sign;
+		if (sign_switch == SPIRIT)
 		{
-			int zyear, zmon, zday;
-			double zhour;
-			sign = start->sign;
-			int lb = start->sign;
-			struct node *cur = node_create(start->date, start->jd_ut, sign);
-			layers[i] = cur;
-			
-			swe_revjul(start->jd_ut, SE_GREG_CAL, &zyear, &zmon, &zday, &zhour);
-			tmp->year = zyear;
-			tmp->mon = zmon;
-			tmp->mday = zday;
-			next_jd = 0.0;
-			
-			while(end->jd_ut > next_jd)
-			{
-				tmp->mday += (int)(pl_period[sign] * inc[i+1]);
-				if (++sign > 12)
-					sign = 1;
-				if (lb == sign)
-				{
-					sign += 6;
-					if (sign > 12)
-						sign -= 12;
-				}
-				
-				cpt(tmp, &temp, result, &t, 2);
-				calculate_utc(tmp);
-				
-				next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
-				
-				snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
-				struct node *child = node_create(date, next_jd, sign);
-				add_child(layers[i], child);
-			}
-			sy = 0, sx += 18;
-			node_print(subwin, ui, cur, &sy, &sx);
-			start = cur;
-			end = cur->children[0];
+			sign = (int)(pxx->dspir[LONG] / 30) +1;
+			if ((int)(pxx->dspir[LONG] / 30) == (int)(pxx->dfor[LONG] / 30))
+				sign += 1;
+			if (sign > 12)
+				sign = 1;
 		}
-	
-		const char *select = "->";
-		mvwprintw(subwin, item, 0, "%s", select);
-		box(win, 0, 0);
-		wrefresh(win);
+		else
+			sign = (int)(pxx->dfor[LONG] / 30)+ 1;
+		char root[MAXBUF];
+		snprintf(root, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], cdata->year, cdata->mon, cdata->mday);
 		
-		int ch = wgetch(win);
-		switch(ch)
+		struct node *l1 = node_create(root, 0.0, sign);
+		l1->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
+		
+		char date[MAXBUF];
+		double next_jd = 0.0;
+
+		while ((next_jd - l1->jd_ut) < 120 * inc[0])
 		{
-			case 'j': case KEY_DOWN:
-				mvwprintw(subwin, item, 0, "  ");
-				item++;
-				if ((size_t)item >= l1->count)
-					item = 0;
-				mvwprintw(subwin, item, 0, "%s", select);
-				wrefresh(win);
-				start = (item == 0) ? l1 : l1->children[item - 1];
-				end = l1->children[item];
-				break;
-			case 'k': case KEY_UP:
-				mvwprintw(subwin, item, 0, "  ");
-				if (item > 0)
-					--item;
-				else
-					item = (int)l1->count - 1;
-				mvwprintw(subwin, item, 0, "%s", select);
-				wrefresh(win);
-				start = (item == 0) ? l1 : l1->children[item - 1];
-				end = l1->children[item];
-				break;
-			default:
-				done = 1;
-				break;
+			tmp->mday += (int)(pl_period[sign] * inc[0]);
+			if (++sign > 12)
+				sign = 1;
+			cpt(tmp, &temp, result, &t, 2);
+			
+			calculate_utc(tmp);
+			
+			next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, 
+			tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
+			
+			snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
+			struct node *child = node_create(date, next_jd, sign);
+			add_child(l1, child);
 		}
-		node_free(layers[0]);
-		node_free(layers[1]);
-		node_free(layers[2]);
+		
+		int sy, sx, item = 0;
+		struct node *layers[3] = { NULL, NULL, NULL };
+		struct node *start = l1;
+		struct node *end = l1->children[0];
+		
+		bool inner_done = 0;
+		while (!inner_done)
+		{
+			werase(win);
+			sy = 0, sx = 3;
+			node_print(subwin, ui, l1, &sy, &sx);
+			for (int i = 0; i < 3; ++i)
+			{
+				int zyear, zmon, zday;
+				double zhour;
+				sign = start->sign;
+				int lb = start->sign;
+				struct node *cur = node_create(start->date, start->jd_ut, sign);
+				layers[i] = cur;
+				
+				swe_revjul(start->jd_ut, SE_GREG_CAL, &zyear, &zmon, &zday, &zhour);
+				tmp->year = zyear;
+				tmp->mon = zmon;
+				tmp->mday = zday;
+				next_jd = 0.0;
+				
+				while(end->jd_ut > next_jd)
+				{
+					tmp->mday += (int)(pl_period[sign] * inc[i+1]);
+					if (++sign > 12)
+						sign = 1;
+					if (lb == sign)
+					{
+						sign += 6;
+						if (sign > 12)
+							sign -= 12;
+					}
+					
+					cpt(tmp, &temp, result, &t, 2);
+					calculate_utc(tmp);
+					
+					next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
+					
+					snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
+					struct node *child = node_create(date, next_jd, sign);
+					add_child(layers[i], child);
+				}
+				sy = 0, sx += 18;
+				node_print(subwin, ui, cur, &sy, &sx);
+				start = cur;
+				end = cur->children[0];
+			}
+		
+			const char *select = "->";
+			mvwprintw(subwin, item, 0, "%s", select);
+			box(win, 0, 0);
+			const char *lot[] = { "fortune", "spirit" };
+			mvwprintw(win, 1, 29, "- - -%s- - -", lot[sign_switch]);
+			wrefresh(win);
+			
+			int ch = wgetch(win);
+			switch(ch)
+			{
+				case 'j': case KEY_DOWN:
+					mvwprintw(subwin, item, 0, "  ");
+					item++;
+					if ((size_t)item >= l1->count)
+						item = 0;
+					mvwprintw(subwin, item, 0, "%s", select);
+					wrefresh(win);
+					start = (item == 0) ? l1 : l1->children[item - 1];
+					end = l1->children[item];
+					break;
+				case 'k': case KEY_UP:
+					mvwprintw(subwin, item, 0, "  ");
+					if (item > 0)
+						--item;
+					else
+						item = (int)l1->count - 1;
+					mvwprintw(subwin, item, 0, "%s", select);
+					wrefresh(win);
+					start = (item == 0) ? l1 : l1->children[item - 1];
+					end = l1->children[item];
+					break;
+				case 'l': case 'h': case KEY_LEFT: case KEY_RIGHT:
+					if (sign_switch == SPIRIT)
+						sign_switch = FORTUNE;
+					else
+						sign_switch = SPIRIT;
+					inner_done = 1;
+					break;
+				default:
+					inner_done = 1;
+					done = 1;
+					break;
+			}
+			node_free(layers[0]);
+			node_free(layers[1]);
+			node_free(layers[2]);
+		}
+		werase(win);
+		wrefresh(win);
+		node_free(l1);
 	}
-	werase(win);
-	wrefresh(win);
-	node_free(l1);
 	free(tmp);
 	delwin(subwin);
 	delwin(win);
