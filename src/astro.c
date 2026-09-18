@@ -20,7 +20,6 @@
 #include "astro.h"
 #include "table.h"
 #include "io.h"
-#include "draw.h"
 #include "anim.h"
 #include "chronos.h"
 #include "indat.h"

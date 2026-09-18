@@ -176,3 +176,4 @@ struct ui {
 void *ecalloc(size_t n, size_t size);
 void *erealloc(void *p, size_t size);
 void config_parse(struct cdata *cdata, char xdg_path[]);
+void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui);

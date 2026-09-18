@@ -51,13 +51,13 @@ static void add_child(struct node *parent, struct node *child)
 	parent->count++;
 }
 
-static void node_print(WINDOW *win, const struct node *node, int *sy, int *sx)
+static void node_print(WINDOW *win, struct ui *ui, const struct node *node, int *sy, int *sx)
 {	
 	mvwprintw(win,*sy, *sx, "%s", node->date);
 	(*sy)++;
 	
 	for (size_t i = 0; i < node->count; i++)
-		node_print(win, node->children[i], sy, sx);
+		node_print(win, ui, node->children[i], sy, sx);
 }	
 
 static void node_free(struct node *node)
@@ -71,8 +71,10 @@ static void node_free(struct node *node)
 
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 {
-	int y = 25, x = 80;
+	int y = 26, x = 76;
 	WINDOW *win = newwin(y, x, (LINES - y)/2, (COLS - x)/2);
+	WINDOW *subwin = derwin(win, y - 1, x - 1, 1, 1);
+	wbkgdset(win, COLOR_PAIR(M_COLOR));
 	
 	// year, month, week, day
 	double inc[4] = {0};
@@ -103,10 +105,10 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 	char date[MAXBUF];
 	double next_jd = 0.0;
 
-	for (int i = 0; (next_jd - l1->jd_ut) < 120 * inc[0]; ++i)
+	while ((next_jd - l1->jd_ut) < 120 * inc[0])
 	{
 		tmp->mday += (int)(pl_period[sign] * inc[0]);
-		if (++sign >= 12)
+		if (++sign > 12)
 			sign = 1;
 		cpt(tmp, &temp, result, &t, 2);
 		
@@ -130,7 +132,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 	{
 		werase(win);
 		sy = 0, sx = 3;
-		node_print(win, l1, &sy, &sx);
+		node_print(subwin, ui, l1, &sy, &sx);
 		for (int i = 0; i < 3; ++i)
 		{
 			int zyear, zmon, zday;
@@ -170,35 +172,36 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 				add_child(layers[i], child);
 			}
 			sy = 0, sx += 18;
-			node_print(win, cur, &sy, &sx);
+			node_print(subwin, ui, cur, &sy, &sx);
 			start = cur;
 			end = cur->children[0];
 		}
 	
 		const char *select = "->";
-		mvwprintw(win, item, 0, "%s", select);
+		mvwprintw(subwin, item, 0, "%s", select);
+		box(win, 0, 0);
 		wrefresh(win);
 		
 		int ch = wgetch(win);
 		switch(ch)
 		{
-			case 'j':
+			case 'j': case KEY_DOWN:
 				mvwprintw(win, item, 0, "  ");
 				item++;
 				if ((size_t)item >= l1->count)
 					item = 0;
-				mvwprintw(win, item, 0, "%s", select);
+				mvwprintw(subwin, item, 0, "%s", select);
 				wrefresh(win);
 				start = (item == 0) ? l1 : l1->children[item - 1];
 				end = l1->children[item];
 				break;
-			case 'k':
-				mvwprintw(win, item, 0, "  ");
+			case 'k': case KEY_UP:
+				mvwprintw(subwin, item, 0, "  ");
 				if (item > 0)
 					--item;
 				else
 					item = (int)l1->count - 1;
-				mvwprintw(win, item, 0, "%s", select);
+				mvwprintw(subwin, item, 0, "%s", select);
 				wrefresh(win);
 				start = (item == 0) ? l1 : l1->children[item - 1];
 				end = l1->children[item];
@@ -215,5 +218,6 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 	wrefresh(win);
 	node_free(l1);
 	free(tmp);
+	delwin(subwin);
 	delwin(win);
 }
