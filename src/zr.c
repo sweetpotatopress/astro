@@ -56,7 +56,7 @@ static void node_print(WINDOW *win, struct ui *ui, const struct node *node, int 
 	mvwprintw(win,*sy, *sx, "%s", node->date);
 	(*sy)++;
 	
-	for (size_t i = 0; i < node->count; i++)
+	for (size_t i = 0; i+1 < node->count; i++)
 		node_print(win, ui, node->children[i], sy, sx);
 }	
 
@@ -164,8 +164,6 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 				calculate_utc(tmp);
 				
 				next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
-				if (next_jd >= end->jd_ut)
-					break;
 				
 				snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
 				struct node *child = node_create(date, next_jd, sign);
@@ -186,7 +184,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 		switch(ch)
 		{
 			case 'j': case KEY_DOWN:
-				mvwprintw(win, item, 0, "  ");
+				mvwprintw(subwin, item, 0, "  ");
 				item++;
 				if ((size_t)item >= l1->count)
 					item = 0;
