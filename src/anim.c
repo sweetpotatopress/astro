@@ -70,16 +70,13 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		}
 			
 		starty += 1;
-		const char *month[] = 
-		{ "err", "jan", "feb", "mar", "apr", "may", "jun",
-		"jul", "aug", "sep", "oct", "nov", "dec" };
 		
 		const char *weekday[] = 
 		{ "sun", "mon", "tue", "wed", "thu", "fri", "sat" };
 		
 		if(cdata->year && cdata->mon && cdata->mday)
 			mvwprintw(win, starty, startx, "%s.%02d.%02d, %s", 
-			month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
+			ui->sym.month[cdata->mon], cdata->mday, cdata->year, weekday[cdata->wday]);
 			
 		starty += 1;
 		if (cdata->hour >= 0)

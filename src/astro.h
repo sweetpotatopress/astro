@@ -139,11 +139,13 @@ struct cdata {
 #define ZO_SYM_MAX 13
 #define MOON_MAX 8
 #define TRANSIT 11
+#define MONTH_MAX 13
 
 struct ui_sym {
 	const char *pl_sym[PL_SYM_MAX];
 	const char *zo_sym[ZO_SYM_MAX];
 	const char *moon[MOON_MAX];
+	const char *month[MONTH_MAX];
 };
 
 struct ui {

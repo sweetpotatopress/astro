@@ -74,7 +74,7 @@ static void node_free(struct node *node)
 
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 {
-	int y = 28, x = 76;
+	int y = 28, x = 78;
 	WINDOW *win = newwin(y, x, (LINES - y)/2, (COLS - x)/2);
 	WINDOW *subwin = derwin(win, y - 2, x - 1, 2, 1);
 	wbkgdset(win, COLOR_PAIR(M_COLOR));
@@ -114,7 +114,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 		else
 			sign = (int)(pxx->dfor[LONG] / 30)+ 1;
 		char root[MAXBUF];
-		snprintf(root, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], cdata->year, cdata->mon, cdata->mday);
+		snprintf(root, MAXBUF, "%s: %s.%d.%d", ui->sym.zo_sym[sign], ui->sym.month[cdata->mon], cdata->mday, cdata->year);
 		
 		struct node *l1 = node_create(root, 0.0, sign);
 		l1->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
@@ -134,7 +134,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 			next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, 
 			tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
 			
-			snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
+			snprintf(date, MAXBUF, "%s: %s.%d.%d", ui->sym.zo_sym[sign], ui->sym.month[tmp->mon], tmp->mday, tmp->year);
 			struct node *child = node_create(date, next_jd, sign);
 			add_child(l1, child);
 		}
@@ -182,7 +182,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 					
 					next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
 					
-					snprintf(date, MAXBUF, "%s: %d.%d.%d", ui->sym.zo_sym[sign], tmp->year, tmp->mon, tmp->mday);
+					snprintf(date, MAXBUF, "%s: %s.%d.%d", ui->sym.zo_sym[sign], ui->sym.month[tmp->mon], tmp->mday, tmp->year);
 					struct node *child = node_create(date, next_jd, sign);
 					add_child(layers[i], child);
 				}

@@ -143,7 +143,10 @@ int main(int argc, char *argv[])
 		"cap", "aqu", "pis" },
 	
 		.moon = { "new", "crescent", "quarter", "gibbous", "full",
-		"2nd gibbous", "2nd quarter", "2nd crescent" }
+		"2nd gibbous", "2nd quarter", "2nd crescent" },
+		
+		.month = { "err", "jan", "feb", "mar", "apr", "may", "jun",
+		"jul", "aug", "sep", "oct", "nov", "dec" }
 	};
 	
 	ui->cc = 1;
