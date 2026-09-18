@@ -23,13 +23,13 @@
 
 struct node {
 	char *date;
-	struct node **children;
 	double jd_ut;
 	int sign;
 	size_t count;
+	struct node **children;
 };
 
-struct node *node_create(const char *date, double jd_ut, int sign)
+static struct node *node_create(const char *date, double jd_ut, int sign)
 {
 	struct node *node = ecalloc(1, sizeof *node);
 	node->date = ecalloc(1, strlen(date) + 1);
@@ -42,17 +42,16 @@ struct node *node_create(const char *date, double jd_ut, int sign)
 	return node;
 }
 
-int add_child(struct node *parent, struct node *child)
+static void add_child(struct node *parent, struct node *child)
 {
 	struct node **new_child = erealloc(parent->children, (parent->count + 1) * sizeof *new_child);
 	
 	parent->children = new_child;
 	parent->children[parent->count] = child;
 	parent->count++;
-	return 1;
 }
 
-void node_print(WINDOW *win, const struct node *node, int *sy, int *sx)
+static void node_print(WINDOW *win, const struct node *node, int *sy, int *sx)
 {	
 	mvwprintw(win,*sy, *sx, "%s", node->date);
 	(*sy)++;
@@ -61,7 +60,7 @@ void node_print(WINDOW *win, const struct node *node, int *sy, int *sx)
 		node_print(win, node->children[i], sy, sx);
 }	
 
-void node_free(struct node *node)
+static void node_free(struct node *node)
 {
 	for (size_t i = 0; i < node->count; i++)
 		node_free(node->children[i]);
@@ -74,8 +73,8 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 {
 	int y = 25, x = 80;
 	WINDOW *win = newwin(y, x, (LINES - y)/2, (COLS - x)/2);
-	double next_jd = 0.0;
 	
+	// year, month, week, day
 	double inc[4] = {0};
 	inc[0] = 360;
 	inc[1] = inc[0] / 12;
@@ -100,11 +99,12 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 	
 	struct node *l1 = node_create(root, 0.0, sign);
 	l1->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
+	
 	char date[MAXBUF];
+	double next_jd = 0.0;
 
 	for (int i = 0; (next_jd - l1->jd_ut) < 120 * inc[0]; ++i)
 	{
-
 		tmp->mday += (int)(pl_period[sign] * inc[0]);
 		if (++sign >= 12)
 			sign = 1;
@@ -120,17 +120,16 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 		add_child(l1, child);
 	}
 	
+	int sy, sx, item = 0;
 	struct node *layers[3] = { NULL, NULL, NULL };
-	int sy, sx;
 	struct node *start = l1;
 	struct node *end = l1->children[0];
-	int item = 0;
+	
 	bool done = 0;
 	while (!done)
 	{
 		werase(win);
-		sy = 0;
-		sx = 3;
+		sy = 0, sx = 3;
 		node_print(win, l1, &sy, &sx);
 		for (int i = 0; i < 3; ++i)
 		{
@@ -161,6 +160,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 				
 				cpt(tmp, &temp, result, &t, 2);
 				calculate_utc(tmp);
+				
 				next_jd = swe_julday(tmp->utc_year, tmp->utc_mon, tmp->utc_mday, tmp->utc_hour, SE_GREG_CAL);
 				if (next_jd >= end->jd_ut)
 					break;
@@ -169,8 +169,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 				struct node *child = node_create(date, next_jd, sign);
 				add_child(layers[i], child);
 			}
-			sy = 0;
-			sx += 18;
+			sy = 0, sx += 18;
 			node_print(win, cur, &sy, &sx);
 			start = cur;
 			end = cur->children[0];
@@ -192,7 +191,6 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 				wrefresh(win);
 				start = (item == 0) ? l1 : l1->children[item - 1];
 				end = l1->children[item];
-
 				break;
 			case 'k':
 				mvwprintw(win, item, 0, "  ");
@@ -204,7 +202,6 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 				wrefresh(win);
 				start = (item == 0) ? l1 : l1->children[item - 1];
 				end = l1->children[item];
-
 				break;
 			default:
 				done = 1;
