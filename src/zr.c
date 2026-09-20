@@ -245,18 +245,12 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 
 static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, int selected, int x, int **zodiac)
 {
-	size_t i;
-	int y;
-	int max_y;
+	int y = 0;
+	int max_y = getmaxy(win) - 1;
 
-	y = 0;
-	max_y = getmaxy(win) - 1;
-
-	for (i = 0; i < parent->count && y < max_y; i++, y++)
+	for (size_t i = 0; i < parent->count && y < max_y; i++, y++)
 	{
-		const struct node *child;
-
-		child = parent->children[i];
+		const struct node *child = parent->children[i];
 		const char *part = strchr(child->date, ':');
 
 		if ((int)i == selected && parent->level < ZWEEK)
