@@ -24,13 +24,14 @@
 #include "chronos.h"
 
 #define FORTUNE 0
-#define SPIRIT  1
+#define SPIRIT 1
 
-#define ZYEAR  0
+#define ROOT -1
+#define ZYEAR 0
 #define ZMONTH 1
-#define ZWEEK  2
-#define ZDAY   3
-#define ZMAX   4
+#define ZWEEK 2
+#define ZDAY 3
+#define ZMAX 4
 
 struct node {
 	char *date;
@@ -116,9 +117,9 @@ static void advance_date(struct cdata *date, double days)
 	cpt(date, &temp, &t, 1);
 }
 
-static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int year, int mon, int mday, int sign, bool bs)
+static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int year, int mon, int mday, int sign, bool b)
 {
-	if (bs == 1)
+	if (b == 1)
 		snprintf(buffer, buffer_size, "%s:+%d.%s.%02d", ui->sym.zo_sym[sign], year, ui->sym.month[mon], mday);
 	else
 		snprintf(buffer, buffer_size, "%s: %d.%s.%02d", ui->sym.zo_sym[sign], year, ui->sym.month[mon], mday);
@@ -126,7 +127,7 @@ static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int yea
 
 static double node_end(const struct node *node, const double *layer_inc, const int *pl_period)
 {
-	if (node->level == -1) 
+	if (node->level == ROOT) 
 		return node->jd_ut + 120 * layer_inc[ZYEAR];
 
 	return node->jd_ut + pl_period[node->sign] *layer_inc[node->level];
@@ -156,11 +157,8 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 	int child_sign;
 	int bond_sign;
 	bool bond_switch = 0;
-	bool bs_print = 0;
+	bool bond_print = 0;
 	char date[MAXBUF];
-
-	if (parent == NULL)
-		ERR_EXIT("zr parent NULL");
 
 	if (parent->count != 0)
 		return;
@@ -192,9 +190,9 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 		if (child_length <= 0.0)
 			break;
 
-		date_string(date, sizeof(date), ui, parent_date.year, parent_date.mon, parent_date.mday, child_sign, bs_print);
-		if (bs_print == 1)
-			bs_print = 0;
+		date_string(date, sizeof(date), ui, parent_date.year, parent_date.mon, parent_date.mday, child_sign, bond_print);
+		if (bond_print == 1)
+			bond_print = 0;
 
 		node_add_child(parent, 
 		node_create(date, child_jd, child_sign, child_level, parent_date.year,
@@ -209,7 +207,7 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 		if (child_sign == bond_sign && !bond_switch)
 		{
 			bond_switch = 1;
-			bs_print = 1;
+			bond_print = 1;
 			child_sign += 6;
 			if (child_sign > 12)
 				child_sign -= 12;
@@ -240,7 +238,7 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 
 	date_string(date, sizeof(date), ui, cdata->year, cdata->mon, cdata->mday, sign, 0);
 
-	root = node_create(date, cdata->jd_ut, sign, -1, cdata->year, cdata->mon, cdata->mday, cdata->hour, cdata->min, cdata->sec, cdata->isdst);
+	root = node_create(date, cdata->jd_ut, sign, ROOT, cdata->year, cdata->mon, cdata->mday, cdata->hour, cdata->min, cdata->sec, cdata->isdst);
 
 	return root;
 }
@@ -250,9 +248,6 @@ static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, 
 	size_t i;
 	int y;
 	int max_y;
-
-	if (parent == NULL)
-		return;
 
 	y = 0;
 	max_y = getmaxy(win) - 1;
@@ -283,9 +278,6 @@ static void rebuild_path(struct node *parents[ZMAX + 1], int selected[ZMAX], str
 		struct node *parent;
 
 		parent = parents[level];
-
-		if (parent == NULL)
-			break;
 
 		node_generate_children(parent, ui, level);
 
@@ -333,35 +325,25 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 {
 	int height = 26;
 	int width = 86;
-	int start_y;
-	int start_x;
+	int sy = (LINES - height) / 2;
+	int sx = (COLS - width) / 2;
+	
+	int sign_switch = FORTUNE;
+	int current_layer = ZYEAR;
+	
+	WINDOW *win = newwin(height, width, sy, sx);
+	WINDOW *subwin = derwin(win, height - 3, width - 2, 3, 1);
+	
+	wbkgdset(win,COLOR_PAIR(M_COLOR));
+	keypad(win, TRUE);
 
-	WINDOW *win;
-	WINDOW *subwin;
-
-	struct node *root;
+	struct node *root = create_root(cdata, pxx, ui, sign_switch);
 	struct node *parents[ZMAX + 1] = {0};
 	int selected[ZMAX] = {0};
 
-	int sign_switch = FORTUNE;
-	int current_layer = ZYEAR;
-	bool done = 0;
-
-	start_y = (LINES - height) / 2;
-	start_x = (COLS - width) / 2;
-
-	win = newwin(height, width, start_y, start_x);
-
-	subwin = derwin(win, height - 3, width - 2, 3, 1);
-
-	wbkgdset(win,COLOR_PAIR(M_COLOR));
-
-	keypad(win, TRUE);
-
-	root = create_root(cdata, pxx, ui, sign_switch);
-
 	parents[0] = root;
 
+	bool done = 0;
 	while (!done) 
 	{
 		int ch;
@@ -382,6 +364,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 		mvwprintw(win, 1, 5+9, "%d", current_layer+1);
 		wattroff(win, COLOR_PAIR(current_layer+3));
 		mvwprintw(win, 1, 5+11, "}");
+		
 		mvwprintw(win, 1, width - 17, "[tab] %s", lot);
 		mvwhline(win, 2, 1, ACS_HLINE, width - 2);
 
