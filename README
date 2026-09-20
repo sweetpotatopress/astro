@@ -1,6 +1,7 @@
 --o https://sweetpotato.press --o
 ~:o irc.libera.chat #astro
 --- --- --- --- --- --- --- 
+
 DEPENDENCIES
 
 ncurses
@@ -77,6 +78,7 @@ element colors					[DONE]
 solar return					[DONE] 
 essential dignities				[DONE]
 synastry/ transit view 			[DONE]
+house system selection		
 secondary progressions
 aspects
 planet day/hour
