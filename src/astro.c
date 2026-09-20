@@ -200,168 +200,163 @@ int main(int argc, char *argv[])
 	new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 	doupdate();
 	
-	int main_done = 0;
-	while (!main_done)
+	int ch = 0;
+	bool done = 0;
+	while(!done && (ch = wgetch(ui->main_win)))
 	{
-		int chart_done = 0, ch = 0;
-		while(!chart_done && !main_done &&
-		(ch = wgetch(ui->main_win)))
+		if (isdigit(ch))
 		{
-			if (isdigit(ch))
-			{
-				ui->cc = ch - '0';
-				if (ui->cc >= CHARTMAX || ui->cc <= 0)
-					ui->cc = 10;
-					
-				set_localtime(cdata[TRANSIT]);
+			ui->cc = ch - '0';
+			if (ui->cc >= CHARTMAX || ui->cc <= 0)
+				ui->cc = 10;
+				
+			set_localtime(cdata[TRANSIT]);
+			ecst_init(planet, cdata[ui->cc]->se);
+			planet_init(planet, ui->cc, pxx);
+			new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+			doupdate();
+		}
+		if (ch >= 1000 && ch <= 1009)
+		{
+			int key = ch - 1000;
+			if (key == 0)
+				key = 10;
+			synastry(cdata, pxx, ui, planet, zodiac, key);
+			getch();
+			planet_init(planet, ui->cc, pxx);
+			ecst_init(planet, cdata[ui->cc]->se);
+			new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+			doupdate();
+		}
+		
+		switch(ch)
+		{
+			case '\n':
+				animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 9: // tab
+				ecst_init(planet, cdata[ui->cc]->se);
+				realtime_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'z':
+				zodiacal_releasing(cdata[ui->cc], pxx[ui->cc], ui, zodiac);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 't':
+				transit(cdata, pxx, ui, planet, zodiac);
 				ecst_init(planet, cdata[ui->cc]->se);
 				planet_init(planet, ui->cc, pxx);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
-			}
-			if (ch >= 1000 && ch <= 1009)
-			{
-				int key = ch - 1000;
-				if (key == 0)
-					key = 10;
-				synastry(cdata, pxx, ui, planet, zodiac, key);
-				getch();
+				break;
+			case 'r':
+				ecst_init(planet, cdata[ui->cc]->se);
+				wheel_init(ui->main_win, ui, 0, 0, 0);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'R':
+				cdata_clear(cdata[ui->cc]);
+				ecst_init(planet, cdata[ui->cc]->se);
 				planet_init(planet, ui->cc, pxx);
+				config_parse(cdata[ui->cc], xdg_path);
+				set_localtime(cdata[ui->cc]);
+				wheel_init(ui->main_win, ui, 0, 0, 0);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'q':
+				done = 1;
+				break;
+			case 'd':
+				if (cdata[ui->cc]->isdst == NDST)
+					cdata[ui->cc]->isdst = YDST;
+				else if (cdata[ui->cc]->isdst >= YDST)
+					cdata[ui->cc]->isdst = NDST;
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'i':
+				cdata_clear(cdata[ui->cc]);
+				in_cdata(cdata[ui->cc], ui, xdg_path);
+				
 				ecst_init(planet, cdata[ui->cc]->se);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
-			}
-			
-			switch(ch)
-			{
-				case '\n':
-					animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 9: // tab
-					ecst_init(planet, cdata[ui->cc]->se);
-					realtime_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 'z':
-					zodiacal_releasing(cdata[ui->cc], pxx[ui->cc], ui, zodiac);
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 't':
-					transit(cdata, pxx, ui, planet, zodiac);
-					ecst_init(planet, cdata[ui->cc]->se);
-					planet_init(planet, ui->cc, pxx);
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 'r':
-					ecst_init(planet, cdata[ui->cc]->se);
-					wheel_init(ui->main_win, ui, 0, 0, 0);
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 'R':
-					cdata_clear(cdata[ui->cc]);
-					ecst_init(planet, cdata[ui->cc]->se);
-					planet_init(planet, ui->cc, pxx);
-					config_parse(cdata[ui->cc], xdg_path);
-					set_localtime(cdata[ui->cc]);
-					wheel_init(ui->main_win, ui, 0, 0, 0);
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 'q':
-					main_done = 1;
-					chart_done = 1;
-					break;
-				case 'd':
-					if (cdata[ui->cc]->isdst == NDST)
-						cdata[ui->cc]->isdst = YDST;
-					else if (cdata[ui->cc]->isdst >= YDST)
-						cdata[ui->cc]->isdst = NDST;
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 'i':
-					cdata_clear(cdata[ui->cc]);
-					in_cdata(cdata[ui->cc], ui, xdg_path);
-					
-					ecst_init(planet, cdata[ui->cc]->se);
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 'w':
-					save_chart(cdata[ui->cc], xdg_path);
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 'e':
-					load_chart(cdata[ui->cc], xdg_path);
-					ecst_init(planet, cdata[ui->cc]->se);
-					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					doupdate();
-					break;
-				case 's':
-					ecst_init(planet, cdata[ui->cc]->se);
-					solar_return(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					break;
-				case 'p':
-					if (!ui->left_trig)
-					{
-						left_table(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-						show_panel(ui->left_panel);
-						ui->left_trig = 1;
-					}
-					else
-					{
-						hide_panel(ui->left_panel);
-						clear();
-						refresh();
-						ui->left_trig = 0;
-					}
-					
-					if (ui->right_trig > 0)
-					{
-						right_table(cdata[ui->cc], ui, planet, zodiac);
-						show_panel(ui->right_panel);
-					}
-					
-					touchwin(ui->main_win);
-					wnoutrefresh(ui->main_win);
-					update_panels();
-					doupdate();
-					break;
-				case 'o':
-					if (!ui->right_trig)
-					{
-						right_table(cdata[ui->cc], ui, planet, zodiac);
-						show_panel(ui->right_panel);
-						ui->right_trig = 1;
-					}
-					else
-					{
-						hide_panel(ui->right_panel);
-						clear();
-						refresh();
-						ui->right_trig = 0;
-					}	
-					
-					if (ui->left_trig > 0)
-					{
-						left_table(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-						show_panel(ui->left_panel);
-					}
-					
-					touchwin(ui->main_win);
-					wnoutrefresh(ui->main_win);
-					update_panels();
-					doupdate();
-					break;
-				default:
-					break;
-			}
+				break;
+			case 'w':
+				save_chart(cdata[ui->cc], xdg_path);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'e':
+				load_chart(cdata[ui->cc], xdg_path);
+				ecst_init(planet, cdata[ui->cc]->se);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 's':
+				ecst_init(planet, cdata[ui->cc]->se);
+				solar_return(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				break;
+			case 'p':
+				if (!ui->left_trig)
+				{
+					left_table(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+					show_panel(ui->left_panel);
+					ui->left_trig = 1;
+				}
+				else
+				{
+					hide_panel(ui->left_panel);
+					clear();
+					refresh();
+					ui->left_trig = 0;
+				}
+				
+				if (ui->right_trig > 0)
+				{
+					right_table(cdata[ui->cc], ui, planet, zodiac);
+					show_panel(ui->right_panel);
+				}
+				
+				touchwin(ui->main_win);
+				wnoutrefresh(ui->main_win);
+				update_panels();
+				doupdate();
+				break;
+			case 'o':
+				if (!ui->right_trig)
+				{
+					right_table(cdata[ui->cc], ui, planet, zodiac);
+					show_panel(ui->right_panel);
+					ui->right_trig = 1;
+				}
+				else
+				{
+					hide_panel(ui->right_panel);
+					clear();
+					refresh();
+					ui->right_trig = 0;
+				}	
+				
+				if (ui->left_trig > 0)
+				{
+					left_table(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+					show_panel(ui->left_panel);
+				}
+				
+				touchwin(ui->main_win);
+				wnoutrefresh(ui->main_win);
+				update_panels();
+				doupdate();
+				break;
+			default:
+				break;
 		}
 	}
 	del_panel(ui->right_panel);
