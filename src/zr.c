@@ -361,6 +361,12 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 		wrefresh(win);
 
 		int ch = wgetch(win);
+		if (isdigit(ch) && (ch - '0') < 4)
+		{
+			current_layer = (ch - '0') - 1;
+			move_selection(parents, selected, current_layer, 0);
+		}
+	
 		switch (ch)
 		{
 			case 'j': case KEY_DOWN:
@@ -398,7 +404,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 				current_layer = ZYEAR;
 				break;
 
-			default:
+			case 'z': case 'q': case 27:
 				done = 1;
 				break;
 		}
