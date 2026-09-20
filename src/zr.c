@@ -240,16 +240,24 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 	return root;
 }
 
-static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, int selected, int x, int **zodiac)
+static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, int selected, int layer, int **zodiac)
 {
-	int y = 0;
-	int max_y = getmaxy(win) - 1;
+	const int width = 20;
+	const int height = 22;
+	
+	int x = (layer % 2) * width + 1;
+	int ys = (layer / 2) * height;
+	int max_y = getmaxy(win);
 
-	for (size_t i = 0; i < parent->count && y < max_y; i++, y++)
+	for (size_t i = 0; i < parent->count; i++)
 	{
+		int y = ys + (int)i;
+		if (y >= max_y)
+			break;
+			
 		const struct node *child = parent->children[i];
 		const char *part = strchr(child->date, ':');
-
+		
 		if ((int)i == selected && parent->level < ZWEEK)
 			mvwprintw(win, y, x, "-->");
 		else
@@ -309,22 +317,43 @@ static void move_selection(struct node **parents, int *selected, int layer, int 
 
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
-	int height = 26;
-	int width = 86;
+	int height = 47;
+	int width = 43;
 	int sy = 0;
 	int sx = (COLS - width);
 	
-	// save left panel state to restore
-	ui->bcc = ui->left_trig;
+	int old_l = ui->left_trig;
+	int old_r = ui->right_trig;
 	
-	ui->cx = (ui->radius + 4);
-	ui->left_trig = 0;
-	hide_panel(ui->left_panel);
+	int toty, totx;
+	getmaxyx(ui->main_win, toty, totx);
 	
+	if (toty < 47)
+	{
+		printw("window too small for zr");
+		getch();
+		return;
+	}
+	if (totx > 163)
+	{
+		ui->cx = (ui->radius + 35);
+		if (toty > 50)
+		{
+			wheel_init(ui->main_win, ui, 7, 0, 0);
+			ui->cx = (ui->radius + 40);
+		}
+	}
+	else
+	{
+		ui->cx = (ui->radius + 5);
+		ui->left_trig = 0;
+		ui->right_trig = 0;
+	
+		hide_panel(ui->left_panel);
+		hide_panel(ui->right_panel);
+	}
 	new_chart(cdata, pxx, ui, planet, zodiac);
-	update_panels();
-	doupdate();
-	
+
 	int sign_switch = FORTUNE;
 	int current_layer = ZYEAR;
 	
@@ -352,7 +381,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		werase(subwin);
 
 		for (int layer = ZYEAR; layer <= ZDAY; layer++)
-			print_column(subwin, ui, parents[layer], selected[layer], 1 + layer * 20, zodiac);
+			print_column(subwin, ui, parents[layer], selected[layer], layer, zodiac);
 
 		mvwprintw(win, 1, 5, "layer: { ");
 		wattron(win, COLOR_PAIR(current_layer+3));
@@ -365,14 +394,22 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		
 		// highlight current layer
 		mvwhline(win, 2, 1, ACS_HLINE, width - 2);
+		mvwhline(win, 24, 1, ACS_HLINE, width - 2);
+		
 		wattron(win, COLOR_PAIR(current_layer+3));
-		mvwhline(win, 2, 1, ACS_HLINE, (current_layer +1) * 20);
+		
+		mvwhline(win, 2, 1, ACS_HLINE, (current_layer +1) * 21);
+		if (current_layer > ZMONTH)
+			mvwhline(win, 24, 1, ACS_HLINE, width - 20);
 		wattroff(win, COLOR_PAIR(current_layer+3));
+		
 		mvwhline(win, 2, 1, ACS_HLINE, (current_layer * 20));
 
 		box(win, 0, 0);
-		wrefresh(win);
-
+		wnoutrefresh(win);
+		update_panels();
+		doupdate();
+	
 		int ch = wgetch(win);
 		if (isdigit(ch) && (ch - '0') < ZMAX)
 		{
@@ -453,6 +490,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 	node_free(root);
 	delwin(subwin);
 	delwin(win);
-	ui->left_trig = ui->bcc;
+	ui->left_trig = old_l;
+	ui->right_trig = old_r;
 	wheel_init(ui->main_win, ui, 0, 0, 0);
 }
