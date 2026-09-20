@@ -33,4 +33,4 @@ void chart_timeset(struct cdata *cdata, int *day_offset);
 void lots(struct pxx *pxx);
 void weekday_check(struct cdata *cdata);
 void set_localtime(struct cdata *cdata);
-void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, int x);
+void cpt(struct cdata *cdata, struct tm *temp, time_t *t, int x);

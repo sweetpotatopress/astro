@@ -116,6 +116,7 @@ struct cdata {
 	double dlat;
 	double dlon;
 	double utc_hour; //0.0 .. 23.999999;
+	double jd_ut;
 	int sec;
 	int min;
 	int hour;
@@ -178,4 +179,4 @@ struct ui {
 void *ecalloc(size_t n, size_t size);
 void *erealloc(void *p, size_t size);
 void config_parse(struct cdata *cdata, char xdg_path[]);
-void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui);
+void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int **zodiac);

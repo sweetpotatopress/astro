@@ -152,12 +152,12 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	calculate_utc(cdata);
 	weekday_check(cdata);
 	
-	double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
+	cdata->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
 	cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
 	
 	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
 	{
-		iret = swe_calc_ut(jd_ut, ipl, iflag, xx, serr);
+		iret = swe_calc_ut(cdata->jd_ut, ipl, iflag, xx, serr);
 		if (iret < 0) 
 			ERR_EXIT("ERR: swe_calc_ut failure");
 			
@@ -169,16 +169,16 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 		planet[ipl][DIST_S] = xx[DIST_S];
 	}
 
-	retro_station(jd_ut, planet);
+	retro_station(cdata->jd_ut, planet);
 	
-	eclipse(jd_ut, cdata->le, cdata->se);
+	eclipse(cdata->jd_ut, cdata->le, cdata->se);
 	
-	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
+	iret = swe_houses_ex(cdata->jd_ut, 0, cdata->dlat, cdata->dlon,
 	'W', cdata->sign_cusp, ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
-	iret = swe_houses_ex(jd_ut, 0, cdata->dlat, cdata->dlon,
+	iret = swe_houses_ex(cdata->jd_ut, 0, cdata->dlat, cdata->dlon,
 	ihsy, cdata->cusp, ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");

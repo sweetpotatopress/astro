@@ -129,8 +129,9 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-void cpt(struct cdata *cdata, struct tm *temp, struct tm *result, time_t *t, int x)
+void cpt(struct cdata *cdata, struct tm *temp, time_t *t, int x)
 {
+	struct tm *result;
 	if (!x || x == 2)
 	{
 		temp->tm_year = cdata->year - 1900;

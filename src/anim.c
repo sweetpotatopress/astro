@@ -234,10 +234,9 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 static void calc_return(struct cdata *cdata, double base_degree)
 {
 	struct tm temp = {0};
-	struct tm *result = NULL;
 	time_t t = 0;
 
-	cpt(cdata, &temp, result, &t, 0);
+	cpt(cdata, &temp, &t, 0);
 	
 	int iflag = SEFLG_SWIEPH;
 	double xx[6];
@@ -262,7 +261,7 @@ static void calc_return(struct cdata *cdata, double base_degree)
 			
 		t+= (diff > 0.0 ? step : -step);
 		
-		cpt(cdata, &temp, result, &t, 1);
+		cpt(cdata, &temp, &t, 1);
 		
 		if (fabs(diff) < 0.00001157407407)
 			break;
@@ -415,10 +414,9 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	size_t inc = HOUR;
 	
 	struct tm temp = {0};
-	struct tm *result = NULL;
 	time_t t = 0;
 	
-	cpt(cdata, &temp, result, &t, 0);
+	cpt(cdata, &temp, &t, 0);
 	
 	int ch = 0;
 	int anim_done = 0;
@@ -470,7 +468,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						ecst_init(planet, cdata->se);
 					break;
 				}
-				cpt(cdata, &temp, result, &t, 1);
+				cpt(cdata, &temp, &t, 1);
 				
 				if (ui->cc == TRANSIT)
 					arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac);
@@ -516,7 +514,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						ecst_init(planet, cdata->se);
 					break;
 				}
-				cpt(cdata, &temp, result, &t, 1);
+				cpt(cdata, &temp, &t, 1);
 				
 				if (ui->cc == TRANSIT)
 					arrange_panel(cdata, pxx, ui, t_panel, t_win, planet, zodiac);
