@@ -116,9 +116,12 @@ static void advance_date(struct cdata *date, double days)
 	cpt(date, &temp, &t, 1);
 }
 
-static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int year, int mon, int mday, int sign)
+static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int year, int mon, int mday, int sign, bool bs)
 {
-	snprintf(buffer, buffer_size, "%s: %d.%s.%02d", ui->sym.zo_sym[sign], year, ui->sym.month[mon], mday);
+	if (bs == 1)
+		snprintf(buffer, buffer_size, "%s:+%d.%s.%02d", ui->sym.zo_sym[sign], year, ui->sym.month[mon], mday);
+	else
+		snprintf(buffer, buffer_size, "%s: %d.%s.%02d", ui->sym.zo_sym[sign], year, ui->sym.month[mon], mday);
 }
 
 static double node_end(const struct node *node, const double *layer_inc, const int *pl_period)
@@ -153,6 +156,7 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 	int child_sign;
 	int bond_sign;
 	bool bond_switch = 0;
+	bool bs_print = 0;
 	char date[MAXBUF];
 
 	if (parent == NULL)
@@ -188,7 +192,9 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 		if (child_length <= 0.0)
 			break;
 
-		date_string(date, sizeof(date), ui, parent_date.year, parent_date.mon, parent_date.mday, child_sign);
+		date_string(date, sizeof(date), ui, parent_date.year, parent_date.mon, parent_date.mday, child_sign, bs_print);
+		if (bs_print == 1)
+			bs_print = 0;
 
 		node_add_child(parent, 
 		node_create(date, child_jd, child_sign, child_level, parent_date.year,
@@ -203,6 +209,7 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 		if (child_sign == bond_sign && !bond_switch)
 		{
 			bond_switch = 1;
+			bs_print = 1;
 			child_sign += 6;
 			if (child_sign > 12)
 				child_sign -= 12;
@@ -231,7 +238,7 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 	if (sign < 1)
 		sign += 12;
 
-	date_string(date, sizeof(date), ui, cdata->year, cdata->mon, cdata->mday, sign);
+	date_string(date, sizeof(date), ui, cdata->year, cdata->mon, cdata->mday, sign, 0);
 
 	root = node_create(date, cdata->jd_ut, sign, -1, cdata->year, cdata->mon, cdata->mday, cdata->hour, cdata->min, cdata->sec, cdata->isdst);
 
