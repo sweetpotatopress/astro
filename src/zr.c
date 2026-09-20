@@ -217,7 +217,6 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 
 static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int sign_switch)
 {
-	struct node *root;
 	char date[MAXBUF];
 	int sign;
 
@@ -238,7 +237,7 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 
 	date_string(date, sizeof(date), ui, cdata->year, cdata->mon, cdata->mday, sign, 0);
 
-	root = node_create(date, cdata->jd_ut, sign, ROOT, cdata->year, cdata->mon, cdata->mday, cdata->hour, cdata->min, cdata->sec, cdata->isdst);
+	struct node *root = node_create(date, cdata->jd_ut, sign, ROOT, cdata->year, cdata->mon, cdata->mday, cdata->hour, cdata->min, cdata->sec, cdata->isdst);
 
 	return root;
 }
@@ -263,15 +262,13 @@ static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, 
 	}
 }
 
-static void rebuild_path(struct node *parents[ZMAX + 1], int selected[ZMAX], struct ui *ui)
+static void rebuild_path(struct node **parents, int *selected, struct ui *ui)
 {
 	int level;
 
 	for (level = 0; level < ZMAX; level++)
 	{
-		struct node *parent;
-
-		parent = parents[level];
+		struct node *parent = parents[level];
 
 		node_generate_children(parent, ui, level);
 
@@ -284,25 +281,22 @@ static void rebuild_path(struct node *parents[ZMAX + 1], int selected[ZMAX], str
 		if ((size_t)selected[level] >= parent->count)
 			selected[level] = (int)parent->count - 1;
 
-		parents[level + 1] = parent->children[selected[level]];
+		if (level + 1 < ZMAX)
+			parents[level + 1] = parent->children[selected[level]];
 	}
 
 	for (int i = level + 1; i <= ZMAX; i++)
 		parents[i] = NULL;
 }
 
-static void move_selection(struct node *parents[ZMAX + 1], int selected[ZMAX], int layer, int direction)
+static void move_selection(struct node **parents, int *selected, int layer, int direction)
 {
-	struct node *parent;
-	int count;
-	int i;
-
-	parent = parents[layer];
+	struct node *parent = parents[layer];
 
 	if (parent == NULL || parent->count == 0)
 		return;
 
-	count = (int)parent->count;
+	int count = (int)parent->count;
 
 	selected[layer] += direction;
 
@@ -311,7 +305,7 @@ static void move_selection(struct node *parents[ZMAX + 1], int selected[ZMAX], i
 	else if (selected[layer] >= count)
 		selected[layer] = 0;
 
-	for (i = layer + 1; i < ZMAX; i++)
+	for (int i = layer + 1; i < ZMAX; i++)
 		selected[i] = 0;
 }
 
@@ -332,7 +326,10 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 	keypad(win, TRUE);
 
 	struct node *root = create_root(cdata, pxx, ui, sign_switch);
-	struct node *parents[ZMAX + 1] = {0};
+	if (!root)
+		ERR_EXIT("zr: failed to create root");
+		
+	struct node *parents[ZMAX] = {0};
 	int selected[ZMAX] = {0};
 
 	parents[0] = root;
@@ -397,6 +394,8 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 				memset(selected, 0, sizeof(selected));
 
 				root = create_root(cdata, pxx, ui, sign_switch);
+				if (!root)
+					ERR_EXIT("zr: failed to create root");
 
 				parents[0] = root;
 				current_layer = ZYEAR;
