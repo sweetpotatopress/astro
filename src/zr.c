@@ -350,7 +350,12 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 		
 		const char *lot = sign_switch == SPIRIT ? "spirit" : "fortune";
 		mvwprintw(win, 1, width - 17, "[tab] %s", lot);
+		
 		mvwhline(win, 2, 1, ACS_HLINE, width - 2);
+		wattron(win, COLOR_PAIR(current_layer+3));
+		mvwhline(win, 2, 1, ACS_HLINE, (current_layer +1) * 20);
+		wattroff(win, COLOR_PAIR(current_layer+3));
+		mvwhline(win, 2, 1, ACS_HLINE, (current_layer * 20));
 
 		box(win, 0, 0);
 		wrefresh(win);
