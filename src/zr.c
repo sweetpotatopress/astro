@@ -20,6 +20,7 @@
 #include <ncurses.h>
 #include "swephexp.h"
 #include "astro.h"
+#include "init.h"
 #include "draw.h"
 #include "chronos.h"
 
@@ -306,12 +307,23 @@ static void move_selection(struct node **parents, int *selected, int layer, int 
 		selected[i] = 0;
 }
 
-void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int **zodiac)
+void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	int height = 26;
 	int width = 86;
-	int sy = (LINES - height) / 2;
-	int sx = (COLS - width) / 2;
+	int sy = 0;
+	int sx = (COLS - width);
+	
+	// save left panel state to restore
+	ui->bcc = ui->left_trig;
+	
+	ui->cx = (ui->radius + 4);
+	ui->left_trig = 0;
+	hide_panel(ui->left_panel);
+	
+	new_chart(cdata, pxx, ui, planet, zodiac);
+	update_panels();
+	doupdate();
 	
 	int sign_switch = FORTUNE;
 	int current_layer = ZYEAR;
@@ -351,6 +363,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 		const char *lot = sign_switch == SPIRIT ? "spirit" : "fortune";
 		mvwprintw(win, 1, width - 17, "[tab] %s", lot);
 		
+		// highlight current layer
 		mvwhline(win, 2, 1, ACS_HLINE, width - 2);
 		wattron(win, COLOR_PAIR(current_layer+3));
 		mvwhline(win, 2, 1, ACS_HLINE, (current_layer +1) * 20);
@@ -361,12 +374,41 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 		wrefresh(win);
 
 		int ch = wgetch(win);
-		if (isdigit(ch) && (ch - '0') < 4)
+		if (isdigit(ch) && (ch - '0') < ZMAX)
 		{
 			current_layer = (ch - '0') - 1;
 			move_selection(parents, selected, current_layer, 0);
 		}
-	
+		
+		if (ch == 'p' && ui->left_trig == 0)
+		{
+			ui->left_trig = 1;
+			show_panel(ui->left_panel);
+			update_panels();
+			doupdate();
+		}
+		else if (ch == 'p' && ui->left_trig == 1)
+		{
+			ui->left_trig = 0;
+			hide_panel(ui->left_panel);
+			update_panels();
+			doupdate();
+		}
+		if (ch == 'o' && ui->right_trig == 0)
+		{
+			ui->right_trig = 1;
+			show_panel(ui->right_panel);
+			update_panels();
+			doupdate();
+		}
+		else if (ch == 'o' && ui->right_trig == 1)
+		{
+			ui->right_trig = 0;
+			hide_panel(ui->right_panel);
+			update_panels();
+			doupdate();
+		}
+
 		switch (ch)
 		{
 			case 'j': case KEY_DOWN:
@@ -393,7 +435,6 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 				node_free(root);
 
 				memset(parents,0,sizeof(parents));
-
 				memset(selected, 0, sizeof(selected));
 
 				root = create_root(cdata, pxx, ui, sign_switch);
@@ -409,9 +450,9 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 				break;
 		}
 	}
-
 	node_free(root);
-
 	delwin(subwin);
 	delwin(win);
+	ui->left_trig = ui->bcc;
+	wheel_init(ui->main_win, ui, 0, 0, 0);
 }

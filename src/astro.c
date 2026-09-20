@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
 				doupdate();
 				break;
 			case 'z':
-				zodiacal_releasing(cdata[ui->cc], pxx[ui->cc], ui, zodiac);
+				zodiacal_releasing(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;

@@ -52,8 +52,8 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		}
 		else
 		{
-			starty = (LINES / 2) - 4;
-			startx = (COLS / 2) - 4;
+			starty = ui->cy - 4;
+			startx = ui->cx - 4;
 		}
 		
 		if(cdata->chart_name)
