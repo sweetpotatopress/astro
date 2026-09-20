@@ -13,13 +13,15 @@ enter		animate chart
 	k/j 	up/down  
 
 0...9		select chart number
-t			transits
 alt+0...9	synastry with selected chart
+t			transits
+
 s			solar return
 
-z			zodiacal releasing (WIP)
-	l/h		switch lot
-	j/k		up or down period
+z			zodiacal releasing
+	k/j		up/down period
+	h/l		up/down layer
+	tab		switch lot
 	
 tab			live update  
 d			toggle dst
@@ -85,7 +87,7 @@ terminal window resize refresh	[DONE]
 user default config				[DONE]
 code documentation
 astro tutorial
-zodiacal releasing
+zodiacal releasing				[DONE]
  
 LICENSE
 
