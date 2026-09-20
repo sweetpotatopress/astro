@@ -103,7 +103,7 @@ static void node_free(struct node *node)
 	free(node);
 }
 
-static void advance_chart_date(struct cdata *date, double days)
+static void advance_date(struct cdata *date, double days)
 {
 	struct tm temp = {0};
 	time_t t = 0;
@@ -114,16 +114,6 @@ static void advance_chart_date(struct cdata *date, double days)
 	seconds = (time_t)llround(days * 86400.0);
 	t += seconds;
 	cpt(date, &temp, &t, 1);
-}
-
-static double chart_date_to_jd(struct cdata *date)
-{
-	struct tm temp = {0};
-	time_t t = 0;
-	
-	cpt(date, &temp, &t, 2);
-
-	return swe_julday(date->year, date->mon, date->mday, date->utc_hour, SE_GREG_CAL);
 }
 
 static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int year, int mon, int mday, int sign)
@@ -155,7 +145,7 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 		12, 27, 30, 12
 	};
 	
-	struct cdata local_date;
+	struct cdata parent_date;
 	double parent_end;
 	double child_jd;
 	double child_length;
@@ -171,15 +161,15 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 	if (parent->count != 0)
 		return;
 
-	memset(&local_date, 0, sizeof(local_date));
+	memset(&parent_date, 0, sizeof(parent_date));
 
-	local_date.year = parent->year;
-	local_date.mon = parent->mon;
-	local_date.mday = parent->mday;
-	local_date.hour = parent->hour;
-	local_date.min = parent->min;
-	local_date.sec = parent->sec;
-	local_date.isdst = parent->isdst;
+	parent_date.year = parent->year;
+	parent_date.mon = parent->mon;
+	parent_date.mday = parent->mday;
+	parent_date.hour = parent->hour;
+	parent_date.min = parent->min;
+	parent_date.sec = parent->sec;
+	parent_date.isdst = parent->isdst;
 
 	parent_end = node_end(parent, layer_inc, pl_period);
 	
@@ -188,7 +178,7 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 
 	for (;;) 
 	{
-		child_jd = chart_date_to_jd(&local_date);
+		child_jd = swe_julday(parent_date.year, parent_date.mon, parent_date.mday, parent_date.utc_hour, SE_GREG_CAL);
 
 		if (child_jd >= parent_end)
 			break;
@@ -198,13 +188,13 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 		if (child_length <= 0.0)
 			break;
 
-		date_string(date, sizeof(date), ui, local_date.year, local_date.mon, local_date.mday, child_sign);
+		date_string(date, sizeof(date), ui, parent_date.year, parent_date.mon, parent_date.mday, child_sign);
 
 		node_add_child(parent, 
-		node_create(date, child_jd, child_sign, child_level, local_date.year,
-		local_date.mon, local_date.mday, local_date.hour, local_date.min, local_date.sec, local_date.isdst));
+		node_create(date, child_jd, child_sign, child_level, parent_date.year,
+		parent_date.mon, parent_date.mday, parent_date.hour, parent_date.min, parent_date.sec, parent_date.isdst));
 
-		advance_chart_date(&local_date, child_length);
+		advance_date(&parent_date, child_length);
 
 		++child_sign;
 		if (child_sign > 12)
@@ -267,7 +257,7 @@ static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, 
 		child = parent->children[i];
 		const char *part = strchr(child->date, ':');
 
-		if ((int)i == selected)
+		if ((int)i == selected && parent->level < ZWEEK)
 			mvwprintw(win, y, x, "-->");
 		else
 			mvwprintw(win, y, x, "   ");
