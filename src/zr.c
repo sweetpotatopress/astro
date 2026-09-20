@@ -53,11 +53,9 @@ struct node {
 };
 
 static struct node *node_create(const char *date, double jd_ut, int sign, int level,
-								int year, int mon, int mday, int hour, int min, int sec, int isdst)
+int year, int mon, int mday, int hour, int min, int sec, int isdst)
 {
-	struct node *node;
-
-	node = ecalloc(1, sizeof(*node));
+	struct node *node = ecalloc(1, sizeof(*node));
 
 	node->date = ecalloc(strlen(date) + 1, sizeof(*node->date));
 	memcpy(node->date, date, strlen(date) + 1);
@@ -82,9 +80,7 @@ static struct node *node_create(const char *date, double jd_ut, int sign, int le
 
 static void node_add_child(struct node *parent, struct node *child)
 {
-	struct node **children;
-
-	children = erealloc(parent->children, (parent->count + 1) * sizeof(*children));
+	struct node **children = erealloc(parent->children, (parent->count + 1) * sizeof(*children));
 
 	parent->children = children;
 	parent->children[parent->count] = child;
@@ -237,7 +233,8 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 
 	date_string(date, sizeof(date), ui, cdata->year, cdata->mon, cdata->mday, sign, 0);
 
-	struct node *root = node_create(date, cdata->jd_ut, sign, ROOT, cdata->year, cdata->mon, cdata->mday, cdata->hour, cdata->min, cdata->sec, cdata->isdst);
+	struct node *root = node_create(date, cdata->jd_ut, sign, ROOT,
+	cdata->year, cdata->mon, cdata->mday, cdata->hour, cdata->min, cdata->sec, cdata->isdst);
 
 	return root;
 }
@@ -337,9 +334,6 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 	bool done = 0;
 	while (!done) 
 	{
-		int ch;
-		const char *lot;
-
 		rebuild_path(parents, selected, ui);
 
 		werase(win);
@@ -348,22 +342,20 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int
 		for (int layer = ZYEAR; layer <= ZDAY; layer++)
 			print_column(subwin, ui, parents[layer], selected[layer], 1 + layer * 20, zodiac);
 
-		lot = sign_switch == SPIRIT ? "spirit" : "fortune";
-
 		mvwprintw(win, 1, 5, "layer: { ");
 		wattron(win, COLOR_PAIR(current_layer+3));
 		mvwprintw(win, 1, 5+9, "%d", current_layer+1);
 		wattroff(win, COLOR_PAIR(current_layer+3));
 		mvwprintw(win, 1, 5+11, "}");
 		
+		const char *lot = sign_switch == SPIRIT ? "spirit" : "fortune";
 		mvwprintw(win, 1, width - 17, "[tab] %s", lot);
 		mvwhline(win, 2, 1, ACS_HLINE, width - 2);
 
 		box(win, 0, 0);
 		wrefresh(win);
 
-		ch = wgetch(win);
-
+		int ch = wgetch(win);
 		switch (ch)
 		{
 			case 'j': case KEY_DOWN:
