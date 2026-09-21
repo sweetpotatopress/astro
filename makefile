@@ -46,7 +46,7 @@ endif
 
 .PHONY: all install swe-install clean debug
 
-all: $(SWE_DEPS)
+all: $(SWE_DEPS) $(SWE_A)
 	@echo "-o--o-building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
 	    -L$(SWE_DIR) -lswe -lm \
@@ -65,10 +65,11 @@ debug: $(SWE_DEPS)
 
 $(SWE_DIR)/%.o: $(SWE_DIR)/%.c
 	$(CC) $(SWE_CFLAGS) -c $< -o $@
+	
+-include $(SWE_DEPS)
 		
 $(SWE_A): $(SWE_OBJS)
 	ar rcs $@ $(SWE_OBJS)
-	rm -f $(SWE_OBJS)
 
 install: all
 	@echo "-x--o installing astro --oo-"
