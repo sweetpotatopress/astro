@@ -17,8 +17,11 @@ INSTALL_DIR = /usr/local/bin
 
 SWE_CFLAGS	= -g -Wall -fPIC -std=c99 -D_POSIX_C_SOURCE=200809L
 SWE_DIR     = swisseph
-SWE_SRCS	:= $(wildcard swisseph/*.c)
-SWE_OBJS	:= $(patsubst swisseph/%.c,swisseph/%.o,$(SWE_SRCS))
+SWE_BUILD	:= $(SWE_DIR)/build
+
+SWE_SRCS	:= $(wildcard $(SWE_DIR)/*.c)
+SWE_OBJS	:= $(patsubst $(SWE_DIR)/%.c,$(SWE_BUILD)/%.o,$(SWE_SRCS))
+SWE_D		:= $(SWE_OBJS:.o=.d)
 SWE_A		:= $(SWE_DIR)/libswe.a
 
 REAL_USER := $(shell echo $${SUDO_USER:-$${DOAS_USER:-$$USER}})
@@ -49,7 +52,7 @@ endif
 all: $(SWE_DEPS) $(SWE_A)
 	@echo "-o--o-building astro -o--/-"
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) \
-	    -L$(SWE_DIR) -lswe -lm \
+	    -L$(SWE_BUILD) -lswe -lm \
 	    -lpanel -lmenu -lform -lncurses -ltinfo
 
 debug: $(SWE_DEPS)
@@ -63,10 +66,10 @@ debug: $(SWE_DEPS)
 	  -L$(SWE_DIR) -lswe -lm \
 	  -lpanel -lmenu -lform -lncurses -ltinfo
 
-$(SWE_DIR)/%.o: $(SWE_DIR)/%.c
-	$(CC) $(SWE_CFLAGS) -c $< -o $@
+$(SWE_BUILD)/%.o: $(SWE_DIR)/%.c
+	$(CC) $(SWE_CFLAGS) -MMD -MP -c $< -o $@
 	
--include $(SWE_DEPS)
+-include $(SWE_D)
 		
 $(SWE_A): $(SWE_OBJS)
 	ar rcs $@ $(SWE_OBJS)
