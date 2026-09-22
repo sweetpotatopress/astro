@@ -48,6 +48,7 @@ i			input chart data
 	tab		fill local time  
 	arrows	navigate  
 	\		draw chart
+	esc		cancel
 
 DATA DIRECTORIES
 
