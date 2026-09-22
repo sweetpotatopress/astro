@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
 		{
 			case 'v':
 				puts(VERSION);
-				return EXIT_SUCCESS;
+				return 0;
 			default:
-				return EXIT_FAILURE;
+				return 1;
 		}
 	}
 	
