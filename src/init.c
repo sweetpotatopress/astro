@@ -144,6 +144,9 @@ void ui_init(struct ui *ui)
 	hide_panel(ui->right_panel);
 	
 	wbkgdset(ui->right_win, COLOR_PAIR(M_COLOR));
+	
+	keypad(ui->main_win, TRUE);
+	show_panel(ui->main_panel);
 }
 
 void zxx_init(int *zodiac[])

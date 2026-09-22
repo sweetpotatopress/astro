@@ -88,7 +88,6 @@ int main(int argc, char *argv[])
 	noecho();
 	keypad(stdscr, TRUE);
 	
-	// alt + 1-0
 	define_key("\0331", ALT1);
 	define_key("\0332", ALT2);
 	define_key("\0333", ALT3);
@@ -142,9 +141,6 @@ int main(int argc, char *argv[])
 		
 	double *planet[SPXXMAX];
 	planet_init(planet, ui->cc, pxx);
-	
-	keypad(ui->main_win, TRUE);
-	show_panel(ui->main_panel);
 	
 	for (int i = 1; i < CHARTMAX; ++i)
 	{
