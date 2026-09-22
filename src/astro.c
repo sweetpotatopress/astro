@@ -133,50 +133,7 @@ int main(int argc, char *argv[])
 
 	struct ui *ui = ecalloc(1, sizeof(*ui));
 	
-	ui->sym = (struct ui_sym) {
-		.pl_sym = { "(o)", "(()", "(-o<)",
-		"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
-		"(P)", "(u)", "(^)" },
-	
-		.zo_sym = { "err", "ari", "tau", "gem", "can",
-		"leo", "vir", "lib", "sco", "sag",
-		"cap", "aqu", "pis" },
-	
-		.moon = { "new", "crescent", "quarter", "gibbous", "full",
-		"2nd gibbous", "2nd quarter", "2nd crescent" },
-		
-		.month = { "err", "jan", "feb", "mar", "apr", "may", "jun",
-		"jul", "aug", "sep", "oct", "nov", "dec" }
-	};
-	
-	ui->cc = 1;
-	
-	ui->left_trig = 1;
-	ui->right_trig = 1;
-	
-	ui->main_win = newwin(LINES, COLS, 0, 0);
-	ui->main_panel = new_panel(ui->main_win);
-
-	hide_panel(ui->main_panel);
-	
-	wbkgdset(ui->main_win, COLOR_PAIR(M_COLOR));
-	
-	ui->indat_win = newwin(CWINY, CWINX, CWIN_Y, CWIN_X);
-	ui->indat_subwin = derwin(ui->indat_win, CWINY-2, CWINX-2, 1, 1);
-	
-	wbkgdset(ui->indat_win, COLOR_PAIR(M_COLOR));
-	
-	ui->left_win = newwin(LWINY, LWINX, LWIN_Y, LWIN_X);
-	ui->left_panel = new_panel(ui->left_win);
-	hide_panel(ui->left_panel);
-	
-	wbkgdset(ui->left_win, COLOR_PAIR(M_COLOR));
-	
-	ui->right_win = newwin(RWINY, RWINX, RWIN_Y, RWIN_X);
-	ui->right_panel = new_panel(ui->right_win);
-	hide_panel(ui->right_panel);
-	
-	wbkgdset(ui->right_win, COLOR_PAIR(M_COLOR));
+	ui_init(ui);
 	
 	struct pxx **pxx = ecalloc(CHARTMAX, sizeof(*pxx));
 	

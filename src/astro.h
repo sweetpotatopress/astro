@@ -37,10 +37,10 @@
 #define RWIN_Y LINES - 9
 #define RWIN_X COLS - 24
 
-#define CWINY 26
-#define CWINX 47
-#define CWIN_Y (LINES - CWINY) / 2
-#define CWIN_X (COLS - CWINX) / 2
+#define IWINY 26
+#define IWINX 47
+#define IWIN_Y (LINES - IWINY) / 2
+#define IWIN_X (COLS - IWINX) / 2
 
 #define M_COLOR 1
 #define FIRE 2

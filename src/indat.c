@@ -214,8 +214,8 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	FORM *cdata_form;
 	int starty = 0, startx = 13;
 	
-	mvwin(ui->indat_win, (LINES - CWINY) / 2, (COLS - CWINX) / 2);
-	wresize(ui->indat_win, CWINY, CWINX);
+	mvwin(ui->indat_win, (LINES - IWINY) / 2, (COLS - IWINX) / 2);
+	wresize(ui->indat_win, IWINY, IWINX);
 	
 	curs_set(1);
 	
