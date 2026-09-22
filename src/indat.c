@@ -95,7 +95,6 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 	{
 		case CITY:
 			city_search(cdata_field, cdata_form, buffer, cdata, xdg_path);
-			form_driver(cdata_form, REQ_VALIDATION);
 			break;
 			
 		case YEAR:
@@ -202,6 +201,14 @@ static void field_label(struct ui *ui)
 
 void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 {
+	char tmp_city[MAXBUF] = {0};
+	char tmp_state[MAXBUF] = {0};
+	char tmp_country[MAXBUF] = {0};
+	
+	snprintf(tmp_city, sizeof tmp_city, "%s", cdata->city);
+	snprintf(tmp_state, sizeof tmp_state, "%s", cdata->state);
+	snprintf(tmp_country, sizeof tmp_country, "%s", cdata->country);
+	
 	FIELD *cdata_field[FIELDMAX + 1];
 	FORM *cdata_form;
 	int starty = 0, startx = 13;
@@ -293,17 +300,27 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	wrefresh(ui->indat_win);
 	pos_form_cursor(cdata_form);
 	
+
 	int cdata_entry = 0, ch = 0;
 	while(!cdata_entry && (ch = wgetch(ui->indat_win)))
 	{
 		switch (ch)
 		{
 			 case '\n':
-				form_driver(cdata_form, REQ_VALIDATION);
-				field_to_member(cdata, xdg_path, cdata_form, cdata_field);
+			 {
+				FIELD *current = current_field(cdata_form);
+				int index = field_index(current);
+	
+				if (index == CITY)
+				{
+
+					form_driver(cdata_form, REQ_VALIDATION);
+					field_to_member(cdata, xdg_path, cdata_form, cdata_field);
+				}
+	
 				form_driver(cdata_form, REQ_NEXT_FIELD);
-			
 				form_driver(cdata_form, REQ_END_LINE);
+			}
 				break;
 				
 			case KEY_DOWN: case ';':
@@ -341,9 +358,22 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 				setfield_localtime(cdata_field, cdata);
 				break;
 				
-			case '\\': case 27:
+			case '\\': case '[': case ']':
+				memset(cdata->chart_name, 0, MAXBUF);
 				cdata_entry = 1;
 				break;	
+				
+			case 27:
+				unpost_form(cdata_form);
+				free_form(cdata_form);
+				for (int i = CITY; i < FIELDMAX; ++i)
+					free_field(cdata_field[i]);
+				delwin(ui->indat_win);
+				snprintf(cdata->city, sizeof tmp_city, "%s", tmp_city);
+				snprintf(cdata->state, sizeof tmp_state, "%s", tmp_state);
+				snprintf(cdata->country, sizeof tmp_country, "%s", tmp_country);
+				return;
+				break;
 				
 			default:
 				form_driver(cdata_form, ch);

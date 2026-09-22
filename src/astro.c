@@ -281,7 +281,6 @@ int main(int argc, char *argv[])
 				doupdate();
 				break;
 			case 'i':
-				cdata_clear(cdata[ui->cc]);
 				in_cdata(cdata[ui->cc], ui, xdg_path);
 				
 				ecst_init(planet, cdata[ui->cc]->se);
