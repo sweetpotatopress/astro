@@ -34,9 +34,10 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define MINUTE 5
 #define SECOND 6
 #define AMPM 7
-#define TIMEZONE 8
-#define LATITUDE 9
-#define LONGITUDE 10
-#define FIELDMAX 11
+#define DRAW 8
+#define TIMEZONE 9
+#define LATITUDE 10
+#define LONGITUDE 11
+#define FIELDMAX 12
 
 void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[]);

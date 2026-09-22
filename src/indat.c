@@ -189,6 +189,7 @@ static void field_label(struct ui *ui)
 		"minute:",
 		"second:",
 		"am/pm:",
+		" ",
 		"timezone:",
 		"latitude:",
 		"longitude:",
@@ -268,6 +269,11 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	field_opts_off(cdata_field[AMPM], O_AUTOSKIP);
 	starty+= 2;
 	
+	cdata_field[DRAW] = new_field(1, 8, starty, startx, 0, 0);
+	set_field_buffer(cdata_field[DRAW], 0, "[ draw ]");
+	field_opts_off(cdata_field[DRAW], O_EDIT);
+	starty += 2;
+	
 	cdata_field[TIMEZONE] = new_field(1, 30, starty, startx, 0, 0);
 	set_field_back(cdata_field[TIMEZONE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(cdata_field[TIMEZONE], O_STATIC);
@@ -284,7 +290,7 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	set_field_back(cdata_field[LONGITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	set_field_type(cdata_field[LONGITUDE], TYPE_NUMERIC, 5, -180.0, 180.0);
 	field_opts_off(cdata_field[LONGITUDE], O_AUTOSKIP);
-	
+
 	cdata_field[FIELDMAX] = NULL;
 
 	cdata_form = new_form(cdata_field);
@@ -299,28 +305,32 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	box(ui->indat_win, 0, 0);
 	wrefresh(ui->indat_win);
 	pos_form_cursor(cdata_form);
-	
 
+	FIELD *current = NULL;
+	int index = 0;
 	int cdata_entry = 0, ch = 0;
 	while(!cdata_entry && (ch = wgetch(ui->indat_win)))
 	{
+		current = current_field(cdata_form);
+		index = field_index(current);
+		
 		switch (ch)
 		{
 			 case '\n':
-			 {
-				FIELD *current = current_field(cdata_form);
-				int index = field_index(current);
-	
 				if (index == CITY)
 				{
-
 					form_driver(cdata_form, REQ_VALIDATION);
 					field_to_member(cdata, xdg_path, cdata_form, cdata_field);
+				}
+				if (index == DRAW)
+				{
+					memset(cdata->chart_name, 0, MAXBUF);
+					cdata_entry = 1;
+					break;
 				}
 	
 				form_driver(cdata_form, REQ_NEXT_FIELD);
 				form_driver(cdata_form, REQ_END_LINE);
-			}
 				break;
 				
 			case KEY_DOWN: case ';':
@@ -379,6 +389,19 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 				form_driver(cdata_form, ch);
 				break;
 		}
+		current = current_field(cdata_form);
+		index = field_index(current);
+		
+		if (index == DRAW)
+		{
+			wattron(ui->indat_win, A_REVERSE);
+			mvwprintw(ui->indat_win, 17, 14, "[ draw ]");
+			wattroff(ui->indat_win, A_REVERSE);
+		}
+		else
+			mvwprintw(ui->indat_subwin, 16, 13, "[ draw ]");
+			
+		pos_form_cursor(cdata_form);
 		box(ui->indat_win, 0, 0);
 		wrefresh(ui->indat_win);
 	}

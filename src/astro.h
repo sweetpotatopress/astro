@@ -37,7 +37,7 @@
 #define RWIN_Y LINES - 9
 #define RWIN_X COLS - 24
 
-#define CWINY 24
+#define CWINY 26
 #define CWINX 47
 #define CWIN_Y (LINES - CWINY) / 2
 #define CWIN_X (COLS - CWINX) / 2
