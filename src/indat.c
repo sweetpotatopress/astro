@@ -19,6 +19,7 @@
 #include <time.h>
 #include "swephexp.h"
 #include "astro.h"
+#include "init.h"
 #include "io.h"
 #include "indat.h"
 #include "chronos.h"
@@ -67,7 +68,7 @@ static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 	set_field_buffer(cdata_field[SECOND], 0, buff);
 }
 
-static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_form, FIELD *cdata_field[])
+static void field_to_member (struct cdata *cdata, struct ui *ui, char xdg_path[], FORM *cdata_form, FIELD *cdata_field[])
 {
 	char *endptr = NULL;
 	long iret;
@@ -94,7 +95,14 @@ static void field_to_member (struct cdata *cdata, char xdg_path[], FORM *cdata_f
 	switch(index)
 	{
 		case CITY:
-			city_search(cdata_field, cdata_form, buffer, cdata, xdg_path);
+			city_search(cdata, ui, xdg_path, cdata_field, cdata_form, buffer);
+			touchwin(ui->main_win);
+			wnoutrefresh(ui->main_win);
+			if (ui->left_trig > 0)
+				top_panel(ui->left_panel);
+			update_panels();
+			doupdate();
+			
 			break;
 			
 		case YEAR:
@@ -200,7 +208,7 @@ static void field_label(struct ui *ui)
 		mvwprintw(ui->indat_win, y, x, "%s", label[i]);
 }
 
-void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
+void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, char xdg_path[])
 {
 	char tmp_city[MAXBUF] = {0};
 	char tmp_state[MAXBUF] = {0};
@@ -214,8 +222,10 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	FORM *cdata_form;
 	int starty = 0, startx = 13;
 	
-	mvwin(ui->indat_win, (LINES - IWINY) / 2, (COLS - IWINX) / 2);
+	mvwin(ui->indat_win, (LINES - IWINY), (COLS - IWINX));
 	wresize(ui->indat_win, IWINY, IWINX);
+	ui_place(cdata, pxx, ui, planet, zodiac, 0);
+	box(ui->indat_win, 0, 0);
 	
 	curs_set(1);
 	
@@ -302,7 +312,6 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	set_current_field(cdata_form, cdata_field[CITY]);
 	
 	field_label(ui);
-	box(ui->indat_win, 0, 0);
 	wrefresh(ui->indat_win);
 	pos_form_cursor(cdata_form);
 
@@ -320,7 +329,7 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 				if (index == CITY)
 				{
 					form_driver(cdata_form, REQ_VALIDATION);
-					field_to_member(cdata, xdg_path, cdata_form, cdata_field);
+					field_to_member(cdata, ui, xdg_path, cdata_form, cdata_field);
 				}
 				if (index == DRAW)
 				{
@@ -382,6 +391,7 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 				snprintf(cdata->city, sizeof tmp_city, "%s", tmp_city);
 				snprintf(cdata->state, sizeof tmp_state, "%s", tmp_state);
 				snprintf(cdata->country, sizeof tmp_country, "%s", tmp_country);
+				ui_place(cdata, pxx, ui, planet, zodiac, 1);
 				return;
 				break;
 				
@@ -409,7 +419,7 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
-		field_to_member(cdata, xdg_path, cdata_form, cdata_field);
+		field_to_member(cdata, ui, xdg_path, cdata_form, cdata_field);
 	}
 
 	unpost_form(cdata_form);
@@ -419,5 +429,7 @@ void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[])
 	
 	for (int i = CITY; i < FIELDMAX; ++i)
 		free_field(cdata_field[i]);
+	ui_place(cdata, pxx, ui, planet, zodiac, 1);
 	delwin(ui->indat_win);
 }
+

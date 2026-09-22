@@ -14,5 +14,4 @@
 
 #pragma once
 
-void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
-struct cdata *cdata, char xdg_path[]);
+void city_search(struct cdata *cdata,  struct ui *ui, char *xdg_path, FIELD *cdata_field[], FORM *cdata_form, char *search);

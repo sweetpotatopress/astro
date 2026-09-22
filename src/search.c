@@ -101,7 +101,7 @@ static ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t l
 	return range;
 }
 
-static void print_menu(FIELD *cdata_field[], FORM *cdata_form, struct cdata *cdata,
+static void print_menu(struct cdata *cdata, struct ui *ui, FIELD *cdata_field[], FORM *cdata_form,
 struct cdata **search_result, ITEM **item_result, size_t search_count)
 {
 	size_t page_max_item = 16;
@@ -125,21 +125,21 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 		if (width > COLS)
 			width = COLS - 2;
 		
-		int starty = (LINES - height) / 2;
-		int startx = (COLS - width) / 2;
+		int starty = 2;
+		int startx = (COLS - width);
 	
 		MENU *city_menu = new_menu(item_visible);	
-		WINDOW *city_win = newwin(height, width, starty, startx);
-		WINDOW *city_subwin = derwin(city_win, height - 3, width - 2, 2, 1);
+		ui->search_win = newwin(height, width, starty, startx);
+		ui->search_subwin = derwin(ui->search_win, height - 3, width - 2, 2, 1);
 		
-		mvwprintw(city_win, 1, 9, "<- [h]-------page %ld/%ld-------[l] -> ", cur_page + 1, page_count);
+		mvwprintw(ui->search_win, 1, 9, "<- [h]-------page %ld/%ld-------[l] -> ", cur_page + 1, page_count);
 		
-		wbkgdset(city_win, COLOR_PAIR(M_COLOR));
-		keypad(city_win, TRUE);
-		box(city_win, 0, 0);
+		wbkgdset(ui->search_win, COLOR_PAIR(M_COLOR));
+		keypad(ui->search_win, TRUE);
+		box(ui->search_win, 0, 0);
 				
-		set_menu_win(city_menu, city_win);
-		set_menu_sub(city_menu, city_subwin);
+		set_menu_win(city_menu, ui->search_win);
+		set_menu_sub(city_menu, ui->search_subwin);
 		
 		set_menu_fore(city_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
 		set_menu_back(city_menu, COLOR_PAIR(M_COLOR));
@@ -150,7 +150,7 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 		ITEM *selected = NULL;
 		
 		int ch, iret, menu_done = 0, city_choice = 0;
-		while(!menu_done && (ch = wgetch(city_win)))
+		while(!menu_done && (ch = wgetch(ui->search_win)))
 		{
 			switch(ch)
 			{
@@ -189,23 +189,23 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 					
 					memcpy(cdata->country, search_result[iret]->country, strlen(search_result[iret]->country) + 1);
 					
-					werase(city_win);
+					werase(ui->search_win);
 					menu_done = 1;
 					city_choice = 1;
 					break;
 				case 'q':
 					form_driver(cdata_form, REQ_CLR_FIELD);
-					werase(city_win);
+					werase(ui->search_win);
 					menu_done = 1;
 					city_choice = 1;
 					break;
 			}	
-			wrefresh(city_win);
+			wrefresh(ui->search_win);
 		}
 		unpost_menu(city_menu);
 		free_menu(city_menu);
-		delwin(city_subwin);
-		delwin(city_win);
+		delwin(ui->search_subwin);
+		delwin(ui->search_win);
 		free(item_visible);
 		
 		if (city_choice)
@@ -213,8 +213,7 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 	}
 }
 
-void city_search(FIELD *cdata_field[], FORM *cdata_form, char *search,
-struct cdata *cdata, char xdg_path[])
+void city_search(struct cdata *cdata,  struct ui *ui, char *xdg_path, FIELD *cdata_field[], FORM *cdata_form, char *search)
 {
 	xdg_check(xdg_path, "city-db");
 	
@@ -305,7 +304,7 @@ struct cdata *cdata, char xdg_path[])
 		item_result[i] = new_item(full_result[i], NULL);
 	}
 	
-	print_menu(cdata_field, cdata_form, cdata, search_result, item_result, search_count);
+	print_menu(cdata, ui, cdata_field, cdata_form, search_result, item_result, search_count);
 	
 	cleanup:
 	for (size_t i = 0; i < search_count; ++i)

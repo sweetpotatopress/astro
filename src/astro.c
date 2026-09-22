@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 				doupdate();
 				break;
 			case 'i':
-				in_cdata(cdata[ui->cc], ui, xdg_path);
+				in_cdata(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, xdg_path);
 				
 				ecst_init(planet, cdata[ui->cc]->se);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);

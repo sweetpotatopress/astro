@@ -155,11 +155,15 @@ struct ui {
 	WINDOW *right_win;
 	WINDOW *indat_win;
 	WINDOW *indat_subwin;
+	WINDOW *search_win;
+	WINDOW *search_subwin;
 	PANEL *main_panel;
 	PANEL *left_panel;
 	PANEL *right_panel;
-	bool left_trig;
-	bool right_trig;
+	int left_trig;
+	int right_trig;
+	int old_l;
+	int old_r;
 	int cc; // current chart
 	int bcc; // previous chart
 	int win_h;

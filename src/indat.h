@@ -40,4 +40,4 @@ along with this program. if not, see <https://www.gnu.org/licenses/> */
 #define LONGITUDE 11
 #define FIELDMAX 12
 
-void in_cdata(struct cdata *cdata, struct ui *ui, char xdg_path[]);
+void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, char xdg_path[]);
