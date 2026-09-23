@@ -24,6 +24,7 @@
 #include "chronos.h"
 #include "indat.h"
 #include "init.h"
+#include "ui.h"
 
 #define VERSION "0.75.7"
 
@@ -182,6 +183,8 @@ int main(int argc, char *argv[])
 			doupdate();
 		}
 		
+		table_trigger(ui, ch);
+		
 		switch(ch)
 		{
 			case '\n':
@@ -253,58 +256,6 @@ int main(int argc, char *argv[])
 			case 's':
 				ecst_init(planet, cdata[ui->cc]->se);
 				solar_return(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-				break;
-			case 'p':
-				if (!ui->left_trig)
-				{
-					left_table(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					show_panel(ui->left_panel);
-					ui->left_trig = 1;
-				}
-				else
-				{
-					hide_panel(ui->left_panel);
-					clear();
-					refresh();
-					ui->left_trig = 0;
-				}
-				
-				if (ui->right_trig > 0)
-				{
-					right_table(cdata[ui->cc], ui, planet, zodiac);
-					show_panel(ui->right_panel);
-				}
-				
-				touchwin(ui->main_win);
-				wnoutrefresh(ui->main_win);
-				update_panels();
-				doupdate();
-				break;
-			case 'o':
-				if (!ui->right_trig)
-				{
-					right_table(cdata[ui->cc], ui, planet, zodiac);
-					show_panel(ui->right_panel);
-					ui->right_trig = 1;
-				}
-				else
-				{
-					hide_panel(ui->right_panel);
-					clear();
-					refresh();
-					ui->right_trig = 0;
-				}	
-				
-				if (ui->left_trig > 0)
-				{
-					left_table(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-					show_panel(ui->left_panel);
-				}
-				
-				touchwin(ui->main_win);
-				wnoutrefresh(ui->main_win);
-				update_panels();
-				doupdate();
 				break;
 			default:
 				break;
