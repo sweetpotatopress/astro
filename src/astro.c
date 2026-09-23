@@ -225,9 +225,6 @@ int main(int argc, char *argv[])
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
-			case 'q':
-				done = 1;
-				break;
 			case 'd':
 				if (cdata[ui->cc]->isdst == NDST)
 					cdata[ui->cc]->isdst = YDST;
@@ -257,7 +254,8 @@ int main(int argc, char *argv[])
 				ecst_init(planet, cdata[ui->cc]->se);
 				solar_return(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				break;
-			default:
+			case 'q':
+				done = 1;
 				break;
 		}
 	}
