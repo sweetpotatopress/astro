@@ -27,17 +27,6 @@
 		exit(EXIT_FAILURE); \
 		} while (0)
 		
-#define ALT1 1001
-#define ALT2 1002
-#define ALT3 1003
-#define ALT4 1004
-#define ALT5 1005
-#define ALT6 1006
-#define ALT7 1007
-#define ALT8 1008
-#define ALT9 1009
-#define ALT0 1000
-
 // dst trigger
 #define NDST 0
 #define YDST 1
