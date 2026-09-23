@@ -178,6 +178,9 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 				
 	ui->cc = ui->bcc;
 	wheel_init(ui->main_win, ui, 0, 0, 0);
+	
+	del_panel(ui->transit_panel);
+	delwin(ui->transit_window);
 }
 
 void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int key)
@@ -394,17 +397,13 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	int anim_done = 0;
 	while(!anim_done && (ch = wgetch(ui->main_win)))
 	{
+		if (ui->cc == TRANSIT)
+			top_panel(ui->transit_panel);
+			
+		table_trigger(ui, ch);
+	
 		switch(ch)
 		{
-			case 'h': case KEY_LEFT:
-				if (inc != SECOND)
-					++inc;
-				break;
-				
-			case 'l': case KEY_RIGHT:
-				if (inc != YEAR)
-					--inc;
-				break;
 			case 'k': case KEY_UP:
 				switch(inc)
 				{
@@ -438,17 +437,14 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 							temp.tm_year = -12998;
 						t = mktime(&temp);
 						ecst_init(planet, cdata->se);
-					break;
+						break;
 				}
 				cpt(cdata, &temp, &t, 1);
 				
 				if (ui->cc == TRANSIT)
 					arrange_panel(cdata, pxx, ui, planet, zodiac);
 				else
-				{
-					top_panel(ui->main_panel);
 					new_chart(cdata, pxx, ui, planet, zodiac);
-				}
 				break;
 				
 			case 'j': case KEY_DOWN:
@@ -484,80 +480,33 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 							temp.tm_year = 16799;
 						t = mktime(&temp);
 						ecst_init(planet, cdata->se);
-					break;
+						break;
 				}
 				cpt(cdata, &temp, &t, 1);
 				
 				if (ui->cc == TRANSIT)
 					arrange_panel(cdata, pxx, ui, planet, zodiac);
 				else
-				{
-					top_panel(ui->main_panel);
 					new_chart(cdata, pxx, ui, planet, zodiac);
-				}
 				break;
-		
+				
+			case 'h': case KEY_LEFT:
+				if (inc != SECOND)
+					++inc;
+				break;
+				
+			case 'l': case KEY_RIGHT:
+				if (inc != YEAR)
+					--inc;
+				break;
+				
 			case '\n': case 'q': case 't':
 				anim_done = 1;
 				break;
-				
-			case 'p':
-				if (ui->cc == TRANSIT)
-					top_panel(ui->transit_panel);
-				else
-					top_panel(ui->main_panel);
-				if (ui->left_trig)
-				{
-					hide_panel(ui->left_panel);
-					ui->left_trig = 0;
-				}
-				else
-				{
-					left_table(cdata, pxx, ui, planet, zodiac);
-					show_panel(ui->left_panel);
-					top_panel(ui->left_panel);
-					ui->left_trig = 1;
-				}
-				
-				if (ui->right_trig > 0)
-				{
-					right_table(cdata, ui, planet, zodiac);
-					show_panel(ui->right_panel);
-					top_panel(ui->right_panel);
-				}
-				
-				update_panels();
-				doupdate();
-				break;
-				
-			case 'o':
-				if (ui->cc == TRANSIT)
-					top_panel(ui->transit_panel);
-				else
-					top_panel(ui->main_panel);
-				if (ui->right_trig)
-				{
-					hide_panel(ui->right_panel);
-					ui->right_trig = 0;
-				}
-				else
-				{
-					right_table(cdata, ui, planet, zodiac);
-					show_panel(ui->right_panel);
-					top_panel(ui->right_panel);
-					ui->right_trig = 1;
-				}
-				
-				if (ui->left_trig > 0)
-				{
-					left_table(cdata, pxx, ui, planet, zodiac);
-					show_panel(ui->left_panel);
-					top_panel(ui->left_panel);
-				}
-				update_panels();
-				doupdate();
-				break;
-			}
+		}
+		if (ui->cc == TRANSIT)
+			arrange_panel(cdata, pxx, ui, planet, zodiac);
+	
 		flushinp();
 		enanosleep(10);
 		switch(inc)
@@ -609,8 +558,6 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 			doupdate();
 		}
 	}
-	del_panel(ui->transit_panel);
-	delwin(ui->transit_window);
 	wmove(ui->main_win, starty, startx);
 	wclrtoeol(ui->main_win);
 	wnoutrefresh(ui->main_win);
