@@ -37,6 +37,56 @@
 #define AIR 4
 #define WATER 5
 
+#define ELEMENT 0
+#define RULER 1
+#define EXALT 2
+#define TRIPLD 3
+#define TRIPLN 4
+#define TRIPLC 5
+#define BOUND0 6
+#define BOUND1 7
+#define BOUND2 8
+#define BOUND3 9
+#define BOUND4 10
+#define DECAN0 11
+#define DECAN1 12
+#define DECAN2 13
+#define DETRI 14
+#define FALL 15
+#define EMPTY 16
+#define MAXZXX 17
+
+#define PLMAX 16
+
+#define ARI 1
+#define TAU 2
+#define GEM 3
+#define CAN 4
+#define LEO 5
+#define VIR 6
+#define LIB 7
+#define SCO 8
+#define SAG 9
+#define CAP 10
+#define AQU 11
+#define PIS 12
+#define ZMAX 13
+
+struct zxx {
+	int iari[MAXZXX];
+	int itau[MAXZXX];
+	int igem[MAXZXX];
+	int ican[MAXZXX];
+	int ileo[MAXZXX];
+	int ivir[MAXZXX];
+	int ilib[MAXZXX];
+	int isco[MAXZXX];
+	int isag[MAXZXX];
+	int icap[MAXZXX];
+	int iaqu[MAXZXX];
+	int ipis[MAXZXX];
+};
+
 #define PL_SYM_MAX 12
 #define ZO_SYM_MAX 13
 #define MOON_MAX 8
@@ -85,3 +135,5 @@ struct ui {
 
 void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, bool x);
 void table_trigger(struct ui *ui, int ch);
+void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void right_table(struct cdata *cdata, struct ui *ui, double **planet, int **zodiac);

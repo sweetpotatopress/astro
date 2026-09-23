@@ -18,7 +18,6 @@
 #include "astro.h"
 #include "ui.h"
 #include "init.h"
-#include "table.h"
 #include "chronos.h"
 #include "anim.h"
 #include "draw.h"

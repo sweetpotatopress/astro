@@ -19,7 +19,6 @@
 #include "swephexp.h"
 #include "astro.h"
 #include "ui.h"
-#include "table.h"
 #include "io.h"
 #include "anim.h"
 #include "chronos.h"

@@ -20,7 +20,6 @@
 #include "ui.h"
 #include "draw.h"
 #include "chronos.h"
-#include "table.h"
 
 void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[])
 {

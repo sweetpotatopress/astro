@@ -21,7 +21,6 @@
 #include "chronos.h"
 #include "anim.h"
 #include "draw.h"
-#include "table.h"
 #include "init.h"
 
 #define SECOND 6

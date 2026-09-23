@@ -32,7 +32,7 @@
 #define ZMONTH 1
 #define ZWEEK 2
 #define ZDAY 3
-#define ZMAX 4
+#define LAYER_MAX 4
 
 struct node {
 	char *date;
@@ -132,7 +132,7 @@ static double node_end(const struct node *node, const double *layer_inc, const i
 
 static void node_generate_children(struct node *parent, struct ui *ui, int child_level)
 {
-	const double layer_inc[ZMAX] = {
+	const double layer_inc[LAYER_MAX] = {
 		360.0,
 		30.0,
 		2.5,
@@ -272,7 +272,7 @@ static void rebuild_path(struct node **parents, int *selected, struct ui *ui)
 {
 	int level;
 
-	for (level = 0; level < ZMAX; level++)
+	for (level = 0; level < LAYER_MAX; level++)
 	{
 		struct node *parent = parents[level];
 
@@ -287,11 +287,11 @@ static void rebuild_path(struct node **parents, int *selected, struct ui *ui)
 		if ((size_t)selected[level] >= parent->count)
 			selected[level] = (int)parent->count - 1;
 
-		if (level + 1 < ZMAX)
+		if (level + 1 < LAYER_MAX)
 			parents[level + 1] = parent->children[selected[level]];
 	}
 
-	for (int i = level + 1; i <= ZMAX; i++)
+	for (int i = level + 1; i <= LAYER_MAX; i++)
 		parents[i] = NULL;
 }
 
@@ -311,7 +311,7 @@ static void move_selection(struct node **parents, int *selected, int layer, int 
 	else if (selected[layer] >= count)
 		selected[layer] = 0;
 
-	for (int i = layer + 1; i < ZMAX; i++)
+	for (int i = layer + 1; i < LAYER_MAX; i++)
 		selected[i] = 0;
 }
 
@@ -337,8 +337,8 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 	if (!root)
 		ERR_EXIT("zr: failed to create root");
 		
-	struct node *parents[ZMAX] = {0};
-	int selected[ZMAX] = {0};
+	struct node *parents[LAYER_MAX] = {0};
+	int selected[LAYER_MAX] = {0};
 
 	parents[0] = root;
 
@@ -381,7 +381,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		doupdate();
 	
 		int ch = wgetch(win);
-		if (isdigit(ch) && (ch - '0') < ZMAX)
+		if (isdigit(ch) && (ch - '0') < LAYER_MAX)
 		{
 			current_layer = (ch - '0') - 1;
 			move_selection(parents, selected, current_layer, 0);
