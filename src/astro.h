@@ -168,9 +168,11 @@ struct ui {
 	WINDOW *indat_subwin;
 	WINDOW *search_win;
 	WINDOW *search_subwin;
+	WINDOW *transit_window;
 	PANEL *main_panel;
 	PANEL *left_panel;
 	PANEL *right_panel;
+	PANEL *transit_panel;
 	int left_trig;
 	int right_trig;
 	int old_l;
