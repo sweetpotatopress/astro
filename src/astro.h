@@ -38,27 +38,6 @@
 #define ALT9 1009
 #define ALT0 1000
 
-#define LWINY 40
-#define LWINX 33
-#define LWIN_Y 0
-#define LWIN_X 0
-
-#define RWINY 9
-#define RWINX 24
-#define RWIN_Y LINES - 9
-#define RWIN_X COLS - 24
-
-#define IWINY 26
-#define IWINX 47
-#define IWIN_Y (LINES - IWINY) / 2
-#define IWIN_X (COLS - IWINX) / 2
-
-#define M_COLOR 1
-#define FIRE 2
-#define EARTH 3
-#define AIR 4
-#define WATER 5
-
 // dst trigger
 #define NDST 0
 #define YDST 1
@@ -82,6 +61,8 @@
 #define PREV_JUL 15
 #define RET_INIT 16
 #define MAXPXX 17
+
+struct ui;
 
 #define SPXXMAX 18 // struct member count
 struct pxx {
@@ -145,52 +126,6 @@ struct cdata {
 	double t_cusp; // transit cusp
 	double le[EMAX]; // lunar eclipse
 	double se[EMAX]; // solar eclipse
-};
-
-#define PL_SYM_MAX 12
-#define ZO_SYM_MAX 13
-#define MOON_MAX 8
-#define TRANSIT 11
-#define MONTH_MAX 13
-
-struct ui_sym {
-	const char *pl_sym[PL_SYM_MAX];
-	const char *zo_sym[ZO_SYM_MAX];
-	const char *moon[MOON_MAX];
-	const char *month[MONTH_MAX];
-};
-
-struct ui {
-	WINDOW *main_win;
-	WINDOW *left_win;
-	WINDOW *right_win;
-	WINDOW *indat_win;
-	WINDOW *indat_subwin;
-	WINDOW *search_win;
-	WINDOW *search_subwin;
-	WINDOW *transit_window;
-	PANEL *main_panel;
-	PANEL *left_panel;
-	PANEL *right_panel;
-	PANEL *transit_panel;
-	int left_trig;
-	int right_trig;
-	int old_l;
-	int old_r;
-	int cc; // current chart
-	int bcc; // previous chart
-	int win_h;
-	int win_w;
-	int cy; // center y
-	int cx; // center x
-	int radius;
-	int or; // outer radius
-	int ir; // inner radius
-	int hr; // house radius
-	int zr; // zodiac radius
-	int pr; // planet radius
-	int ar; // angle radius
-	struct ui_sym sym;
 };
 
 void *ecalloc(size_t n, size_t size);

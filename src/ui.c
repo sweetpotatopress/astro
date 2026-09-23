@@ -14,6 +14,7 @@
 
 #include <ncurses.h>
 #include "astro.h"
+#include "ui.h"
 #include "init.h"
 
 void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, bool x)

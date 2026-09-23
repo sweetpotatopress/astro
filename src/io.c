@@ -24,6 +24,7 @@
 #include <menu.h>
 #include "swephexp.h"
 #include "astro.h"
+#include "ui.h"
 #include "io.h"
 
 void xdg_check(char xdg_path[], const char *s)

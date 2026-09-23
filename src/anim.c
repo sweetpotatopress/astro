@@ -17,11 +17,11 @@
 #include <errno.h>
 #include "swephexp.h"
 #include "astro.h"
+#include "ui.h"
 #include "chronos.h"
 #include "anim.h"
 #include "draw.h"
 #include "table.h"
-#include "ui.h"
 #include "init.h"
 
 #define SECOND 6

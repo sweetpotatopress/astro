@@ -16,8 +16,8 @@
 #include <time.h>
 #include "swephexp.h"
 #include "astro.h"
-#include "init.h"
 #include "ui.h"
+#include "init.h"
 #include "table.h"
 #include "chronos.h"
 #include "anim.h"
@@ -57,6 +57,14 @@ void planet_init(double *planet[], int cc, struct pxx **pxx)
 
 void ui_init(struct ui *ui)
 {
+	start_color();
+	
+	init_pair(M_COLOR, COLOR_WHITE,  COLOR_BLACK);
+	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
+	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
+	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
+	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
+	
 	ui->sym = (struct ui_sym) {
 		.pl_sym = { "(o)", "(()", "(-o<)",
 		"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
