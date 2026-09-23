@@ -19,7 +19,7 @@
 #include <time.h>
 #include "swephexp.h"
 #include "astro.h"
-#include "init.h"
+#include "ui.h"
 #include "io.h"
 #include "indat.h"
 #include "chronos.h"

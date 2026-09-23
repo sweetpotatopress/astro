@@ -21,6 +21,7 @@
 #include "anim.h"
 #include "draw.h"
 #include "table.h"
+#include "ui.h"
 #include "init.h"
 
 #define SECOND 6
@@ -140,42 +141,13 @@ void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double 
 		wattroff(ui->main_win, COLOR_PAIR(FIRE));
 		
 		wnoutrefresh(ui->main_win);
-		update_panels();
-		doupdate();
 	
 		for (int i = 0; i < 10; ++i)
 		{
 			enanosleep(10);
 			if (ch == 9 || ch == 'q')
 				break;
-			if (ch == 'p' && ui->left_trig == 0)
-			{
-				ui->left_trig = 1;
-				show_panel(ui->left_panel);
-				ch = 0;
-				break;
-			}
-			else if (ch == 'p' && ui->left_trig == 1)
-			{
-				ui->left_trig = 0;
-				hide_panel(ui->left_panel);
-				ch = 0;
-				break;
-			}
-			if (ch == 'o' && ui->right_trig == 0)
-			{
-				ui->right_trig = 1;
-				show_panel(ui->right_panel);
-				ch = 0;
-				break;
-			}
-			else if (ch == 'o' && ui->right_trig == 1)
-			{
-				ui->right_trig = 0;
-				hide_panel(ui->right_panel);
-				ch = 0;
-				break;
-			}
+			table_trigger(ui, ch);
 		}
 		
 		if (ch == 9 || ch == 'q')

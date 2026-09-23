@@ -11,14 +11,6 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. if not, see <https://www.gnu.org/licenses/>
- 
-#pragma once
 
-void cdata_clear(struct cdata *cdata);
-void ecst_init(double *planet[], double *sol_eclipse);
-void planet_init(double *planet[], int cur_chart, struct pxx **pxx);
-void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao);
-void ui_init(struct ui *ui);
-void zxx_init(int *zodiac[]);
-void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet);
-void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, bool x);
+void table_trigger(struct ui *ui, int ch);

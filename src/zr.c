@@ -20,7 +20,7 @@
 #include <ncurses.h>
 #include "swephexp.h"
 #include "astro.h"
-#include "init.h"
+#include "ui.h"
 #include "draw.h"
 #include "chronos.h"
 
@@ -387,34 +387,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 			move_selection(parents, selected, current_layer, 0);
 		}
 		
-		if (ch == 'p' && ui->left_trig == 0)
-		{
-			ui->left_trig = 1;
-			show_panel(ui->left_panel);
-			update_panels();
-			doupdate();
-		}
-		else if (ch == 'p' && ui->left_trig == 1)
-		{
-			ui->left_trig = 0;
-			hide_panel(ui->left_panel);
-			update_panels();
-			doupdate();
-		}
-		if (ch == 'o' && ui->right_trig == 0)
-		{
-			ui->right_trig = 1;
-			show_panel(ui->right_panel);
-			update_panels();
-			doupdate();
-		}
-		else if (ch == 'o' && ui->right_trig == 1)
-		{
-			ui->right_trig = 0;
-			hide_panel(ui->right_panel);
-			update_panels();
-			doupdate();
-		}
+		table_trigger(ui, ch);
 
 		switch (ch)
 		{

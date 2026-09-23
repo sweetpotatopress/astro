@@ -17,6 +17,7 @@
 #include "swephexp.h"
 #include "astro.h"
 #include "init.h"
+#include "ui.h"
 #include "table.h"
 #include "chronos.h"
 #include "anim.h"
@@ -52,46 +53,6 @@ void planet_init(double *planet[], int cc, struct pxx **pxx)
 		pxx[cc]->dfor, pxx[cc]->dspir};
 		
 	memcpy(planet, new_planet, sizeof(new_planet));
-}
-
-void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, bool x)
-{
-	if (!x)
-	{
-		ui->old_l = ui->left_trig;
-		ui->old_r = ui->right_trig;
-	
-		int toty, totx;
-		getmaxyx(ui->main_win, toty, totx);
-		
-		if (totx > 163)
-		{
-			ui->cx = (ui->radius + 35);
-			if (toty > 50)
-			{
-				wheel_init(ui->main_win, ui, 7, 0, 0);
-				ui->cx = (ui->radius + 40);
-			}
-		}
-		else
-		{
-			ui->cx = (ui->radius + 5);
-			ui->left_trig = 0;
-			ui->right_trig = 0;
-		
-			hide_panel(ui->left_panel);
-			hide_panel(ui->right_panel);
-		}
-		new_chart(cdata, pxx, ui, planet, zodiac);
-	}
-
-	if (x)
-	{
-		ui->left_trig = ui->old_l;
-		ui->right_trig = ui->old_r;
-		wheel_init(ui->main_win, ui, 0, 0, 0);
-		new_chart(cdata, pxx, ui, planet, zodiac);
-	}
 }
 
 void ui_init(struct ui *ui)
