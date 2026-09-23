@@ -82,28 +82,9 @@ int main(int argc, char *argv[])
 
 	initscr();
 	set_escdelay(25);
-	start_color();
 	cbreak();
 	noecho();
-	keypad(stdscr, TRUE);
 	
-	define_key("\0331", ALT1);
-	define_key("\0332", ALT2);
-	define_key("\0333", ALT3);
-	define_key("\0334", ALT4);
-	define_key("\0335", ALT5);
-	define_key("\0336", ALT6);
-	define_key("\0337", ALT7);
-	define_key("\0338", ALT8);
-	define_key("\0339", ALT9);
-	define_key("\0330", ALT0);
-
-	init_pair(M_COLOR, COLOR_WHITE,  COLOR_BLACK);
-	init_pair(FIRE,    COLOR_RED,    COLOR_BLACK);
-	init_pair(EARTH,   COLOR_GREEN,  COLOR_BLACK);
-	init_pair(AIR,     COLOR_YELLOW, COLOR_BLACK);
-	init_pair(WATER,   COLOR_BLUE,   COLOR_BLACK);
-
 	struct cdata **cdata = ecalloc(CHARTMAX, sizeof(*cdata));
 	
 	for (int i = 0; i < CHARTMAX; ++i)

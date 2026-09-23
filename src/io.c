@@ -27,7 +27,7 @@
 #include "ui.h"
 #include "io.h"
 
-void xdg_check(char xdg_path[], const char *s)
+void xdg_check(char *xdg_path, const char *s)
 {
 	const char *home_dir = getenv("HOME");
 	const char *xdg_data = getenv("XDG_DATA_HOME");
@@ -46,13 +46,13 @@ void xdg_check(char xdg_path[], const char *s)
 	
 	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
 	{
-		if (strlen(xdg_path) > 255)
-			ERR_EXIT("XDG_DATA_HOME path too long");
-	
 		if (!xdg_data || xdg_data[0] == '\0')
 			snprintf(xdg_path, MAXBUF, "%s/.local/share/astro/%s", home_dir, s);
 		else
 			snprintf(xdg_path, MAXBUF, "%s/astro/%s", xdg_data, s);
+			
+		if (strlen(xdg_path) > 255)
+			ERR_EXIT("XDG_DATA_HOME path too long");
 	}
 	
 	else
