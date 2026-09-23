@@ -142,13 +142,14 @@ void realtime_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double 
 		
 		wnoutrefresh(ui->main_win);
 	
+		table_trigger(ui, ch);
 		for (int i = 0; i < 10; ++i)
 		{
 			enanosleep(10);
 			if (ch == 9 || ch == 'q')
 				break;
-			table_trigger(ui, ch);
 		}
+		doupdate();
 		
 		if (ch == 9 || ch == 'q')
 			break;
