@@ -322,7 +322,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 	int sy = 0;
 	int sx = (COLS - width);
 	
-	ui_place(cdata, pxx, ui, planet, zodiac, 0);
+	ui_resize(cdata, pxx, ui, planet, zodiac, 0);
 
 	int sign_switch = FORTUNE;
 	int current_layer = ZYEAR;
@@ -460,5 +460,5 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 	node_free(root);
 	delwin(subwin);
 	delwin(win);
-	ui_place(cdata, pxx, ui, planet, zodiac, 1);
+	ui_resize(cdata, pxx, ui, planet, zodiac, 1);
 }

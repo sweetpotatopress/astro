@@ -54,7 +54,7 @@ void planet_init(double *planet[], int cc, struct pxx **pxx)
 	memcpy(planet, new_planet, sizeof(new_planet));
 }
 
-void ui_place(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, bool x)
+void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, bool x)
 {
 	if (!x)
 	{
