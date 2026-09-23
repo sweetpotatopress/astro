@@ -78,8 +78,6 @@ int main(int argc, char *argv[])
 	char xdg_path[MAXBUF] = {0};
 	xdg_check(xdg_path, "ephe");
 	
-	if (strlen(xdg_path) > 255)
-		ERR_EXIT("XDG_DATA_HOME path too long");
 	swe_set_ephe_path(xdg_path);
 
 	initscr();
