@@ -58,10 +58,8 @@ void ui_place(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 {
 	if (!x)
 	{
-		int l = ui->left_trig;
-		int r = ui->right_trig;
-		ui->old_l = l;
-		ui->old_r = r;
+		ui->old_l = ui->left_trig;
+		ui->old_r = ui->right_trig;
 	
 		int toty, totx;
 		getmaxyx(ui->main_win, toty, totx);
@@ -89,10 +87,8 @@ void ui_place(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 
 	if (x)
 	{
-		int l = ui->old_l;
-		int r = ui->old_r;
-		ui->left_trig = l;
-		ui->right_trig = r;
+		ui->left_trig = ui->old_l;
+		ui->right_trig = ui->old_r;
 		wheel_init(ui->main_win, ui, 0, 0, 0);
 		new_chart(cdata, pxx, ui, planet, zodiac);
 	}
