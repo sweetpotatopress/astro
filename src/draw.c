@@ -315,9 +315,9 @@ void draw_aspect(WINDOW *win, double **planet, chtype ch)
 	double trine = 120.0;
 	double opposition = 180.0;
 	
-	for (int i = 0; i < SE_PLUTO; ++i)
+	for (int i = 0; i <= SE_PLUTO; ++i)
 	{
-		for (int j = i+1; j < SE_PLUTO; ++j)
+		for (int j = i+1; j <= SE_PLUTO; ++j)
 		{
 			double diff = fmod(fabs(planet[i][LONG] - planet[j][LONG]), 360);
 			if (diff > 180)
