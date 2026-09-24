@@ -159,18 +159,18 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet
 		int x = (ui->cx - (int)(ui->pr * cos_rad)) - sym_len / 2;
 		int y = ui->cy + (int)(ui->pr * sin_rad * 0.5);
 		
-		int x_in = (ui->cx - (int)((ui->ir - 1) * cos_rad));
-		int y_in = ui->cy + (int)((ui->ir - 1) * sin_rad * 0.5);
+		int x_in = (ui->cx - (int)((ui->ir-1) * cos_rad));
+		int y_in = ui->cy + (int)((ui->ir-1) * sin_rad * 0.5);
 		
-		int x_in_m = (ui->cx - (int)((ui->ir) * cos_rad));
-		int y_in_m = ui->cy + (int)((ui->ir) * sin_rad * 0.5);
+		int x_in_m = (ui->cx - (int)((ui->ir+1) * cos_rad));
+		int y_in_m = ui->cy + (int)((ui->ir+1) * sin_rad * 0.5);
 	
-		
 		planet[i][PL_X] = x_in;
 		planet[i][PL_Y] = y_in;
 		
 		degree_color(win, y-1, x, i, planet, zodiac);
 		mvwaddstr(win, y, x, ui->sym.pl_sym[i]);
+		
 		mvwaddch(win, y_in_m, x_in_m, '+');
 	
 		if (planet[i][RETRO] > 0 && i != SE_TRUE_NODE)
@@ -338,6 +338,7 @@ void draw_aspect(WINDOW *win, double **planet)
 			if (diff > 180)
 				diff = 360.0 - diff;
 			double house_diff = fabs(planet[i][DEGREE] - planet[j][DEGREE]);
+			
 			chtype ch = line_char((int)planet[i][PL_Y], (int)planet[i][PL_X],
 				(int)planet[j][PL_Y], (int)planet[j][PL_X]);
 			
