@@ -196,7 +196,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	
 	werase(ui->left_win);
 	
-	int starty = 1, startx = 2;
+	int starty = 1, startx = 1;
 	int j = 0;
 	
 	for (int i = 0; i < p_count; ++i)
@@ -332,7 +332,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 			}
 			mutual_reception(ui->left_win, starty, ipl, result);
 		}
-		startx = 2;
+		startx = 1;
 		++starty;
 		++ipl;
 	}

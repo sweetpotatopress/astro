@@ -50,10 +50,15 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 			starty = 2;
 			startx = COLS - 20;
 		}
-		else
+		else if (ui->left_trig)
 		{
-			starty = ui->cy - 4;
-			startx = ui->cx - 10;
+			starty = 1;
+			startx = 33;
+		}
+		else if (!ui->left_trig)
+		{
+			starty = 1;
+			startx = 1;
 		}
 		
 		if(cdata->chart_name)
