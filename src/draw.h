@@ -23,4 +23,4 @@ void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet,
 void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, int **zodiac);
 void draw_house(WINDOW *win, struct cdata *cdata, struct ui *ui, chtype ch);
 void draw_circle(WINDOW *win, struct ui *ui, int radius, chtype ch);
-void draw_aspect(WINDOW *win, double **planet, chtype ch);
+void draw_aspect(WINDOW *win, double **planet);

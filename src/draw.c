@@ -308,7 +308,22 @@ static void draw_line(WINDOW *win, int y0, int x0, int y1, int x1, chtype ch)
 	}
 }
 
-void draw_aspect(WINDOW *win, double **planet, chtype ch)
+static chtype line_char(int y0, int x0, int y1, int x1)
+{
+	int dx = abs(x1 - x0);
+	int dy = abs(y1 - y0);
+	
+	if (dx > dy * 2)
+		return '-';
+	if (dy > dx * 2)
+		return '\'';
+	if ((x1 - x0) * (y1 - y0) < 0)
+		return '.';
+		
+	return '.';
+}
+
+void draw_aspect(WINDOW *win, double **planet)
 {
 	double sextile = 60.0;
 	double square = 90.0;
@@ -323,6 +338,8 @@ void draw_aspect(WINDOW *win, double **planet, chtype ch)
 			if (diff > 180)
 				diff = 360.0 - diff;
 			double house_diff = fabs(planet[i][DEGREE] - planet[j][DEGREE]);
+			chtype ch = line_char((int)planet[i][PL_Y], (int)planet[i][PL_X],
+				(int)planet[j][PL_Y], (int)planet[j][PL_X]);
 			
 			if (fabs(diff - sextile) <= 7.0 && house_diff <= 7)
 			{
