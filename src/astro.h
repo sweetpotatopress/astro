@@ -49,7 +49,9 @@
 #define PREV_S 14
 #define PREV_JUL 15
 #define RET_INIT 16
-#define MAXPXX 17
+#define PL_X 17
+#define PL_Y 18
+#define MAXPXX 19
 
 struct ui;
 

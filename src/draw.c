@@ -159,8 +159,19 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet
 		int x = (ui->cx - (int)(ui->pr * cos_rad)) - sym_len / 2;
 		int y = ui->cy + (int)(ui->pr * sin_rad * 0.5);
 		
+		int x_in = (ui->cx - (int)((ui->ir - 1) * cos_rad));
+		int y_in = ui->cy + (int)((ui->ir - 1) * sin_rad * 0.5);
+		
+		int x_in_m = (ui->cx - (int)((ui->ir) * cos_rad));
+		int y_in_m = ui->cy + (int)((ui->ir) * sin_rad * 0.5);
+	
+		
+		planet[i][PL_X] = x_in;
+		planet[i][PL_Y] = y_in;
+		
 		degree_color(win, y-1, x, i, planet, zodiac);
 		mvwaddstr(win, y, x, ui->sym.pl_sym[i]);
+		mvwaddch(win, y_in_m, x_in_m, '+');
 	
 		if (planet[i][RETRO] > 0 && i != SE_TRUE_NODE)
 		{
@@ -266,3 +277,82 @@ void draw_circle(WINDOW *win, struct ui *ui, int radius, chtype ch)
 		mvwaddch(win, y, x, ch);
 	}
 }
+
+static void draw_line(WINDOW *win, int y0, int x0, int y1, int x1, chtype ch)
+{
+	int dx = abs(x1 - x0);
+	int sx = (x0 < x1) ? 1 : -1;
+	int dy = -abs(y1 - y0);
+	int sy = (y0 < y1) ? 1 : -1;
+	int err = dx + dy;
+	
+	for (;;) 
+	{
+		mvwaddch(win, y0, x0, ch);
+		
+		if (x0 == x1 && y0 == y1)
+			break;
+		
+		int e2 = 2 * err;
+		
+		if (e2 >= dy)
+		{
+			err += dy;
+			x0 += sx;
+		}
+		if (e2 <= dx)
+		{
+			err += dx;
+			y0 += sy;
+		}
+	}
+}
+
+void draw_aspect(WINDOW *win, double **planet, chtype ch)
+{
+	double sextile = 60.0;
+	double square = 90.0;
+	double trine = 120.0;
+	double opposition = 180.0;
+	
+	for (int i = 0; i < SE_PLUTO; ++i)
+	{
+		for (int j = i+1; j < SE_PLUTO; ++j)
+		{
+			double diff = fmod(fabs(planet[i][LONG] - planet[j][LONG]), 360);
+			if (diff > 180)
+				diff = 360.0 - diff;
+			double house_diff = fabs(planet[i][DEGREE] - planet[j][DEGREE]);
+			
+			if (fabs(diff - sextile) <= 7.0 && house_diff <= 7)
+			{
+				wattron(win, COLOR_PAIR(EARTH));
+				draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
+					(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
+				wattroff(win, COLOR_PAIR(EARTH));
+			}
+			if (fabs(diff - square) <= 7.0 && house_diff <= 7)
+			{
+				wattron(win, COLOR_PAIR(FIRE));
+				draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
+					(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
+				wattroff(win, COLOR_PAIR(FIRE));
+			}
+			if (fabs(diff - trine) <= 7.0 && house_diff <= 7)
+			{
+				wattron(win, COLOR_PAIR(WATER));
+				draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
+					(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
+				wattroff(win, COLOR_PAIR(WATER));
+			}
+			if (fabs(diff - opposition) <= 7.0 && house_diff <= 7)
+			{
+				wattron(win, COLOR_PAIR(FIRE));
+				draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
+					(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
+				wattroff(win, COLOR_PAIR(FIRE));
+			}
+		}
+	}
+}
+		

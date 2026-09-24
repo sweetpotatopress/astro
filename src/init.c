@@ -319,7 +319,7 @@ void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao)
 	ui->zr = ui->radius + 3;
 	
 	ui->pr = ((full_radius - 10) + po) - ro;
-	ui->ar = ((ui->radius / 2) + 4) + ao;
+	ui->ar = ((ui->radius / 2) + 6) + ao;
 }
 
 static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, 
@@ -337,6 +337,8 @@ double **planet, int **zodiac)
 	zo_pos(win, cdata, pxx, ui, zodiac);
 	
 	planet_pos(win, cdata, ui, planet, zodiac);
+	
+	draw_aspect(win, planet, '.');
 	
 	if (fabs(cdata->dlat) > 1e-6)
 		ascmc_pos(win, cdata, ui, planet, zodiac);
