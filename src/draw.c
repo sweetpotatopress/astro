@@ -171,7 +171,8 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet
 		degree_color(win, y-1, x, i, planet, zodiac);
 		mvwaddstr(win, y, x, ui->sym.pl_sym[i]);
 		
-		mvwaddch(win, y_in_m, x_in_m, '+');
+		if (i <= SE_PLUTO)
+			mvwaddch(win, y_in_m, x_in_m, '+');
 	
 		if (planet[i][RETRO] > 0 && i != SE_TRUE_NODE)
 		{
