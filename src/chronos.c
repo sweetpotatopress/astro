@@ -244,7 +244,7 @@ void retro_station(double jd_ut, double *planet[])
 {
 	const int station = 7;
 	const double is_retro = 0.0;
-	const double station_calc = 0.00001;
+	const double station_calc = JUL_SEC;
 	
 	const int iter = 32;
 	const int multi = 16;
@@ -306,7 +306,7 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const double eclipse_calc = 0.00001;
+	const double eclipse_calc = JUL_SEC;
 	const int iter = 32;
 	const int multi = 8;
 	

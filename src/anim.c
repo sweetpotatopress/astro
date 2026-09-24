@@ -241,7 +241,7 @@ static void calc_return(struct cdata *cdata, double base_degree)
 		
 		cpt(cdata, &temp, &t, 1);
 		
-		if (fabs(diff) < 0.00001157407407)
+		if (fabs(diff) < JUL_SEC)
 			break;
 	}
 }

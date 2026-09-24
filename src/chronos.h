@@ -23,6 +23,7 @@
 
 #define NEXT_E 0
 #define PREV_E 1
+#define JUL_SEC 0.00001157407407
 
 int sect(struct pxx *pxx);
 int daycount(int month, int year);
