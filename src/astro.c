@@ -161,7 +161,11 @@ int main(int argc, char *argv[])
 			doupdate();
 		}
 		
-		table_trigger(ui, ch);
+		if (table_trigger(ui, ch) == 1)
+		{
+			new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+			doupdate();
+		}
 		
 		switch(ch)
 		{

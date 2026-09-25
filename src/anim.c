@@ -405,7 +405,11 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		if (ui->cc == TRANSIT)
 			top_panel(ui->transit_panel);
 			
-		table_trigger(ui, ch);
+		if (table_trigger(ui, ch) == 1)
+		{
+			new_chart(cdata, pxx, ui, planet, zodiac);
+			doupdate();
+		}
 	
 		switch(ch)
 		{

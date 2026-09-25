@@ -23,6 +23,7 @@
 #include "ui.h"
 #include "draw.h"
 #include "chronos.h"
+#include "init.h"
 
 #define FORTUNE 0
 #define SPIRIT 1
@@ -387,8 +388,12 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 			move_selection(parents, selected, current_layer, 0);
 		}
 		
-		table_trigger(ui, ch);
-
+		if (table_trigger(ui, ch) == 1)
+		{
+			new_chart(cdata, pxx, ui, planet, zodiac);
+			doupdate();
+		}
+	
 		switch (ch)
 		{
 			case 'j': case KEY_DOWN:

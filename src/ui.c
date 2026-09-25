@@ -61,7 +61,7 @@ void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 	}
 }
 
-void table_trigger(struct ui *ui, int ch)
+int table_trigger(struct ui *ui, int ch)
 {
 	int up = 0;
 	if (ch == 'p' && ui->left_trig == 0)
@@ -92,7 +92,9 @@ void table_trigger(struct ui *ui, int ch)
 	{
 		update_panels();
 		doupdate();
+		return 1;
 	}
+	return 0;
 }
 
 static int bound_check(int sign, int degree)
