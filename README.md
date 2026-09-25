@@ -3,12 +3,12 @@
 --- --- --- --- --- --- ---   
 ![miles davis birth chart drawn in astro](https://sweetpotato.press/img/astro.png)
 
-DEPENDENCIES  
+##### DEPENDENCIES  
 
 ncurses  
 iana timezone database  
 
-KEYBINDS  
+##### KEYBINDS  
 
 ```
 enter		animate chart  
@@ -53,20 +53,20 @@ i			input chart data
 	esc		cancel
 ```
 
-DATA DIRECTORIES
+##### DATA DIRECTORIES
 
-astro				: /usr/local/bin  
-
-city-db 			: $XDG_DATA_HOME/astro  
-swisseph/ephe/ 		: $XDG_DATA_HOME/astro  
-charts/ 			: $XDG_DATA_HOME/astro  
+$XDG_DATA_HOME/astro  
+- city-db :   
+- swisseph/ephe/ :  
+- charts/ :  
  
-OPTIONAL
-to set default iana timezone and location  
+OPTIONAL  
+<sub>set default iana timezone and location</sub>
 
-config				: $XDG_CONFIG_HOME/astro  
+$XDG_CONFIG_HOME/astro  
+- config :  
 
-config template : 
+#### config template
 ```
 timezone = America/Chicago  
 latitude = 41.85003  
@@ -95,12 +95,12 @@ TODO
 - [ ] astro tutorial
 - [x] zodiacal releasing
  
-LICENSE  
+##### LICENSE  
 astro  
-AGPLv3  
+<sub>AGPLv3</sub>
  
 swiss ephemeris  
-https://github.com/aloistr/swisseph  
+<sub>https://github.com/aloistr/swisseph</sub>
  
 geonames - (city-db)  
-CC BY 4.0  
+<sub>CC BY 4.0</sub>
