@@ -97,16 +97,12 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 				mvwprintw(win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
 		}
 		starty += 1;
-		int utc;
 		
-		if ((int)cdata->utc_hour == 0)
-			utc = cdata->hour - 24;
-		else
-			utc = cdata->hour - (int)cdata->utc_hour;
-		if (utc > 14)
-			utc -= 24;
+		int utc = cdata->hour - (int)cdata->utc_hour;
 		if (utc < - 12)
 			utc += 24;
+		else if (utc > 14)
+			utc -= 24;
 			
 		if (cdata->isdst == YDST)
 			mvwprintw(win, starty, startx, "DST UTC%+02d", utc);
