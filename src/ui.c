@@ -174,7 +174,7 @@ static void mutual_reception(WINDOW *win, int starty, int planet, int result[PLM
 		if (result[planet][RULER] == c && result[c][RULER] == planet && c != planet)
 		{
 			wattron(win, COLOR_PAIR(AIR));
-			mvwprintw(win, starty, 5, "+");
+			mvwprintw(win, starty, 4, "+");
 			wattroff(win, COLOR_PAIR(AIR));
 		}
 	}
