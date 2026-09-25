@@ -326,10 +326,13 @@ static chtype line_char(int y0, int x0, int y1, int x1)
 
 void draw_aspect(WINDOW *win, double **planet)
 {
-	double sextile = 60.0;
-	double square = 90.0;
-	double trine = 120.0;
-	double opposition = 180.0;
+	const double sextile = 60.0;
+	const double square = 90.0;
+	const double trine = 120.0;
+	const double opposition = 180.0;
+	
+	const double aspects[4] = { sextile, square, trine, opposition };
+	const int aspect_color[4] = { EARTH, FIRE, WATER, FIRE };
 	
 	for (int i = 0; i <= SE_PLUTO; ++i)
 	{
@@ -346,34 +349,17 @@ void draw_aspect(WINDOW *win, double **planet)
 			if (planet[i][LONG_S] > planet[j][LONG_S] && planet[i][DEGREE] <= planet[j][DEGREE])
 				ch = '+';
 			
-			if (fabs(diff - sextile) <= 7.0 && house_diff <= 7)
+			for (int c = 0; c < 4; ++c)
 			{
-				wattron(win, COLOR_PAIR(EARTH));
-				draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
-					(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
-				wattroff(win, COLOR_PAIR(EARTH));
+				if (fabs(diff - aspects[c]) <= 7.0 && house_diff <= 7)
+				{
+					wattron(win, COLOR_PAIR(aspect_color[c]));
+					draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
+						(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
+					wattroff(win, COLOR_PAIR(aspect_color[c]));
+				}
 			}
-			if (fabs(diff - square) <= 7.0 && house_diff <= 7)
-			{
-				wattron(win, COLOR_PAIR(FIRE));
-				draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
-					(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
-				wattroff(win, COLOR_PAIR(FIRE));
-			}
-			if (fabs(diff - trine) <= 7.0 && house_diff <= 7)
-			{
-				wattron(win, COLOR_PAIR(WATER));
-				draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
-					(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
-				wattroff(win, COLOR_PAIR(WATER));
-			}
-			if (fabs(diff - opposition) <= 7.0 && house_diff <= 7)
-			{
-				wattron(win, COLOR_PAIR(FIRE));
-				draw_line(win, (int)planet[i][PL_Y], (int)planet[i][PL_X],
-					(int)planet[j][PL_Y], (int)planet[j][PL_X], ch);
-				wattroff(win, COLOR_PAIR(FIRE));
-			}
+	
 		}
 	}
 }
