@@ -1,6 +1,7 @@
 --o https://sweetpotato.press --o  
 ~:o irc.libera.chat #astro  
 --- --- --- --- --- --- ---   
+![miles davis birth chart drawn in astro](https://sweetpotato.press/img/astro.png)
 
 DEPENDENCIES  
 
@@ -66,11 +67,11 @@ to set default iana timezone and location
 config				: $XDG_CONFIG_HOME/astro  
 
 config template : 
- 
+```
 timezone = America/Chicago  
 latitude = 41.85003  
 longitude = -87.65005  
- 
+```
 TODO  
  
 - [x] save and load charts
@@ -81,17 +82,17 @@ TODO
 - [x] solar return
 - [x] essential dignities
 - [x] synastry/ transit view
-- [] house system selection		
-- [] secondary progressions
+- [ ] house system selection		
+- [ ] secondary progressions
 - [x] aspects
-- [] planet day/hour
-- [] primary directions
+- [ ] planet day/hour
+- [ ] primary directions
 - [x] eclipse data
 - [x] multiple charts
 - [x] terminal window resize refresh
 - [x] user default config
-- [] code documentation
-- [] astro tutorial
+- [ ] code documentation
+- [ ] astro tutorial
 - [x] zodiacal releasing
  
 LICENSE  
