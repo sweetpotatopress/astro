@@ -88,7 +88,9 @@ void ui_init(struct ui *ui)
 		"2nd gibbous", "2nd quarter", "2nd crescent" },
 		
 		.month = { "err", "jan", "feb", "mar", "apr", "may", "jun",
-		"jul", "aug", "sep", "oct", "nov", "dec" }
+		"jul", "aug", "sep", "oct", "nov", "dec" },
+		
+	 	.week = { "sun", "mon", "tue", "wed", "thu", "fri", "sat" }
 	};
 	
 	ui->cc = 1;
