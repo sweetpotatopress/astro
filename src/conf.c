@@ -152,7 +152,7 @@ static void field_label(struct ui *ui)
 		"longitude",
 		NULL };
 		
-	int y = 2, x = 1;
+	int y = 3, x = 1;
 	for (size_t i = C_ASP; i < C_NULL; ++i, y+=2)
 		mvwprintw(ui->config_win, y, x, "%s", label[i]);
 }
@@ -175,17 +175,21 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 {
 	FIELD *field[C_MAX] = { NULL };
 	FORM *form = NULL;
-	int sy = 1, sx = 13;
+	int sy = 0, sx = 13;
 	
 	char **buffer = ecalloc(C_NULL, sizeof *buffer);
 	for (int i = C_ASP; i < C_NULL; ++i)
 		buffer[i] = ecalloc(MAXBUF ,sizeof *buffer[i]);
 	
 	ui->config_win = newwin(CWINY, CWINX, CWIN_Y, CWIN_X);
-	ui->config_subwin = derwin(ui->config_win, CWINY-2, CWINX-2, 1, 1);
+	ui->config_subwin = derwin(ui->config_win, CWINY-4, CWINX-2, 3, 1);
+	
+	char *header = "conf - [tab]fill [space]toggle [enter]set -";
 	
 	mvwin(ui->config_win, (LINES - CWINY), (COLS - CWINX));
 	wresize(ui->config_win, CWINY, CWINX);
+	mvwprintw(ui->config_win, 1, 1, "%s", header);
+	mvwhline(ui->config_win, 2, 1, ACS_HLINE, CWINX - 2);
 	box(ui->config_win, 0, 0);
 	
 	curs_set(1);
@@ -305,7 +309,4 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	}
 	delwin(ui->config_win);
 	free(buffer);
-	
 }
-
-
