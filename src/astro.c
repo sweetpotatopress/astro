@@ -25,7 +25,7 @@
 #include "indat.h"
 #include "init.h"
 
-#define VERSION "0.76.0"
+#define VERSION "0.76.1"
 
 void *ecalloc(size_t n, size_t size)
 {
