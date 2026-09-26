@@ -29,9 +29,11 @@
 #define C_NULL 4
 #define C_MAX 5
 
-static void ftb(FIELD **field, char **buffer)
+static void ftb(struct ui *ui, FIELD **field, char **buffer)
 {
-	for (int i = C_ASP; i < C_NULL; ++i)
+	snprintf(buffer[C_ASP], MAXBUF, "%d", ui->aspect_trig);
+	
+	for (int i = C_TIMEZONE; i < C_NULL; ++i)
 	{
 		const char *v = field_buffer(field[i], 0);
 		
@@ -44,19 +46,16 @@ static void ftb(FIELD **field, char **buffer)
 
 static void btf(FIELD **field, char **buffer)
 {
-	for (int i = C_ASP; i < C_NULL; ++i)
+	for (int i = C_TIMEZONE; i < C_NULL; ++i)
 		set_field_buffer(field[i], 0, buffer[i]);
 }
 		
-static void set_current(FIELD **field, struct cdata *cdata, struct ui *ui)
+static void set_current(FIELD **field, struct cdata *cdata)
 {
 	char xdg_path[MAXBUF] = {0};
 	xdg_check(xdg_path, "config");
 	
 	char buf[MAXBUF] = {0};
-	
-	snprintf(buf, sizeof buf, "%d", ui->aspect_trig);
-	set_field_buffer(field[C_ASP], 0, buf);
 	
 	set_field_buffer(field[C_TIMEZONE], 0, cdata->timezone);
 	
@@ -91,8 +90,7 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 	if (setenv("TZ", buffer[C_TIMEZONE], 1) != 0)
 		ERR_EXIT("ERR: setenv conf.c");
 	tzset();
-	memcpy(cdata->timezone,
-	buffer[C_TIMEZONE], strlen(buffer[C_TIMEZONE]) + 1);
+	memcpy(cdata->timezone, buffer[C_TIMEZONE], strlen(buffer[C_TIMEZONE]) + 1);
 	
 	char *endptr = NULL;
 	double dret;
@@ -112,6 +110,7 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 	dret = strtod(buffer[C_LONGITUDE], &endptr);
 	if (errno != ERANGE)
 		cdata->dlon = dret;
+	errno = 0;
 }
 
 void config_init(struct cdata *cdata, struct ui *ui)
@@ -178,10 +177,19 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	curs_set(1);
 	keypad(ui->config_win, TRUE);
 	
-	field[C_ASP] = new_field(1, 2, sy, sx, 0, 0);
-	set_field_back(field[C_ASP], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	set_field_type(field[C_ASP], TYPE_INTEGER, 1, 1, -1);
-	field_opts_off(field[C_ASP], O_AUTOSKIP);
+	field[C_ASP] = new_field(1, 3, sy, sx, 0, 0);
+	if (ui->aspect_trig)
+	{
+		set_field_buffer(field[C_ASP], 0, "off");
+		set_field_back(field[C_ASP], COLOR_PAIR (FIRE) | A_REVERSE);
+	}
+	else
+	{
+		set_field_buffer(field[C_ASP], 0, "on ");
+		set_field_back(field[C_ASP], COLOR_PAIR (EARTH) | A_REVERSE);
+	}
+	field_opts_off(field[C_ASP], O_EDIT);
+	
 	sy += 2;
 	
 	field[C_TIMEZONE] = new_field(1, 30, sy, sx, 0, 0);
@@ -209,10 +217,11 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	
 	post_form(form);
 	
-	set_current_field(form, field[C_ASP]);
-	field_label(ui);
+    field_label(ui);
 	config_parse(buffer);
 	btf(field, buffer);
+	set_current_field(form, field[C_ASP]);
+	pos_form_cursor(form);
 
 	wrefresh(ui->config_win);
 	
@@ -221,10 +230,25 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	{
 		switch (ch)
 		{
+			case ' ':
+				if (current_field(form) == field[C_ASP])
+				{
+					ui->aspect_trig = !ui->aspect_trig;
+					if (ui->aspect_trig)
+					{
+						set_field_buffer(field[C_ASP], 0, "off");
+						set_field_back(field[C_ASP], COLOR_PAIR (FIRE) | A_REVERSE);
+					}
+					else
+					{
+						set_field_buffer(field[C_ASP], 0, "on ");
+						set_field_back(field[C_ASP], COLOR_PAIR (EARTH) | A_REVERSE);
+					}
+				}
+				break;
 			case 9:
-				set_current(field, cdata, ui);
+				set_current(field, cdata);
 				pos_form_cursor(form);
-				touchwin(ui->config_win);
 				break;
 				
 			case KEY_DOWN: case ';':
@@ -265,12 +289,12 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 		box(ui->config_win, 0, 0);
 		wrefresh(ui->config_win);
 	}
-	for(int i = C_ASP; i < C_NULL; ++i)
+	for(int i = C_TIMEZONE; i < C_NULL; ++i)
 	{
 		set_current_field(form, field[i]);
 		form_driver(form, REQ_VALIDATION);
 	}
-	ftb(field, buffer);
+	ftb(ui, field, buffer);
 	config_set(cdata, ui, buffer);
 	config_write(cdata, ui);
 	
