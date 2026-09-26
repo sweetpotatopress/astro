@@ -31,6 +31,11 @@ d			toggle dst
 
 r			redraw chart  
 R			redraw config chart
+c			config
+	tab		set current chart info to config
+	enter	set config as default
+	esc		cancel
+	
 q			exit astro  
 
 o 			toggle right table
@@ -60,18 +65,9 @@ $XDG_DATA_HOME/astro
 - swisseph/ephe/ :  
 - charts/ :  
  
-OPTIONAL  
-<sub>set default iana timezone and location</sub>
-
 $XDG_CONFIG_HOME/astro  
 - config :  
 
-#### config template
-```
-timezone = America/Chicago  
-latitude = 41.85003  
-longitude = -87.65005  
-```
 TODO  
  
 - [x] save and load charts
