@@ -157,6 +157,20 @@ static void field_label(struct ui *ui)
 		mvwprintw(ui->config_win, y, x, "%s", label[i]);
 }
 
+static void button_toggle(FIELD **field, int idx, int *trig)
+{
+	if (*trig)
+	{
+		set_field_buffer(field[idx], 0, "off");
+		set_field_back(field[idx], COLOR_PAIR (FIRE) | A_REVERSE);
+	}
+	else
+	{
+		set_field_buffer(field[idx], 0, "on ");
+		set_field_back(field[idx], COLOR_PAIR (EARTH) | A_REVERSE);
+	}
+}
+
 void config_menu(struct cdata *cdata, struct ui *ui)
 {
 	FIELD *field[C_MAX] = { NULL };
@@ -178,18 +192,8 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	keypad(ui->config_win, TRUE);
 	
 	field[C_ASP] = new_field(1, 3, sy, sx, 0, 0);
-	if (ui->aspect_trig)
-	{
-		set_field_buffer(field[C_ASP], 0, "off");
-		set_field_back(field[C_ASP], COLOR_PAIR (FIRE) | A_REVERSE);
-	}
-	else
-	{
-		set_field_buffer(field[C_ASP], 0, "on ");
-		set_field_back(field[C_ASP], COLOR_PAIR (EARTH) | A_REVERSE);
-	}
+	button_toggle(field, C_ASP, &ui->aspect_trig);
 	field_opts_off(field[C_ASP], O_EDIT);
-	
 	sy += 2;
 	
 	field[C_TIMEZONE] = new_field(1, 30, sy, sx, 0, 0);
@@ -216,10 +220,11 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	set_form_sub(form, ui->config_subwin);
 	
 	post_form(form);
-	
     field_label(ui);
+    
 	config_parse(buffer);
 	btf(field, buffer);
+	
 	set_current_field(form, field[C_ASP]);
 	pos_form_cursor(form);
 
@@ -234,16 +239,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 				if (current_field(form) == field[C_ASP])
 				{
 					ui->aspect_trig = !ui->aspect_trig;
-					if (ui->aspect_trig)
-					{
-						set_field_buffer(field[C_ASP], 0, "off");
-						set_field_back(field[C_ASP], COLOR_PAIR (FIRE) | A_REVERSE);
-					}
-					else
-					{
-						set_field_buffer(field[C_ASP], 0, "on ");
-						set_field_back(field[C_ASP], COLOR_PAIR (EARTH) | A_REVERSE);
-					}
+					button_toggle(field, C_ASP, &ui->aspect_trig);
 				}
 				break;
 			case 9:
