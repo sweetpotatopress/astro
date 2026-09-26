@@ -31,6 +31,11 @@
 #define IWIN_Y (LINES - IWINY) / 2
 #define IWIN_X (COLS - IWINX) / 2
 
+#define CWINY 12
+#define CWINX 47
+#define CWIN_Y (LINES - CWINY) / 2
+#define CWIN_X (COLS - CWINX) / 2
+
 #define M_COLOR 1
 #define FIRE 2
 #define EARTH 3
@@ -122,10 +127,13 @@ struct ui {
 	WINDOW *search_win;
 	WINDOW *search_subwin;
 	WINDOW *transit_window;
+	WINDOW *config_win;
+	WINDOW *config_subwin;
 	PANEL *main_panel;
 	PANEL *left_panel;
 	PANEL *right_panel;
 	PANEL *transit_panel;
+	int aspect_trig;
 	int left_trig;
 	int right_trig;
 	int old_l;

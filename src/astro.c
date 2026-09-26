@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 	for (int i = 1; i < CHARTMAX; ++i)
 	{
 		set_localtime(cdata[i]);
-		config_parse(cdata[i], xdg_path);
+		config_init(cdata[i], ui);
 		ecst_init(planet, cdata[i]->se);
 	}
 	
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 				cdata_clear(cdata[ui->cc]);
 				ecst_init(planet, cdata[ui->cc]->se);
 				planet_init(planet, ui->cc, pxx);
-				config_parse(cdata[ui->cc], xdg_path);
+				config_init(cdata[ui->cc], ui);
 				set_localtime(cdata[ui->cc]);
 				wheel_init(ui->main_win, ui, 0, 0, 0);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
@@ -235,6 +235,11 @@ int main(int argc, char *argv[])
 			case 's':
 				ecst_init(planet, cdata[ui->cc]->se);
 				solar_return(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				break;
+			case 'c':
+				config_menu(cdata[ui->cc], ui);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
 				break;
 			case 'q':
 				done = 1;

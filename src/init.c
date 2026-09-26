@@ -341,7 +341,8 @@ double **planet, int **zodiac)
 	
 	planet_pos(win, cdata, ui, planet, zodiac);
 	
-	draw_aspect(win, planet);
+	if (!ui->aspect_trig)
+		draw_aspect(win, planet);
 	
 	if (fabs(cdata->dlat) > 1e-6)
 		ascmc_pos(win, cdata, ui, planet, zodiac);
