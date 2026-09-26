@@ -30,9 +30,11 @@ d			toggle dst
 
 r			redraw chart  
 R			redraw config chart
+
 c			config
 	tab		set current chart info to config
-	enter	set config as default
+	enter	set config default
+	space	toggle buttons
 	esc		cancel
 	
 q			exit astro  
