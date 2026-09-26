@@ -193,10 +193,10 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	cdata[key]->sign_cusp[1] = cdata[ui->cc]->sign_cusp[1];
 	
 	wheel_init(ui->main_win, ui, 0, 9, 0);
-	planet_pos(ui->main_win, cdata[key], ui, planet, zodiac);
 	
 	ui->bcc = ui->cc;
 	ui->cc = TRANSIT;
+	planet_pos(ui->main_win, cdata[key], ui, planet, zodiac);
 	cc_data(ui->main_win, cdata[key], ui);
 	ui->cc = ui->bcc;
 	
