@@ -13,6 +13,7 @@ iana timezone database
 enter		animate chart  
 	h/l 	time increment  
 	k/j 	up/down  
+	0...9	increment count
 
 0...9		select chart number
 alt+0...9	synastry with selected chart
