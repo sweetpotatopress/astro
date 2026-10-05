@@ -347,7 +347,8 @@ void draw_aspect(WINDOW *win, double **planet)
 			chtype ch = line_char((int)planet[i][PL_Y], (int)planet[i][PL_X],
 				(int)planet[j][PL_Y], (int)planet[j][PL_X]);
 				
-			if (planet[i][LONG_S] > planet[j][LONG_S] && planet[i][DEGREE] <= planet[j][DEGREE])
+			if ((planet[i][LONG_S] > planet[j][LONG_S] && planet[i][DEGREE] <= planet[j][DEGREE]) ||
+			(planet[j][LONG_S] > planet[i][LONG_S] && planet[j][DEGREE] <= planet[i][DEGREE]))
 				ch = '+';
 			
 			for (int c = 0; c < 4; ++c)
