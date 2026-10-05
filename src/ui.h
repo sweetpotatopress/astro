@@ -127,7 +127,7 @@ struct ui {
 	WINDOW *indat_subwin;
 	WINDOW *search_win;
 	WINDOW *search_subwin;
-	WINDOW *transit_window;
+	WINDOW *transit_win;
 	WINDOW *config_win;
 	WINDOW *config_subwin;
 	PANEL *main_panel;

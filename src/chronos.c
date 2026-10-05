@@ -691,7 +691,6 @@ void calculate_utc(struct cdata *cdata)
 
 void cpt(struct cdata *cdata, struct tm *temp, time_t *t, int x)
 {
-	struct tm *result;
 	if (!x || x == 2)
 	{
 		temp->tm_year = cdata->year - 1900;
@@ -706,7 +705,9 @@ void cpt(struct cdata *cdata, struct tm *temp, time_t *t, int x)
 	}
 	if (x)
 	{	
-		result = localtime(t);
+		struct tm *result = localtime(t);
+		if(!result)
+			return;
 		cdata->year = result->tm_year + 1900;
 		cdata->mon = result->tm_mon + 1;
 		cdata->mday = result->tm_mday;

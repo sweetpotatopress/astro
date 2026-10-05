@@ -30,6 +30,9 @@
 #define MONTH 2
 #define YEAR 1
 
+#define MIN_YEAR -14098
+#define MAX_YEAR 14899
+
 static void enanosleep(unsigned int ms)
 {
 	struct timespec ts;
@@ -40,60 +43,60 @@ static void enanosleep(unsigned int ms)
 
 void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 {	
-	int starty, startx;
+	int sy, sx;
 	int count = (ui->cc == TRANSIT || ui->cc == SYNASTRY) ? 2 : 1;
 	for (int i = 0; i < count; ++i)
 	{
 		if (ui->cc == TRANSIT || ui->cc == SYNASTRY)
 		{
 			i++;
-			starty = 2;
-			startx = COLS - 20;
+			sy = 2;
+			sx = COLS - 20;
 		}
 		else if (ui->left_trig)
 		{
-			starty = 1;
-			startx = 33;
+			sy = 1;
+			sx = 33;
 		}
 		else if (!ui->left_trig)
 		{
-			starty = 1;
-			startx = 1;
+			sy = 1;
+			sx = 1;
 		}
 		
 		if(cdata->chart_name)
-			mvwprintw(win, starty, startx, "%s", cdata->chart_name);
+			mvwprintw(win, sy, sx, "%s", cdata->chart_name);
 		
 		if (ui->cc != TRANSIT || ui->cc != SYNASTRY)
 		{
-			starty += 1;
+			sy += 1;
 			if (cdata->state && !isdigit((unsigned char)cdata->state[0]) && strlen(cdata->state) > 1)
-				mvwprintw(win, starty, startx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
+				mvwprintw(win, sy, sx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
 			
 			else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
-				mvwprintw(win, starty, startx, "%.22s, %s", cdata->city, cdata->country);
+				mvwprintw(win, sy, sx, "%.22s, %s", cdata->city, cdata->country);
 		}
 			
-		starty += 1;
+		sy += 1;
 		
 		if(cdata->year && cdata->mon && cdata->mday)
-			mvwprintw(win, starty, startx, "%s.%02d.%02d, %s", 
+			mvwprintw(win, sy, sx, "%s.%02d.%02d, %s", 
 			ui->sym.month[cdata->mon], cdata->mday, cdata->year, ui->sym.week[cdata->wday]);
 			
-		starty += 1;
+		sy += 1;
 		if (cdata->hour >= 0)
 		{
 			int hour = cdata->hour;
 			if (hour == 12)
-				mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
+				mvwprintw(win, sy, sx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
 			else if (hour > 12)	
-				mvwprintw(win, starty, startx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
+				mvwprintw(win, sy, sx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
 			else if (hour == 0)
-				mvwprintw(win, starty, startx, "12:%02d:%02dAM", cdata->min, cdata->sec);
+				mvwprintw(win, sy, sx, "12:%02d:%02dAM", cdata->min, cdata->sec);
 			else if (hour > 0 && hour < 12)
-				mvwprintw(win, starty, startx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
+				mvwprintw(win, sy, sx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
 		}
-		starty += 1;
+		sy += 1;
 		
 		int local_min = cdata->hour * 60 + cdata->min + (int)lround(cdata->sec / 60.0);
 		int utc_min = (int)lround(cdata->utc_hour * 60.0);
@@ -107,23 +110,23 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		int off_hour = abs_min / 60;
 		int rem_min = abs_min % 60;
 		
-		mvwprintw(win, starty, startx, "%sUTC%c%02d:%02d", cdata->isdst == YDST ? "DST " : "",
+		mvwprintw(win, sy, sx, "%sUTC%c%02d:%02d", cdata->isdst == YDST ? "DST " : "",
 		usign < 0 ? '-' : '+', off_hour, rem_min);
 			
 		if (i > 0)
 			return;
 			
-		starty += 1;
+		sy += 1;
 		if (cdata->timezone)
-			mvwprintw(win, starty, startx, "%.30s", cdata->timezone);
+			mvwprintw(win, sy, sx, "%.30s", cdata->timezone);
 		
-		starty += 1;
+		sy += 1;
 		if (fabs(cdata->dlat) > 1e-6)
-			mvwprintw(win, starty, startx, "%f", cdata->dlat);
+			mvwprintw(win, sy, sx, "%f", cdata->dlat);
 		
-		starty += 1;
+		sy += 1;
 		if (fabs(cdata->dlon) > 1e-6)
-			mvwprintw(win, starty, startx, "%f", cdata->dlon);
+			mvwprintw(win, sy, sx, "%f", cdata->dlon);
 	}
 }
 
@@ -173,8 +176,8 @@ void realtime_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, doubl
 
 void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
 {
-	ui->transit_window = newwin(LINES, COLS, 0, 0);
-	ui->transit_panel = new_panel(ui->transit_window);
+	ui->transit_win = newwin(LINES, COLS, 0, 0);
+	ui->transit_panel = new_panel(ui->transit_win);
 	
 	ui->bcc = ui->cc;
 	cdata[TRANSIT]->t_cusp = cdata[ui->bcc]->sign_cusp[1];
@@ -193,7 +196,7 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	wheel_init(ui->main_win, ui, 0, 0, 0);
 	
 	del_panel(ui->transit_panel);
-	delwin(ui->transit_window);
+	delwin(ui->transit_win);
 }
 
 void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int key)
@@ -222,14 +225,21 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	wheel_init(ui->main_win, ui, 0, 0, 0);
 }
 
-static void arrange_panel(struct cdata *cdata, struct pxx *pxx, struct ui *ui,
-double **planet, int **zodiac)
+static void print_inc(WINDOW *win, int sy, int sx, const char *label, int advance)
 {
-	overwrite(ui->main_win, ui->transit_window);
+	wmove(win, sy, sx);
+	wclrtoeol(win);
+	mvwprintw(win, sy, sx, "(%s)[%d]", label, advance);
+}
+
+static void arrange_panel(struct cdata *cdata, struct pxx *pxx, struct ui *ui,
+double **planet, int **zodiac, int sy, int sx, const char *label, int advance)
+{
+	overwrite(ui->main_win, ui->transit_win);
 	pxx_init(cdata, pxx, planet);
 	wheel_init(ui->main_win, ui, 0, 9, 0);
-	planet_pos(ui->transit_window, cdata, ui, planet, zodiac);
-	cc_data(ui->transit_window, cdata, ui);
+	planet_pos(ui->transit_win, cdata, ui, planet, zodiac);
+	cc_data(ui->transit_win, cdata, ui);
 					
 	top_panel(ui->main_panel);
 	top_panel(ui->transit_panel);
@@ -238,19 +248,53 @@ double **planet, int **zodiac)
 		top_panel(ui->left_panel);
 	if (ui->right_trig)
 		top_panel(ui->right_panel);
+	print_inc(ui->transit_win, sy, sx, label, advance);
 		
 	update_panels();
 	doupdate();
 }
 
+static void year_wrap(int *year)
+{
+	if (*year > MAX_YEAR)
+		*year = MIN_YEAR;
+	else if (*year < MIN_YEAR)
+		*year = MAX_YEAR;
+}
+
+static void lesser_wrap(struct tm *temp, time_t *t, size_t inc)
+{
+	if (inc == SECOND || inc == MINUTE || inc == HOUR || inc == DAY)
+	{
+		struct tm *result = localtime(t);
+		if (!result)
+			return;
+		*temp = *result;
+		if (temp->tm_year > MAX_YEAR)
+		{
+			year_wrap(&temp->tm_year);
+			*t = mktime(temp);
+		}
+		else if (temp->tm_year < MIN_YEAR)
+		{
+			year_wrap(&temp->tm_year);
+			*t = mktime(temp);
+		}
+	}
+}
+
 void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
-	int starty = 0;
-	int startx = COLS - 14;
+	int sy = 0;
+	int sx = COLS - 14;
 	
-	mvwprintw(ui->main_win, starty, startx, "(hour)");
+	int advance = 1;
+	int next_advance = 0;
+	const char *label = "hour";
+	
+	print_inc(ui->main_win, sy, sx, label, advance);
 	if (ui->cc == TRANSIT)
-		arrange_panel(cdata, pxx, ui, planet, zodiac);
+		arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
 	
 	int max_day = 0; // daycount() return flag
 	size_t inc = HOUR;
@@ -272,6 +316,26 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 			new_chart(cdata, pxx, ui, planet, zodiac);
 			doupdate();
 		}
+		
+		if (isdigit((unsigned char)ch))
+		{
+			int digit = ch - '0';
+			
+			if (!next_advance)
+			{
+				advance = digit;
+				next_advance = 1;
+			}
+			else if (advance <= (INT_MAX - digit) / 10)
+				advance = advance * 10 + digit;
+			if (advance < 0 || advance > 999)
+			{
+				advance = 1;
+				next_advance = 0;
+			}
+		}
+		else
+			next_advance = 0;
 	
 		switch(ch)
 		{
@@ -279,86 +343,96 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				switch(inc)
 				{
 					case SECOND:
-						t += 1;
+						t += advance;
 						break;
 					case MINUTE:
-						t += 60;
+						t += 60 * advance;
 						break;
 					case HOUR:
-						t += 3600;
+						t += 3600 * advance;
 						break;
 					case DAY:
-						t += 86400;
+						t += 86400 * advance;
 						break;
 					case MONTH:
-						if ((++temp.tm_mon) > 11)
-						{
-							temp.tm_mon = 0;
-							++temp.tm_year;
-						}
+					{
+						int tot = temp.tm_mon + advance;
+						temp.tm_year += tot / 12;
+						temp.tm_mon = tot % 12;
+						
 						max_day = daycount(temp.tm_mon, temp.tm_year);
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
+						year_wrap(&temp.tm_year);
 						t = mktime(&temp);
 						ecst_init(planet, cdata->se);
 						break;
+					}
 					case YEAR:
-						temp.tm_year++;
-						if (temp.tm_year > 16799)
-							temp.tm_year = -12998;
+						temp.tm_year += advance;
+						year_wrap(&temp.tm_year);
 						t = mktime(&temp);
 						ecst_init(planet, cdata->se);
 						break;
 				}
+				lesser_wrap(&temp, &t, inc);
 				cpt(cdata, &temp, &t, 1);
 				
 				if (ui->cc == TRANSIT)
-					arrange_panel(cdata, pxx, ui, planet, zodiac);
+					arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
 				else
 					new_chart(cdata, pxx, ui, planet, zodiac);
+				print_inc(ui->main_win, sy, sx, label, advance);
 				break;
 				
 			case 'j': case KEY_DOWN:
 				switch(inc)
 				{
 					case SECOND:
-						t -= 1;
+						t -= advance;
 						break;
 					case MINUTE:
-						t -= 60;
+						t -= 60 * advance;
 						break;
 					case HOUR:
-						t -= 3600;
+						t -= 3600 * advance;
 						break;
 					case DAY:
-						t -= 86400;
+						t -= 86400 * advance;
 						break;
 					case MONTH:
-						if ((--temp.tm_mon) < 0)
+					{
+						int tot = temp.tm_mon - advance;
+						temp.tm_year += tot / 12;
+						temp.tm_mon = tot % 12;
+						if (temp.tm_mon < 0)
 						{
-							temp.tm_mon = 11;
+							temp.tm_mon += 12;
 							--temp.tm_year;
 						}
 						max_day = daycount(temp.tm_mon, temp.tm_year);
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
+						year_wrap(&temp.tm_year);
 						t = mktime(&temp);
 						ecst_init(planet, cdata->se);
+					}
 						break;
 					case YEAR:
-						--temp.tm_year;
-						if (temp.tm_year < -12998)
-							temp.tm_year = 16799;
+						temp.tm_year -= advance;
+						year_wrap(&temp.tm_year);
 						t = mktime(&temp);
 						ecst_init(planet, cdata->se);
 						break;
 				}
+				lesser_wrap(&temp, &t, inc);
 				cpt(cdata, &temp, &t, 1);
 				
 				if (ui->cc == TRANSIT)
-					arrange_panel(cdata, pxx, ui, planet, zodiac);
+					arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
 				else
 					new_chart(cdata, pxx, ui, planet, zodiac);
+				print_inc(ui->main_win, sy, sx, label, advance);
 				break;
 				
 			case 'h': case KEY_LEFT:
@@ -376,60 +450,51 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				break;
 		}
 		if (ui->cc == TRANSIT)
-			arrange_panel(cdata, pxx, ui, planet, zodiac);
+			arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
 	
 		flushinp();
 		enanosleep(10);
 		switch(inc)
 		{
 			case SECOND:
-				wmove(ui->main_win, starty, startx);
-				wclrtoeol(ui->main_win);
-				mvwprintw(ui->main_win, starty, startx, "(sec)");
+				label = "sec";
 				break;
 				
 			case MINUTE:
-				wmove(ui->main_win, starty, startx);
-				wclrtoeol(ui->main_win);
-				mvwprintw(ui->main_win, starty, startx, "(min)");
+				label = "min";
 				break;
 				
 			case HOUR:
-				wmove(ui->main_win, starty, startx);
-				wclrtoeol(ui->main_win);
-				mvwprintw(ui->main_win, starty, startx, "(hour)");
+				label = "hour";
 				break;
 				
 			case DAY:
-				wmove(ui->main_win, starty, startx);
-				wclrtoeol(ui->main_win);
-				mvwprintw(ui->main_win, starty, startx, "(day)");
+				label = "day";
 				break;
 				
 			case MONTH:
-				wmove(ui->main_win, starty, startx);
-				wclrtoeol(ui->main_win);
-				mvwprintw(ui->main_win, starty, startx, "(mon)");
+				label = "mon";
 				break;
 				
 			case YEAR:
-				wmove(ui->main_win, starty, startx);
-				wclrtoeol(ui->main_win);
-				mvwprintw(ui->main_win, starty, startx, "(year)");
+				label = "year";
 				break;
 		}
+		print_inc(ui->main_win, sy, sx, label, advance);
+		
 		if (ui->cc == TRANSIT)
 		{
-			copywin(ui->main_win, ui->transit_window, 
-			starty, startx,
-			starty, startx,
-			starty, startx + 5,
+			copywin(ui->main_win, ui->transit_win, 
+			sy, sx,
+			sy, sx,
+			sy, sx + 5,
 			FALSE);
+			print_inc(ui->transit_win, sy, sx, label, advance);
 			update_panels();
 			doupdate();
 		}
 	}
-	wmove(ui->main_win, starty, startx);
+	wmove(ui->main_win, sy, sx);
 	wclrtoeol(ui->main_win);
 	wnoutrefresh(ui->main_win);
 }
