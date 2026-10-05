@@ -765,31 +765,19 @@ static void find_station(double jd_start, double initial_speed, int direction, i
 void retro_station(double jd_ut, double *planet[])
 {
 	const int station = 7;
-	const double station_calc = JUL_SEC;
-	
-	const int iter = 32;
-	const int multi = 16;
 	
 	for (int ipl = SE_MERCURY; ipl <= SE_PLUTO; ipl++)
 	{
-		for (int i = 0; i < iter; ++i)
+		if (planet[ipl][NEXT_JUL] - jd_ut > JUL_SEC ||
+		planet[ipl][PREV_JUL] - jd_ut < -JUL_SEC)
 		{
-			const double limit = (multi * i);
-			
-			if (planet[ipl][NEXT_JUL] - jd_ut > station_calc ||
-			planet[ipl][PREV_JUL] - jd_ut < -station_calc)
-			{
-				planet[ipl][NEXT_S] = planet[ipl][NEXT_JUL] - jd_ut;
-				planet[ipl][PREV_S] = planet[ipl][PREV_JUL] - jd_ut;
-			}
-			
-			if (fabs(planet[ipl][NEXT_S] - limit) <= station_calc || 
-			fabs(planet[ipl][PREV_S] - limit) <= station_calc ||
-			planet[ipl][NEXT_S] <= 0.0 || planet[ipl][PREV_S] >= 0.0)
-			{
-				planet[ipl][RET_INIT] = 0;
-				break;
-			}
+			planet[ipl][NEXT_S] = planet[ipl][NEXT_JUL] - jd_ut;
+			planet[ipl][PREV_S] = planet[ipl][PREV_JUL] - jd_ut;
+		}
+		
+		if (planet[ipl][NEXT_S] <= 0.0 || planet[ipl][PREV_S] >= 0.0)
+		{
+			planet[ipl][RET_INIT] = 0;
 		}
 		
 		if (planet[ipl][RET_INIT] < 0.5)
@@ -818,62 +806,46 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 	double xx[6];
 	char serr[AS_MAXCH];
 	
-	const double eclipse_calc = JUL_SEC;
-	const int iter = 32;
-	const int multi = 8;
-	
-	for (int i = 0; i < iter; ++i)
+	if (sol_eclipse[E_INIT] > 0)
 	{
-		const double limit = (multi * i);
+		sol_eclipse[EN_JUL] = sol_eclipse[EN_FJUL] - jd_ut;
+		sol_eclipse[EP_JUL] = jd_ut - sol_eclipse[EP_FJUL];
 		
-		if (sol_eclipse[E_INIT] > 0)
-		{
-			double ens_jul = sol_eclipse[EN_FJUL] - jd_ut;
-			sol_eclipse[EN_JUL] = ens_jul;
-			double eps_jul = jd_ut - sol_eclipse[EP_FJUL];
-			sol_eclipse[EP_JUL] = eps_jul;
-			
-			double enl_jul = luna_eclipse[EN_FJUL] - jd_ut;
-			luna_eclipse[EN_JUL] = enl_jul;
-			double epl_jul = jd_ut - luna_eclipse[EP_FJUL];
-			luna_eclipse[EP_JUL] = epl_jul;
-		}
+		luna_eclipse[EN_JUL] = luna_eclipse[EN_FJUL] - jd_ut;
+		luna_eclipse[EP_JUL] = jd_ut - luna_eclipse[EP_FJUL];
+	}
+	
+	if (sol_eclipse[EN_JUL] < JUL_SEC || luna_eclipse[EN_JUL] < JUL_SEC ||
+	sol_eclipse[EP_JUL] < JUL_SEC || luna_eclipse[EP_JUL] < JUL_SEC)
+		sol_eclipse[E_INIT] = 0.0;
 		
-		if (sol_eclipse[EN_JUL] < eclipse_calc || luna_eclipse[EN_JUL] < eclipse_calc ||
-		sol_eclipse[EP_JUL] < eclipse_calc || luna_eclipse[EP_JUL] < eclipse_calc)
-			sol_eclipse[E_INIT] = 0;
-			
-		if (fabs(limit - sol_eclipse[EN_JUL]) <= eclipse_calc || fabs(limit - sol_eclipse[EP_JUL]) <= eclipse_calc ||
-		fabs(limit - luna_eclipse[EN_JUL]) <= eclipse_calc || fabs(limit - luna_eclipse[EP_JUL]) <= eclipse_calc ||
-		(int)sol_eclipse[E_INIT] == 0)
-		{
-			swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, NEXT_E, serr);
-			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
-			sol_eclipse[EN_JUL] = tret[0] - jd_ut;
-			sol_eclipse[EN_FJUL] = tret[0];
-			sol_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
-			
-			swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, PREV_E, serr);
-			swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
-			sol_eclipse[EP_JUL] = jd_ut - tret[0];
-			sol_eclipse[EP_FJUL] = tret[0];
-			sol_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
-			
-			swe_lun_eclipse_when(jd_ut, iflag, 0, tret, NEXT_E, serr);
-			swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
-			luna_eclipse[EN_JUL] = tret[0] - jd_ut;
-			luna_eclipse[EN_FJUL] = tret[0];
-			luna_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
-			
-			swe_lun_eclipse_when(jd_ut, iflag, 0, tret, PREV_E, serr);
-			swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
-			luna_eclipse[EP_JUL] = jd_ut - tret[0];
-			luna_eclipse[EP_FJUL] = tret[0];
-			luna_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
-			
-			sol_eclipse[E_INIT] = 1;
-			break;
-		}
+	if (sol_eclipse[E_INIT] < 0.5)
+	{
+		swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, NEXT_E, serr);
+		swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
+		sol_eclipse[EN_JUL] = tret[0] - jd_ut;
+		sol_eclipse[EN_FJUL] = tret[0];
+		sol_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
+		
+		swe_sol_eclipse_when_glob(jd_ut, iflag, 0, tret, PREV_E, serr);
+		swe_calc_ut(tret[0], SE_SUN, iflag, xx, serr);
+		sol_eclipse[EP_JUL] = jd_ut - tret[0];
+		sol_eclipse[EP_FJUL] = tret[0];
+		sol_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
+		
+		swe_lun_eclipse_when(jd_ut, iflag, 0, tret, NEXT_E, serr);
+		swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
+		luna_eclipse[EN_JUL] = tret[0] - jd_ut;
+		luna_eclipse[EN_FJUL] = tret[0];
+		luna_eclipse[EN_SIGN] = ((int)xx[LONG] / 30) + 1;
+		
+		swe_lun_eclipse_when(jd_ut, iflag, 0, tret, PREV_E, serr);
+		swe_calc_ut(tret[0], SE_MOON, iflag, xx, serr);
+		luna_eclipse[EP_JUL] = jd_ut - tret[0];
+		luna_eclipse[EP_FJUL] = tret[0];
+		luna_eclipse[EP_SIGN] = ((int)xx[LONG] / 30) + 1;
+		
+		sol_eclipse[E_INIT] = 1.0;
 	}
 }
 
