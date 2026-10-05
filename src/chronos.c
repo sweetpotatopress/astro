@@ -741,21 +741,20 @@ static void find_station(double jd_start, double initial_speed, int direction, i
 	int initial_sign = speed_sign(initial_speed);
 	if (initial_sign == 0)
 		return;
-	do 
+		
+	while (speed_sign(speed) == initial_sign)
 	{
 		jd_ut += direction * coarse;
 		swe_calc_ut(jd_ut, ipl, iflag, xx, serr);
 		speed = xx[LONG_S];
 	} 
-	while (speed_sign(speed) == initial_sign);
 		
-	do
+	while (speed_sign(speed) != initial_sign)
 	{
 		jd_ut -= direction * fine;
 		swe_calc_ut(jd_ut, ipl, iflag, xx, serr);
 		speed = xx[LONG_S];
 	} 
-	while (speed_sign(speed) != initial_sign);
 	
 	*offset = jd_ut - jd_start;
 	*jd = jd_ut;
@@ -776,9 +775,7 @@ void retro_station(double jd_ut, double *planet[])
 		}
 		
 		if (planet[ipl][NEXT_S] <= 0.0 || planet[ipl][PREV_S] >= 0.0)
-		{
 			planet[ipl][RET_INIT] = 0;
-		}
 		
 		if (planet[ipl][RET_INIT] < 0.5)
 		{
@@ -787,7 +784,6 @@ void retro_station(double jd_ut, double *planet[])
 			planet[ipl][RET_INIT] = 1;
 		}
 	
-		// fill retro & station data
 		const int is_retro = planet[ipl][LONG_S] <= 0.0;
 		
 		planet[ipl][RETRO] = is_retro ? 1.0 : 0.0;
