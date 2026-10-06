@@ -31,7 +31,7 @@
 #define YEAR 1
 
 #define MIN_YEAR -14098
-#define MAX_YEAR 14899
+#define MAX_YEAR 14098
 
 static void enanosleep(unsigned int ms)
 {
@@ -225,6 +225,17 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	wheel_init(ui->main_win, ui, 0, 0, 0);
 }
 
+static int daycount(int month, int year)
+{
+	const int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	
+	if (month == 2)
+		if (((year + 1900) % 4 == 0 && (year + 1900) % 100 != 0) || 
+		((year + 1900) % 400 == 0))
+			return 29;
+	return days[month];
+}
+
 static void print_inc(WINDOW *win, int sy, int sx, const char *label, int advance)
 {
 	wmove(win, sy, sx);
@@ -270,16 +281,8 @@ static void lesser_wrap(struct tm *temp, time_t *t, size_t inc)
 		if (!result)
 			return;
 		*temp = *result;
-		if (temp->tm_year > MAX_YEAR)
-		{
-			year_wrap(&temp->tm_year);
-			*t = mktime(temp);
-		}
-		else if (temp->tm_year < MIN_YEAR)
-		{
-			year_wrap(&temp->tm_year);
-			*t = mktime(temp);
-		}
+		year_wrap(&temp->tm_year);
+		*t = mktime(temp);
 	}
 }
 
@@ -382,7 +385,6 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 					arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
 				else
 					new_chart(cdata, pxx, ui, planet, zodiac);
-				print_inc(ui->main_win, sy, sx, label, advance);
 				break;
 				
 			case 'j': case KEY_DOWN:
@@ -432,7 +434,6 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 					arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
 				else
 					new_chart(cdata, pxx, ui, planet, zodiac);
-				print_inc(ui->main_win, sy, sx, label, advance);
 				break;
 				
 			case 'h': case KEY_LEFT:

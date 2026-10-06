@@ -30,7 +30,6 @@
 #define YDST 1
 
 int sect(struct pxx *pxx);
-int daycount(int month, int year);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);
 void retro_station(double jd_ut, double *planet[]);
 void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
