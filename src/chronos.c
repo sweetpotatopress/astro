@@ -61,17 +61,6 @@ void weekday_check(struct cdata *cdata)
 	cdata->wday = gt.tm_wday;
 }
 
-int daycount(int month, int year)
-{
-	const int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-	
-	if (month == 2)
-		if (((year + 1900) % 4 == 0 && (year + 1900) % 100 != 0) || 
-		((year + 1900) % 400 == 0))
-			return 29;
-	return days[month];
-}
-
 int sect(struct pxx *pxx)
 {
 	int sect = 0;
