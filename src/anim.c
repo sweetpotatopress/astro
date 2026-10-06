@@ -288,27 +288,21 @@ static void lesser_wrap(struct tm *temp, time_t *t, size_t inc)
 
 void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
-	int sy = 0;
-	int sx = COLS - 14;
+	int sy = 0, sx = COLS - 14;
+	int advance = 1, next_advance = 0;
 	
-	int advance = 1;
-	int next_advance = 0;
+	size_t inc = HOUR;
 	const char *label = "hour";
+	
+	struct tm temp = {0};
+	time_t t = 0;
+	cpt(cdata, &temp, &t, 0);
 	
 	print_inc(ui->main_win, sy, sx, label, advance);
 	if (ui->cc == TRANSIT)
 		arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
-	
-	int max_day = 0; // daycount() return flag
-	size_t inc = HOUR;
-	
-	struct tm temp = {0};
-	time_t t = 0;
-	
-	cpt(cdata, &temp, &t, 0);
-	
-	int ch = 0;
-	int anim_done = 0;
+
+	int ch = 0, anim_done = 0;
 	while(!anim_done && (ch = wgetch(ui->main_win)))
 	{
 		if (ui->cc == TRANSIT)
@@ -363,19 +357,17 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						temp.tm_year += tot / 12;
 						temp.tm_mon = tot % 12;
 						
-						max_day = daycount(temp.tm_mon, temp.tm_year);
+						int max_day = daycount(temp.tm_mon, temp.tm_year);
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						year_wrap(&temp.tm_year);
 						t = mktime(&temp);
-						ecst_init(planet, cdata->se);
 						break;
 					}
 					case YEAR:
 						temp.tm_year += advance;
 						year_wrap(&temp.tm_year);
 						t = mktime(&temp);
-						ecst_init(planet, cdata->se);
 						break;
 				}
 				lesser_wrap(&temp, &t, inc);
@@ -412,19 +404,17 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 							temp.tm_mon += 12;
 							--temp.tm_year;
 						}
-						max_day = daycount(temp.tm_mon, temp.tm_year);
+						int max_day = daycount(temp.tm_mon, temp.tm_year);
 						if (temp.tm_mday > max_day)
 							temp.tm_mday = max_day;
 						year_wrap(&temp.tm_year);
 						t = mktime(&temp);
-						ecst_init(planet, cdata->se);
 					}
 						break;
 					case YEAR:
 						temp.tm_year -= advance;
 						year_wrap(&temp.tm_year);
 						t = mktime(&temp);
-						ecst_init(planet, cdata->se);
 						break;
 				}
 				lesser_wrap(&temp, &t, inc);
