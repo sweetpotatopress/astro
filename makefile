@@ -2,13 +2,22 @@ CFLAGS	:= -Wall -Wextra -Wpedantic -O3 -std=c99
 SWE_CFLAGS = -g -Wall -fPIC -std=c99
 
 SWE_DIR	= swisseph
+SWE_SRCS = swisseph/swedate.c swisseph/swehouse.c swisseph/swejpl.c \
+			swisseph/swemmoon.c swisseph/swemplan.c swisseph/sweph.c \
+			swisseph/swephlib.c swisseph/swecl.c swisseph/swehel.c
+			
+SWE_OBJS = swisseph/swedate.o swisseph/swehouse.o swisseph/swejpl.o \
+			swisseph/swemmoon.o swisseph/swemplan.o swisseph/sweph.o \
+			swisseph/swephlib.o swisseph/swecl.o swisseph/swehel.o
+			
 SWE_A := $(SWE_DIR)/libswe.a
-SWE_SRCS != echo $(SWE_DIR)/*.c
-SWE_OBJS = $(SWE_SRCS:S,.c,.o,)
-
+	
 LIBS = -lform -lmenu -lpanel -lncurses -lm
 INC = -Isrc -Iswisseph
-SRCS != echo src/*.c
+SRCS  = src/anim.c src/astro.c src/chronos.c src/conf.c \
+		src/draw.c src/indat.c src/init.c src/io.c \
+		src/search.c src/ui.c src/zr.c
+		
 TARGET = astro
 INSTALL_DIR = /usr/local/bin
 
@@ -30,14 +39,11 @@ all: ${SWE_A}
 debug:
 	cc $(INC) $(CFLAGS) -g -O0 -fno-omit-frame-pointer \
 	$(SRCS) $(SWE_A) $(LIBS)
-
-.for obj in $(SWE_OBJS)
-$(obj): $(obj:R).c
-	cc $(INC) $(SWE_CFLAGS) -c ${.IMPSRC} -o ${.TARGET}
-.endfor
+.c.o:
+	cc $(INC) $(SWE_CFLAGS) -c $< -o $@
 
 $(SWE_A): $(SWE_OBJS)
-	ar rcs $(.TARGET) $(SWE_OBJS)
+	ar rcs $@ $(SWE_OBJS)
 	
 install:
 	mkdir -p "$(INSTALL_DIR)"
