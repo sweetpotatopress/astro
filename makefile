@@ -1,5 +1,5 @@
-CFLAGS	:= -Wall -Wextra -Wpedantic -O3 -std=c99
-SWE_CFLAGS = -g -Wall -fPIC -std=c99
+CFLAGS	:= -Wall -Wextra -Wpedantic -O3
+SWE_CFLAGS = -g -Wall -fPIC
 
 SWE_DIR	= swisseph
 SWE_SRCS = swisseph/swedate.c swisseph/swehouse.c swisseph/swejpl.c \
@@ -12,7 +12,7 @@ SWE_OBJS = swisseph/swedate.o swisseph/swehouse.o swisseph/swejpl.o \
 			
 SWE_A := $(SWE_DIR)/libswe.a
 	
-LIBS = -lform -lmenu -lpanel -lncurses -lm
+LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
 INC = -Isrc -Iswisseph
 SRCS  = src/anim.c src/astro.c src/chronos.c src/conf.c \
 		src/draw.c src/indat.c src/init.c src/io.c \
