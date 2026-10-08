@@ -39,6 +39,7 @@ all: ${SWE_A}
 debug:
 	cc $(INC) $(CFLAGS) -g -O0 -fno-omit-frame-pointer \
 	$(SRCS) $(SWE_A) $(LIBS)
+	
 .c.o:
 	cc $(INC) $(SWE_CFLAGS) -c $< -o $@
 
