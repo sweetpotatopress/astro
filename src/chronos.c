@@ -23,12 +23,6 @@
 #include "init.h"
 #include "chronos.h"
 
-#ifdef __GLIBC__
-#define TM_GMTOFF(x) ((x).__tm_gmtoff)
-#else
-#define TM_GMTOFF(x) ((x).tm_gmtoff)
-#endif
-
 void set_localtime(struct cdata *cdata)
 {	
 	time_t now = time(NULL);
@@ -665,7 +659,7 @@ void calculate_utc(struct cdata *cdata)
 	if (is_lmt_date(cdata))
 	{
 		int offset = (int)lround(cdata->dlon * 240.0);
-		t += (int)TM_GMTOFF(tm_in) - offset;
+		t += (int)tm_in.tm_gmtoff - offset;
 	}
 	
 	struct tm *tm_utc = gmtime(&t);
