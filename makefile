@@ -3,7 +3,7 @@ CFLAGS	:= -Wall -Wextra -Wpedantic -O3
 SWE_CFLAGS := -g -Wall -fPIC
 
 PREFIX = /usr/local
-LIBS = -lform -lmenu -lpanel -lncurses -lswe $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
+LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
 INC	= -Isrc -Iswisseph
 
 SRC		=	src/anim.c src/astro.c src/chronos.c src/conf.c \
@@ -22,7 +22,7 @@ SWE_D 	= 	swisseph/swedate.d swisseph/swehouse.d swisseph/swejpl.d \
 			swisseph/swemmoon.d swisseph/swemplan.d swisseph/sweph.d \
 			swisseph/swephlib.d swisseph/swecl.d swisseph/swehel.d
 
-SWE_A	=	swisseph/libswe.a
+SWE_A	= swisseph/libswe.a
 
 CONFIG_DIR	= $(HOME)/.config/astro
 DATA_DIR	= $(HOME)/.local/share/astro
@@ -38,7 +38,7 @@ $(SWE_A): $(SWE_OBJ)
 	ar rcs $@ $(SWE_OBJ); \
 	
 astro: ${SWE_A}
-	$(CC) $(INC) $(CFLAGS) $(SRC) $(LIBS) -o astro
+	$(CC) $(INC) $(CFLAGS) $(SRC) $(SWE_A) $(LIBS) -o astro
 
 data: 
 	mkdir -p "$(CONFIG_DIR)"; \
