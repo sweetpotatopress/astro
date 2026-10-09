@@ -9,10 +9,8 @@ ncurses
 iana timezone database  
 
 ##### INSTALL
-build
-`make`
-install
-`doas make install`
+build `make`  
+install `doas make install`
 
 ##### KEYBINDS  
 ```
