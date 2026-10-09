@@ -22,7 +22,7 @@ SWE_D 	= 	swisseph/swedate.d swisseph/swehouse.d swisseph/swejpl.d \
 			swisseph/swemmoon.d swisseph/swemplan.d swisseph/sweph.d \
 			swisseph/swephlib.d swisseph/swecl.d swisseph/swehel.d
 
-SWE_A	= swisseph/libswe.a
+SWE_A	=	swisseph/libswe.a
 
 CONFIG_DIR	= $(HOME)/.config/astro
 DATA_DIR	= $(HOME)/.local/share/astro
