@@ -51,6 +51,6 @@ install:
 	cp "astro" "$(DESTDIR)$(PREFIX)/bin"
 
 clean:
-	rm $(SWE_OBJ) $(SWE_D)
+	rm $(SWE_OBJ) $(SWE_D) $(SWE_A) astro
 	
 .PHONY: all data astro install clean
