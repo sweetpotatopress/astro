@@ -673,6 +673,13 @@ extern HANDLE dllhandle;        // set by swedllst::DllMain,
 #define ext_def(x)	extern EXP32 x CALL_CONV 
 			/* ext_def(x) evaluates to x on Unix */
 
+/***************************
+ * yam added functions 
+ ***************************/
+ext_def(size_t) xstrcpy(char *to, const char *from);
+
+ext_def(size_t) xstrcat(char *s, const char *append);
+
 ext_def(int32) swe_heliacal_ut(double tjdstart_ut, double *geopos, double *datm, double *dobs, char *ObjectName, int32 TypeEvent, int32 iflag, double *dret, char *serr);
 ext_def(int32) swe_heliacal_pheno_ut(double tjd_ut, double *geopos, double *datm, double *dobs, char *ObjectName, int32 TypeEvent, int32 helflag, double *darr, char *serr);
 ext_def(int32) swe_vis_limit_mag(double tjdut, double *geopos, double *datm, double *dobs, char *ObjectName, int32 helflag, double *dret, char *serr);

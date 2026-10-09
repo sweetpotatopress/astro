@@ -384,7 +384,7 @@ int32 CALL_CONV swe_utc_to_jd(int32 iyear, int32 imonth, int32 iday, int32 ihour
   swe_revjul(tjd_ut1, gregflag, &iyear2, &imonth2, &iday2, &d);
   if (iyear != iyear2 || imonth != imonth2 || iday != iday2) {
     if (serr != NULL)
-      sprintf(serr, "invalid date: year = %d, month = %d, day = %d", iyear, imonth, iday);
+      snprintf(serr, AS_MAXCH, "invalid date: year = %d, month = %d, day = %d", iyear, imonth, iday);
     return ERR;
   }
   if (ihour < 0 || ihour > 23 
@@ -392,7 +392,7 @@ int32 CALL_CONV swe_utc_to_jd(int32 iyear, int32 imonth, int32 iday, int32 ihour
    || dsec < 0 || dsec >= 61
    || (dsec >= 60 && (imin < 59 || ihour < 23 || tjd_ut1 < J1972))) {
     if (serr != NULL)
-      sprintf(serr, "invalid time: %d:%d:%.2f", ihour, imin, dsec);
+      snprintf(serr, AS_MAXCH, "invalid time: %d:%d:%.2f", ihour, imin, dsec);
     return ERR;
   }
   dhour = (double) ihour + ((double) imin) / 60.0 + dsec / 3600.0;
@@ -447,7 +447,7 @@ int32 CALL_CONV swe_utc_to_jd(int32 iyear, int32 imonth, int32 iday, int32 ihour
     }
     if (j != 1) {
       if (serr != NULL)
-	sprintf(serr, "invalid time (no leap second!): %d:%d:%.2f", ihour, imin, dsec);
+	snprintf(serr, AS_MAXCH, "invalid time (no leap second!): %d:%d:%.2f", ihour, imin, dsec);
       return ERR;
     }
   }

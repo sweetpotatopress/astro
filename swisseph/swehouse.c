@@ -654,7 +654,7 @@ int CALL_CONV swe_houses_armc_ex2(
       saved_sundec = h.sundec;
     }
     if (h.sundec < -24 || h.sundec > 24) {
-      sprintf(serr, "House system I (Sunshine) needs valid Sun declination in ascmc[9]");
+      snprintf(serr, AS_MAXCH, "House system I (Sunshine) needs valid Sun declination in ascmc[9]");
       return ERR;
     }
   }
@@ -664,7 +664,7 @@ int CALL_CONV swe_houses_armc_ex2(
   // on failure, we only have 12 Porphyry cusps
   if (retc < 0) {
     ito = 12;
-    if (serr != NULL) strcpy(serr, h.serr);
+    if (serr != NULL) xstrcpy(serr, h.serr);
   }
   for (i = 1; i <= ito; i++) {
     cusp[i] = h.cusp[i];
@@ -987,7 +987,7 @@ static int CalcH(
   }
   /* we respect smaller case letter for i, otherwise they are deprecated */
   if (hsy > 95 && hsy != 'i') {
-    sprintf(hsp->serr, "use of lower case letters like %c for house systems is deprecated", hsy);
+    snprintf(hsp->serr, AS_MAXCH, "use of lower case letters like %c for house systems is deprecated", hsy);
     hsy = (char) (hsy - 32);/* translate into capital letter */
   }
   switch (hsy) {
@@ -1173,7 +1173,7 @@ static int CalcH(
       retc = sunshine_solution_makransky(th, fi, ekl, hsp);
     }
     if (retc == ERR) {	// only Makransky version does this
-      strcpy(hsp->serr, "within polar circle, switched to Porphyry"); 
+      xstrcpy(hsp->serr, "within polar circle, switched to Porphyry"); 
       hsy = 'O';
       goto porphyry;
     }
@@ -1250,7 +1250,7 @@ static int CalcH(
   case 'K': /* Koch houses */
     if (fabs(fi) >= 90 - ekl) {  /* within polar circle */
       retc = ERR;
-      strcpy(hsp->serr, "within polar circle, switched to Porphyry"); 
+      xstrcpy(hsp->serr, "within polar circle, switched to Porphyry"); 
       goto porphyry;
     }
     sina = sind(hsp->mc) * sine / cosd(fi);
@@ -1627,7 +1627,7 @@ porphyry:
     }
     if (fabs(fi) >= 90 - ekl) {  /* within polar circle */
       retc = ERR;
-      strcpy(hsp->serr, "within polar circle, switched to Porphyry"); 
+      xstrcpy(hsp->serr, "within polar circle, switched to Porphyry"); 
       hsy = (int) 'O';
       goto porphyry;
     }
@@ -1667,7 +1667,7 @@ porphyry:
 	if (i >= niter_max) {
 	  retc = ERR;
 	  hsy = (int) 'O';
-	  strcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
+	  xstrcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
 	  goto porphyry;
 	}
 	if (hsp->do_hspeed) hsp->cusp_speed[ih] = AscDash(rectasc, f, sine, cose);
@@ -1709,7 +1709,7 @@ porphyry:
 	if (i >= niter_max) {
 	  retc = ERR;
 	  hsy = (int) 'O';
-	  strcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
+	  xstrcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
 	  goto porphyry;
 	}
 	if (hsp->do_hspeed) hsp->cusp_speed[ih] = AscDash(rectasc, f, sine, cose);
@@ -1830,7 +1830,7 @@ porphyry:
   default:	/* Placidus houses */
     if (fabs(fi) >= 90 - ekl) {  /* within polar circle */
       retc = ERR;
-      strcpy(hsp->serr, "within polar circle, switched to Porphyry"); 
+      xstrcpy(hsp->serr, "within polar circle, switched to Porphyry"); 
       goto porphyry;
     } 
     a = asind(tand(fi) * tane);
@@ -1864,7 +1864,7 @@ porphyry:
       }
       if (i >= niter_max) {
 	retc = ERR;
-	strcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
+	xstrcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
 	goto porphyry;
       }
       if (hsp->do_hspeed) hsp->cusp_speed[ih] = AscDash(rectasc, f, sine, cose);
@@ -1900,7 +1900,7 @@ porphyry:
       }
       if (i >= niter_max) {
 	retc = ERR;
-	strcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
+	xstrcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
 	goto porphyry;
       }
       if (hsp->do_hspeed) hsp->cusp_speed[ih] = AscDash(rectasc, f, sine, cose);
@@ -1936,7 +1936,7 @@ porphyry:
       }
       if (i >= niter_max) {
 	retc = ERR;
-	strcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
+	xstrcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
 	goto porphyry;
       }
       if (hsp->do_hspeed) hsp->cusp_speed[ih] = AscDash(rectasc, f, sine, cose);
@@ -1972,7 +1972,7 @@ porphyry:
       }
       if (i >= niter_max) {
 	retc = ERR;
-	strcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
+	xstrcpy(hsp->serr, "very close to polar circle, switched to Porphyry"); 
 	goto porphyry;
       }
       if (hsp->do_hspeed) hsp->cusp_speed[ih] = AscDash(rectasc, f, sine, cose);
@@ -2237,7 +2237,7 @@ double CALL_CONV swe_house_pos(
 		  // also solve many problems.
     if (swe_houses_armc_ex2(armc, geolat, eps, hsys, hcusp, ascmc, NULL, NULL, serr) == ERR) {
       if (serr != NULL)
-	sprintf(serr, "swe_house_pos(): failed for system %c", hsys);
+	snprintf(serr, AS_MAXCH, "swe_house_pos(): failed for system %c", hsys);
     } else {
       hpos = 0;
       for (i = 1; i <= 12; i++) {
@@ -2447,12 +2447,12 @@ double CALL_CONV swe_house_pos(
         xp[0] = 0;
 	hpos = 0;
 	if (serr != NULL)
-          strcpy(serr, "Koch house position failed in circumpolar area");
+          xstrcpy(serr, "Koch house position failed in circumpolar area");
 	break;
       }
       if (is_circumpolar) {
 	if (serr != NULL)
-          strcpy(serr, "Koch house position, doubtful result in circumpolar area");
+          xstrcpy(serr, "Koch house position, doubtful result in circumpolar area");
       }
       /* to make sure that a call with a house cusp position returns
        * a value within the house, 0.001" is added */
@@ -2808,7 +2808,7 @@ double CALL_CONV swe_house_pos(
         else
           xp[0] = swe_degnorm(270 + mdd / 2);
 	if (serr != NULL)
-          strcpy(serr, "Otto Ludwig procedure within circumpolar regions.");
+          xstrcpy(serr, "Otto Ludwig procedure within circumpolar regions.");
       } else {
         sinad = tand(de) * tand(geolat);
         ad = asind(sinad);
@@ -2836,7 +2836,7 @@ double CALL_CONV swe_house_pos(
     hpos = 0;
     if (swe_houses_armc_ex2(armc, geolat, eps, hsys, hcusp, ascmc, NULL, NULL, serr) == ERR) {
       if (serr != NULL)
-	sprintf(serr, "swe_house_pos(): failed for system %c", hsys);
+	snprintf(serr, AS_MAXCH, "swe_house_pos(): failed for system %c", hsys);
       break;
     }
     if (swe_difdeg2n(hcusp[6], hcusp[1]) > 0) {
@@ -2869,7 +2869,7 @@ double CALL_CONV swe_house_pos(
       hpos = i + (d - c1) / hsize;
     }
     if (serr != NULL)
-      sprintf(serr, "swe_house_pos(): using simplified algorithm for system %c\n", hsys);
+      snprintf(serr, AS_MAXCH, "swe_house_pos(): using simplified algorithm for system %c\n", hsys);
     break;
   }
   return hpos;
@@ -2918,7 +2918,7 @@ static int sunshine_solution_makransky(double ramc, double lat, double ecl, stru
   sinecl = sind(ecl);
   int ih;
   // if (90 - fabs(lat) <= ecl) {
-  //   strcpy(hsp->serr, "Sunshine in polar circle not allowed");
+  //   xstrcpy(hsp->serr, "Sunshine in polar circle not allowed");
   //   return ERR;
   // }
   if (sunshine_init(lat, dec, xh) == ERR)
@@ -3054,7 +3054,7 @@ static int sunshine_solution_treindl(double ramc, double lat, double ecl, struct
   AS_BOOL mc_under_horizon;
   double dec = hsp->sundec;
   // if (90 - fabs(lat) <= ecl) {
-  //   strcpy(hsp->serr, "Sunshine in polar circle not allowed");
+  //   xstrcpy(hsp->serr, "Sunshine in polar circle not allowed");
   //   return ERR;
   // }
   sinlat = sind(lat);
@@ -3109,7 +3109,7 @@ static int sunshine_solution_treindl(double ramc, double lat, double ecl, struct
     c = acosd(cosc);
     // now Sinussatz
     if (c < 1e-6) {
-      sprintf(hsp->serr, "Sunshine house %d c=%le very small", ih, c);
+      snprintf(hsp->serr, AS_MAXCH, "Sunshine house %d c=%le very small", ih, c);
       retval = ERR;
     }
     sinzd = sind(xhs) * sind(alpha2) / sind(c);

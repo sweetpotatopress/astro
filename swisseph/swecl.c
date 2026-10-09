@@ -770,7 +770,7 @@ iter_where:
     retc |= (SE_ECL_PARTIAL | SE_ECL_NONCENTRAL);
   } else {
     if (serr != NULL)
-      sprintf(serr, "no solar eclipse at tjd = %f", tjd);
+      snprintf(serr, AS_MAXCH, "no solar eclipse at tjd = %f", tjd);
     for (i = 0; i < 2; i++)
       geopos[i] = 0;
     *dcore = 0;
@@ -933,7 +933,7 @@ int32 CALL_CONV swe_sol_eclipse_how(
     attr[i] = 0;
   if (geopos[2] < SEI_ECL_GEOALT_MIN || geopos[2] > SEI_ECL_GEOALT_MAX) {
     if (serr != NULL)
-      sprintf(serr, "location for eclipses must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
+      snprintf(serr, AS_MAXCH, "location for eclipses must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
     return ERR;
   }
   ifl &= SEFLG_EPHMASK; 
@@ -1049,7 +1049,7 @@ static int32 eclipse_how( double tjd_ut, int32 ipl, char *starname, int32 ifl,
   else {
     retc = 0;
     if (serr != NULL)
-      sprintf(serr, "no solar eclipse at tjd = %f", tjd_ut);
+      snprintf(serr, AS_MAXCH, "no solar eclipse at tjd = %f", tjd_ut);
   }
   /*
    * ratio of diameter of moon to that of sun
@@ -1209,12 +1209,12 @@ int32 CALL_CONV swe_sol_eclipse_when_glob(double tjd_start, int32 ifl, int32 ifl
   iflagcart = iflag | SEFLG_XYZ;
   if (ifltype == (SE_ECL_PARTIAL | SE_ECL_CENTRAL)) {
     if (serr != NULL)
-      strcpy(serr, "central partial eclipses do not exist");
+      xstrcpy(serr, "central partial eclipses do not exist");
     return ERR;
   }
   if (ifltype == (SE_ECL_ANNULAR_TOTAL | SE_ECL_NONCENTRAL)) {
     if (serr != NULL)
-      strcpy(serr, "non-central hybrid (annular-total) eclipses do not exist");
+      xstrcpy(serr, "non-central hybrid (annular-total) eclipses do not exist");
     return ERR;
   }
   if (ifltype == 0)
@@ -1608,14 +1608,14 @@ int32 CALL_CONV swe_lun_occult_when_glob(
    */
   if (ifltype == (SE_ECL_PARTIAL | SE_ECL_CENTRAL)) {
     if (serr != NULL)
-      strcpy(serr, "central partial eclipses do not exist");
+      xstrcpy(serr, "central partial eclipses do not exist");
     return ERR;
   }
   if (ipl != SE_SUN) {
     ifltype2 = (ifltype & ~(SE_ECL_NONCENTRAL | SE_ECL_CENTRAL));
     if (ifltype2 == SE_ECL_ANNULAR || ifltype == SE_ECL_ANNULAR_TOTAL) {
       if (serr != NULL)
-	sprintf(serr, "annular occulation do not exist for object %d %s\n", ipl, starname);
+	snprintf(serr, AS_MAXCH, "annular occulation do not exist for object %d %s\n", ipl, starname);
       return ERR;
     }
   }
@@ -1645,7 +1645,7 @@ next_try:
    * will never allow it. */
   if (fabs(ls[1]) > 7 && starname != NULL && *starname != '\0') {
     if (serr != NULL) 
-      sprintf(serr, "occultation never occurs: star %s has ecl. lat. %.1f", starname, ls[1]);
+      snprintf(serr, AS_MAXCH, "occultation never occurs: star %s has ecl. lat. %.1f", starname, ls[1]);
     return ERR;
   }
   if (swe_calc(t, SE_MOON, ifl, lm, serr) == ERR)
@@ -2023,7 +2023,7 @@ int32 CALL_CONV swe_sol_eclipse_when_loc(double tjd_start, int32 ifl,
   double geopos2[20], dcore[10];
   if (geopos[2] < SEI_ECL_GEOALT_MIN || geopos[2] > SEI_ECL_GEOALT_MAX) {
     if (serr != NULL)
-      sprintf(serr, "location for eclipses must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
+      snprintf(serr, AS_MAXCH, "location for eclipses must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
     return ERR;
   }
   ifl &= SEFLG_EPHMASK; 
@@ -2077,7 +2077,7 @@ int32 CALL_CONV swe_lun_occult_when_loc(double tjd_start, int32 ipl, char *starn
    * are treated as calls for Pluto as main body SE_PLUTO */
   if (geopos[2] < SEI_ECL_GEOALT_MIN || geopos[2] > SEI_ECL_GEOALT_MAX) {
     if (serr != NULL)
-      sprintf(serr, "location for occultations must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
+      snprintf(serr, AS_MAXCH, "location for occultations must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
     return ERR;
   }
   if (ipl < 0) ipl = 0;
@@ -2453,7 +2453,7 @@ next_try:
    * will never allow it. */
   if (fabs(ls[1]) > 7 && starname != NULL && *starname != '\0') {
     if (serr != NULL) 
-      sprintf(serr, "occultation never occurs: star %s has ecl. lat. %.1f", starname, ls[1]);
+      snprintf(serr, AS_MAXCH, "occultation never occurs: star %s has ecl. lat. %.1f", starname, ls[1]);
     return ERR;
   }
   if (swe_calc(t, SE_MOON, iflaggeo, lm, serr) == ERR)
@@ -3202,7 +3202,7 @@ int32 CALL_CONV swe_lun_eclipse_how(
     geopos[0] = geopos[0]; /* to shut up mint */
   if (geopos != NULL && (geopos[2] < SEI_ECL_GEOALT_MIN || geopos[2] > SEI_ECL_GEOALT_MAX)) {
     if (serr != NULL)
-      sprintf(serr, "location for eclipses must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
+      snprintf(serr, AS_MAXCH, "location for eclipses must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
     return ERR;
   }
   ifl = ifl & ~SEFLG_TOPOCTR;
@@ -3329,7 +3329,7 @@ static int32 lun_eclipse_how(
     attr[0] = 0;
   } else {
     if (serr != NULL)
-      sprintf(serr, "no lunar eclipse at tjd = %f", tjd);
+      snprintf(serr, AS_MAXCH, "no lunar eclipse at tjd = %f", tjd);
   }
   attr[8] = attr[0];
   /**************************
@@ -3405,7 +3405,7 @@ int32 CALL_CONV swe_lun_eclipse_when(double tjd_start, int32 ifl, int32 ifltype,
     ifltype &= ~(SE_ECL_ANNULAR|SE_ECL_ANNULAR_TOTAL);
     if (ifltype == 0) {
       if (serr != NULL) {
-        strcpy(serr, "annular lunar eclipses don't exist");
+        xstrcpy(serr, "annular lunar eclipses don't exist");
       }
       return ERR; /* avoids infinite loop */
     }
@@ -3638,7 +3638,7 @@ int32 CALL_CONV swe_lun_eclipse_when_loc(double tjd_start, int32 ifl,
   int i;
   if (geopos != NULL && (geopos[2] < SEI_ECL_GEOALT_MIN || geopos[2] > SEI_ECL_GEOALT_MAX)) {
     if (serr != NULL)
-      sprintf(serr, "location for eclipses must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
+      snprintf(serr, AS_MAXCH, "location for eclipses must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
     return ERR;
   }
   ifl &= ~(SEFLG_JPLHOR | SEFLG_JPLHOR_APPROX);
@@ -3934,7 +3934,7 @@ int32 CALL_CONV swe_pheno(double tjd, int32 ipl, int32 iflag, double *attr, char
 	attr[4] = 236.05828 - a * 2.81914E+00 + a2 * 8.39034E-03;
       attr[4] += 5 * log10(lbr2[2] * lbr[2]);
       if (attr[0] > 179.0)
-        sprintf(serr2, "magnitude value for Venus at phase angle i=%.1f is bad; formula is valid only for i < 179.0", attr[0]);
+        snprintf(serr2, AS_MAXCH, "magnitude value for Venus at phase angle i=%.1f is bad; formula is valid only for i < 179.0", attr[0]);
     } else if (ipl == SE_MARS) {
       double a = attr[0];
       double a2 = a * a; 
@@ -4107,7 +4107,7 @@ int32 CALL_CONV swe_pheno(double tjd, int32 ipl, int32 iflag, double *attr, char
     }
   }
   if (*serr2 != '\0' && serr != NULL)
-    strcpy(serr, serr2);
+    xstrcpy(serr, serr2);
   return iflag;
 }
 
@@ -4407,7 +4407,7 @@ int32 CALL_CONV swe_rise_trans_true_hor(
   AS_BOOL do_fixstar = (starname != NULL && *starname != '\0');
   if (geopos[2] < SEI_ECL_GEOALT_MIN || geopos[2] > SEI_ECL_GEOALT_MAX) {
     if (serr != NULL)
-      sprintf(serr, "location for swe_rise_trans() must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
+      snprintf(serr, AS_MAXCH, "location for swe_rise_trans() must be between %.0f and %.0f m above sea", SEI_ECL_GEOALT_MIN, SEI_ECL_GEOALT_MAX);
     return ERR;
   }
   // if horhgt == -100, set horhgt = dip of horizon, i.e. refracted height
@@ -4681,7 +4681,7 @@ nazalt++;
     }
   }
   if (serr)
-    sprintf(serr, "rise or set not found for planet %d", ipl);
+    snprintf(serr, AS_MAXCH, "rise or set not found for planet %d", ipl);
   return -2; /* no t of rise or set found */
 }
 
@@ -5130,7 +5130,7 @@ int32 CALL_CONV swe_nod_aps(double tjd_et, int32 ipl, int32 iflag,
 	  // (ipl >= SE_FICT_OFFSET && ipl - SE_FICT_OFFSET < SE_NFICT_ELEM)) 
 	  {
     if (serr != NULL)
-      sprintf(serr, "nodes/apsides for planet %5.0f are not implemented", (double) ipl);
+      snprintf(serr, AS_MAXCH, "nodes/apsides for planet %5.0f are not implemented", (double) ipl);
     if (xnasc != NULL)
       for (i = 0; i <= 5; i++)
 	xnasc[i] = 0;
@@ -5791,7 +5791,7 @@ int32 CALL_CONV swe_get_orbital_elements(
   double r, ecce2;
   if (ipl <= 0 || ipl == SE_MEAN_NODE || ipl == SE_TRUE_NODE || ipl == SE_MEAN_APOG || ipl == SE_OSCU_APOG || ipl == SE_INTP_APOG || ipl == SE_INTP_PERG) {
     if (serr != NULL)
-      sprintf(serr, "error in swe_get_orbital_elements(): object %d not valid\n", ipl);
+      snprintf(serr, AS_MAXCH, "error in swe_get_orbital_elements(): object %d not valid\n", ipl);
     return ERR;
   }
   // if (ipl != SE_MOON) iflg0 |= SEFLG_HELCTR;
@@ -6325,7 +6325,7 @@ int32 CALL_CONV swe_gauquelin_sector(
   AS_BOOL above_horizon = FALSE;
   if (imeth < 0 || imeth > 5) {
     if (serr)
-          sprintf(serr, "invalid method: %d", imeth);
+          snprintf(serr, AS_MAXCH, "invalid method: %d", imeth);
     return ERR;
   }
   /* function calls for Pluto with asteroid number 134340
@@ -6422,7 +6422,7 @@ int32 CALL_CONV swe_gauquelin_sector(
   } else {
     *dgsect = 0;
     if (serr)
-      sprintf(serr, "rise or set not found for planet %d", ipl);
+      snprintf(serr, AS_MAXCH, "rise or set not found for planet %d", ipl);
     return ERR;
   }
 }

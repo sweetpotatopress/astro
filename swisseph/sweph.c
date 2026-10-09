@@ -233,7 +233,7 @@ static void trace_swe_get_planet_name(int swtch, int ipl, char *s);
 
 char *CALL_CONV swe_version(char *s)
 {
-  strcpy(s, SE_VERSION);
+  xstrcpy(s, SE_VERSION);
   return s;
 }
 
@@ -270,7 +270,7 @@ char *CALL_CONV swe_get_library_path(char *s)
 	strncpy(s, dli.dli_fname, len);
 	s[len] = '\0';
       } else{
-	strcpy(s, dli.dli_fname);
+	xstrcpy(s, dli.dli_fname);
       }
       bytes = strlen(s);
     } else {
@@ -381,7 +381,7 @@ int32 CALL_CONV swe_calc(double tjd, int ipl, int32 iflag,
     epheflag = SEFLG_SWIEPH;
   }
   if (swi_init_swed_if_start() == 1 && !(epheflag & SEFLG_MOSEPH) && serr != NULL) {
-    strcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_calc() or swe_calc_ut()");
+    xstrcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_calc() or swe_calc_ut()");
   }
   if (swed.last_epheflag != epheflag) {
     free_planets();
@@ -633,7 +633,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
   /* no barycentric calculations with Moshier ephemeris */
   if ((iflag & SEFLG_BARYCTR) && (iflag & SEFLG_MOSEPH)) {
     if (serr != NULL)
-      strcpy(serr, "barycentric Moshier positions are not supported.");
+      xstrcpy(serr, "barycentric Moshier positions are not supported.");
     return ERR;
   }
   if (epheflag != SEFLG_MOSEPH && !swed.ephe_path_is_set && !swed.jpl_file_is_open)
@@ -681,13 +681,13 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
         if (retc == NOT_AVAILABLE) {
 	  iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_SWIEPH;
 	  if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	    strcat(serr, " \ntrying Swiss Eph; ");
+	    xstrcat(serr, " \ntrying Swiss Eph; ");
 	  goto sweph_moon;
 	} else if (retc == BEYOND_EPH_LIMITS) {
 	  if (tjd > MOSHLUEPH_START && tjd < MOSHLUEPH_END) {
 	    iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_MOSEPH;
 	    if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	      strcat(serr, " \nusing Moshier Eph; ");
+	      xstrcat(serr, " \nusing Moshier Eph; ");
 	    goto moshier_moon;
 	  } else
 	    goto return_error;
@@ -704,7 +704,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
 	  if (tjd > MOSHLUEPH_START && tjd < MOSHLUEPH_END) {
 	    iflag = (iflag & ~SEFLG_SWIEPH) | SEFLG_MOSEPH;
 	    if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	      strcat(serr, " \nusing Moshier eph.; ");
+	      xstrcat(serr, " \nusing Moshier eph.; ");
 	    goto moshier_moon;
 	  } else 
 	    goto return_error;
@@ -765,7 +765,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
         if (retc == NOT_AVAILABLE) {
 	  iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_SWIEPH;
 	  if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	    strcat(serr, " \ntrying Swiss Eph; ");
+	    xstrcat(serr, " \ntrying Swiss Eph; ");
 	  goto sweph_sbar;
 	}
 	psdp->teval = tjd;
@@ -787,7 +787,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
 	  if (tjd > MOSHLUEPH_START && tjd < MOSHLUEPH_END) {
 	    iflag = (iflag & ~SEFLG_SWIEPH) | SEFLG_MOSEPH;
 	    if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	      strcat(serr, " \nusing Moshier; ");
+	      xstrcat(serr, " \nusing Moshier; ");
 	    goto moshier_sbar;
 	  } else
 	    goto return_error;
@@ -979,7 +979,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
       for (i = 0; i < 24; i++)
 	x[i] = 0;
       if (serr != NULL)
-	sprintf(serr, "Interpolated apsides are restricted to JD %8.1f - JD %8.1f",
+	snprintf(serr, AS_MAXCH, "Interpolated apsides are restricted to JD %8.1f - JD %8.1f",
 		MOSHLUEPH_START, MOSHLUEPH_END);
       return ERR;
     }
@@ -1003,7 +1003,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
       for (i = 0; i < 24; i++)
 	x[i] = 0;
       if (serr != NULL)
-	sprintf(serr, "Interpolated apsides are restricted to JD %8.1f - JD %8.1f",
+	snprintf(serr, AS_MAXCH, "Interpolated apsides are restricted to JD %8.1f - JD %8.1f",
 		MOSHLUEPH_START, MOSHLUEPH_END);
       return ERR;
     }
@@ -1050,13 +1050,13 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
     }
     if (ipli == SEI_CHIRON && (tjd < CHIRON_START || tjd > CHIRON_END)) {
       if (serr != NULL)
-	sprintf(serr, "Chiron's ephemeris is restricted to JD %8.1f - JD %8.1f",
+	snprintf(serr, AS_MAXCH, "Chiron's ephemeris is restricted to JD %8.1f - JD %8.1f",
 		CHIRON_START, CHIRON_END);
       return ERR;
     }
     if (ipli == SEI_PHOLUS && (tjd < PHOLUS_START || tjd > PHOLUS_END)) {
       if (serr != NULL)
-	sprintf(serr, 
+	snprintf(serr, AS_MAXCH, 
 		"Pholus's ephemeris is restricted to JD %8.1f - JD %8.1f",
 		PHOLUS_START, PHOLUS_END);
       return ERR;
@@ -1070,7 +1070,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
     iflag = swed.pldat[SEI_EARTH].xflgs;
     /* asteroid */
     if (serr != NULL) {
-      strcpy(serr2, serr); 
+      xstrcpy(serr2, serr); 
       *serr = '\0';
     }
     /* asteroid */
@@ -1088,16 +1088,16 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
 	iflag = (iflag & ~SEFLG_EPHMASK) | SEFLG_MOSEPH;
 	epheflag = SEFLG_MOSEPH;
 	if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	  strcat(serr, "\nusing Moshier eph.; ");
+	  xstrcat(serr, "\nusing Moshier eph.; ");
 	goto do_asteroid;
       } else
 	goto return_error;
     }
     /* add warnings from earth/sun computation */
     if (serr != NULL && *serr == '\0' && *serr2 != '\0') {
-      strcpy(serr, "sun: ");
+      xstrcpy(serr, "sun: ");
       serr2[AS_MAXCH-5] = '\0';
-      strcat(serr, serr2);
+      xstrcat(serr, serr2);
     }
   /*********************************************** 
    * fictitious planets                          *    
@@ -1129,7 +1129,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
 	iflag = (iflag & ~SEFLG_EPHMASK) | SEFLG_MOSEPH;
 	epheflag = SEFLG_MOSEPH;
 	if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	  strcat(serr, "\nusing Moshier eph.; ");
+	  xstrcat(serr, "\nusing Moshier eph.; ");
 	goto do_fict_plan;
       } else
 	goto return_error;
@@ -1139,7 +1139,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
    ***********************************************/
   } else {
     if (serr != NULL) {
-      sprintf(serr, "illegal planet number %d.", ipl);
+      snprintf(serr, AS_MAXCH, "illegal planet number %d.", ipl);
     }
     goto return_error;
   }
@@ -1183,8 +1183,8 @@ int32 swi_init_swed_if_start(void)
   /* initialisation of swed, when called first time from */
   if (!swed.swed_is_initialised) {
     memset((void *) &swed, 0, sizeof(struct swe_data));
-    strcpy(swed.ephepath, SE_EPHE_PATH);
-    strcpy(swed.jplfnam, SE_FNAME_DFT);
+    xstrcpy(swed.ephepath, SE_EPHE_PATH);
+    xstrcpy(swed.jplfnam, SE_FNAME_DFT);
     swe_set_tid_acc(SE_TIDAL_AUTOMATIC);
     swed.swed_is_initialised = TRUE;
     return 1;
@@ -1327,18 +1327,18 @@ void CALL_CONV swe_set_ephe_path(const char *path)
   if ((sp = getenv("SE_EPHE_PATH")) != NULL 
     && strlen(sp) != 0
     && strlen(sp) <= AS_MAXCH-1-13) {
-    strcpy(s, sp);
+    xstrcpy(s, sp);
   } else if (path == NULL || *path == '\0') {
-    strcpy(s, SE_EPHE_PATH);
+    xstrcpy(s, SE_EPHE_PATH);
   } else if (strlen(path) <= AS_MAXCH-1-13) {
-    strcpy(s, path);
+    xstrcpy(s, path);
   } else {
-    strcpy(s, SE_EPHE_PATH);
+    xstrcpy(s, SE_EPHE_PATH);
   }
   i = (int) strlen(s);
   if (*(s + i - 1) != *DIR_GLUE && *s != '\0')
-    strcat(s, DIR_GLUE);
-  strcpy(swed.ephepath, s);
+    xstrcat(s, DIR_GLUE);
+  xstrcpy(swed.ephepath, s);
 //swe_set_interpolate_nut(TRUE);
   /* try to open lunar ephemeris, in order to get DE number and set
    * tidal acceleration of the Moon */
@@ -1356,7 +1356,7 @@ void CALL_CONV swe_set_ephe_path(const char *path)
       if (path == NULL) {
         fputs("  *s = '\\0';\n", swi_fp_trace_c);
       } else {
-	fprintf(swi_fp_trace_c, "  strcpy(s, \"%s\");\n", path);
+	fprintf(swi_fp_trace_c, "  xstrcpy(s, \"%s\");\n", path);
       }
       fputs("  swe_set_ephe_path(s);\n", swi_fp_trace_c);
       fputs("  printf(\"swe_set_ephe_path: path_in = \");", swi_fp_trace_c);
@@ -1485,7 +1485,7 @@ void CALL_CONV swe_set_jpl_file(const char *fname)
      strncpy(s, fname, AS_MAXCH - 1);
      s[AS_MAXCH - 1] = '\0';
   } else {
-    strcpy(s, fname);
+    xstrcpy(s, fname);
   }
   sp = strrchr(s, (int) *DIR_GLUE);
   if (sp == NULL) {
@@ -1495,7 +1495,7 @@ void CALL_CONV swe_set_jpl_file(const char *fname)
   }
   if (strlen(sp) >= AS_MAXCH)
     sp[AS_MAXCH - 1] = '\0';
-  strcpy(swed.jplfnam, sp);
+  xstrcpy(swed.jplfnam, sp);
   /* open ephemeris */
   retc = open_jpl_file(ss, swed.jplfnam, swed.ephepath, NULL);
   if (retc == OK) {
@@ -1509,7 +1509,7 @@ void CALL_CONV swe_set_jpl_file(const char *fname)
   if (swi_trace_count < TRACE_COUNT_MAX) {
     if (swi_fp_trace_c != NULL) {
       fputs("\n/*SWE_SET_JPL_FILE*/\n", swi_fp_trace_c);
-      fprintf(swi_fp_trace_c, "  strcpy(s, \"%s\");\n", fname);
+      fprintf(swi_fp_trace_c, "  xstrcpy(s, \"%s\");\n", fname);
       fputs("  swe_set_jpl_file(s);\n", swi_fp_trace_c);
       fputs("  printf(\"swe_set_jpl_file: fname_in = \");", swi_fp_trace_c);
       fputs("  printf(s);\n", swi_fp_trace_c);
@@ -1581,13 +1581,13 @@ static int main_planet(double tjd, int ipli, int iplmoon, int32 epheflag, int32 
       if (retc == NOT_AVAILABLE) {
 	iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_SWIEPH;
 	if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	  strcat(serr, " \ntrying Swiss Eph; ");
+	  xstrcat(serr, " \ntrying Swiss Eph; ");
 	goto sweph_planet;
       } else if (retc == BEYOND_EPH_LIMITS) {
 	if (tjd > MOSHPLEPH_START && tjd < MOSHPLEPH_END) {
 	  iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_MOSEPH;
 	  if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	    strcat(serr, " \nusing Moshier Eph; ");
+	    xstrcat(serr, " \nusing Moshier Eph; ");
 	  goto moshier_planet;
 	} else {
 	  return ERR;
@@ -1605,13 +1605,13 @@ static int main_planet(double tjd, int ipli, int iplmoon, int32 epheflag, int32 
       if (retc == NOT_AVAILABLE) {
 	iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_SWIEPH;
 	if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	  strcat(serr, " \ntrying Swiss Eph; ");
+	  xstrcat(serr, " \ntrying Swiss Eph; ");
 	goto sweph_planet;
       } else if (retc == BEYOND_EPH_LIMITS) {
 	if (tjd > MOSHPLEPH_START && tjd < MOSHPLEPH_END) {
 	  iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_MOSEPH;
 	  if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	    strcat(serr, " \nusing Moshier Eph; ");
+	    xstrcat(serr, " \nusing Moshier Eph; ");
 	  goto moshier_planet;
 	} else
 	  return ERR;
@@ -1628,7 +1628,7 @@ static int main_planet(double tjd, int ipli, int iplmoon, int32 epheflag, int32 
 	if (tjd > MOSHPLEPH_START && tjd < MOSHPLEPH_END) {
 	  iflag = (iflag & ~SEFLG_SWIEPH) | SEFLG_MOSEPH;
 	  if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	    strcat(serr, " \nusing Moshier eph.; ");
+	    xstrcat(serr, " \nusing Moshier eph.; ");
 	  goto moshier_planet;
 	} else 
 	  return ERR;
@@ -1646,7 +1646,7 @@ static int main_planet(double tjd, int ipli, int iplmoon, int32 epheflag, int32 
 	if (tjd > MOSHPLEPH_START && tjd < MOSHPLEPH_END) {
 	  iflag = (iflag & ~SEFLG_SWIEPH) | SEFLG_MOSEPH;
 	  if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	    strcat(serr, " \nusing Moshier eph.; ");
+	    xstrcat(serr, " \nusing Moshier eph.; ");
 	  goto moshier_planet;
 	} else
 	  return ERR;
@@ -1709,7 +1709,7 @@ static int main_planet_bary(double tjd, int ipli, int32 epheflag, int32 iflag, A
       if (retc == NOT_AVAILABLE) {
 	iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_SWIEPH;
 	if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	  strcat(serr, " \ntrying Swiss Eph; ");
+	  xstrcat(serr, " \ntrying Swiss Eph; ");
 	goto sweph_planet;
       }
       break;
@@ -1725,7 +1725,7 @@ static int main_planet_bary(double tjd, int ipli, int32 epheflag, int32 iflag, A
 	if (tjd > MOSHPLEPH_START && tjd < MOSHPLEPH_END) {
 	  iflag = (iflag & ~SEFLG_SWIEPH) | SEFLG_MOSEPH;
 	  if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	    strcat(serr, " \nusing Moshier eph.; ");
+	    xstrcat(serr, " \nusing Moshier eph.; ");
 	  goto moshier_planet;
 	} else {
 	  return ERR;
@@ -1891,7 +1891,7 @@ static int sweplan(double tjd, int ipli, int ifno, int32 iflag, AS_BOOL do_save,
       /* if moon file doesn't exist, take moshier moon */
       if (swed.fidat[SEI_FILE_MOON].fptr == NULL) {
 	if (serr != NULL && strlen(serr) + 35 < AS_MAXCH)
-	  strcat(serr, " \nusing Moshier eph. for moon; ");
+	  xstrcat(serr, " \nusing Moshier eph. for moon; ");
 	retc = swi_moshmoon(tjd, do_save, xpm, serr);
 	if (retc != OK)
 	  return(retc);
@@ -2179,7 +2179,7 @@ static int sweph(double tjd, int ipli, int ifno, int32 iflag, double *xsunb, AS_
   /* if sweph file not open, find and open it */
   if (fdp->fptr == NULL) {
     swi_gen_filename(tjd, ipli, fname); 
-    strcpy(subdirnam, fname);
+    xstrcpy(subdirnam, fname);
     sp = strrchr(subdirnam, (int) *DIR_GLUE);
     if (sp != NULL) {
       *sp = '\0';
@@ -2187,14 +2187,14 @@ static int sweph(double tjd, int ipli, int ifno, int32 iflag, double *xsunb, AS_
     } else {
       subdirlen = 0;
     }
-    strcpy(s, fname);
+    xstrcpy(s, fname);
 again:
     fdp->fptr = swi_fopen(ifno, s, swed.ephepath, serr);
     if (fdp->fptr == NULL) {
       // if it is a planetary moon, also try without the directory "sat/"
       if (ipli > SE_PLMOON_OFFSET && ipli < SE_AST_OFFSET) { 
 	if (subdirlen > 0 && strncmp(s, subdirnam, (size_t) subdirlen) == 0) {
-	  swi_strcpy(s, s + subdirlen + 1);	/* remove "sat/" etc. */
+	  xstrcpy(s, s + subdirlen + 1);	/* remove "sat/" etc. */
 	  goto again;
 	}
       /*
@@ -2205,7 +2205,7 @@ again:
 	char *spp;
 	spp = strchr(s, '.');
 	if (spp > s && *(spp-1) != 's') {	/* no 's' before '.' ? */
-	  sprintf(spp, "s.%s", SE_FILE_SUFFIX);	/* insert an 's' */
+	  snprintf(spp, AS_MAXCH, "s.%s", SE_FILE_SUFFIX);	/* insert an 's' */
 	  goto again;
 	}
 	/*
@@ -2215,9 +2215,9 @@ again:
 	 * asteroid subdirectory.
 	 */
         spp--;	/* point to the character before '.' which must be a 's' */
-	swi_strcpy(spp, spp + 1);	/* remove the s */
+	xstrcpy(spp, spp + 1);	/* remove the s */
 	if (subdirlen > 0 && strncmp(s, subdirnam, (size_t) subdirlen) == 0) {
-	  swi_strcpy(s, s + subdirlen + 1);	/* remove "ast0/" etc. */
+	  xstrcpy(s, s + subdirlen + 1);	/* remove "ast0/" etc. */
 	  goto again;
 	}
       }
@@ -2241,28 +2241,28 @@ again:
         sp = fname;
       }
       if (ipli > SE_AST_OFFSET) {
-        sprintf(s, "asteroid No. %d (%s): ", ipli - SE_AST_OFFSET, sp);
+        snprintf(s, AS_MAXCH, "asteroid No. %d (%s): ", ipli - SE_AST_OFFSET, sp);
       } else if (ipli > SE_PLMOON_OFFSET) {
 	if (strstr(fname, "99.") != NULL) 
-	  sprintf(s, "plan. COB No. %d (%s): ", ipli, sp);
+	  snprintf(s, AS_MAXCH, "plan. COB No. %d (%s): ", ipli, sp);
 	else
-	  sprintf(s, "plan. moon No. %d (%s): ", ipli, sp);
+	  snprintf(s, AS_MAXCH, "plan. moon No. %d (%s): ", ipli, sp);
       } else if (ipli > SEI_PLUTO) {
-        sprintf(s, "asteroid eph. file (%s): ", sp);
+        snprintf(s, AS_MAXCH, "asteroid eph. file (%s): ", sp);
       } else if (ipli != SEI_MOON) {
-        sprintf(s, "planets eph. file (%s): ", sp);
+        snprintf(s, AS_MAXCH, "planets eph. file (%s): ", sp);
       } else {
-        sprintf(s, "moon eph. file (%s): ", sp);
+        snprintf(s, AS_MAXCH, "moon eph. file (%s): ", sp);
       }
       if (tjd < fdp->tfstart) {
-	sprintf(s + strlen(s), "jd %f < lower limit %f;", 
+	snprintf(s + strlen(s), AS_MAXCH, "jd %f < lower limit %f;", 
 		  tjd, fdp->tfstart); 
       } else {
-	sprintf(s + strlen(s), "jd %f > upper limit %f;", 
+	snprintf(s + strlen(s), AS_MAXCH, "jd %f > upper limit %f;", 
 		  tjd, fdp->tfend); 
       }
       if (strlen(serr) + strlen(s) < AS_MAXCH)
-	strcat(serr, s);
+	xstrcat(serr, s);
     }
     return(NOT_AVAILABLE);
   }
@@ -2373,34 +2373,34 @@ FILE *swi_fopen(int ifno, char *fname, char *ephepath, char *serr)
   } else {
     fnamp = fn; 
   }
-  strcpy(s1, ephepath);
+  xstrcpy(s1, ephepath);
   np = swi_cutstr(s1, PATH_SEPARATOR, cpos, 20);
   *s = '\0';
   for (i = 0; i < np; i++) {
-    strcpy(s, cpos[i]);
+    xstrcpy(s, cpos[i]);
     if (strcmp(s, ".") == 0) { /* current directory */
       *s = '\0';
     } else {
       j = (int) strlen(s);
       if (*s != '\0' && *(s + j - 1) != *DIR_GLUE)
-	strcat(s, DIR_GLUE);
+	xstrcat(s, DIR_GLUE);
     }
     if (strlen(s) + strlen(fname) < AS_MAXCH) {
-      strcat(s, fname);
+      xstrcat(s, fname);
     } else {
       if (serr != NULL)
-	sprintf(serr, "error: file path and name must be shorter than %d.", AS_MAXCH);
+	snprintf(serr, AS_MAXCH, "error: file path and name must be shorter than %d.", AS_MAXCH);
       return NULL;
     }
-    strcpy(fnamp, s);
+    xstrcpy(fnamp, s);
     fp = fopen(fnamp, BFILE_R_ACCESS);
     if (fp != NULL) 
       return fp;
   }
-  sprintf(s, "SwissEph file '%s' not found in PATH '%s'", fname, ephepath);
+  snprintf(s, AS_MAXCH, "SwissEph file '%s' not found in PATH '%s'", fname, ephepath);
   s[AS_MAXCH-1] = '\0';		/* s must not be longer then AS_MAXCH */
   if (serr != NULL)
-    strcpy(serr, s);
+    xstrcpy(serr, s);
   return NULL;
 }
 
@@ -3042,12 +3042,12 @@ int32 swi_get_ayanamsa_ex(double tjd_et, int32 iflag, double *daya, char *serr)
       || sid_mode == SE_SIDM_GALEQU_TRUE
       || sid_mode == SE_SIDM_GALEQU_MULA) 
       && serr != NULL) {
-    strcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_get_ayanamsa_ex()");
+    xstrcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_get_ayanamsa_ex()");
   }
   if (!swed.ayana_is_set)
     swe_set_sid_mode(SE_SIDM_FAGAN_BRADLEY, 0, 0);
   if (sid_mode == SE_SIDM_TRUE_CITRA) {
-    strcpy(star, "Spica"); /* Citra */
+    xstrcpy(star, "Spica"); /* Citra */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true, x, serr)) == ERR) {
       return ERR; 
     }
@@ -3056,35 +3056,35 @@ int32 swi_get_ayanamsa_ex(double tjd_et, int32 iflag, double *daya, char *serr)
     return (retflag & SEFLG_EPHMASK);
   }
   if (sid_mode == SE_SIDM_TRUE_REVATI) {
-    strcpy(star, ",zePsc"); /* Revati */
+    xstrcpy(star, ",zePsc"); /* Revati */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 359.8333333333);
     return (retflag & SEFLG_EPHMASK);
   }
   if (sid_mode == SE_SIDM_TRUE_PUSHYA) {
-    strcpy(star, ",deCnc"); /* Pushya = Asellus Australis */
+    xstrcpy(star, ",deCnc"); /* Pushya = Asellus Australis */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 106);
     return (retflag & SEFLG_EPHMASK);
   }
   if (sid_mode == SE_SIDM_TRUE_SHEORAN) {
-    strcpy(star, ",deCnc"); /* Asellus Australis */
+    xstrcpy(star, ",deCnc"); /* Asellus Australis */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 103.49264221625);
     return (retflag & SEFLG_EPHMASK);
   }
   if (sid_mode == SE_SIDM_TRUE_MULA) {
-    strcpy(star, ",laSco"); /* Mula = lambda Scorpionis */
+    xstrcpy(star, ",laSco"); /* Mula = lambda Scorpionis */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 240);
     return (retflag & SEFLG_EPHMASK);
   }
   if (sid_mode ==  SE_SIDM_GALCENT_0SAG) {
-    strcpy(star, ",SgrA*"); /* Galactic Centre */
+    xstrcpy(star, ",SgrA*"); /* Galactic Centre */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 240.0);
@@ -3092,7 +3092,7 @@ int32 swi_get_ayanamsa_ex(double tjd_et, int32 iflag, double *daya, char *serr)
     /*return swe_degnorm(x[0] - 359.83333333334);*/
   }
   if (sid_mode ==  SE_SIDM_GALCENT_COCHRANE) {
-    strcpy(star, ",SgrA*"); /* Galactic Centre */
+    xstrcpy(star, ",SgrA*"); /* Galactic Centre */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 270.0);
@@ -3100,7 +3100,7 @@ int32 swi_get_ayanamsa_ex(double tjd_et, int32 iflag, double *daya, char *serr)
     /*return swe_degnorm(x[0] - 359.83333333334);*/
   }
   if (sid_mode ==  SE_SIDM_GALCENT_RGILBRAND) {
-    strcpy(star, ",SgrA*"); /* Galactic Centre */
+    xstrcpy(star, ",SgrA*"); /* Galactic Centre */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 210.0 - 90.0 * 0.3819660113);
@@ -3108,7 +3108,7 @@ int32 swi_get_ayanamsa_ex(double tjd_et, int32 iflag, double *daya, char *serr)
     /*return swe_degnorm(x[0] - 359.83333333334);*/
   }
   if (sid_mode == SE_SIDM_GALCENT_MULA_WILHELM) {
-    strcpy(star, ",SgrA*"); /* Galactic Centre */
+    xstrcpy(star, ",SgrA*"); /* Galactic Centre */
     /* right ascension in polar projection onto the ecliptic, 
      * and that point is put in the middle of Mula */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_true | SEFLG_EQUATORIAL, x, serr)) == ERR)
@@ -3120,21 +3120,21 @@ int32 swi_get_ayanamsa_ex(double tjd_et, int32 iflag, double *daya, char *serr)
     /*return swe_degnorm(x[0] - 359.83333333334);*/
   }
   if (sid_mode == SE_SIDM_GALEQU_IAU1958) {
-    strcpy(star, ",GP1958"); /* Galactic Pole IAU 1958 */
+    xstrcpy(star, ",GP1958"); /* Galactic Pole IAU 1958 */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_galequ, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 150);
     return (retflag & SEFLG_EPHMASK);
   }
   if (sid_mode == SE_SIDM_GALEQU_TRUE) {
-    strcpy(star, ",GPol"); /* Galactic Pole modern, true */
+    xstrcpy(star, ",GPol"); /* Galactic Pole modern, true */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_galequ, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 150);
     return (retflag & SEFLG_EPHMASK);
   }
   if (sid_mode == SE_SIDM_GALEQU_MULA) {
-    strcpy(star, ",GPol"); /* Galactic Pole modern, true */
+    xstrcpy(star, ",GPol"); /* Galactic Pole modern, true */
     if ((retflag = swe_fixstar(star, tjd_et, iflag_galequ, x, serr)) == ERR)
       return ERR;
     *daya = swe_degnorm(x[0] - 150 - 6.6666666667);
@@ -4427,9 +4427,9 @@ static int get_new_segment(double tjd, int ipli, int ifno, char *serr)
      * order + 1 */
     if (nco > pdp->ncoe) {
       if (serr != NULL) {
-	sprintf(serr, "error in ephemeris file: %d coefficients instead of %d. ", nco, pdp->ncoe);
+	snprintf(serr, AS_MAXCH, "error in ephemeris file: %d coefficients instead of %d. ", nco, pdp->ncoe);
 	if (strlen(serr) + strlen(fdp->fnam) < AS_MAXCH - 1) {
-	  sprintf(serr, "error in ephemeris file %s: %d coefficients instead of %d. ", fdp->fnam, nco, pdp->ncoe);
+	  snprintf(serr, AS_MAXCH, "error in ephemeris file %s: %d coefficients instead of %d. ", fdp->fnam, nco, pdp->ncoe);
 	}
       }
       free(pdp->segp);
@@ -4562,7 +4562,7 @@ static int read_const(int ifno, char *serr)
   } else {
     sp++;
   }
-  strcpy(s2, sp);
+  xstrcpy(s2, sp);
   /* to lower case */
   for (sp = s2; *sp != '\0'; sp++)
     *sp = tolower((int) *sp);
@@ -4576,7 +4576,7 @@ static int read_const(int ifno, char *serr)
     *sp = tolower((int) *sp);
   if (strcmp(s2, s) != 0) {
     if (serr != NULL) {
-      sprintf(serr, "Ephemeris file name '%s' wrong; rename '%s' ", s2, s);
+      snprintf(serr, AS_MAXCH, "Ephemeris file name '%s' wrong; rename '%s' ", s2, s);
     }
     goto return_error;
   }
@@ -4606,7 +4606,7 @@ static int read_const(int ifno, char *serr)
     strncpy(sastnam, s, lastnam+i);	// fixed 19-nov-19
     *(sastnam+lastnam+i) = '\0';
     /* save elements, they are required for swe_plan_pheno() */
-    strcpy(swed.astelem, s);
+    xstrcpy(swed.astelem, s);
     /* required for magnitude */
     swed.ast_H = atof(s + 35 + i);
     swed.ast_G = atof(s + 42 + i);
@@ -4876,7 +4876,7 @@ file_damage:
   if (serr != NULL) {
     *serr = '\0';
     if (strlen(serr_file_damage) + strlen(fdp->fnam) + strlen(smsg) < AS_MAXCH) {
-      sprintf(serr, serr_file_damage, fdp->fnam, smsg);
+      snprintf(serr, AS_MAXCH, serr_file_damage, fdp->fnam, smsg);
     }
   }
 return_error:
@@ -4914,9 +4914,9 @@ static int do_fread(void *trg, int size, int count, int corrsize, FILE *fp, int3
   if (!freord && size == corrsize) {
     if (fread((void *) targ, (size_t) totsize, 1, fp) == 0) {
       if (serr != NULL) {
-	strcpy(serr, "Ephemeris file is damaged (1). ");
+	xstrcpy(serr, "Ephemeris file is damaged (1). ");
 	if (strlen(serr) + strlen(swed.fidat[ifno].fnam) < AS_MAXCH - 1) {
-	  sprintf(serr, "Ephemeris file %s is damaged (2).", swed.fidat[ifno].fnam);
+	  snprintf(serr, AS_MAXCH, "Ephemeris file %s is damaged (2).", swed.fidat[ifno].fnam);
 	}
       }
       return(ERR);
@@ -4925,9 +4925,9 @@ static int do_fread(void *trg, int size, int count, int corrsize, FILE *fp, int3
   } else {
     if (fread((void *) &space[0], (size_t) totsize, 1, fp) == 0) {
       if (serr != NULL) {
-	strcpy(serr, "Ephemeris file is damaged (3). ");
+	xstrcpy(serr, "Ephemeris file is damaged (3). ");
 	if (strlen(serr) + strlen(swed.fidat[ifno].fnam) < AS_MAXCH - 1) {
-	  sprintf(serr, "Ephemeris file %s is damaged (4).", swed.fidat[ifno].fnam);
+	  snprintf(serr, AS_MAXCH, "Ephemeris file %s is damaged (4).", swed.fidat[ifno].fnam);
 	}
       }
       return(ERR);
@@ -5283,14 +5283,14 @@ static int lunar_osc_elem(double tjd, int ipl, int32 iflag, char *serr)
 	  iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_SWIEPH;
 	  epheflag = SEFLG_SWIEPH;
 	  if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	    strcat(serr, " \ntrying Swiss Eph; ");
+	    xstrcat(serr, " \ntrying Swiss Eph; ");
 	  break;
 	} else if (retc == BEYOND_EPH_LIMITS) {
 	  if (tjd > MOSHLUEPH_START && tjd < MOSHLUEPH_END) {
 	    iflag = (iflag & ~SEFLG_JPLEPH) | SEFLG_MOSEPH;
 	    epheflag = SEFLG_MOSEPH;
 	    if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	      strcat(serr, " \nusing Moshier Eph; ");
+	      xstrcat(serr, " \nusing Moshier Eph; ");
 	    break;
 	  } else
 	    return ERR;
@@ -5324,7 +5324,7 @@ static int lunar_osc_elem(double tjd, int ipl, int32 iflag, char *serr)
 	    iflag = (iflag & ~SEFLG_SWIEPH) | SEFLG_MOSEPH;
 	    epheflag = SEFLG_MOSEPH;
 	    if (serr != NULL && strlen(serr) + 30 < AS_MAXCH)
-	      strcat(serr, " \nusing Moshier eph.; ");
+	      xstrcat(serr, " \nusing Moshier eph.; ");
 	    break;
 	  } else
 	    return ERR;
@@ -6123,16 +6123,16 @@ static int32 plaus_iflag(int32 iflag, int32 ipl, double tjd, char *serr)
       if (serr != NULL) {
 	switch (swed.eop_dpsi_loaded) {
 	  case 0:
-	    strcpy(serr, "you did not call swe_set_jpl_file(); default to SEFLG_JPLHOR_APPROX");
+	    xstrcpy(serr, "you did not call swe_set_jpl_file(); default to SEFLG_JPLHOR_APPROX");
 	    break;
 	  case -1:
-	    strcpy(serr, "file eop_1962_today.txt not found; default to SEFLG_JPLHOR_APPROX");
+	    xstrcpy(serr, "file eop_1962_today.txt not found; default to SEFLG_JPLHOR_APPROX");
 	    break;
 	  case -2:
-	    strcpy(serr, "file eop_1962_today.txt corrupt; default to SEFLG_JPLHOR_APPROX");
+	    xstrcpy(serr, "file eop_1962_today.txt corrupt; default to SEFLG_JPLHOR_APPROX");
 	    break;
 	  case -3:
-	    strcpy(serr, "file eop_finals.txt corrupt; default to SEFLG_JPLHOR_APPROX");
+	    xstrcpy(serr, "file eop_finals.txt corrupt; default to SEFLG_JPLHOR_APPROX");
 	    break;
 	}
       }
@@ -6159,7 +6159,7 @@ static int32 fixstar_format_search_name(char *star, char *sstar, char *serr)
   sstar[SWI_STAR_LENGTH] = '\0';
   // remove whitespaces from search name
   while ((sp = strchr(sstar, ' ')) != NULL)
-    swi_strcpy(sp, sp+1);
+    xstrcpy(sp, sp+1);
   /* traditional name of star to lower case;
    * keep uppercase with Bayer/Flamsteed designations after comma */
   for (sp = sstar; *sp != '\0' && *sp != ','; sp++) 
@@ -6167,7 +6167,7 @@ static int32 fixstar_format_search_name(char *star, char *sstar, char *serr)
   cmplen = strlen(sstar);
   if (cmplen == 0) {
     if (serr != NULL)
-      sprintf(serr, "swe_fixstar(): star name empty");
+      snprintf(serr, AS_MAXCH, "swe_fixstar(): star name empty");
     return ERR; 
   }
   return OK;
@@ -6181,7 +6181,7 @@ static int32 save_star_in_struct(int nrecs, struct fixed_star *fstp, char *serr)
   struct fixed_star *ftarget;
   char *serr_alloc = "error in function load_all_fixed_stars(): could not resize fixed stars array";
   if ((swed.fixed_stars = (struct fixed_star *) realloc(swed.fixed_stars, nrecs * sizestru)) == NULL) {
-    if (serr != NULL) strcpy(serr, serr_alloc);
+    if (serr != NULL) xstrcpy(serr, serr_alloc);
     return ERR;
   }
   ftarget = swed.fixed_stars + (nrecs - 1);
@@ -6217,7 +6217,7 @@ int32 fixstar_cut_string(char *srecord, char *star, struct fixed_star *stardata,
   double epoch, radv, parall, mag;
   double ra_s, ra_pm, de_pm, ra, de;
   double ra_h, ra_m, de_d, de_m, de_s;
-  strcpy(s, srecord);
+  xstrcpy(s, srecord);
   i = swi_cutstr(s, ",", cpos, 20);
   /* return trad. name, nomeclature name */
   swi_right_trim(cpos[0]);
@@ -6225,10 +6225,10 @@ int32 fixstar_cut_string(char *srecord, char *star, struct fixed_star *stardata,
   if (i < 14) {
     if (serr != NULL) {
       if (i >= 2) {
-	sprintf(serr, "data of star '%s,%s' incomplete", cpos[0], cpos[1]);
+	snprintf(serr, AS_MAXCH, "data of star '%s,%s' incomplete", cpos[0], cpos[1]);
       } else {
         if (strlen(s) > 200) s[200] = '\0';
-	sprintf(serr, "invalid line in fixed stars file: '%s'", s);
+	snprintf(serr, AS_MAXCH, "invalid line in fixed stars file: '%s'", s);
       }
     }
     return ERR;
@@ -6238,12 +6238,12 @@ int32 fixstar_cut_string(char *srecord, char *star, struct fixed_star *stardata,
   if (strlen(cpos[1]) > SWI_STAR_LENGTH-1)
     cpos[1][SWI_STAR_LENGTH-1] = '\0';
   if (star != NULL) {
-    strcpy(star, cpos[0]);
+    xstrcpy(star, cpos[0]);
     if (strlen(cpos[0]) + strlen(cpos[1]) + 1 < SWI_STAR_LENGTH - 1)
-      sprintf(star + strlen(star), ",%s", cpos[1]);
+      snprintf(star + strlen(star), AS_MAXCH, ",%s", cpos[1]);
   }
-  strcpy(stardata->starname, cpos[0]);
-  strcpy(stardata->starbayer, cpos[1]);
+  xstrcpy(stardata->starname, cpos[0]);
+  xstrcpy(stardata->starbayer, cpos[1]);
   // star data
   epoch = atof(cpos[2]);
   ra_h = atof(cpos[3]);
@@ -6351,17 +6351,17 @@ static int32 load_all_fixed_stars(char *serr)
     if (*s == '\n') continue;
     if (*s == '\r') continue;
     if (*s == '\0') continue;
-    strcpy(srecord, s);
+    xstrcpy(srecord, s);
     retc = fixstar_cut_string(srecord, NULL, &fstdata, serr);
     if (retc == ERR) return ERR;
     // if star has a traditional name, save it with that name as its search key
     if (*fstdata.starname != '\0') {
       nrecs++;
       nnamed++;
-      strcpy(fstdata.skey, fstdata.starname);
+      xstrcpy(fstdata.skey, fstdata.starname);
       // remove white spaces from star name
       while ((sp = strchr(fstdata.skey, ' ')) != NULL)
-	swi_strcpy(sp, sp+1);
+	xstrcpy(sp, sp+1);
       // star name to lowercase and compare with search string
       for (sp = fstdata.skey; *sp != '\0'; sp++) 
 	*sp = tolower((int) *sp);
@@ -6374,11 +6374,11 @@ static int32 load_all_fixed_stars(char *serr)
     nstars++;
     nrecs++;
     //sprintf(fstdata.skey, "~%s", fstdata.starbayer); // ~ sorts after alnum
-    sprintf(fstdata.skey, ",%s", fstdata.starbayer); // , sorts before alnum
+    snprintf(fstdata.skey, 200, ",%s", fstdata.starbayer); // , sorts before alnum
     // remove white spaces from star bayer name
     while ((sp = strchr(fstdata.skey, ' ')) != NULL)
-      swi_strcpy(sp, sp+1);
-    strcpy(last_starbayer, fstdata.starbayer);
+      xstrcpy(sp, sp+1);
+    xstrcpy(last_starbayer, fstdata.starbayer);
     if ((retc = save_star_in_struct(nrecs, &fstdata, serr)) == ERR) return ERR;
     // also save it with sequential star number as search key (NO!!!!)
     // nrecs++;
@@ -6423,7 +6423,7 @@ static int32 fixstar_calc_from_struct(struct fixed_star *stardata, double tjd, i
   iflag = plaus_iflag(iflag, -1, tjd, serr);
   epheflag = iflag & SEFLG_EPHMASK;
   if (swi_init_swed_if_start() == 1 && !(epheflag & SEFLG_MOSEPH) && serr != NULL) {
-    strcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_fixstar() or swe_fixstar_ut()");
+    xstrcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_fixstar() or swe_fixstar_ut()");
   }
   if (swed.last_epheflag != epheflag) {
     free_planets();
@@ -6451,7 +6451,7 @@ static int32 fixstar_calc_from_struct(struct fixed_star *stardata, double tjd, i
    * nutation                               * 
    ******************************************/
   swi_check_nutation(tjd, iflag);
-  sprintf(star, "%s,%s", stardata->starname, stardata->starbayer);
+  snprintf(star, AS_MAXCH, "%s,%s", stardata->starname, stardata->starbayer);
   epoch = stardata->epoch;
   ra_pm = stardata->ramot; de_pm = stardata->demot;
   radv = stardata->radvel; parall = stardata->parall; 
@@ -6685,14 +6685,14 @@ static int32 search_star_in_list(char *sstar, struct fixed_star *stardata, char 
     star_nr = atoi(sstar);
   } else {
     if ((sp = strchr(sstar, ',')) != NULL) {
-      swi_strcpy(sstar, sp);
+      xstrcpy(sstar, sp);
       is_bayer = TRUE;
     }
   }
   if (star_nr > 0) {
     if (star_nr > swed.n_fixstars_real) {
       if (serr != NULL) 
-	sprintf(serr, "error, swe_fixstar(): sequential fixed star number %d is not available", star_nr);
+	snprintf(serr, AS_MAXCH, "error, swe_fixstar(): sequential fixed star number %d is not available", star_nr);
       return ERR;
     }
     *stardata = swed.fixed_stars[star_nr - 1]; // keys start from 1
@@ -6704,10 +6704,10 @@ static int32 search_star_in_list(char *sstar, struct fixed_star *stardata, char 
     ndata = swed.n_fixstars_named;
     if (sp - sstar != strlen(sstar) - 1) {
       if (serr != NULL)
-	sprintf(serr, "error, swe_fixstar(): invalid search string %s", sstar);
+	snprintf(serr, AS_MAXCH, "error, swe_fixstar(): invalid search string %s", sstar);
       return ERR;
     }
-    strcpy(searchkey, sstar);
+    xstrcpy(searchkey, sstar);
     len = (int) (strlen(sstar) - 1);
     searchkey[len] = '\0';
     for (i = 0; i < ndata; i++) {
@@ -6717,11 +6717,11 @@ static int32 search_star_in_list(char *sstar, struct fixed_star *stardata, char 
       }
     }
     if (serr != NULL)
-      sprintf(serr, "error, swe_fixstar(): star search string %s did not match", sstar);
+      snprintf(serr, AS_MAXCH, "error, swe_fixstar(): star search string %s did not match", sstar);
     return ERR;
   /* traditional name or Bayer/Flamsteed: find it with binary search */
   } else {
-    strcpy(searchkey, sstar);
+    xstrcpy(searchkey, sstar);
     if (is_bayer) {
       //*searchkey = '~';
       //stardatabegp = &(swed.fixed_stars[swed.n_fixstars_real + swed.n_fixstars_named]);
@@ -6738,7 +6738,7 @@ static int32 search_star_in_list(char *sstar, struct fixed_star *stardata, char 
 	       fstar_node_compare);
     if (stardatap == NULL) {
       if (serr != NULL) 
-	sprintf(serr, "error, swe_fixstar(): could not find star name %s", sstar);
+	snprintf(serr, AS_MAXCH, "error, swe_fixstar(): could not find star name %s", sstar);
       return ERR;
     }
     *stardata = *stardatap;
@@ -6753,50 +6753,50 @@ static AS_BOOL get_builtin_star(char *star, char *sstar, char *srecord)
    * sidereal ephemerides */
   /* Ayanamsha SE_SIDM_TRUE_CITRA */
   if (strncmp(star, "spica", 5) == 0 || strncmp(star, "Spica", 5) == 0) {
-    strcpy(srecord, "Spica,alVir,ICRS,13,25,11.57937,-11,09,40.7501,-42.35,-30.67,1,13.06,0.97,-10,3672");
-    strcpy(sstar, "spica");
+    xstrcpy(srecord, "Spica,alVir,ICRS,13,25,11.57937,-11,09,40.7501,-42.35,-30.67,1,13.06,0.97,-10,3672");
+    xstrcpy(sstar, "spica");
     return TRUE;
   /* Ayanamsha SE_SIDM_TRUE_REVATI */
   } else if (strstr(star, ",zePsc") != NULL || strncmp(star, "revati", 6) == 0 || strncmp(star, "Revati", 6) == 0) {
-    strcpy(srecord, "Revati,zePsc,ICRS,01,13,43.88735,+07,34,31.2745,145,-55.69,15,18.76,5.187,06,174");
-    strcpy(sstar, "revati");
+    xstrcpy(srecord, "Revati,zePsc,ICRS,01,13,43.88735,+07,34,31.2745,145,-55.69,15,18.76,5.187,06,174");
+    xstrcpy(sstar, "revati");
     return TRUE;
   /* Ayanamsha SE_SIDM_TRUE_PUSHYA */
   } else if (strstr(star, ",deCnc") != NULL || strncmp(star, "pushya", 6) == 0 || strncmp(star, "Pushya", 6) == 0 ) {
-    strcpy(srecord, "Pushya,deCnc,ICRS,08,44,41.09921,+18,09,15.5034,-17.67,-229.26,17.14,24.98,3.94,18,2027");
-    strcpy(sstar, "pushya");
+    xstrcpy(srecord, "Pushya,deCnc,ICRS,08,44,41.09921,+18,09,15.5034,-17.67,-229.26,17.14,24.98,3.94,18,2027");
+    xstrcpy(sstar, "pushya");
     return TRUE;
   /* Ayanamsha SE_SIDM_TRUE_SHEORAN */
   } else if (strstr(star, ",deCnc") != NULL) {
-    strcpy(srecord, "Pushya,deCnc,ICRS,08,44,41.09921,+18,09,15.5034,-17.67,-229.26,17.14,24.98,3.94,18,2027");
-    strcpy(sstar, "pushya");
+    xstrcpy(srecord, "Pushya,deCnc,ICRS,08,44,41.09921,+18,09,15.5034,-17.67,-229.26,17.14,24.98,3.94,18,2027");
+    xstrcpy(sstar, "pushya");
     return TRUE;
   /* Ayanamsha SE_SIDM_TRUE_MULA */
   } else if (strstr(star, ",laSco") != NULL || strncmp(star, "mula", 6) == 0 || strncmp(star, "Mula", 6) == 0) {
-    strcpy(srecord, "Mula,laSco,ICRS,17,33,36.52012,-37,06,13.7648,-8.53,-30.8,-3,5.71,1.62,-37,11673");
-    strcpy(sstar, "mula");
+    xstrcpy(srecord, "Mula,laSco,ICRS,17,33,36.52012,-37,06,13.7648,-8.53,-30.8,-3,5.71,1.62,-37,11673");
+    xstrcpy(sstar, "mula");
     return TRUE;
   /* Ayanamsha SE_SIDM_GALCENT_0SAG */
   /* Ayanamsha SE_SIDM_GALCENT_COCHRANE */
   /* Ayanamsha SE_SIDM_GALCENT_RGILBRAND */
   } else if (strstr(star, ",SgrA*") != NULL) {
-    strcpy(srecord, "Gal. Center,SgrA*,2000,17,45,40.03599,-29,00,28.1699,-2.755718425,-5.547,0.0,0.125,999.99,0,0");
-    strcpy(sstar, ",SgrA*");
+    xstrcpy(srecord, "Gal. Center,SgrA*,2000,17,45,40.03599,-29,00,28.1699,-2.755718425,-5.547,0.0,0.125,999.99,0,0");
+    xstrcpy(sstar, ",SgrA*");
     return TRUE;
   /* Ayanamsha SE_SIDM_GALEQU_IAU1958 */
   } else if (strstr(star, ",GP1958") != NULL) {
-    strcpy(srecord, "Gal. Pole IAU1958,GP1958,1950,12,49,0.0,27,24,0.0,0.0,0.0,0.0,0.0,0.0,0,0");
-    strcpy(sstar, ",GP1958");
+    xstrcpy(srecord, "Gal. Pole IAU1958,GP1958,1950,12,49,0.0,27,24,0.0,0.0,0.0,0.0,0.0,0.0,0,0");
+    xstrcpy(sstar, ",GP1958");
     return TRUE;
   /* Ayanamsha SE_SIDM_GALEQU_TRUE */
   } else if (strstr(star, ",GPol") != NULL) {
-    strcpy(srecord, "Gal. Pole,GPol,ICRS,12,51,36.7151981,27,06,11.193172,0.0,0.0,0.0,0.0,0.0,0,0");
-    strcpy(sstar, ",GPol");
+    xstrcpy(srecord, "Gal. Pole,GPol,ICRS,12,51,36.7151981,27,06,11.193172,0.0,0.0,0.0,0.0,0.0,0,0");
+    xstrcpy(sstar, ",GPol");
     return TRUE;
   /* Ayanamsha SE_SIDM_GALEQU_MULA */
   } else if (strstr(star, ",GPol") != NULL) {
-    strcpy(srecord, "Gal. Pole,GPol,ICRS,12,51,36.7151981,27,06,11.193172,0.0,0.0,0.0,0.0,0.0,0,0");
-    strcpy(sstar, ",GPol");
+    xstrcpy(srecord, "Gal. Pole,GPol,ICRS,12,51,36.7151981,27,06,11.193172,0.0,0.0,0.0,0.0,0.0,0,0");
+    xstrcpy(sstar, ",GPol");
     return TRUE;
   }
   return FALSE;
@@ -6839,7 +6839,7 @@ int32 CALL_CONV swe_fixstar2(char *star, double tjd, int32 iflag,
     goto return_err;
   /* star elements from last call: */
   if (swed.n_fixstars_records > 0 && strcmp(slast_starname, sstar) == 0) {
- //   strcpy(srecord, slast_stardata);
+ //   xstrcpy(srecord, slast_stardata);
     stardata = last_stardata;
     goto found;
   }
@@ -6857,9 +6857,9 @@ int32 CALL_CONV swe_fixstar2(char *star, double tjd, int32 iflag,
     goto return_err;
   /******************************************************/
   found:
-  //strcpy(slast_stardata, srecord);
+  //xstrcpy(slast_stardata, srecord);
   last_stardata = stardata;
-  strcpy(slast_starname, sstar);
+  xstrcpy(slast_starname, sstar);
   if ((retc = fixstar_calc_from_struct(&stardata, tjd, iflag, star, xx, serr)) == ERR)
     goto return_err;
 #ifdef TRACE
@@ -6924,7 +6924,7 @@ int32 CALL_CONV swe_fixstar2_mag(char *star, double *mag, char *serr)
     goto return_err;
   /* star elements from last call: */
   if (swed.n_fixstars_records > 0 && strcmp(slast_starname, sstar) == 0) {
- //   strcpy(srecord, slast_stardata);
+ //   xstrcpy(srecord, slast_stardata);
     stardata = last_stardata;
     goto found;
   }
@@ -6934,9 +6934,9 @@ int32 CALL_CONV swe_fixstar2_mag(char *star, double *mag, char *serr)
   /******************************************************/
   found:
   last_stardata = stardata;
-  strcpy(slast_starname, sstar);
+  xstrcpy(slast_starname, sstar);
   *mag = stardata.mag;
-  sprintf(star, "%s,%s", stardata.starname, stardata.starbayer);
+  snprintf(star, AS_MAXCH, "%s,%s", stardata.starname, stardata.starbayer);
   return OK;
   return_err:
   *mag = 0;
@@ -6958,84 +6958,84 @@ char *CALL_CONV swe_get_planet_name(int ipl, char *s)
   if (ipl == SE_AST_OFFSET + 134340)
     ipl = SE_PLUTO;
   if (ipl != 0 && ipl == swed.i_saved_planet_name) {
-    strcpy(s, swed.saved_planet_name);
+    xstrcpy(s, swed.saved_planet_name);
     return s;
   }
   switch(ipl) {
     case SE_SUN: 
-      strcpy(s, SE_NAME_SUN);
+      xstrcpy(s, SE_NAME_SUN);
       break;
     case SE_MOON: 
-      strcpy(s, SE_NAME_MOON);
+      xstrcpy(s, SE_NAME_MOON);
       break;
     case SE_MERCURY: 
-      strcpy(s, SE_NAME_MERCURY);
+      xstrcpy(s, SE_NAME_MERCURY);
       break;
     case SE_VENUS: 
-      strcpy(s, SE_NAME_VENUS);
+      xstrcpy(s, SE_NAME_VENUS);
       break;
     case SE_MARS: 
-      strcpy(s, SE_NAME_MARS);
+      xstrcpy(s, SE_NAME_MARS);
       break;
     case SE_JUPITER: 
-      strcpy(s, SE_NAME_JUPITER);
+      xstrcpy(s, SE_NAME_JUPITER);
       break;
     case SE_SATURN: 
-      strcpy(s, SE_NAME_SATURN);
+      xstrcpy(s, SE_NAME_SATURN);
       break;
     case SE_URANUS: 
-      strcpy(s, SE_NAME_URANUS);
+      xstrcpy(s, SE_NAME_URANUS);
       break;
     case SE_NEPTUNE: 
-      strcpy(s, SE_NAME_NEPTUNE);
+      xstrcpy(s, SE_NAME_NEPTUNE);
       break;
     case SE_PLUTO: 
-      strcpy(s, SE_NAME_PLUTO);
+      xstrcpy(s, SE_NAME_PLUTO);
       break;
     case SE_MEAN_NODE: 
-      strcpy(s, SE_NAME_MEAN_NODE);
+      xstrcpy(s, SE_NAME_MEAN_NODE);
       break;
     case SE_TRUE_NODE: 
-      strcpy(s, SE_NAME_TRUE_NODE);
+      xstrcpy(s, SE_NAME_TRUE_NODE);
       break;
     case SE_MEAN_APOG: 
-      strcpy(s, SE_NAME_MEAN_APOG);
+      xstrcpy(s, SE_NAME_MEAN_APOG);
       break;
     case SE_OSCU_APOG: 
-      strcpy(s, SE_NAME_OSCU_APOG);
+      xstrcpy(s, SE_NAME_OSCU_APOG);
       break;  
     case SE_INTP_APOG: 
-      strcpy(s, SE_NAME_INTP_APOG);
+      xstrcpy(s, SE_NAME_INTP_APOG);
       break;  
     case SE_INTP_PERG: 
-      strcpy(s, SE_NAME_INTP_PERG);
+      xstrcpy(s, SE_NAME_INTP_PERG);
       break;  
     case SE_EARTH: 
-      strcpy(s, SE_NAME_EARTH);
+      xstrcpy(s, SE_NAME_EARTH);
       break;
     case SE_CHIRON: 
     case SE_AST_OFFSET + MPC_CHIRON: 
-      strcpy(s, SE_NAME_CHIRON);
+      xstrcpy(s, SE_NAME_CHIRON);
       break;
     case SE_PHOLUS: 
     case SE_AST_OFFSET + MPC_PHOLUS: 
-      strcpy(s, SE_NAME_PHOLUS);
+      xstrcpy(s, SE_NAME_PHOLUS);
       break;
     case SE_CERES: 
     case SE_AST_OFFSET + MPC_CERES: 
-      strcpy(s, SE_NAME_CERES);
+      xstrcpy(s, SE_NAME_CERES);
       break;
     case SE_PALLAS: 
     case SE_AST_OFFSET + MPC_PALLAS: 
-      strcpy(s, SE_NAME_PALLAS);
+      xstrcpy(s, SE_NAME_PALLAS);
       break;
     case SE_JUNO: 
     case SE_AST_OFFSET + MPC_JUNO: 
-      strcpy(s, SE_NAME_JUNO);
+      xstrcpy(s, SE_NAME_JUNO);
       break;
     case SE_VESTA: 
     case SE_AST_OFFSET + MPC_VESTA: 
-      strcpy(s, SE_NAME_VESTA);
+      xstrcpy(s, SE_NAME_VESTA);
       break;
     default: 
       /* fictitious planets */
@@ -7047,17 +7047,17 @@ char *CALL_CONV swe_get_planet_name(int ipl, char *s)
       if (ipl > SE_PLMOON_OFFSET || ipl > SE_AST_OFFSET) { // 2nd condition obsolete
 	/* if name is already available */
 	if (ipl == swed.fidat[SEI_FILE_ANY_AST].ipl[0]) {
-	  strcpy(s, swed.fidat[SEI_FILE_ANY_AST].astnam);
+	  xstrcpy(s, swed.fidat[SEI_FILE_ANY_AST].astnam);
         /* else try to get it from ephemeris file */
 	} else {
 	  retc = sweph(J2000, ipl, SEI_FILE_ANY_AST, 0, NULL, NO_SAVE, xp, NULL);
 	  if (retc != ERR && retc != NOT_AVAILABLE) {
-	    strcpy(s, swed.fidat[SEI_FILE_ANY_AST].astnam);
+	    xstrcpy(s, swed.fidat[SEI_FILE_ANY_AST].astnam);
 	  } else {
 	    if (ipl > SE_AST_OFFSET) {
-	      sprintf(s, "%d: not found (asteroid)", ipl - SE_AST_OFFSET);
+	      snprintf(s, AS_MAXCH, "%d: not found (asteroid)", ipl - SE_AST_OFFSET);
 	    } else {
-	      sprintf(s, "%d: not found (planetary moon)", ipl);
+	      snprintf(s, AS_MAXCH, "%d: not found (planetary moon)", ipl);
 	    }
 	  }
 	}
@@ -7102,14 +7102,14 @@ char *CALL_CONV swe_get_planet_name(int ipl, char *s)
               if (*sp == '\0')
                 continue;
               swi_right_trim(sp);
-              strcpy(s, sp);
+              xstrcpy(s, sp);
             }
             fclose(fp);
           }
         }
       } else  {
 	i = ipl;
-	sprintf(s, "%d", i);
+	snprintf(s, AS_MAXCH, "%d", i);
       }
       break;
   }
@@ -7119,7 +7119,7 @@ char *CALL_CONV swe_get_planet_name(int ipl, char *s)
 #endif
   if (strlen(s) < 80) {
     swed.i_saved_planet_name = ipl;
-    strcpy(swed.saved_planet_name, s);
+    xstrcpy(swed.saved_planet_name, s);
   }
   return s;
 }
@@ -7181,7 +7181,7 @@ static void trace_swe_fixstar(int swtch, char *star, double tjd, int32 iflag, do
   case 1:
     if (swi_fp_trace_c != NULL) {
       fputs("\n/*SWE_FIXSTAR*/\n", swi_fp_trace_c);
-      fprintf(swi_fp_trace_c, "  strcpy(star, \"%s\");", star);
+      fprintf(swi_fp_trace_c, "  xstrcpy(star, \"%s\");", star);
       fprintf(swi_fp_trace_c, " tjd = %.9f;", tjd);
       fprintf(swi_fp_trace_c, " iflag = %d;\n", iflag);
       fprintf(swi_fp_trace_c, "  iflgret = swe_fixstar(star, tjd, iflag, xx, serr);");
@@ -7289,7 +7289,7 @@ int swi_get_observer(double tjd, int32 iflag,
   double cosfi, sinfi, cc, ss, cosl, sinl, h;
   if (!swed.geopos_is_set) {
     if (serr != NULL)
-      strcpy(serr, "geographic position has not been set");
+      xstrcpy(serr, "geographic position has not been set");
     return ERR;
   }
   /* geocentric position of observer depends on sidereal time,
@@ -7392,7 +7392,7 @@ int32 CALL_CONV swe_time_equ(double tjd_ut, double *E, char *serr)
   int32 iflag = SEFLG_EQUATORIAL;
   iflag = plaus_iflag(iflag, -1, tjd_ut, serr);
   if (swi_init_swed_if_start() == 1 && !(iflag & SEFLG_MOSEPH) && serr != NULL) {
-    strcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_time_equ(), swe_lmt_to_lat() or swe_lat_to_lmt()");
+    xstrcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_time_equ(), swe_lmt_to_lat() or swe_lat_to_lmt()");
   }
   if (swed.jpl_file_is_open)
     iflag |= SEFLG_JPLEPH;
@@ -7446,18 +7446,18 @@ static int open_jpl_file(double *ss, char *fname, char *fpath, char *serr)
   if (retc != OK && strstr(fname, SE_FNAME_DFT) != NULL && serr != NULL) {
     retc = swi_open_jpl_file(ss, SE_FNAME_DFT2, fpath, serr2);
     if (retc == OK) {
-      strcpy(swed.jplfnam, SE_FNAME_DFT2);
+      xstrcpy(swed.jplfnam, SE_FNAME_DFT2);
       if (serr != NULL) {
-        strcpy(serr2, "Error with JPL ephemeris file ");
+        xstrcpy(serr2, "Error with JPL ephemeris file ");
 	if (strlen(serr2) + strlen(SE_FNAME_DFT) < AS_MAXCH)
-	  strcat(serr2, SE_FNAME_DFT);
+	  xstrcat(serr2, SE_FNAME_DFT);
 	if (strlen(serr2) + strlen(serr) + 2 < AS_MAXCH) 
-	  sprintf(serr2 + strlen(serr2), ": %s", serr);
+	  snprintf(serr2 + strlen(serr2), AS_MAXCH, ": %s", serr);
 	if (strlen(serr2) + 17 < AS_MAXCH) 
-	  strcat(serr2, ". Defaulting to ");
+	  xstrcat(serr2, ". Defaulting to ");
 	if (strlen(serr2) + strlen(SE_FNAME_DFT2) < AS_MAXCH) 
-	  strcat(serr2, SE_FNAME_DFT2);
-        strcpy(serr, serr2);
+	  xstrcat(serr2, SE_FNAME_DFT2);
+        xstrcpy(serr, serr2);
       }
     }
   }
@@ -7534,7 +7534,7 @@ static int32 swi_fixstar_load_record(char *star, char *srecord, char *sname, cha
     // invalid line without comma
     if ((sp = strchr(s, ',')) == NULL) {
       if (serr != NULL) {
-	sprintf(serr, "star file %s damaged at line %d", SE_STARFILE, fline);
+	snprintf(serr, AS_MAXCH, "star file %s damaged at line %d", SE_STARFILE, fline);
       }
       return ERR;
     } 
@@ -7557,7 +7557,7 @@ static int32 swi_fixstar_load_record(char *star, char *srecord, char *sname, cha
     //fstar[SWI_STAR_LENGTH] = '\0';	/* force termination */
     // remove white spaces from star name
     while ((sp = strchr(fstar, ' ')) != NULL)
-      swi_strcpy(sp, sp+1);
+      xstrcpy(sp, sp+1);
     i = (int) strlen(fstar);
     // length of star name differs from length of search string: continue
     if (i < (int) cmplen)
@@ -7570,14 +7570,14 @@ static int32 swi_fixstar_load_record(char *star, char *srecord, char *sname, cha
       goto found;
   }
   if (serr != NULL) {
-    sprintf(serr, "star  not found");
+    snprintf(serr, AS_MAXCH, "star  not found");
     if (strlen(serr) + strlen(star) < AS_MAXCH) {
-      sprintf(serr, "star %s not found", star);
+      snprintf(serr, AS_MAXCH, "star %s not found", star);
     }
     return ERR;
   }
   found:
-  strcpy(srecord, s);
+  xstrcpy(srecord, s);
   retc = fixstar_cut_string(srecord, star, &stardata, serr);
   if (retc == ERR) return ERR;
   if (dparams != NULL) {
@@ -7631,7 +7631,7 @@ static int32 swi_fixstar_calc_from_record(char *srecord, double tjd, int32 iflag
   iflag = plaus_iflag(iflag, -1, tjd, serr);
   epheflag = iflag & SEFLG_EPHMASK;
   if (swi_init_swed_if_start() == 1 && !(epheflag & SEFLG_MOSEPH) && serr != NULL) {
-    strcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_fixstar() or swe_fixstar_ut()");
+    xstrcpy(serr, "Please call swe_set_ephe_path() or swe_set_jplfile() before calling swe_fixstar() or swe_fixstar_ut()");
   }
   if (swed.last_epheflag != epheflag) {
     free_planets();
@@ -7921,7 +7921,7 @@ int32 CALL_CONV swe_fixstar(char *star, double tjd, int32 iflag,
   }
   /* star elements from last call: */
   if (*slast_stardata != '\0' && strcmp(slast_starname, sstar) == 0) {
-    strcpy(srecord, slast_stardata);
+    xstrcpy(srecord, slast_stardata);
     goto found;
   }
   if (get_builtin_star(star, sstar, srecord)) {
@@ -7937,8 +7937,8 @@ int32 CALL_CONV swe_fixstar(char *star, double tjd, int32 iflag,
   if ((retc = swi_fixstar_load_record(star, srecord, NULL, NULL, NULL, serr)) != OK)
     goto return_err;
   found:
-  strcpy(slast_stardata, srecord);
-  strcpy(slast_starname, sstar);
+  xstrcpy(slast_stardata, srecord);
+  xstrcpy(slast_starname, sstar);
   if ((retc = swi_fixstar_calc_from_record(srecord, tjd, iflag, star, xx, serr)) == ERR)
     goto return_err;
 #ifdef TRACE
@@ -8011,7 +8011,7 @@ int32 CALL_CONV swe_fixstar_mag(char *star, double *mag, char *serr)
   }
   /* star elements from last call: */
   if (*slast_stardata != '\0' && strcmp(slast_starname, sstar) == 0) {
-    strcpy(srecord, slast_stardata);
+    xstrcpy(srecord, slast_stardata);
     retc = fixstar_cut_string(srecord, star, &stardata, serr);
     if (retc == ERR) goto return_err;
     // magnitude V
@@ -8028,8 +8028,8 @@ int32 CALL_CONV swe_fixstar_mag(char *star, double *mag, char *serr)
   if ((retc = swi_fixstar_load_record(star, srecord, NULL, NULL, dparams, serr)) != OK)
     goto return_err;
   found:
-  strcpy(slast_stardata, srecord);
-  strcpy(slast_starname, sstar);
+  xstrcpy(slast_stardata, srecord);
+  xstrcpy(slast_starname, sstar);
   *mag = dparams[7];
   return OK;
   return_err:
@@ -8049,7 +8049,7 @@ int32 CALL_CONV swe_calc_pctr(double tjd, int32 ipl, int32 iplctr, int32 iflag, 
   struct epsilon *oe;
   if (ipl == iplctr) {
     if (serr != NULL) 
-	  sprintf(serr, "ipl and iplctr (= %d) must not be identical\n", ipl);
+	  snprintf(serr, AS_MAXCH, "ipl and iplctr (= %d) must not be identical\n", ipl);
 	return ERR;
   }
   iflag = plaus_iflag(iflag, ipl, tjd, serr);
@@ -8542,7 +8542,7 @@ int32 CALL_CONV swe_helio_cross(int ipl, double x2cross, double jd_et, int iflag
   ) {
     char snam[AS_MAXCH];
     swe_get_planet_name(ipl, snam);
-    if (serr != NULL) sprintf(serr, "swe_helio_cross: not possible for object %d = %s", ipl, snam);
+    if (serr != NULL) snprintf(serr, AS_MAXCH, "swe_helio_cross: not possible for object %d = %s", ipl, snam);
     return ERR;
   }
   if (swe_calc(jd_et, ipl, flag, x, serr) < 0) 
@@ -8588,7 +8588,7 @@ int32 CALL_CONV swe_helio_cross_ut(int ipl, double x2cross, double jd_ut, int if
   ) {
     char snam[AS_MAXCH];
     swe_get_planet_name(ipl, snam);
-    if (serr != NULL) sprintf(serr, "swe_helio_cross: not possible for object %d = %s", ipl, snam);
+    if (serr != NULL) snprintf(serr, AS_MAXCH, "swe_helio_cross: not possible for object %d = %s", ipl, snam);
     return ERR;
   }
   if (swe_calc_ut(jd_ut, ipl, flag, x, serr) < 0) 

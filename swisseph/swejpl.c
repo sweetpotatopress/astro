@@ -227,9 +227,9 @@ static int32 fsizer(char *serr)
    * between -20000 and +20000, segment size >= 1 and <= 200 */
   if (js->eh_ss[0] < -5583942 || js->eh_ss[1] > 9025909 || js->eh_ss[2] < 1 || js->eh_ss[2] > 200) {
     if (serr != NULL) {
-      strcpy(serr, "alleged ephemeris file has invalid format.");
+      xstrcpy(serr, "alleged ephemeris file has invalid format.");
       if (strlen(serr) + strlen(js->jplfname) + 3 < AS_MAXCH) {
-	sprintf(serr, "alleged ephemeris file (%s) has invalid format.", js->jplfname);
+	snprintf(serr, AS_MAXCH, "alleged ephemeris file (%s) has invalid format.", js->jplfname);
       }
     }
     return(NOT_AVAILABLE);
@@ -315,13 +315,13 @@ static int32 fsizer(char *serr)
       break;
     default:
       if (serr != NULL)
-	sprintf(serr,"unknown numde value %d;", numde);
+	snprintf(serr, AS_MAXCH, "unknown numde value %d;", numde);
       return ERR;
   }
 #endif
   if (ksize < 1000 || ksize > 5000) {
     if (serr != NULL)
-      sprintf(serr, "JPL ephemeris file does not provide valid ksize (%d)", ksize);/**/
+      snprintf(serr, AS_MAXCH, "JPL ephemeris file does not provide valid ksize (%d)", ksize);/**/
     return NOT_AVAILABLE;
   }
   return ksize;
@@ -378,7 +378,7 @@ int swi_pleph(double et, int ntarg, int ncent, double *rrd, char *serr)
       return(state(et, list, FALSE, pv, pvsun, rrd, serr));
     } else {
       if (serr != NULL) 
-	sprintf(serr,"No nutations on the JPL ephemeris file;");
+	snprintf(serr, AS_MAXCH, "No nutations on the JPL ephemeris file;");
       return (NOT_AVAILABLE);
     }
   }
@@ -392,7 +392,7 @@ int swi_pleph(double et, int ntarg, int ncent, double *rrd, char *serr)
       return 0;
     } else {
       if (serr != NULL) 
-	sprintf(serr,"No librations on the ephemeris file;");
+	snprintf(serr, AS_MAXCH,"No librations on the ephemeris file;");
       return (NOT_AVAILABLE);
     }
   }
@@ -753,9 +753,9 @@ static int state(double et, int32 *list, int do_bary,
       && flen - nb != ksize * nrecl
       ) {
       if (serr != NULL) {
-	sprintf(serr, "JPL ephemeris file is mutilated; length = %d instead of %d.", (unsigned int) flen, (unsigned int) nb);
+	snprintf(serr, AS_MAXCH, "JPL ephemeris file is mutilated; length = %d instead of %d.", (unsigned int) flen, (unsigned int) nb);
 	if (strlen(serr) + strlen(js->jplfname) < AS_MAXCH - 1) {
-	  sprintf(serr, "JPL ephemeris file %s is mutilated; length = %d instead of %d.", js->jplfname, (unsigned int) flen, (unsigned int) nb);
+	  snprintf(serr, AS_MAXCH, "JPL ephemeris file %s is mutilated; length = %d instead of %d.", js->jplfname, (unsigned int) flen, (unsigned int) nb);
 	}
       }
       return(NOT_AVAILABLE);
@@ -774,7 +774,7 @@ static int state(double et, int32 *list, int do_bary,
       reorder((char *) &ts[2], sizeof(double), 2);
     if (ts[0] != js->eh_ss[0] || ts[3] != js->eh_ss[1]) {
       if (serr != NULL)
-	sprintf(serr, "JPL ephemeris file is corrupt; start/end date check failed. %.1f != %.1f || %.1f != %.1f", ts[0],js->eh_ss[0],ts[3],js->eh_ss[1]);
+	snprintf(serr, AS_MAXCH, "JPL ephemeris file is corrupt; start/end date check failed. %.1f != %.1f || %.1f != %.1f", ts[0],js->eh_ss[0],ts[3],js->eh_ss[1]);
       return NOT_AVAILABLE;
     }
   }
@@ -787,7 +787,7 @@ static int state(double et, int32 *list, int do_bary,
   /*       error return for epoch out of range */
   if (et < js->eh_ss[0] || et > js->eh_ss[1]) {
     if (serr != NULL) 
-      sprintf(serr,"jd %f outside JPL eph. range %.2f .. %.2f;", et, js->eh_ss[0], js->eh_ss[1]);
+      snprintf(serr, AS_MAXCH, "jd %f outside JPL eph. range %.2f .. %.2f;", et, js->eh_ss[0], js->eh_ss[1]);
     return BEYOND_EPH_LIMITS;
   }
   /*       calculate record # and relative time in interval */
@@ -800,13 +800,13 @@ static int state(double et, int32 *list, int do_bary,
     nrl = nr;
     if (FSEEK(js->jplfptr, (off_t64) (nr * ((off_t64) irecsz)), 0) != 0) {
       if (serr != NULL) 
-	sprintf(serr, "Read error in JPL eph. at %f\n", et);
+	snprintf(serr, AS_MAXCH, "Read error in JPL eph. at %f\n", et);
       return NOT_AVAILABLE;
     }
     for (k = 1; k <= ncoeffs; ++k) {
       if ( fread((void *) &buf[k - 1], sizeof(double), 1, js->jplfptr) != 1) {
 	if (serr != NULL) 
-	  sprintf(serr, "Read error in JPL eph. at %f\n", et);
+	  snprintf(serr, AS_MAXCH, "Read error in JPL eph. at %f\n", et);
 	return NOT_AVAILABLE;
       }
       if (js->do_reorder)
@@ -932,11 +932,11 @@ int swi_open_jpl_file(double *ss, char *fname, char *fpath, char *serr)
     || (js->jplfpath = (char *) MALLOC(strlen(fpath)+1)) == NULL
     ) {
     if (serr != NULL)
-      strcpy(serr, "error in malloc() with JPL ephemeris.");
+      xstrcpy(serr, "error in malloc() with JPL ephemeris.");
     return ERR;
   }
-  strcpy(js->jplfname, fname);
-  strcpy(js->jplfpath, fpath);
+  xstrcpy(js->jplfname, fname);
+  xstrcpy(js->jplfpath, fpath);
   retc = read_const_jpl(ss, serr);
   if (retc != OK) 
     swi_close_jpl_file();
