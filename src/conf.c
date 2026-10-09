@@ -51,9 +51,6 @@ static void btf(FIELD **field, char **buffer)
 		
 static void set_current(FIELD **field, struct cdata *cdata)
 {
-	char xdg_path[MAXBUF] = {0};
-	xdg_check(xdg_path, "config");
-	
 	char buf[MAXBUF] = {0};
 	
 	set_field_buffer(field[C_TIMEZONE], 0, cdata->timezone);
@@ -67,10 +64,10 @@ static void set_current(FIELD **field, struct cdata *cdata)
 	
 static void config_parse(char **buffer)
 {
-	char xdg_path[MAXBUF] = {0};
-	xdg_check(xdg_path, "config");
+	char config_path[MAXPATH] = {0};
+	path_check(config_path, "config");
 	
-	FILE *fp = fopen(xdg_path, "r");
+	FILE *fp = fopen(config_path, "r");
 	if (fp == NULL)
 		return;
 		
@@ -126,10 +123,10 @@ void config_init(struct cdata *cdata, struct ui *ui)
 
 static void config_write(struct cdata *cdata, struct ui *ui)
 {
-	char xdg_path[MAXBUF] = {0};
-	xdg_check(xdg_path, "config");
+	char config_path[MAXPATH] = {0};
+	path_check(config_path, "config");
 	
-	FILE *ifp = fopen(xdg_path, "w");
+	FILE *ifp = fopen(config_path, "w");
 	if (!ifp)
 		ERR_EXIT("ERR: set_current ifp");
 		

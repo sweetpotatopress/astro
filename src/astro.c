@@ -87,10 +87,10 @@ int main(int argc, char *argv[])
 	
 	iana_check();
 	
-	char xdg_path[MAXBUF] = {0};
-	xdg_check(xdg_path, "ephe");
+	char ephe_path[MAXPATH] = {0};
+	path_check(ephe_path, "ephe");
 	
-	swe_set_ephe_path(xdg_path);
+	swe_set_ephe_path(ephe_path);
 
 	initscr();
 	set_escdelay(25);
@@ -220,18 +220,18 @@ int main(int argc, char *argv[])
 				doupdate();
 				break;
 			case 'i':
-				in_cdata(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, xdg_path);
+				in_cdata(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				ecst_init(planet, cdata[ui->cc]->se);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
 			case 'w':
-				save_chart(cdata[ui->cc], xdg_path);
+				save_chart(cdata[ui->cc]);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
 			case 'e':
-				load_chart(cdata[ui->cc], xdg_path);
+				load_chart(cdata[ui->cc]);
 				ecst_init(planet, cdata[ui->cc]->se);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();

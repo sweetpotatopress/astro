@@ -212,11 +212,12 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 	}
 }
 
-void city_search(struct cdata *cdata,  struct ui *ui, char *xdg_path, FIELD *cdata_field[], FORM *cdata_form, char *search)
+void city_search(struct cdata *cdata,  struct ui *ui, FIELD *cdata_field[], FORM *cdata_form, char *search)
 {
-	xdg_check(xdg_path, "city-db");
+	char db_path[MAXBUF] = {0};
+	path_check(db_path, "city-db");
 	
-	FILE *fp = fopen(xdg_path, "r");
+	FILE *fp = fopen(db_path, "r");
 	if (fp == NULL)
 		ERR_EXIT("city_search fopen");
 	

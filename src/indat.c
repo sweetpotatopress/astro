@@ -65,7 +65,7 @@ static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 	set_field_buffer(cdata_field[SECOND], 0, buff);
 }
 
-static void field_to_member (struct cdata *cdata, struct ui *ui, char xdg_path[], FORM *cdata_form, FIELD *cdata_field[])
+static void field_to_member (struct cdata *cdata, struct ui *ui, FORM *cdata_form, FIELD *cdata_field[])
 {
 	char *endptr = NULL;
 	long iret;
@@ -92,7 +92,7 @@ static void field_to_member (struct cdata *cdata, struct ui *ui, char xdg_path[]
 	switch(index)
 	{
 		case CITY:
-			city_search(cdata, ui, xdg_path, cdata_field, cdata_form, buffer);
+			city_search(cdata, ui, cdata_field, cdata_form, buffer);
 			touchwin(ui->main_win);
 			wnoutrefresh(ui->main_win);
 			if (ui->left_trig > 0)
@@ -205,7 +205,7 @@ static void field_label(struct ui *ui)
 		mvwprintw(ui->indat_win, y, x, "%s", label[i]);
 }
 
-void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, char xdg_path[])
+void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	char tmp_city[MAXBUF] = {0};
 	char tmp_state[MAXBUF] = {0};
@@ -326,7 +326,7 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 				if (index == CITY)
 				{
 					form_driver(cdata_form, REQ_VALIDATION);
-					field_to_member(cdata, ui, xdg_path, cdata_form, cdata_field);
+					field_to_member(cdata, ui, cdata_form, cdata_field);
 				}
 				if (index == DRAW)
 				{
@@ -418,7 +418,7 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 	{
 		set_current_field(cdata_form, cdata_field[i]);
 		form_driver(cdata_form, REQ_VALIDATION);
-		field_to_member(cdata, ui, xdg_path, cdata_form, cdata_field);
+		field_to_member(cdata, ui, cdata_form, cdata_field);
 	}
 
 	unpost_form(cdata_form);

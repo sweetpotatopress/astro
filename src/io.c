@@ -42,36 +42,23 @@
 #define FDST 12
 #define FMAX 13
 
-void xdg_check(char *xdg_path, const char *s)
+void path_check(char *path, const char *s)
 {
 	const char *home_dir = getenv("HOME");
-	const char *xdg_data = getenv("XDG_DATA_HOME");
-	const char *xdg_config = getenv("XDG_CONFIG_HOME");
-	
 	if (!home_dir || home_dir[0] == '\0')
 		ERR_EXIT("$HOME not set");
 	
 	if (strcmp("config", s) == 0)
-	{
-		if (!xdg_config || xdg_config[0] == '\0')
-			snprintf(xdg_path, MAXBUF, "%s/.config/astro/%s", home_dir, s);
-		else
-			snprintf(xdg_path, MAXBUF, "%s/astro/%s", xdg_config, s);
-	}
+			snprintf(path, MAXBUF, "%s/.config/astro/%s", home_dir, s);
 	
 	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
 	{
-		if (!xdg_data || xdg_data[0] == '\0')
-			snprintf(xdg_path, MAXBUF, "%s/.local/share/astro/%s", home_dir, s);
-		else
-			snprintf(xdg_path, MAXBUF, "%s/astro/%s", xdg_data, s);
-			
-		if (strlen(xdg_path) > 255)
-			ERR_EXIT("XDG_DATA_HOME path too long");
+		snprintf(path, MAXBUF, "%s/.local/share/astro/%s", home_dir, s);
+		if (strlen(path) > 255)
+			ERR_EXIT("home path too long");
 	}
-	
 	else
-		ERR_EXIT("xdg_path() string error");
+		ERR_EXIT("path check string error");
 }
 
 static size_t file_count(const char *path, const int r)
@@ -152,7 +139,7 @@ static void back_dir(char *filepath, char *cur_dir)
 	snprintf(cur_dir, MAXBUF, " %s", name);
 }
 
-static int print_save_menu(char *filepath, ITEM **item_save, char **name, char **desc, char *xdg_path)
+static int print_save_menu(char *filepath, ITEM **item_save, char **name, char **desc, char *chart_path)
 {
 	size_t icount = name_to_item(filepath, item_save, name, desc);
 	
@@ -240,7 +227,7 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 				}
 				break;
 			case 'h': case KEY_LEFT: 
-				if (strcmp(filepath, xdg_path) == 0)
+				if (strcmp(filepath, chart_path) == 0)
 					break;
 				back_dir(filepath, cur_dir);
 				break;
@@ -484,24 +471,26 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 		delwin(save_win);
 }
 
-void save_chart(struct cdata *cdata, char xdg_path[])
+void save_chart(struct cdata *cdata)
 {
-	char filepath[MAXPATH] = {0};
-	xdg_check(xdg_path, "charts");
-	memcpy(filepath, xdg_path, strlen(xdg_path)+1);
+	char chart_path[MAXPATH] = {0};
+	path_check(chart_path, "charts");
 	
-	size_t size = file_count(xdg_path, 1) + 1;
+	char filepath[MAXPATH] = {0};
+	memcpy(filepath, chart_path, strlen(chart_path)+1);
+	
+	size_t size = file_count(chart_path, 1) + 1;
 	
 	ITEM **item_save = ecalloc(size, sizeof(ITEM *));
 	char **name = ecalloc(size, sizeof(char *));
 	char **desc = ecalloc(size, sizeof(char *));
 	
-	if (print_save_menu(filepath, item_save, name, desc, xdg_path) == 1)
+	if (print_save_menu(filepath, item_save, name, desc, chart_path) == 1)
 		save_file_name(cdata, filepath);
 }
 
 
-static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_load, char **name, char **desc, char *xdg_path)
+static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_load, char **name, char **desc, char *chart_path)
 {
 	size_t icount = name_to_item(filepath, item_load, name, desc);
 	
@@ -669,7 +658,7 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 				menu_done = 1;
 				break;
 			case 'h': case KEY_LEFT:
-				if (strcmp(filepath, xdg_path) == 0)
+				if (strcmp(filepath, chart_path) == 0)
 					break;
 				back_dir(filepath, cur_dir);
 				break;
@@ -733,17 +722,19 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 	delwin(load_win);
 }
 
-void load_chart(struct cdata *cdata, char xdg_path[])
+void load_chart(struct cdata *cdata)
 {
-	char filepath[MAXPATH] = {0};
-	xdg_check(xdg_path, "charts");
-	memcpy(filepath, xdg_path, strlen(xdg_path)+1);
+	char chart_path[MAXPATH] = {0};
+	path_check(chart_path, "charts");
 	
-	size_t count = file_count(xdg_path, 1) + 1;
+	char filepath[MAXPATH] = {0};
+	memcpy(filepath, chart_path, strlen(chart_path)+1);
+	
+	size_t count = file_count(chart_path, 1) + 1;
 	
 	ITEM **item_load = ecalloc(count, sizeof(ITEM *));
 	char **name = ecalloc(count, sizeof(char *));
 	char **desc = ecalloc(count, sizeof(char *));
 	
-	print_load_menu(cdata, filepath, item_load, name, desc, xdg_path);
+	print_load_menu(cdata, filepath, item_load, name, desc, chart_path);
 }
