@@ -298,7 +298,7 @@ int swi_moshplan(double tjd, int ipli, AS_BOOL do_save, double *xpret, double *x
   /* tjd beyond ephemeris limits, give some margin for spped at edge */
   if (tjd < MOSHPLEPH_START - 0.3 || tjd > MOSHPLEPH_END + 0.3) {
     if (serr != NULL) {
-      snprintf(s, AS_MAXCH, "jd %f outside Moshier planet range %.2f .. %.2f ",
+      snprintf(s, AS_MAXBUF, "jd %f outside Moshier planet range %.2f .. %.2f ",
 		    tjd, MOSHPLEPH_START, MOSHPLEPH_END);
       if (strlen(serr) + strlen(s) < AS_MAXCH)
 	xstrcat(serr, s);
@@ -708,7 +708,7 @@ static int read_elements_file(int32 ipl, double tjd,
     /* file does not exist, use built-in bodies */
     if (ipl >= SE_NFICT_ELEM) {
       if (serr != NULL)
-        snprintf(serr, AS_MAXCH, "error no elements for fictitious body no %7.0f", (double) ipl);
+        snprintf(serr, AS_MAXBUF, "error no elements for fictitious body no %7.0f", (double) ipl);
       return ERR;
     }
     if (tjd0 != NULL)
@@ -753,10 +753,10 @@ static int read_elements_file(int32 ipl, double tjd,
     if ((sp = strchr(s, '#')) != NULL)
       *sp = '\0';
     ncpos = swi_cutstr(s, ",", cpos, 20);
-    snprintf(serri, AS_MAXCH, "error in file %s, line %7.0f:", SE_FICTFILE, (double) iline);
+    snprintf(serri, AS_MAXBUF, "error in file %s, line %7.0f:", SE_FICTFILE, (double) iline);
     if (ncpos < 9) {
       if (serr != NULL) {
-        snprintf(serr, AS_MAXCH, "%s nine elements required", serri);
+        snprintf(serr, AS_MAXBUF, "%s nine elements required", serri);
       }
       goto return_err;
     }
@@ -777,7 +777,7 @@ static int read_elements_file(int32 ipl, double tjd,
         *tjd0 = J1900;
       else if (*sp == 'j' || *sp == 'b') {
         if (serr != NULL) {
-          snprintf(serr, AS_MAXCH, "%s invalid epoch", serri);
+          snprintf(serr, AS_MAXBUF, "%s invalid epoch", serri);
 	}
         goto return_err;
       } else
@@ -801,7 +801,7 @@ static int read_elements_file(int32 ipl, double tjd,
         *tequ = tjd;
       else if (*sp == 'j' || *sp == 'b') {
         if (serr != NULL) {
-          snprintf(serr, AS_MAXCH, "%s invalid equinox", serri);
+          snprintf(serr, AS_MAXBUF, "%s invalid equinox", serri);
 	}
         goto return_err;
       } else
@@ -813,7 +813,7 @@ static int read_elements_file(int32 ipl, double tjd,
 	  *mano = swe_degnorm(*mano);
       if (retc == ERR) {
         if (serr != NULL) {
-          snprintf(serr, AS_MAXCH, "%s mean anomaly value invalid", serri);
+          snprintf(serr, AS_MAXBUF, "%s mean anomaly value invalid", serri);
 	}
         goto return_err;
       }
@@ -831,7 +831,7 @@ static int read_elements_file(int32 ipl, double tjd,
       retc = check_t_terms(tt, cpos[3], sema);
       if (*sema <= 0 || retc == ERR) {
         if (serr != NULL) {
-          snprintf(serr, AS_MAXCH, "%s semi-axis value invalid", serri);
+          snprintf(serr, AS_MAXBUF, "%s semi-axis value invalid", serri);
 	}
         goto return_err;
       }
@@ -841,7 +841,7 @@ static int read_elements_file(int32 ipl, double tjd,
       retc = check_t_terms(tt, cpos[4], ecce);
       if (*ecce >= 1 || *ecce < 0 || retc == ERR) {
         if (serr != NULL) {
-          snprintf(serr, AS_MAXCH, "%s eccentricity invalid (no parabolic or hyperbolic orbits allowed)", serri);
+          snprintf(serr, AS_MAXBUF, "%s eccentricity invalid (no parabolic or hyperbolic orbits allowed)", serri);
 	}
         goto return_err;
       }
@@ -852,7 +852,7 @@ static int read_elements_file(int32 ipl, double tjd,
 	  *parg = swe_degnorm(*parg);
       if (retc == ERR) {
         if (serr != NULL) {
-          snprintf(serr, AS_MAXCH, "%s perihelion argument value invalid", serri);
+          snprintf(serr, AS_MAXBUF, "%s perihelion argument value invalid", serri);
 	}
         goto return_err;
       }
@@ -864,7 +864,7 @@ static int read_elements_file(int32 ipl, double tjd,
 	  *node = swe_degnorm(*node);
       if (retc == ERR) {
         if (serr != NULL) {
-          snprintf(serr, AS_MAXCH, "%s node value invalid", serri);
+          snprintf(serr, AS_MAXBUF, "%s node value invalid", serri);
 	}
         goto return_err;
       }
@@ -876,7 +876,7 @@ static int read_elements_file(int32 ipl, double tjd,
 	  *incl = swe_degnorm(*incl);
       if (retc == ERR) {
         if (serr != NULL) {
-          snprintf(serr, AS_MAXCH, "%s inclination value invalid", serri);
+          snprintf(serr, AS_MAXBUF, "%s inclination value invalid", serri);
 	}
         goto return_err;
       }
@@ -901,7 +901,7 @@ static int read_elements_file(int32 ipl, double tjd,
   }
   if (!elem_found) {
     if (serr != NULL) {
-      snprintf(serr, AS_MAXCH, "%s elements for planet %7.0f not found", serri, (double) ipl);
+      snprintf(serr, AS_MAXBUF, "%s elements for planet %7.0f not found", serri, (double) ipl);
     }
     goto return_err;
   }

@@ -104,7 +104,7 @@ static double deltat_aa(double tjd, double tid_acc);
 size_t CALL_CONV xstrcpy(char *to, const char *from)
 {
 	const char *ofrom = from;
-	size_t nleft = AS_MAXCH;
+	size_t nleft = AS_MAXBUF;
 	
 	if (nleft != 0)
 	{
@@ -125,7 +125,7 @@ size_t CALL_CONV xstrcpy(char *to, const char *from)
 
 size_t CALL_CONV xstrcat(char *s, const char *append)
 {
-	size_t n = AS_MAXCH;
+	size_t n = AS_MAXBUF;
 	const char *os = s;
 	const char *oappend = append;
 	size_t dlen;
@@ -133,7 +133,7 @@ size_t CALL_CONV xstrcat(char *s, const char *append)
 	while (n-- != 0 && *s != '\0')
 		s++;
 	dlen = s - os;
-	n = AS_MAXCH - dlen;
+	n = AS_MAXBUF - dlen;
 	
 	if (n-- == 0)
 		return(dlen + strlen(append));
@@ -3690,12 +3690,12 @@ void swi_gen_filename(double tjd, int ipli, char *fname)
       break;
     default: 	/* asteroid or planetary moon */
       if (ipli > SE_PLMOON_OFFSET && ipli < SE_AST_OFFSET) {
-        snprintf(fname, AS_MAXCH, "sat%ssepm%d.%s", DIR_GLUE, ipli, SE_FILE_SUFFIX);
+        snprintf(fname, AS_MAXBUF, "sat%ssepm%d.%s", DIR_GLUE, ipli, SE_FILE_SUFFIX);
       } else {
 	sform = "ast%d%sse%05d.%s";
 	if (ipli - SE_AST_OFFSET > 99999) 
 	  sform = "ast%d%ss%06d.%s";
-	snprintf(fname, AS_MAXCH, sform, (ipli - SE_AST_OFFSET) / 1000, DIR_GLUE, ipli - SE_AST_OFFSET, SE_FILE_SUFFIX);
+	snprintf(fname, AS_MAXBUF, sform, (ipli - SE_AST_OFFSET) / 1000, DIR_GLUE, ipli - SE_AST_OFFSET, SE_FILE_SUFFIX);
       }
       return;	/* asteroids or planetary moons: only one file 3000 bc - 3000 ad */
       /* break; */
@@ -3732,7 +3732,7 @@ void swi_gen_filename(double tjd, int ipli, char *fname)
   else 
     xstrcat(fname, "_");
   icty = abs(icty);
-  snprintf(fname + strlen(fname), AS_MAXCH, "%02d.%s", icty, SE_FILE_SUFFIX);
+  snprintf(fname + strlen(fname), AS_MAXBUF, "%02d.%s", icty, SE_FILE_SUFFIX);
 #if 0
   printf("fname  %s\n", fname); 
   fflush(stdout);
@@ -3973,7 +3973,7 @@ char *CALL_CONV swe_cs2degstr(CSEC t, char *a)
   s = t % 60L;
   m = t / 60 % 60L;
   h = t / 3600 % 100L;	/* only 0..99 degrees */ 
-  snprintf(a, AS_MAXCH, "%2d%s%02d'%02d", h, ODEGREE_STRING, m, s);
+  snprintf(a, AS_MAXBUF, "%2d%s%02d'%02d", h, ODEGREE_STRING, m, s);
   return (a);
 } /* swe_cs2degstr() */
 
@@ -4494,14 +4494,14 @@ void CALL_CONV swe_get_astro_models(char *samod, char *sdet, int32 iflag)
 	if (imod == SEMOD_DELTAT_DEFAULT) imod = 0;
 	break;
     }
-    snprintf(samod0 + strlen(samod0), AS_MAXCH, "%d,", imod);
+    snprintf(samod0 + strlen(samod0), AS_MAXBUF, "%d,", imod);
   }
   /*if (samod != NULL) 
     xstrcpy(samod, samod0);*/
   *sdet = '\0';
   if (sdet != NULL) {
     /* JPL ephemeris number and tidal acceleration used with it */
-    snprintf(sdet + strlen(sdet), AS_MAXCH, "JPL eph. %d; tidal acc. Moon used by SE: %.4f\n", 
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, "JPL eph. %d; tidal acc. Moon used by SE: %.4f\n", 
       swi_get_denum(SEI_SUN, iflag), swe_get_tid_acc());
     if (iflag & SEFLG_JPLEPH) {
       if (iflag & SEFLG_JPLHOR) 
@@ -4515,63 +4515,63 @@ void CALL_CONV swe_get_astro_models(char *samod, char *sdet, int32 iflag)
     }
     /* long-term Delta T calculation */
     get_deltat_model(pmodel[SE_MODEL_DELTAT], s);
-    snprintf(sdet + strlen(sdet), AS_MAXCH, "Delta T (long-term): %s\n", s);
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, "Delta T (long-term): %s\n", s);
     /* precession model */
     get_precession_model(pmodel[SE_MODEL_PREC_LONGTERM], iflag, s);
-    snprintf(sdet + strlen(sdet), AS_MAXCH, "Precession: %s\n", s);
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, "Precession: %s\n", s);
     if (pmodel[SE_MODEL_PREC_LONGTERM] != pmodel[SE_MODEL_PREC_SHORTTERM] && !(iflag & (SEFLG_JPLHOR | SEFLG_JPLHOR_APPROX))) {
       get_precession_model(pmodel[SE_MODEL_PREC_SHORTTERM], iflag, s);
-      snprintf(sdet + strlen(sdet), AS_MAXCH, "+ short-term model: %s\n", s);
+      snprintf(sdet + strlen(sdet), AS_MAXBUF, "+ short-term model: %s\n", s);
     }
     /* nutation */
     get_nutation_model(pmodel[SE_MODEL_NUT], iflag, s);
-    snprintf(sdet + strlen(sdet), AS_MAXCH, "Nutation: %s\n", s);
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, "Nutation: %s\n", s);
     /* frame bias */
     get_frame_bias_model(pmodel[SE_MODEL_BIAS], s);
-    snprintf(sdet + strlen(sdet), AS_MAXCH, "Frame bias: %s\n", s);
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, "Frame bias: %s\n", s);
     /* sidereal time */
     get_sidt_model(pmodel[SE_MODEL_SIDT], s);
-    snprintf(sdet + strlen(sdet), AS_MAXCH, "Sid. time: %s\n", s);
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, "Sid. time: %s\n", s);
     /* swetest parameters */
-    snprintf(sdet + strlen(sdet), AS_MAXCH, "swetest parameters:      D P P N B J J S\n");
-    snprintf(sdet + strlen(sdet), AS_MAXCH, "                    -amod%s", samod0);
-    snprintf(sdet + strlen(sdet), AS_MAXCH, " -tidacc%f", swe_get_tid_acc());
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, "swetest parameters:      D P P N B J J S\n");
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, "                    -amod%s", samod0);
+    snprintf(sdet + strlen(sdet), AS_MAXBUF, " -tidacc%f", swe_get_tid_acc());
     xstrcat(sdet, "\n");
     /* list all available astronomical models */
     if (!list_all_models) {
-      snprintf(sdet + strlen(sdet), AS_MAXCH, "For list of all available astronomical models, add a '+' to the version string\n(swetest parameter -amod%s+ or -amod%s+)\n", samod, samod0);
+      snprintf(sdet + strlen(sdet), AS_MAXBUF, "For list of all available astronomical models, add a '+' to the version string\n(swetest parameter -amod%s+ or -amod%s+)\n", samod, samod0);
     } else {
       xstrcat(sdet, "DELTA T MODELS (D)\n");
       for (i = 0; i <= SEMOD_NDELTAT; i++) {
 	if (i == SEMOD_DELTAT_DEFAULT) continue;
-        snprintf(sdet + strlen(sdet), AS_MAXCH, "  (%d)", i);
-	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXCH, " (=%d)", SEMOD_DELTAT_DEFAULT);
+        snprintf(sdet + strlen(sdet), AS_MAXBUF, "  (%d)", i);
+	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXBUF, " (=%d)", SEMOD_DELTAT_DEFAULT);
 	get_deltat_model(i, s);
-	snprintf(sdet + strlen(sdet), AS_MAXCH, ": %s\n", s);
+	snprintf(sdet + strlen(sdet), AS_MAXBUF, ": %s\n", s);
       }
       xstrcat(sdet, "PRECESSION MODELS (P P) (long-term/short-term)\n");
       for (i = 0; i <= SEMOD_NPREC; i++) {
 	if (i == SEMOD_PREC_DEFAULT) continue;
-        snprintf(sdet + strlen(sdet), AS_MAXCH, "  (%d)", i);
-	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXCH, " (=%d)", SEMOD_PREC_DEFAULT);
+        snprintf(sdet + strlen(sdet), AS_MAXBUF, "  (%d)", i);
+	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXBUF, " (=%d)", SEMOD_PREC_DEFAULT);
 	get_precession_model(i, iflag, s);
-	snprintf(sdet + strlen(sdet), AS_MAXCH, ": %s\n", s);
+	snprintf(sdet + strlen(sdet), AS_MAXBUF, ": %s\n", s);
       }
       xstrcat(sdet, "NUTATION MODELS (N)\n");
       for (i = 0; i <= SEMOD_NNUT; i++) {
 	if (i == SEMOD_NUT_DEFAULT) continue;
-        snprintf(sdet + strlen(sdet), AS_MAXCH, "  (%d)", i);
-	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXCH, " (=%d)", SEMOD_NUT_DEFAULT);
+        snprintf(sdet + strlen(sdet), AS_MAXBUF, "  (%d)", i);
+	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXBUF, " (=%d)", SEMOD_NUT_DEFAULT);
 	get_nutation_model(i, iflag, s);
-	snprintf(sdet + strlen(sdet), AS_MAXCH, ": %s\n", s);
+	snprintf(sdet + strlen(sdet), AS_MAXBUF, ": %s\n", s);
       }
       xstrcat(sdet, "FRAME BIAS MODELS (B)\n");
       for (i = 0; i <= SEMOD_NBIAS; i++) {
 	if (i == SEMOD_BIAS_DEFAULT) continue;
-        snprintf(sdet + strlen(sdet), AS_MAXCH, "  (%d)", i);
-	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXCH, " (=%d)", SEMOD_BIAS_DEFAULT);
+        snprintf(sdet + strlen(sdet), AS_MAXBUF, "  (%d)", i);
+	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXBUF, " (=%d)", SEMOD_BIAS_DEFAULT);
 	get_frame_bias_model(i, s);
-	snprintf(sdet + strlen(sdet), AS_MAXCH, ": %s\n", s);
+	snprintf(sdet + strlen(sdet), AS_MAXBUF, ": %s\n", s);
       }
       xstrcat(sdet, "JPL HORIZONS MODELS (J) (with SEFLG_JPLEPH|SEFLG_JPLHOR).\n");
       xstrcat(sdet, "  IAU 1980 (Wahr) + daily corrections to dpsi/deps 1962-today.\n");
@@ -4584,10 +4584,10 @@ void CALL_CONV swe_get_astro_models(char *samod, char *sdet, int32 iflag)
       xstrcat(sdet, "SIDEREAL TIME MODELS (S)\n");
       for (i = 0; i <= SEMOD_NSIDT; i++) {
 	if (i == SEMOD_SIDT_DEFAULT) continue;
-        snprintf(sdet + strlen(sdet), AS_MAXCH, "  (%d)", i);
-	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXCH, " (=%d)", SEMOD_SIDT_DEFAULT);
+        snprintf(sdet + strlen(sdet), AS_MAXBUF, "  (%d)", i);
+	if (i == 0) snprintf(sdet + strlen(sdet), AS_MAXBUF, " (=%d)", SEMOD_SIDT_DEFAULT);
 	get_sidt_model(i, s);
-	snprintf(sdet + strlen(sdet), AS_MAXCH, ": %s\n", s);
+	snprintf(sdet + strlen(sdet), AS_MAXBUF, ": %s\n", s);
       }
     }
   }
@@ -4622,7 +4622,7 @@ void swi_open_trace(char *serr)
   if (swi_trace_count >= TRACE_COUNT_MAX) {
     if (swi_trace_count == TRACE_COUNT_MAX) { 
       if (serr != NULL)
-	snprintf(serr, AS_MAXCH, "trace stopped, %d calls exceeded.", TRACE_COUNT_MAX);
+	snprintf(serr, AS_MAXBUF, "trace stopped, %d calls exceeded.", TRACE_COUNT_MAX);
       if (swi_fp_trace_out != NULL)
 	fprintf(swi_fp_trace_out, "trace stopped, %d calls exceeded.\n", TRACE_COUNT_MAX);
       if (swi_fp_trace_c != NULL)
@@ -4631,7 +4631,7 @@ void swi_open_trace(char *serr)
     return;
   }
   if (swi_fp_trace_c == NULL) {
-    char fname[AS_MAXCH];
+    char fname[AS_MAXBUF];
 #if TRACE == 2
     char *sp, *sp1;
     int ipid;
@@ -4646,11 +4646,11 @@ void swi_open_trace(char *serr)
 # else
     ipid = getpid();
 # endif
-    snprintf(sp1, AS_MAXCH, "_%d%s", ipid, sp);
+    snprintf(sp1, AS_MAXBUF, "_%d%s", ipid, sp);
 #endif
     if ((swi_fp_trace_c = fopen(fname, FILE_A_ACCESS)) == NULL) {
       if (serr != NULL) {
-	snprintf(serr, AS_MAXCH, "could not open trace output file '%s'", fname);
+	snprintf(serr, AS_MAXBUF, "could not open trace output file '%s'", fname);
       }
     } else {
       fputs("#include \"sweodef.h\"\n", swi_fp_trace_c);   
@@ -4679,11 +4679,11 @@ void swi_open_trace(char *serr)
 # else
     ipid = getpid();
 # endif
-    snprintf(sp1, AS_MAXCH, "_%d%s", ipid, sp);
+    snprintf(sp1, AS_MAXBUF, "_%d%s", ipid, sp);
 #endif
     if ((swi_fp_trace_out = fopen(fname, FILE_A_ACCESS)) == NULL) {
       if (serr != NULL) {
-	snprintf(serr, AS_MAXCH, "could not open trace output file '%s'", fname);
+	snprintf(serr, AS_MAXBUF, "could not open trace output file '%s'", fname);
       }
     }
   }
