@@ -61,12 +61,12 @@ i			input chart data
 ```
 ##### DATA DIRECTORIES
 
-###### $XDG_DATA_HOME/astro  
+###### $(HOME)/.local/share/astro
 - city-db    
 - swisseph/ephe/   
 - charts/   
  
-###### $XDG_CONFIG_HOME/astro  
+###### $(HOME)/.config/astro
 - config   
 
 ##### TODO  
