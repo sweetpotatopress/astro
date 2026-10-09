@@ -596,7 +596,7 @@ static int32 swecalc(double tjd, int ipl, int32 iplmoon, int32 iflag, double *x,
   struct plan_data *ndp;
   double *xp, *xp2;
   double ss[3];
-  char serr2[AS_MAXBUF];
+  char serr2[AS_MAXCH];
   //if (serr != NULL)
   //  *serr = '\0';  // is done in calling function
   serr2[0] = '\0';
@@ -1315,8 +1315,8 @@ void CALL_CONV swe_close(void)
 void CALL_CONV swe_set_ephe_path(const char *path) 
 {
   int i, iflag;
-  char s[AS_MAXBUF];
-  char serr[AS_MAXBUF];
+  char s[AS_MAXCH];
+  char serr[AS_MAXCH];
   char *sp;
   double xx[6];
   /* close all open files and delete all planetary data */
@@ -1380,7 +1380,7 @@ void CALL_CONV swe_set_ephe_path(const char *path)
 void load_dpsi_deps(void)
 {
   FILE *fp;
-  char s[AS_MAXBUF];
+  char s[AS_MAXCH];
   char *cpos[20];
   int n = 0, iyear, mjd = 0, mjdsv = 0;
   double dpsi, deps, TJDOFS = 2400000.5;
@@ -1474,7 +1474,7 @@ void load_dpsi_deps(void)
  */
 void CALL_CONV swe_set_jpl_file(const char *fname)
 {
-  char *sp, s[AS_MAXBUF];
+  char *sp, s[AS_MAXCH];
   int retc;
   double ss[3];
   /* close all open files and delete all planetary data */
@@ -2241,24 +2241,24 @@ again:
         sp = fname;
       }
       if (ipli > SE_AST_OFFSET) {
-        snprintf(s, AS_MAXBUF, "asteroid No. %d (%s): ", ipli - SE_AST_OFFSET, sp);
+        snprintf(s, AS_MAXCH*2, "asteroid No. %d (%s): ", ipli - SE_AST_OFFSET, sp);
       } else if (ipli > SE_PLMOON_OFFSET) {
 	if (strstr(fname, "99.") != NULL) 
-	  snprintf(s, AS_MAXBUF, "plan. COB No. %d (%s): ", ipli, sp);
+	  snprintf(s, AS_MAXCH*2, "plan. COB No. %d (%s): ", ipli, sp);
 	else
-	  snprintf(s, AS_MAXBUF, "plan. moon No. %d (%s): ", ipli, sp);
+	  snprintf(s, AS_MAXCH*2, "plan. moon No. %d (%s): ", ipli, sp);
       } else if (ipli > SEI_PLUTO) {
-        snprintf(s, AS_MAXBUF, "asteroid eph. file (%s): ", sp);
+        snprintf(s, AS_MAXCH*2, "asteroid eph. file (%s): ", sp);
       } else if (ipli != SEI_MOON) {
-        snprintf(s, AS_MAXBUF, "planets eph. file (%s): ", sp);
+        snprintf(s, AS_MAXCH*2, "planets eph. file (%s): ", sp);
       } else {
-        snprintf(s, AS_MAXBUF, "moon eph. file (%s): ", sp);
+        snprintf(s, AS_MAXCH*2, "moon eph. file (%s): ", sp);
       }
       if (tjd < fdp->tfstart) {
-	snprintf(s + strlen(s), AS_MAXBUF, "jd %f < lower limit %f;", 
+	snprintf(s + strlen(s), AS_MAXCH*2, "jd %f < lower limit %f;", 
 		  tjd, fdp->tfstart); 
       } else {
-	snprintf(s + strlen(s), AS_MAXBUF, "jd %f > upper limit %f;", 
+	snprintf(s + strlen(s), AS_MAXCH*2, "jd %f > upper limit %f;", 
 		  tjd, fdp->tfend); 
       }
       if (strlen(serr) + strlen(s) < AS_MAXCH)
@@ -2397,7 +2397,7 @@ FILE *swi_fopen(int ifno, char *fname, char *ephepath, char *serr)
     if (fp != NULL) 
       return fp;
   }
-  snprintf(s, AS_MAXBUF, "SwissEph file '%s' not found in PATH '%s'", fname, ephepath);
+  snprintf(s, AS_MAXCH*2, "SwissEph file '%s' not found in PATH '%s'", fname, ephepath);
   s[AS_MAXCH-1] = '\0';		/* s must not be longer then AS_MAXCH */
   if (serr != NULL)
     xstrcpy(serr, s);

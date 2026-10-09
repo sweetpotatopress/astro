@@ -298,7 +298,7 @@ int swi_moshplan(double tjd, int ipli, AS_BOOL do_save, double *xpret, double *x
   /* tjd beyond ephemeris limits, give some margin for spped at edge */
   if (tjd < MOSHPLEPH_START - 0.3 || tjd > MOSHPLEPH_END + 0.3) {
     if (serr != NULL) {
-      snprintf(s, AS_MAXBUF, "jd %f outside Moshier planet range %.2f .. %.2f ",
+      snprintf(s, AS_MAXCH, "jd %f outside Moshier planet range %.2f .. %.2f ",
 		    tjd, MOSHPLEPH_START, MOSHPLEPH_END);
       if (strlen(serr) + strlen(s) < AS_MAXCH)
 	xstrcat(serr, s);
@@ -753,7 +753,7 @@ static int read_elements_file(int32 ipl, double tjd,
     if ((sp = strchr(s, '#')) != NULL)
       *sp = '\0';
     ncpos = swi_cutstr(s, ",", cpos, 20);
-    snprintf(serri, AS_MAXBUF, "error in file %s, line %7.0f:", SE_FICTFILE, (double) iline);
+    snprintf(serri, AS_MAXCH, "error in file %s, line %7.0f:", SE_FICTFILE, (double) iline);
     if (ncpos < 9) {
       if (serr != NULL) {
         snprintf(serr, AS_MAXBUF, "%s nine elements required", serri);
