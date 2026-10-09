@@ -19,6 +19,10 @@ SWE_SRC = swisseph/swedate.c swisseph/swehouse.c swisseph/swejpl.c \
 SWE_OBJ = swisseph/swedate.o swisseph/swehouse.o swisseph/swejpl.o \
 			swisseph/swemmoon.o swisseph/swemplan.o swisseph/sweph.o \
 			swisseph/swephlib.o swisseph/swecl.o swisseph/swehel.o
+			
+SWE_D = swisseph/swedate.d swisseph/swehouse.d swisseph/swejpl.d \
+			swisseph/swemmoon.d swisseph/swemplan.d swisseph/sweph.d \
+			swisseph/swephlib.d swisseph/swecl.d swisseph/swehel.d
 
 SWE_A	= swisseph/libswe.a
 CONFIG_DIR	= $(HOME)/.config/astro
@@ -27,12 +31,12 @@ CHARTS_DIR	= $(DATA_DIR)/charts
 
 all: data astro
 
-.c.o:
-	$(CC) $(INC) $(SWE_CFLAGS) -c $< -o $@
+.c.o: $(SWE_SRC)
+	$(CC) $(INC) $(SWE_CFLAGS) -MMD -MP -c $< -o $@
+-include $(SWE_D)
 	
 $(SWE_A): $(SWE_OBJ)
 	ar rcs $@ $(SWE_OBJ); \
-	rm $(SWE_OBJ)
 	
 astro: ${SWE_A}
 	$(CC) $(INC) $(CFLAGS) $(SRC) $(SWE_A) $(LIBS) -o astro
@@ -47,4 +51,4 @@ install:
 	mkdir -p "$(DESTDIR)$(PREFIX)/bin"; \
 	cp "astro" "$(DESTDIR)$(PREFIX)/bin"
 	
-.PHONY: all debug install clean
+.PHONY: all data astro install 
