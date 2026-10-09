@@ -8,6 +8,12 @@ further documentation and news
 ncurses  
 iana timezone database  
 
+##### INSTALL
+build
+`make`
+install
+`doas make install`
+
 ##### KEYBINDS  
 ```
 enter		animate chart  
@@ -87,8 +93,6 @@ i			input chart data
 - [x] multiple charts
 - [x] terminal window resize refresh
 - [x] user default config
-- [ ] code documentation
-- [ ] astro tutorial
 - [x] zodiacal releasing
  
 ##### LICENSE  
