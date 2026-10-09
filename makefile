@@ -30,7 +30,7 @@ CHARTS_DIR	= $(DATA_DIR)/charts
 
 all: data astro
 
-.c.o: $(SWE_SRC)
+.c.o:
 	$(CC) $(INC) $(SWE_CFLAGS) -MMD -MP -c $< -o $@
 -include $(SWE_D)
 	
