@@ -49,7 +49,7 @@ void path_check(char *path, const char *s)
 	if (!home_dir || home_dir[0] == '\0')
 		ERR_EXIT("$HOME not set");
 	
-	else if (strcmp("config", s) == 0)
+	if (strcmp("config", s) == 0)
 		snprintf(path, MAXBUF, "%s/.config/astro/%s", home_dir, s);
 	
 	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
