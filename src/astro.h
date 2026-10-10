@@ -22,9 +22,9 @@
 #define CHARTMAX 13
 
 #define ERR_EXIT(str) do { \
-		fprintf(stderr, "%s\n", str); \
 		endwin(); \
 		swe_close(); \
+		fprintf(stderr, "\n --?> %s <--\n\n", str); \
 		exit(EXIT_FAILURE); \
 		} while (0)
 		
