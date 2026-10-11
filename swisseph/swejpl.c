@@ -229,7 +229,7 @@ static int32 fsizer(char *serr)
     if (serr != NULL) {
       xstrcpy(serr, "alleged ephemeris file has invalid format.");
       if (strlen(serr) + strlen(js->jplfname) + 3 < AS_MAXCH) {
-	snprintf(serr, AS_MAXCH, "alleged ephemeris file (%s) has invalid format.", js->jplfname);
+	snprintf(serr, AS_MAXCH, "alleged ephemeris file (%.200s) has invalid format.", js->jplfname);
       }
     }
     return(NOT_AVAILABLE);
@@ -755,7 +755,7 @@ static int state(double et, int32 *list, int do_bary,
       if (serr != NULL) {
 	snprintf(serr, AS_MAXCH, "JPL ephemeris file is mutilated; length = %d instead of %d.", (unsigned int) flen, (unsigned int) nb);
 	if (strlen(serr) + strlen(js->jplfname) < AS_MAXCH - 1) {
-	  snprintf(serr, AS_MAXCH, "JPL ephemeris file %s is mutilated; length = %d instead of %d.", js->jplfname, (unsigned int) flen, (unsigned int) nb);
+	  snprintf(serr, AS_MAXBUF, "JPL ephemeris file %s is mutilated; length = %d instead of %d.", js->jplfname, (unsigned int) flen, (unsigned int) nb);
 	}
       }
       return(NOT_AVAILABLE);

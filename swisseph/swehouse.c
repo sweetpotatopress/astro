@@ -583,6 +583,7 @@ static int sidereal_houses_trad(double tjde,
     ascmc[i] = swe_degnorm(ascmc[i] - ay);
   }
 //if (hsys == 'P') fprintf(stderr, " => %f\n", cusp[1]);
+	(void)nutl;
   return retc;
 }
 

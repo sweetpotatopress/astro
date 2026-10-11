@@ -93,35 +93,7 @@ struct meff_ele {double r,m;};
 /****************
  * global stuff *
  ****************/
-TLS struct swe_data swed = {FALSE,	/* ephe_path_is_set = FALSE */
-                            FALSE,	/* jpl_file_is_open = FALSE */
-                            NULL,	/* fixfp, fixed stars file pointer */
-			    "",		/* ephepath, ephemeris path */
-			    "",		/* jplfnam, JPL file name, default */
-			    0,		/* jpldenum */
-			    0,          /* last_epheflag */
-			    FALSE,	/* geopos_is_set, for topocentric */
-			    FALSE,	/* ayana_is_set, ayanamsa is set */
-			    FALSE,	/* is_old_starfile, fixstars.cat is used (default is sefstars.txt) */
-			    0.0, 0.0, 0.0, 0.0, /* eop_tjd_... */
-			    0,          /* eop_dpsi_loaded */
-			    0.0, 	/* tid_acc */
-			    FALSE,	/* is_tid_acc_manual */
-			    FALSE,	/* init_dt_done */
-			    FALSE,	/* swed_is_initialised */
-			    FALSE,	/* delta_t_userdef_is_set */
-			    0.0,	/* delta_t_userdef */
-			    0.0,	/* ast_G */
-			    0.0,	/* ast_H */
-			    0.0,	/* ast_diam */
-			    "",		/* astelem[] */
-			    0, 		/* i_saved_planet_name */
-			    "",		/* saved_planet_name[] */
-			    NULL,	/* dpsi */
-			    NULL,	/* deps */
-			    0,		/* timeout */
-			    {0,0,0,0,0,0,0,0,}, /* astro_models */
-			    };
+TLS struct swe_data swed = {0};
 
 /*************
  * constants *
@@ -253,6 +225,10 @@ HANDLE dllhandle = NULL;        // global used in swe_version
 #endif
 #endif // MSDOS
 
+#ifdef __GNUC__
+static char xswe_marker;
+#endif
+
 char *CALL_CONV swe_get_library_path(char *s)
 {
   size_t bytes;
@@ -265,7 +241,7 @@ char *CALL_CONV swe_get_library_path(char *s)
   bytes = GetModuleFileName((HMODULE) dllhandle, (TCHAR*) s, (DWORD) len);
 #else
   #ifdef __GNUC__
-    if (dladdr((void *)swe_version, &dli) != 0) {
+    if (dladdr((void *)&xswe_marker, &dli) != 0) {
       if (strlen(dli.dli_fname) >= len) {
 	strncpy(s, dli.dli_fname, len);
 	s[len] = '\0';
@@ -1998,7 +1974,7 @@ static int jplplan(double tjd, int ipli, int32 iflag, AS_BOOL do_save,
   struct plan_data *pdp = &swed.pldat[ipli];
   struct plan_data *pedp = &swed.pldat[SEI_EARTH];
   struct plan_data *psdp = &swed.pldat[SEI_SUNBARY];
-  iflag = SEFLG_JPLEPH; /* currently not used, but this stops compiler warning */
+  (void)iflag; /* currently not used, but this stops compiler warning */
   /* we assume Teph ~= TDB ~= TT. The maximum error is < 0.002 sec, 
    * corresponding to an ephemeris error < 0.001 arcsec for the moon */
   /* double tjd_tdb, T;
@@ -2444,6 +2420,7 @@ int32 swi_get_denum(int32 ipli, int32 iflag)
 
 static int calc_center_body(int32 ipli, int32 iflag, double *xx, double *xcom, char *serr)
 {
+	(void)serr;
   int i;
   if (!(iflag & SEFLG_CENTER_BODY))
     return OK;
@@ -6065,6 +6042,7 @@ void swi_check_nutation(double tjd, int32 iflag)
  */
 static int32 plaus_iflag(int32 iflag, int32 ipl, double tjd, char *serr)
 {
+	(void)tjd;
   int32 epheflag = 0;
   int jplhor_model = swed.astro_models[SE_MODEL_JPLHOR_MODE];
   int jplhora_model = swed.astro_models[SE_MODEL_JPLHORA_MODE];
@@ -6374,7 +6352,7 @@ static int32 load_all_fixed_stars(char *serr)
     nstars++;
     nrecs++;
     //sprintf(fstdata.skey, "~%s", fstdata.starbayer); // ~ sorts after alnum
-    snprintf(fstdata.skey, 200, ",%s", fstdata.starbayer); // , sorts before alnum
+    snprintf(fstdata.skey, sizeof(fstdata.starbayer)+1, ",%s", fstdata.starbayer); // , sorts before alnum
     // remove white spaces from star bayer name
     while ((sp = strchr(fstdata.skey, ' ')) != NULL)
       xstrcpy(sp, sp+1);
@@ -6702,7 +6680,7 @@ static int32 search_star_in_list(char *sstar, struct fixed_star *stardata, char 
   } else if (!is_bayer && (sp = strchr(sstar, '%')) != NULL) {
     stardatabegp = &(swed.fixed_stars[swed.n_fixstars_real]);
     ndata = swed.n_fixstars_named;
-    if (sp - sstar != strlen(sstar) - 1) {
+    if ((size_t)(sp - sstar) != strlen(sstar) - 1) {
       if (serr != NULL)
 	snprintf(serr, AS_MAXBUF, "error, swe_fixstar(): invalid search string %s", sstar);
       return ERR;
@@ -7472,6 +7450,8 @@ static int open_jpl_file(double *ss, char *fname, char *fpath, char *serr)
 #if 1
 static int32 swi_fixstar_load_record(char *star, char *srecord, char *sname, char *sbayer, double *dparams, char *serr)
 {
+	(void)sname;
+	(void)sbayer;
   char s[AS_MAXCH + 20], *sp, *sp2;	/* 20 byte for SE_STARFILE */
   char sstar[SWI_STAR_LENGTH + 1];
   char fstar[SWI_STAR_LENGTH + 1];
