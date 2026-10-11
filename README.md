@@ -9,8 +9,7 @@ ncurses
 iana timezone database  
 
 ##### INSTALL
-build `make`  
-install `doas make install`
+`doas make install`
 
 ##### KEYBINDS  
 ```
@@ -63,15 +62,6 @@ i			input chart data
 	\		draw chart
 	esc		cancel
 ```
-##### DATA DIRECTORIES
-
-###### $(HOME)/.local/share/astro
-- city-db    
-- swisseph/ephe/   
-- charts/   
- 
-###### $(HOME)/.config/astro
-- config   
 
 ##### TODO  
 - [x] save and load charts
