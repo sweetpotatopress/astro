@@ -1,4 +1,5 @@
 CC	= cc
+
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share/astro
