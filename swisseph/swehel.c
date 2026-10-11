@@ -223,6 +223,7 @@ static double PupilDia(double Age, double B)
 */
 static double OpticFactor(double Bback, double kX, double *dobs, double JDNDaysUT, char *ObjectName, int TypeFactor, int helflag)
 {
+	(void)JDNDaysUT;
   double Pst, CIb, CIi, ObjectSize, Fb, Fe, Fsc, Fci, Fcb, Ft, Fp, Fa, Fr, Fm;
   double Age = dobs[0];
   double SN = dobs[1], SNi;
@@ -552,6 +553,7 @@ static int32 RiseSet(double JDNDaysUT, double *dgeo, double *datm, char *ObjectN
 */
 static double SunRA(double JDNDaysUT, int32 helflag, char *serr)
 {
+	(void)helflag;
   int imon, iday, iyar, calflag = SE_GREG_CAL;
   double dut;
   static TLS double tjdlast;
@@ -1267,6 +1269,7 @@ static double Bday(double AltO, double AziO, double AltS, double AziS, double su
 */
 static double Bcity(double Value, double Press)
 {
+	(void)Press;
   double Bcity = Value;
   Press += 0.0; /* unused; statement prevents compiler warning */
   Bcity = mymax(Bcity, 0);

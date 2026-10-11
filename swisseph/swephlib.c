@@ -3246,6 +3246,8 @@ int32 swi_guess_ephe_flag(void)
 
 int32 swi_get_tid_acc(double tjd_ut, int32 iflag, int32 denum, int32 *denumret, double *tid_acc, char *serr)
 {
+	(void)tjd_ut;
+	(void)serr;
   iflag &= SEFLG_EPHMASK;
   if (swed.is_tid_acc_manual) {
     *tid_acc = swed.tid_acc;
@@ -4494,7 +4496,7 @@ void CALL_CONV swe_get_astro_models(char *samod, char *sdet, int32 iflag)
 	if (imod == SEMOD_DELTAT_DEFAULT) imod = 0;
 	break;
     }
-    snprintf(samod0 + strlen(samod0), AS_MAXBUF, "%d,", imod);
+    snprintf(samod0 + strlen(samod0), AS_MAXCH, "%d,", imod);
   }
   /*if (samod != NULL) 
     xstrcpy(samod, samod0);*/
