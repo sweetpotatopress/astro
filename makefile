@@ -39,7 +39,7 @@ astro: ${SWE_A}
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(SRC) $(SWE_A) $(LIBS) -o $@
 	
 debug: ${SWE_A}
-	$(CC) $(CPPFLAGS) $(CFLAGS) -g -O0 $(SRC) $(SWE_A) $(LIBS) -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -g -O0 $(SRC) $(SWE_A) $(LIBS) -o astro
 
 install: all
 	mkdir -p "$(DESTDIR)$(BINDIR)"
