@@ -42,7 +42,7 @@
 #define FDST 12
 #define FMAX 13
 
-static void path_env(const char *xdg, char *env, const char *f)
+static void path_env(char *env, const char *xdg,  const char *f)
 {
 	const char *dir = getenv(xdg);
 	if (dir && dir[0] != '\0')
@@ -63,17 +63,17 @@ void path_check(char *path, const char *s)
 
 	if (strcmp("cdir", s) == 0)
 	{
-		path_env("XDG_CONFIG_HOME", env, ".config");
+		path_env(env, "XDG_CONFIG_HOME", ".config");
 		snprintf(path, MAXBUF, "%s/%s", env, "astro");
 	}
 	else if (strcmp("config", s) == 0)
 	{
-		path_env("XDG_CONFIG_HOME", env, ".config");
+		path_env(env, "XDG_CONFIG_HOME", ".config");
 		snprintf(path, MAXBUF, "%s/%s", env, "astro/config");
 	}
 	else if (strcmp("charts", s) == 0)
 	{
-		path_env("XDG_DATA_HOME", env, ".local/share");
+		path_env(env, "XDG_DATA_HOME", ".local/share");
 		snprintf(path, MAXBUF, "%s/%s", env, "astro/charts");
 	}
 	else if (strcmp("ephe", s) == 0)
