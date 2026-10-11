@@ -64,26 +64,26 @@ void path_check(char *path, const char *s)
 	if (strcmp("cdir", s) == 0)
 	{
 		path_env(env, "XDG_CONFIG_HOME", ".config");
-		snprintf(path, MAXBUF, "%s/%s", env, "astro");
+		snprintf(path, MAXPATH, "%s/%s", env, "astro");
 	}
 	else if (strcmp("config", s) == 0)
 	{
 		path_env(env, "XDG_CONFIG_HOME", ".config");
-		snprintf(path, MAXBUF, "%s/%s", env, "astro/config");
+		snprintf(path, MAXPATH, "%s/%s", env, "astro/config");
 	}
 	else if (strcmp("charts", s) == 0)
 	{
 		path_env(env, "XDG_DATA_HOME", ".local/share");
-		snprintf(path, MAXBUF, "%s/%s", env, "astro/charts");
+		snprintf(path, MAXPATH, "%s/%s", env, "astro/charts");
 	}
 	else if (strcmp("ephe", s) == 0)
 	{
-		snprintf(path, MAXBUF, "%s/%s", ASTRO_DATA_DIR, "ephe");
+		snprintf(path, MAXPATH, "%s/%s", ASTRO_DATA_DIR, "ephe");
 		if (strlen(path) > 255)
 			ERR_EXIT("ERR: ephe path too long");
 	}
 	else if (strcmp("city-db", s) == 0)
-		snprintf(path, MAXBUF, "%s/%s", ASTRO_DATA_DIR, "city-db");
+		snprintf(path, MAXPATH, "%s/%s", ASTRO_DATA_DIR, "city-db");
 	else
 		ERR_EXIT("path_check string error");
 }
@@ -438,7 +438,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 	
 	char *filename = field_buffer(save_field[0], 0);
 	char fn[MAXBUF] = {0};
-	char newpath[MAXBUF] = {0};
+	char newpath[MAXPATH] = {0};
 	int len = 0;
 	
 	field_info(save_field[0], NULL, &len, NULL, NULL, NULL, NULL);
@@ -449,7 +449,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 		len--;
 	fn[len] = '\0';
 	
-	snprintf(newpath, MAXBUF, "%s/%s", filepath, fn);
+	snprintf(newpath, MAXPATH, "%s/%s", filepath, fn);
 	
 	if (stat(newpath, &buff) == 0)
 	{
