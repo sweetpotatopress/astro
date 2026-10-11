@@ -1,13 +1,15 @@
+VERSION = 0.76.7
+
 CC	= cc
 
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share/astro
 
-CFLAGS	= -Wall -Wextra -Wpedantic -O3
-CPPFLAGS = -Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"'
-
 LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
+
+CPPFLAGS = -Isrc -DASTRO_DATA_DIR='"$(DATADIR)"' -DVERSION=\"$(VERSION)\"
+CFLAGS	= -Wall -Wextra -Wpedantic -O3
 
 SRC		=	src/anim.c src/astro.c src/chronos.c src/conf.c \
 			src/draw.c src/indat.c src/init.c src/io.c \
@@ -17,20 +19,14 @@ SWE_SRC = 	swisseph/swedate.c swisseph/swehouse.c swisseph/swejpl.c \
 			swisseph/swemmoon.c swisseph/swemplan.c swisseph/sweph.c \
 			swisseph/swephlib.c swisseph/swecl.c swisseph/swehel.c
 			
-SWE_OBJ = 	swisseph/swedate.o swisseph/swehouse.o swisseph/swejpl.o \
-			swisseph/swemmoon.o swisseph/swemplan.o swisseph/sweph.o \
-			swisseph/swephlib.o swisseph/swecl.o swisseph/swehel.o
-			
-SWE_D 	= 	swisseph/swedate.d swisseph/swehouse.d swisseph/swejpl.d \
-			swisseph/swemmoon.d swisseph/swemplan.d swisseph/sweph.d \
-			swisseph/swephlib.d swisseph/swecl.d swisseph/swehel.d
-
+SWE_OBJ	=	${SWE_SRC:.c=.o}
+SWE_D	=	${SWE_SRC:.c=.d}
 SWE_A	=	swisseph/libswe.a
 
 all: astro
 
 .c.o:
-	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
+	$(CC) -Iswisseph $(CFLAGS) -MMD -MP -c $< -o $@
 -include $(SWE_D)
 	
 $(SWE_A): $(SWE_OBJ)
@@ -41,16 +37,20 @@ astro: ${SWE_A}
 	
 debug: ${SWE_A}
 	$(CC) $(CPPFLAGS) $(CFLAGS) -g -O0 $(SRC) $(SWE_A) $(LIBS) -o astro
+	
+clean:
+	rm -f $(SWE_OBJ) $(SWE_D) $(SWE_A) astro
 
 install: all
 	mkdir -p "$(DESTDIR)$(BINDIR)"
-	cp "astro" "$(DESTDIR)$(BINDIR)"
+	cp -f "astro" "$(DESTDIR)$(BINDIR)"
 	chmod 755 "$(DESTDIR)$(BINDIR)/astro"
 	mkdir -p "$(DESTDIR)$(DATADIR)"
 	cp -R "swisseph/ephe" "$(DESTDIR)$(DATADIR)"
 	cp city-db "$(DESTDIR)$(DATADIR)"
 
-clean:
-	rm $(SWE_OBJ) $(SWE_D) $(SWE_A) astro
-	
-.PHONY: all debug astro install clean
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/astro
+	rm -rf $(DESTDIR)$(DATADIR)
+
+.PHONY: all astro debug clean install uninstall
