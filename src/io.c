@@ -58,7 +58,7 @@ static void path_env(char *env, const char *xdg,  const char *f)
 
 void path_check(char *path, const char *s)
 {
-	memset(path, 0, MAXBUF);
+	memset(path, 0, MAXPATH);
 	char env[MAXBUF] = {0};
 
 	if (strcmp("cdir", s) == 0)
