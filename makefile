@@ -3,7 +3,7 @@ PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share/astro
 
-CFLAGS	:= -Wall -Wextra -Wpedantic -O3
+CFLAGS	= -Wall -Wextra -Wpedantic -O3
 CPPFLAGS = -Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"'
 
 LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
