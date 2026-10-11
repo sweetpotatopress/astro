@@ -8,7 +8,7 @@ DATADIR = $(PREFIX)/share/astro
 
 LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
 
-CPPFLAGS = -Isrc -DASTRO_DATA_DIR='"$(DATADIR)"' -DVERSION=\"$(VERSION)\"
+CPPFLAGS = -Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"' -DVERSION=\"$(VERSION)\"
 CFLAGS	= -Wall -Wextra -Wpedantic -O3
 
 SRC		=	src/anim.c src/astro.c src/chronos.c src/conf.c \
@@ -26,7 +26,7 @@ SWE_A	=	swisseph/libswe.a
 all: astro
 
 .c.o:
-	$(CC) -Iswisseph $(CFLAGS) -MMD -MP -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
 -include $(SWE_D)
 	
 $(SWE_A): $(SWE_OBJ)
