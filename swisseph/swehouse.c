@@ -545,6 +545,8 @@ static int sidereal_houses_trad(double tjde,
 			   double *ascmc_speed,
 			   char *serr)
 {
+  (void)nutl; //unused
+  
   int i, retc = OK;
   double ay;
   int ito;
@@ -583,7 +585,6 @@ static int sidereal_houses_trad(double tjde,
     ascmc[i] = swe_degnorm(ascmc[i] - ay);
   }
 //if (hsys == 'P') fprintf(stderr, " => %f\n", cusp[1]);
-	(void)nutl;
   return retc;
 }
 

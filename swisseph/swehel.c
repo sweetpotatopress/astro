@@ -223,7 +223,8 @@ static double PupilDia(double Age, double B)
 */
 static double OpticFactor(double Bback, double kX, double *dobs, double JDNDaysUT, char *ObjectName, int TypeFactor, int helflag)
 {
-	(void)JDNDaysUT;
+  (void)JDNDaysUT; // unused
+  
   double Pst, CIb, CIi, ObjectSize, Fb, Fe, Fsc, Fci, Fcb, Ft, Fp, Fa, Fr, Fm;
   double Age = dobs[0];
   double SN = dobs[1], SNi;
@@ -232,7 +233,6 @@ static double OpticFactor(double Bback, double kX, double *dobs, double JDNDaysU
   double OpticDia = dobs[4];
   double OpticTrans = dobs[5];
   AS_BOOL is_scotopic = FALSE;
-  JDNDaysUT += 0.0; /* currently not used, statement prevents compiler warning */
   SNi = SN;
   if (SNi <= 0.00000001) SNi = 0.00000001;
   /* 23 jaar as standard from Garstang*/
@@ -553,12 +553,12 @@ static int32 RiseSet(double JDNDaysUT, double *dgeo, double *datm, char *ObjectN
 */
 static double SunRA(double JDNDaysUT, int32 helflag, char *serr)
 {
-	(void)helflag;
+  (void)helflag; // unused
+  
   int imon, iday, iyar, calflag = SE_GREG_CAL;
   double dut;
   static TLS double tjdlast;
   static TLS double ralast;
-  helflag += 0; /* statement prevents compiler warning */
   *serr = '\0';
   if (JDNDaysUT == tjdlast)
     return ralast;
@@ -1269,9 +1269,9 @@ static double Bday(double AltO, double AziO, double AltS, double AziS, double su
 */
 static double Bcity(double Value, double Press)
 {
-	(void)Press;
+  (void)Press; // unused
+  
   double Bcity = Value;
-  Press += 0.0; /* unused; statement prevents compiler warning */
   Bcity = mymax(Bcity, 0);
   return Bcity;
 }

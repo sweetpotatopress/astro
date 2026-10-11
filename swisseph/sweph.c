@@ -2420,7 +2420,7 @@ int32 swi_get_denum(int32 ipli, int32 iflag)
 
 static int calc_center_body(int32 ipli, int32 iflag, double *xx, double *xcom, char *serr)
 {
-	(void)serr;
+  (void)serr; // unused
   int i;
   if (!(iflag & SEFLG_CENTER_BODY))
     return OK;
@@ -6042,7 +6042,7 @@ void swi_check_nutation(double tjd, int32 iflag)
  */
 static int32 plaus_iflag(int32 iflag, int32 ipl, double tjd, char *serr)
 {
-	(void)tjd;
+  (void)tjd; // unused
   int32 epheflag = 0;
   int jplhor_model = swed.astro_models[SE_MODEL_JPLHOR_MODE];
   int jplhora_model = swed.astro_models[SE_MODEL_JPLHORA_MODE];
@@ -7450,8 +7450,9 @@ static int open_jpl_file(double *ss, char *fname, char *fpath, char *serr)
 #if 1
 static int32 swi_fixstar_load_record(char *star, char *srecord, char *sname, char *sbayer, double *dparams, char *serr)
 {
-	(void)sname;
-	(void)sbayer;
+  (void)sname;
+  (void)sbayer; // unused
+  
   char s[AS_MAXCH + 20], *sp, *sp2;	/* 20 byte for SE_STARFILE */
   char sstar[SWI_STAR_LENGTH + 1];
   char fstar[SWI_STAR_LENGTH + 1];

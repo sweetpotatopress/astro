@@ -3246,8 +3246,9 @@ int32 swi_guess_ephe_flag(void)
 
 int32 swi_get_tid_acc(double tjd_ut, int32 iflag, int32 denum, int32 *denumret, double *tid_acc, char *serr)
 {
-	(void)tjd_ut;
-	(void)serr;
+  (void)tjd_ut;
+  (void)serr; // unused
+  
   iflag &= SEFLG_EPHMASK;
   if (swed.is_tid_acc_manual) {
     *tid_acc = swed.tid_acc;
