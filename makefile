@@ -1,10 +1,15 @@
 CC	= cc
+
 CFLAGS	:= -Wall -Wextra -Wpedantic -O3
 SWE_CFLAGS := -g -Wall -fPIC
 
 PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
+DATADIR = $(PREFIX)/share/astro
+
+CPPFLAGS = -Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"'
+
 LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
-INC	= -Isrc -Iswisseph
 
 SRC		=	src/anim.c src/astro.c src/chronos.c src/conf.c \
 			src/draw.c src/indat.c src/init.c src/io.c \
@@ -24,33 +29,27 @@ SWE_D 	= 	swisseph/swedate.d swisseph/swehouse.d swisseph/swejpl.d \
 
 SWE_A	=	swisseph/libswe.a
 
-CONFIG_DIR	= $(HOME)/.config/astro
-DATA_DIR	= $(HOME)/.local/share/astro
-CHARTS_DIR	= $(DATA_DIR)/charts
-
-all: data astro
+all: astro
 
 .c.o:
-	$(CC) $(INC) $(SWE_CFLAGS) -MMD -MP -c $< -o $@
+	$(CC) $(CPPFLAGS) $(SWE_CFLAGS) -MMD -MP -c $< -o $@
 -include $(SWE_D)
 	
 $(SWE_A): $(SWE_OBJ)
-	ar rcs $@ $(SWE_OBJ); \
+	ar rcs $@ $(SWE_OBJ)
 	
 astro: ${SWE_A}
-	$(CC) $(INC) $(CFLAGS) $(SRC) $(SWE_A) $(LIBS) -o astro
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(SRC) $(SWE_A) $(LIBS) -o $@
 
-data: 
-	mkdir -p "$(CONFIG_DIR)"; \
-	mkdir -p "$(CHARTS_DIR)"; \
-	cp -r "swisseph/ephe" "$(DATA_DIR)"; \
-	cp city-db "$(DATA_DIR)";
-
-install:
-	mkdir -p "$(DESTDIR)$(PREFIX)/bin"; \
-	cp "astro" "$(DESTDIR)$(PREFIX)/bin"
+install: all
+	mkdir -p "$(DESTDIR)$(BINDIR)"
+	cp "astro" "$(DESTDIR)$(BINDIR)"
+	chmod 755 "$(DESTDIR)$(BINDIR)/astro"
+	mkdir -p "$(DESTDIR)$(DATADIR)"
+	cp -R "swisseph/ephe" "$(DESTDIR)$(DATADIR)"
+	cp city-db "$(DESTDIR)$(DATADIR)"
 
 clean:
 	rm $(SWE_OBJ) $(SWE_D) $(SWE_A) astro
 	
-.PHONY: all data astro install clean
+.PHONY: all astro install clean
