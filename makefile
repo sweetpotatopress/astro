@@ -1,12 +1,9 @@
 CC	= cc
-
-CFLAGS	:= -Wall -Wextra -Wpedantic -O3
-SWE_CFLAGS := -g -Wall -fPIC
-
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share/astro
 
+CFLAGS	:= -Wall -Wextra -Wpedantic -O3
 CPPFLAGS = -Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"'
 
 LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
@@ -32,7 +29,7 @@ SWE_A	=	swisseph/libswe.a
 all: astro
 
 .c.o:
-	$(CC) $(CPPFLAGS) $(SWE_CFLAGS) -MMD -MP -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c $< -o $@
 -include $(SWE_D)
 	
 $(SWE_A): $(SWE_OBJ)
@@ -40,6 +37,9 @@ $(SWE_A): $(SWE_OBJ)
 	
 astro: ${SWE_A}
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(SRC) $(SWE_A) $(LIBS) -o $@
+	
+debug: ${SWE_A}
+	$(CC) $(CPPFLAGS) $(CFLAGS) -g -O0 $(SRC) $(SWE_A) $(LIBS) -o $@
 
 install: all
 	mkdir -p "$(DESTDIR)$(BINDIR)"
@@ -52,4 +52,4 @@ install: all
 clean:
 	rm $(SWE_OBJ) $(SWE_D) $(SWE_A) astro
 	
-.PHONY: all astro install clean
+.PHONY: all debug astro install clean
