@@ -144,3 +144,4 @@ void path_check(char *path, const char *s);
 void load_chart(struct cdata *cdata);
 void save_chart(struct cdata *cdata);
 void set_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int ch);
+void datadir_check(void);

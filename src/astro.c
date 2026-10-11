@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
 	}
 	
 	iana_check();
+	datadir_check();
 	
 	char ephe_path[MAXPATH] = {0};
 	path_check(ephe_path, "ephe");

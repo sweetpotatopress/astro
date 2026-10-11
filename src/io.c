@@ -42,24 +42,69 @@
 #define FDST 12
 #define FMAX 13
 
+static void path_env(const char *xdg, char *env, const char *f)
+{
+	const char *dir = getenv(xdg);
+	if (dir && dir[0] != '\0')
+	{
+		snprintf(env, MAXBUF, "%s", dir);
+		return;
+	}
+	const char *home = getenv("HOME");
+	if (!home || home[0] == '\0')
+		ERR_EXIT("ERR: $HOME not set");
+	snprintf(env, MAXBUF, "%s/%s", home, f);
+}
+
 void path_check(char *path, const char *s)
 {
 	memset(path, 0, MAXBUF);
-	const char *home_dir = getenv("HOME");
-	if (!home_dir || home_dir[0] == '\0')
-		ERR_EXIT("$HOME not set");
-	
-	if (strcmp("config", s) == 0)
-		snprintf(path, MAXBUF, "%s/.config/astro/%s", home_dir, s);
-	
-	else if (strcmp("ephe", s) == 0 || strcmp("city-db", s) == 0 || strcmp("charts", s) == 0)
+	char env[MAXBUF] = {0};
+
+	if (strcmp("cdir", s) == 0)
 	{
-		snprintf(path, MAXBUF, "%s/.local/share/astro/%s", home_dir, s);
-		if (strlen(path) > 255)
-			ERR_EXIT("home path too long");
+		path_env("XDG_CONFIG_HOME", env, ".config");
+		snprintf(path, MAXBUF, "%s/%s", env, "astro");
 	}
+	else if (strcmp("config", s) == 0)
+	{
+		path_env("XDG_CONFIG_HOME", env, ".config");
+		snprintf(path, MAXBUF, "%s/%s", env, "astro/config");
+	}
+	else if (strcmp("charts", s) == 0)
+	{
+		path_env("XDG_DATA_HOME", env, ".local/share");
+		snprintf(path, MAXBUF, "%s/%s", env, "astro/charts");
+	}
+	else if (strcmp("ephe", s) == 0)
+	{
+		snprintf(path, MAXBUF, "%s/%s", ASTRO_DATA_DIR, "ephe");
+		if (strlen(path) > 255)
+			ERR_EXIT("ERR: ephe path too long");
+	}
+	else if (strcmp("city-db", s) == 0)
+		snprintf(path, MAXBUF, "%s/%s", ASTRO_DATA_DIR, "city-db");
 	else
-		ERR_EXIT("path check string error");
+		ERR_EXIT("path_check string error");
+}
+
+void datadir_check(void)
+{
+	char path[MAXPATH] = {0};
+	path_check(path, "cdir");
+	if (access(path, F_OK) == -1)
+		if (mkdir(path, 0755) == -1)
+			ERR_EXIT("ERR: cdir mkdir");
+	
+	path_check(path, "charts");
+	if (access(path, F_OK) == -1)
+		ERR_EXIT("ERR: no charts dir");
+	path_check(path, "ephe");
+	if (access(path, F_OK) == -1)
+		ERR_EXIT("ERR: no ephe installed");
+	path_check(path, "city-db");
+	if (access(path, F_OK) == -1)
+		ERR_EXIT("ERR: no city-db installed");
 }
 
 static size_t file_count(const char *path, const int r)
