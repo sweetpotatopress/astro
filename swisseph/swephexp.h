@@ -601,55 +601,12 @@ extern "C" {
 //#define SEMOD_DELTAT_DEFAULT   SEMOD_DELTAT_ESPENAK_MEEUS_2006
 #define SEMOD_DELTAT_DEFAULT   SEMOD_DELTAT_STEPHENSON_ETC_2016
 
-/**************************************************************
- * here follow some ugly definitions which are only required
- * if SwissEphemeris is compiled on Windows, either to use a DLL
- * or to create a DLL.
- * Unix users can savely ignore his section
- * and skip to the export function decarations below.
- ************************************************************/
-#if defined(DOS32) || !MSDOS || defined(WIN32)
-			/* use compiler switch to define DOS32 */
-#  define MALLOC malloc  
-#  define CALLOC calloc  
-#  define FREE free  
-#else
-#  ifdef __BORLANDC__
-#    include <alloc.h>
-#    define MALLOC farmalloc  
-#    define CALLOC farcalloc  
-#    define FREE farfree  
-#  else
-#    define MALLOC _fmalloc
-#    define CALLOC _fcalloc
-#    define FREE _ffree
-#  endif
-#endif
+#define MALLOC malloc  
+#define CALLOC calloc  
+#define FREE free  
 
-/* DLL defines
-  Define UNDECO_DLL for un-decorated dll
-  verify compiler option __cdecl for un-decorated and __stdcall for decorated */
-/*#define UNDECO_DLL*/
-#ifdef MAKE_DLL
-  #if defined (PASCAL) || defined(__stdcall)
-   #if defined UNDECO_DLL
-    #define CALL_CONV __cdecl
-   #else
-    #define CALL_CONV __stdcall
-   #endif 
-  #else
-    #define CALL_CONV 
-  #endif
-  /* To export symbols in the new DLL model of Win32, Microsoft 
-     recommends the following approach */ 
-  #define EXP32  __declspec( dllexport )
-#else 
-  #define CALL_CONV 
-  #define EXP32 
-#endif  
-
-
-#ifndef _SWEDLL_H
+#define CALL_CONV 
+#define EXP32 
 
 /***********************************************************
  * exported functions
@@ -1002,8 +959,6 @@ ext_def( char *) swe_cs2timestr(CSEC t, int sep, AS_BOOL suppressZero, char *a);
 ext_def( char *) swe_cs2lonlatstr(CSEC t, char pchar, char mchar, char *s);
 
 ext_def( char *) swe_cs2degstr(CSEC t, char *a);
-
-#endif  /* #ifndef _SWEDLL_H */
 
 #endif  /* #ifndef _SWEPHEXP_INCLUDED */
 
