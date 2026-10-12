@@ -97,53 +97,53 @@ static double deltat_aa(double tjd, double tid_acc);
 
 #define SEFLG_EPHMASK   (SEFLG_JPLEPH|SEFLG_SWIEPH|SEFLG_MOSEPH)
 
-size_t CALL_CONV xstrcpy(char *to, const char *from)
+size_t CALL_CONV xstrcpy(char *dst, const char *src)
 {
-	const char *ofrom = from;
+	const char *osrc = src;
 	size_t nleft = AS_MAXCH;
 	
 	if (nleft != 0)
 	{
 		while (--nleft != 0)
 		{
-			if ((*to++ = *from++) == '\0')
+			if ((*dst++ = *src++) == '\0')
 				break;
 		}
 	}
 	if (nleft == 0)
 	{
-		*to = '\0';
-		while (*from++)
+		*dst = '\0';
+		while (*src++)
 			;
 	}
-	return(from - ofrom - 1);
+	return(src - osrc - 1);
 }
 
-size_t CALL_CONV xstrcat(char *s, const char *append)
+size_t CALL_CONV xstrcat(char *dst, const char *src)
 {
 	size_t n = AS_MAXCH;
-	const char *os = s;
-	const char *oappend = append;
+	const char *odst = dst;
+	const char *osrc = src;
 	size_t dlen;
 	
-	while (n-- != 0 && *s != '\0')
-		s++;
-	dlen = s - os;
-	n = AS_MAXBUF - dlen;
+	while (n-- != 0 && *dst != '\0')
+		dst++;
+	dlen = dst - odst;
+	n = AS_MAXCH - dlen;
 	
 	if (n-- == 0)
-		return(dlen + strlen(append));
-	while (*append != '\0')
+		return(dlen + strlen(src));
+	while (*src != '\0')
 	{
 		if (n != 0)
 		{
-			*s++ = *append;
+			*dst++ = *src;
 			n--;
 		}
-		append++;
+		src++;
 	}
-	*s = '\0';
-	return(dlen + (append - oappend));
+	*dst = '\0';
+	return(dlen + (src - osrc));
 }
 	
 /* Reduce x modulo 360 degrees
