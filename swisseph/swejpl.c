@@ -63,31 +63,22 @@
   for promoting such software, products or services.
 */
 
-#if MSDOS
-#else
-  #define _FILE_OFFSET_BITS 64
-#endif
+#define _FILE_OFFSET_BITS 64
 
 #include <string.h>
 #include "swephexp.h"
 #include "sweph.h"
 #include "swejpl.h"
 
-#if MSDOS
-  typedef __int64 off_t64;
-  #define FSEEK _fseeki64
-  #define FTELL _ftelli64
-#else
-  typedef off_t off_t64;
-  #define FSEEK fseeko
-  #define FTELL ftello
+typedef off_t off_t64;
+#define FSEEK fseeko
+#define FTELL ftello
 //  #ifdef __ANDROID_API__ 
 //    #undef FSEEK
 //    #undef FTELL
 //    #define FSEEK fseek
 //    #define FTELL ftell
 //  #endif
-#endif
 
 #define DEBUG_DO_SHOW	FALSE
 

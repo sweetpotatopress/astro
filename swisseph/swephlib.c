@@ -77,10 +77,6 @@
 #include "swephexp.h"
 #include "sweph.h"
 #include "swephlib.h"
-#if MSDOS
-# include <process.h>
-# define strdup _strdup
-#endif
 
 #ifdef TRACE
 void swi_open_trace(char *serr);
@@ -4644,11 +4640,7 @@ void swi_open_trace(char *serr)
 #if TRACE == 2
     sp = strchr(fname_trace_c, '.');
     sp1 = strchr(fname, '.');
-# if MSDOS
-    ipid = _getpid();
-# else
     ipid = getpid();
-# endif
     snprintf(sp1, AS_MAXBUF, "_%d%s", ipid, sp);
 #endif
     if ((swi_fp_trace_c = fopen(fname, FILE_A_ACCESS)) == NULL) {
@@ -4677,11 +4669,7 @@ void swi_open_trace(char *serr)
 #if TRACE == 2
     sp = strchr(fname_trace_out, '.');
     sp1 = strchr(fname, '.');
-# if MSDOS
-    ipid = _getpid();
-# else
     ipid = getpid();
-# endif
     snprintf(sp1, AS_MAXBUF, "_%d%s", ipid, sp);
 #endif
     if ((swi_fp_trace_out = fopen(fname, FILE_A_ACCESS)) == NULL) {

@@ -296,11 +296,7 @@ int whicheph = SEFLG_JPLEPH;
 char cmdline[4 * AS_MAXCH];
 char *stit = "Planetary Phenomena";
 
-#if MSDOS
-# define   EPHEPATH "C:\\C600\\SOURCE\\SWEPH\\"
-#else
 # define   EPHEPATH "/home/ephe"
-#endif
 
 static char *dms(double x, int iflag);
 static int find_zero(double y00, double y11, double y2, double dx, 

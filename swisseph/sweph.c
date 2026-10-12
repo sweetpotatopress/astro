@@ -62,10 +62,6 @@
 
 #include <string.h>
 #include <ctype.h>
-#if MSDOS
-#include <tchar.h>
-#include <windows.h>
-#endif
 #include "swejpl.h"
 #include "swephexp.h"
 #include "sweph.h"
@@ -210,11 +206,8 @@ char *CALL_CONV swe_version(char *s)
 }
 
 #ifndef NO_SWE_GLP	// -DNO_SWE_GLP to suppress this function
-#if MSDOS
-HANDLE dllhandle = NULL;        // global used in swe_version
-				// if DLL, set by DllMain()
-#else		
 #ifdef __GNUC__
+static char xswe_marker;
 // The following define is actually forbidden. 
 // It would be better to compile with -D_GNU_SOURCE.
 #ifndef __USE_GNU
@@ -222,11 +215,6 @@ HANDLE dllhandle = NULL;        // global used in swe_version
 #endif
 #include <dlfcn.h>		// must be linked with -ldl
   static Dl_info dli;
-#endif
-#endif // MSDOS
-
-#ifdef __GNUC__
-static char xswe_marker;
 #endif
 
 char *CALL_CONV swe_get_library_path(char *s)
@@ -237,9 +225,6 @@ char *CALL_CONV swe_get_library_path(char *s)
 #if !defined(__APPLE) 
   len = AS_MAXCH;
   bytes = 0;
-#if MSDOS
-  bytes = GetModuleFileName((HMODULE) dllhandle, (TCHAR*) s, (DWORD) len);
-#else
   #ifdef __GNUC__
     if (dladdr((void *)&xswe_marker, &dli) != 0) {
       if (strlen(dli.dli_fname) >= len) {
@@ -255,7 +240,6 @@ char *CALL_CONV swe_get_library_path(char *s)
   #else
     bytes = readlink("/proc/self/exe", s, len);
   #endif
-#endif
   s[bytes] = '\0';
 #endif
   return s;

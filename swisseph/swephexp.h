@@ -397,14 +397,10 @@ extern "C" {
  */
 
 #ifndef SE_EPHE_PATH
-#if MSDOS
-#  define SE_EPHE_PATH    "\\sweph\\ephe\\"
-#else
-#  define SE_EPHE_PATH    ".:/users/ephe2/:/users/ephe/"
+#define SE_EPHE_PATH    ".:/users/ephe2/:/users/ephe/"
     /* At Astrodienst, we maintain two ephemeris areas for the 600'000+  asteroid files: 
        the short files in /users/ephe/ast*, the long file in /users/ephe2/ast*.
        /users  is a synonym for /home on many systems */
-#endif
 #endif  /* SE_EPHE_PATH */
 
 /* defines for function swe_split_deg() (in swephlib.c) */
@@ -612,17 +608,6 @@ extern "C" {
  * Unix users can savely ignore his section
  * and skip to the export function decarations below.
  ************************************************************/
-#if defined(MAKE_DLL) || defined(USE_DLL) || defined(_WINDOWS)
-#  include <windows.h>
-extern HANDLE dllhandle;        // set by swedllst::DllMain, 
-				// defined in sweph.c
-				// used by GetModuleFilename in sweph.c
-#endif
-
-#ifdef USE_DLL
-#  include "swedll.h"
-#endif
-
 #if defined(DOS32) || !MSDOS || defined(WIN32)
 			/* use compiler switch to define DOS32 */
 #  define MALLOC malloc  

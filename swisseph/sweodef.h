@@ -93,70 +93,16 @@
 #define TLS
 #endif
 
-#ifdef _WIN32		/* Microsoft VC 5.0 does not define MSDOS anymore */
-# undef MSDOS
-# define MSDOS MY_TRUE
-# undef _WINDOWS
-# define _WINDOWS
-#include <wtypes.h>
-#include <objbase.h>
-#include <wincon.h>
-#include <winbase.h>
-#include <io.h>
-#include <windows.h>
-# define sleep(x)	Sleep((x) * 1000)
-#endif
-
 #ifdef _MSC_VER
 # define MS_VC
 #endif
 
-#ifdef WIN32		/* Microsoft VC 5.0 does not define MSDOS anymore */
-# define MSDOS MY_TRUE
-#endif
-
-#ifdef MSDOS	/* already defined by some DOS compilers */
-# undef MSDOS
-# define MSDOS MY_TRUE
-#endif
-
-#ifdef __TURBOC__	/* defined by  turboc */
-# ifndef MSDOS
-#   define MSDOS MY_TRUE
-# endif
-# define TURBO_C
-#endif
-
-#ifdef __SC__	/* defined by  Symantec C */
-# ifndef MSDOS
-#   define MSDOS MY_TRUE
-# endif
-# define SYMANTEC_C
-#endif
-
-#ifdef __WATCOMC__	/* defined by  WatcomC */
-# ifndef MSDOS
-#   define MSDOS MY_TRUE
-# endif
-# define WATCOMC
-#endif
-
-
-#ifdef MSDOS
-#  define HPUNIX MY_FALSE
-#  define INTEL_BYTE_ORDER 1
-#  ifndef TURBO_C
-#    define MS_C	/* assume Microsoft C compiler */
-#  endif
-# define UNIX_FS MY_FALSE
-#else
 #  define MSDOS MY_FALSE
 #  define HPUNIX MY_TRUE
 #  ifndef _HPUX_SOURCE
 #    define _HPUX_SOURCE
 #  endif
 #  define UNIX_FS MY_TRUE
-#endif
 
 #include <math.h>
 #include <stdlib.h>
@@ -293,7 +239,6 @@ typedef int32    centisec;       /* centiseconds used for angles and times */
 #define CS2DEG	(1.0/360000.0)	/* centisec to degree */
 
 /* control strings for fopen()	*/
-#if UNIX_FS
 #  define BFILE_R_ACCESS "r"	/* open binary file for reading */
 #  define BFILE_RW_ACCESS "r+"	/* open binary file for writing and reading */
 #  define BFILE_W_CREATE "w"	/* create/open binary file for write*/
@@ -306,21 +251,6 @@ typedef int32    centisec;       /* centiseconds used for angles and times */
 #  define OPEN_MODE 0666	/* default file creation mode */
 #  define DIR_GLUE "/"		/* glue string for directory/file */
 #  define PATH_SEPARATOR ";:"	/* semicolon or colon may be used */
-#else
-#  define BFILE_R_ACCESS "rb"	/* open binary file for reading */
-#  define BFILE_RW_ACCESS "r+b"	/* open binary file for writing and reading */
-#  define BFILE_W_CREATE "wb"	/* create/open binary file for write*/
-#  define BFILE_A_ACCESS "a+b"	/* create/open binary file for append*/
-#  define PATH_SEPARATOR ";"	/* semicolon as PATH separator */
-#  define OPEN_MODE 0666	/* default file creation mode */
-#  define FILE_R_ACCESS "rt"	/* open text file for reading */
-#  define FILE_RW_ACCESS "r+t"	/* open text file for writing and reading */
-#  define FILE_W_CREATE "wt"	/* create/open text file for write*/
-#  define FILE_A_ACCESS "a+t"	/* create/open text file for append*/
-/* attention, all backslashes for msdos directry names must be written as \\,
-   because it is the C escape character */
-#  define DIR_GLUE "\\"		/* glue string for directory/file */
-#endif
 
 #include <string.h>
 #include <ctype.h>
