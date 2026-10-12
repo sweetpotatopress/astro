@@ -100,7 +100,7 @@ static double deltat_aa(double tjd, double tid_acc);
 size_t CALL_CONV xstrcpy(char *to, const char *from)
 {
 	const char *ofrom = from;
-	size_t nleft = AS_MAXBUF;
+	size_t nleft = AS_MAXCH;
 	
 	if (nleft != 0)
 	{
@@ -121,7 +121,7 @@ size_t CALL_CONV xstrcpy(char *to, const char *from)
 
 size_t CALL_CONV xstrcat(char *s, const char *append)
 {
-	size_t n = AS_MAXBUF;
+	size_t n = AS_MAXCH;
 	const char *os = s;
 	const char *oappend = append;
 	size_t dlen;
