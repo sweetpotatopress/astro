@@ -1,15 +1,15 @@
 VERSION = 0.76.7
 
 CC	= cc
-
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share/astro
 
 LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf '%s' -ltinfo) -lm
 
-CPPFLAGS = -Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"' -DVERSION=\"$(VERSION)\"
-CFLAGS	= -Wall -Wextra -Wpedantic -O3
+CPPFLAGS =	-Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"' -DVERSION=\"$(VERSION)\"
+CFLAGS	= 	-Wall -Wextra -Wpedantic -Wsign-conversion -Wconversion \
+			-Wshadow -Wfloat-equal -Werror=implicit-function-declaration
 
 SRC		=	src/anim.c src/astro.c src/chronos.c src/conf.c \
 			src/draw.c src/indat.c src/init.c src/io.c \
