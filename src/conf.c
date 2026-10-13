@@ -21,18 +21,20 @@
 #include "astro.h"
 #include "ui.h"
 
-#define C_ASP 0
-#define C_TIMEZONE 1
-#define C_LATITUDE 2
-#define C_LONGITUDE 3
-#define C_NULL 4
-#define C_MAX 5
+#define C_TIMEZONE 0
+#define C_LATITUDE 1
+#define C_LONGITUDE 2
+#define C_ASP 3
+#define C_SIZE 4
+#define C_NULL 5
+#define C_MAX C_NULL+1
 
 static void ftb(struct ui *ui, FIELD **field, char **buffer)
 {
 	snprintf(buffer[C_ASP], MAXBUF, "%d", ui->aspect_trig);
+	snprintf(buffer[C_SIZE], MAXBUF, "%d", ui->lht);
 	
-	for (int i = C_TIMEZONE; i < C_NULL; ++i)
+	for (int i = C_TIMEZONE; i < C_ASP; ++i)
 	{
 		const char *v = field_buffer(field[i], 0);
 		
@@ -45,7 +47,7 @@ static void ftb(struct ui *ui, FIELD **field, char **buffer)
 
 static void btf(FIELD **field, char **buffer)
 {
-	for (int i = C_TIMEZONE; i < C_NULL; ++i)
+	for (int i = C_TIMEZONE; i < C_ASP; ++i)
 		set_field_buffer(field[i], 0, buffer[i]);
 }
 		
@@ -71,7 +73,7 @@ static void config_parse(char **buffer)
 	if (fp == NULL)
 		return;
 		
-	for (int i = C_ASP; i < C_NULL; ++i)
+	for (int i = C_TIMEZONE; i < C_NULL; ++i)
 	{
 		if (fgets(buffer[i], MAXBUF, fp) == NULL)
 			break;
@@ -92,12 +94,7 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 	double dret;
 	long lret;
 	errno = 0;
-	
-	lret = strtol(buffer[C_ASP], &endptr, 10);
-	if (errno != ERANGE)
-		ui->aspect_trig = (int)lret;
-	errno = 0;
-	
+
 	dret = strtod(buffer[C_LATITUDE], &endptr);
 	if (errno != ERANGE)
 		cdata->dlat = dret;
@@ -107,16 +104,27 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 	if (errno != ERANGE)
 		cdata->dlon = dret;
 	errno = 0;
+	
+	lret = strtol(buffer[C_ASP], &endptr, 10);
+	if (errno != ERANGE)
+		ui->aspect_trig = (int)lret;
+	errno = 0;
+	
+	lret = strtol(buffer[C_SIZE], &endptr, 10);
+	if (errno != ERANGE)
+		ui->lht = (int)lret;
+	errno = 0;
+	
 }
 
 void config_init(struct cdata *cdata, struct ui *ui)
 {
 	char **buffer = ecalloc(C_NULL, sizeof *buffer);
-	for (int i = C_ASP; i < C_NULL; ++i)
+	for (int i = C_TIMEZONE; i < C_NULL; ++i)
 		buffer[i] = ecalloc(MAXBUF ,sizeof *buffer[i]);
 	config_parse(buffer);
 	config_set(cdata, ui, buffer);
-	for (int i = C_ASP; i < C_NULL; ++i)
+	for (int i = C_TIMEZONE; i < C_NULL; ++i)
 		free(buffer[i]);
 	free(buffer);
 }
@@ -130,11 +138,12 @@ static void config_write(struct cdata *cdata, struct ui *ui)
 	if (!ifp)
 		ERR_EXIT("ERR: set_current ifp");
 		
-	fprintf(ifp, "%d\n%s\n%f\n%f\n",
-		ui->aspect_trig,
+	fprintf(ifp, "%s\n%f\n%f\n%d\n%d\n",
 		cdata->timezone,
 		cdata->dlat,
-		cdata->dlon);
+		cdata->dlon,
+		ui->aspect_trig,
+		ui->lht);
 		
 	fclose(ifp);
 }
@@ -142,15 +151,22 @@ static void config_write(struct cdata *cdata, struct ui *ui)
 static void field_label(struct ui *ui)
 {
 	const char *label[] = {
-		"aspect",
 		"timezone",
 		"latitude",
 		"longitude",
+		"aspect",
+		"size",
 		NULL };
 		
 	int y = 3, x = 1;
-	for (size_t i = C_ASP; i < C_NULL; ++i, y+=2)
+	
+	for (size_t i = C_TIMEZONE; i < C_ASP; ++i, y+=2)
 		mvwprintw(ui->config_win, y, x, "%s", label[i]);
+	mvwprintw(ui->config_win, y, x, "%s", label[C_ASP]);
+	x+= 17;
+	mvwprintw(ui->config_win, y, x, "%s", label[C_SIZE]);
+	x-= 17;
+		
 }
 
 static void button_toggle(FIELD **field, int idx, int *trig)
@@ -174,7 +190,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	int sy = 0, sx = 13;
 	
 	char **buffer = ecalloc(C_NULL, sizeof *buffer);
-	for (int i = C_ASP; i < C_NULL; ++i)
+	for (int i = C_TIMEZONE; i < C_NULL; ++i)
 		buffer[i] = ecalloc(MAXBUF ,sizeof *buffer[i]);
 	
 	ui->config_win = newwin(CWINY, CWINX, CWIN_Y, CWIN_X);
@@ -190,11 +206,6 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	
 	curs_set(1);
 	keypad(ui->config_win, TRUE);
-	
-	field[C_ASP] = new_field(1, 3, sy, sx, 0, 0);
-	button_toggle(field, C_ASP, &ui->aspect_trig);
-	field_opts_off(field[C_ASP], O_EDIT);
-	sy += 2;
 	
 	field[C_TIMEZONE] = new_field(1, 30, sy, sx, 0, 0);
 	set_field_back(field[C_TIMEZONE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
@@ -212,6 +223,17 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	set_field_back(field[C_LONGITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	set_field_type(field[C_LONGITUDE], TYPE_NUMERIC, 5, -180.0, 180.0);
 	field_opts_off(field[C_LONGITUDE], O_AUTOSKIP);
+	sy+= 2;
+	
+	field[C_ASP] = new_field(1, 3, sy, sx, 0, 0);
+	button_toggle(field, C_ASP, &ui->aspect_trig);
+	field_opts_off(field[C_ASP], O_EDIT);
+	
+	sx += 9;
+	field[C_SIZE] = new_field(1, 3, sy, sx, 0, 0);
+	button_toggle(field, C_SIZE, &ui->lht);
+	field_opts_off(field[C_SIZE], O_EDIT);
+	sx -= 9;
 	
 	field[C_NULL] = NULL;
 
@@ -241,6 +263,13 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 					ui->aspect_trig = !ui->aspect_trig;
 					button_toggle(field, C_ASP, &ui->aspect_trig);
 				}
+				
+				if (current_field(form) == field[C_SIZE])
+				{
+					ui->lht = !ui->lht;
+					button_toggle(field, C_SIZE, &ui->lht);
+				}
+	
 				break;
 			case 9:
 				set_current(field, cdata);
@@ -285,7 +314,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 		box(ui->config_win, 0, 0);
 		wrefresh(ui->config_win);
 	}
-	for(int i = C_TIMEZONE; i < C_NULL; ++i)
+	for(int i = C_TIMEZONE; i < C_ASP; ++i)
 	{
 		set_current_field(form, field[i]);
 		form_driver(form, REQ_VALIDATION);
@@ -298,7 +327,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	unpost_form(form);
 	free_form(form);
 	
-	for (int i = C_ASP; i < C_NULL; ++i)
+	for (int i = C_TIMEZONE; i < C_NULL; ++i)
 	{
 		free_field(field[i]);
 		free(buffer[i]);

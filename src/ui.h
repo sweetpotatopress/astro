@@ -32,7 +32,7 @@
 #define IWIN_X (COLS - IWINX) / 2
 
 #define CWINY 12
-#define CWINX 47
+#define CWINX 50
 #define CWIN_Y (LINES - CWINY) / 2
 #define CWIN_X (COLS - CWINX) / 2
 
@@ -137,6 +137,8 @@ struct ui {
 	int aspect_trig;
 	int left_trig;
 	int left_page;
+	int left_height;
+	int lht; // left height trigger
 	int right_trig;
 	int old_l;
 	int old_r;

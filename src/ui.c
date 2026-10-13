@@ -21,6 +21,9 @@
 #include "chronos.h"
 #include "draw.h"
 
+#define SMALL 22
+#define LARGE 44
+
 void ui_init(struct ui *ui)
 {
 	start_color();
@@ -69,6 +72,8 @@ void ui_init(struct ui *ui)
 	
 	ui->main_win = newwin(LINES, COLS, 0, 0);
 	ui->main_panel = new_panel(ui->main_win);
+	getmaxyx(ui->main_win, ui->win_h, ui->win_w);
+	
 
 	hide_panel(ui->main_panel);
 	
@@ -81,6 +86,8 @@ void ui_init(struct ui *ui)
 	
 	ui->left_win = newwin(LWINY, LWINX, LWIN_Y, LWIN_X);
 	ui->left_panel = new_panel(ui->left_win);
+	
+	ui->left_height = (ui->win_h < LARGE) ? SMALL : LARGE;
 	hide_panel(ui->left_panel);
 	
 	wbkgdset(ui->left_win, COLOR_PAIR(M_COLOR));
@@ -291,25 +298,25 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	"ne", "pl", "so", "no",
 	"as", "mc", "ds", "ic",
 	"  "};
-	
-	int small = 22;
-	int large = 44;
-	int height = (ui->win_h < 44) ? small : large;
-	
+
+	if (ui->lht == TRUE)
+		ui->left_height = SMALL;
+	else
+		ui->left_height = (ui->win_h < LARGE) ? SMALL : LARGE;
+		
 	mvwin(ui->left_win, 0, 0);
-	wresize(ui->left_win, height, 33);
+	wresize(ui->left_win, ui->left_height, 33);
 	
 	werase(ui->left_win);
 	
 	int starty = 1, startx = 1;
 	int j = 0;
-	if (height == small)
+	if (ui->left_height == SMALL)
 		mvwprintw(ui->left_win, 0, 1, "page %d/2", ui->left_page+1);
 	
 	int p_count = 18;
 	for (int i = 0; i < p_count; ++i)
 	{
-		
 		int sign = ((int)planet[i][LONG] / 30) + 1;
 		
 		int full_deg = (int)planet[i][LONG];
@@ -384,9 +391,9 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	"------------------------------");
 	++starty;
 	
-	if (height == small && ui->left_page == 0)
+	if (ui->left_height == SMALL && ui->left_page == 0)
 		return;
-	if (height == small && ui->left_page == 1)
+	if (ui->left_height == SMALL && ui->left_page == 1)
 	{
 		werase(ui->left_win);
 		starty = 1;
