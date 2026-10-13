@@ -310,7 +310,7 @@ void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao)
 	
 	ui->cy = (ui->win_h / 2);
 	ui->cx = (ui->win_w / 2);
-	if ((ui->win_w - ui->win_h) > 60)
+	if ((ui->win_w - ui->win_h) > 80)
 		ui->cx += 9;
 	
 	int full_radius = (((ui->win_w / 2 < ui->win_h) ? ui->win_w / 2 : ui->win_h));
