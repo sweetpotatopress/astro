@@ -9,7 +9,7 @@ LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf 
 
 CPPFLAGS =	-Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"' -DVERSION=\"$(VERSION)\"
 CFLAGS	= 	-Wall -Wextra -Wpedantic -Wsign-conversion -Wconversion \
-			-Wshadow -Wfloat-equal -Werror=implicit-function-declaration
+			-Wshadow -Wfloat-equal -Werror=implicit-function-declaration -O3
 
 SRC		=	src/anim.c src/astro.c src/chronos.c src/conf.c \
 			src/draw.c src/indat.c src/init.c src/io.c \
