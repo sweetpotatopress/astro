@@ -55,16 +55,6 @@ void weekday_check(struct cdata *cdata)
 	cdata->wday = gt.tm_wday;
 }
 
-double deg2dec(int deg, double min, double sec)
-{
-	return (deg + (min / 60) + (sec / 3600));
-}
-
-void primary_directions(struct cdata *cdata, struct pxx *pxx, struct ui *ui)
-{
-	double naibod = deg2dec(0, 59, 8.33);
-}
-
 int sect(struct pxx *pxx)
 {
 	int sect = 0;
