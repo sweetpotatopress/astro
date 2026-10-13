@@ -141,38 +141,11 @@ void zxx_init(int *zodiac[])
 			zodiac[z][d] = zodia[z][d];
 }
 
-void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
+void cusp_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 {
-	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
-	int ipl, iret;
-	double xx[6];
-	char serr[AS_MAXCH];
 	double ascmc[10];
 	int ihsy = 'W';
-	
-	calculate_utc(cdata);
-	weekday_check(cdata);
-	
-	cdata->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
-	cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
-	
-	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
-	{
-		iret = swe_calc_ut(cdata->jd_ut, ipl, iflag, xx, serr);
-		if (iret < 0) 
-			ERR_EXIT("ERR: swe_calc_ut failure");
-			
-		planet[ipl][LONG] = xx[LONG];
-		planet[ipl][LAT] = xx[LAT];
-		planet[ipl][DIST] = xx[DIST];
-		planet[ipl][LONG_S] = xx[LONG_S];
-		planet[ipl][LAT_S] = xx[LAT_S];
-		planet[ipl][DIST_S] = xx[DIST_S];
-	}
-
-	retro_station(cdata->jd_ut, planet);
-	
-	eclipse(cdata->jd_ut, cdata->le, cdata->se);
+	int iret;
 	
 	iret = swe_houses_ex(cdata->jd_ut, 0, cdata->dlat, cdata->dlon,
 	'W', cdata->sign_cusp, ascmc);
@@ -207,7 +180,7 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	lots(pxx);
 	
 	// seperate degree and minutes
-	for (ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
+	for (int ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
 	{
 		planet[ipl][DEGREE] = (int)planet[ipl][LONG] % 30;
 		planet[ipl][MIN] = (int)((planet[ipl][LONG] - (int)planet[ipl][LONG]) * 60);
@@ -217,7 +190,41 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 		if (planet[ipl][LONG_S] < 0)
 			planet[ipl][DEGREE_S] *= -1;
 	}
+}
+
+void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
+{
+	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
+	int ipl, iret;
+	double xx[6];
+	char serr[AS_MAXCH];
+
+	calculate_utc(cdata);
+	weekday_check(cdata);
 	
+	cdata->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
+	cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
+	
+	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
+	{
+		iret = swe_calc_ut(cdata->jd_ut, ipl, iflag, xx, serr);
+		if (iret < 0) 
+			ERR_EXIT("ERR: swe_calc_ut failure");
+			
+		planet[ipl][LONG] = xx[LONG];
+		planet[ipl][LAT] = xx[LAT];
+		planet[ipl][DIST] = xx[DIST];
+		planet[ipl][LONG_S] = xx[LONG_S];
+		planet[ipl][LAT_S] = xx[LAT_S];
+		planet[ipl][DIST_S] = xx[DIST_S];
+	}
+
+	retro_station(cdata->jd_ut, planet);
+	
+	eclipse(cdata->jd_ut, cdata->le, cdata->se);
+	
+	cusp_init(cdata, pxx, planet);
+
 	// moonphase
 	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
 	
@@ -232,8 +239,7 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	cdata->moonphase = phase;
 }
 
-static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, 
-double **planet, int **zodiac)
+void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	curs_set(0);
 	werase(win);
