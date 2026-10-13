@@ -136,6 +136,7 @@ struct ui {
 	PANEL *transit_panel;
 	int aspect_trig;
 	int left_trig;
+	int left_page;
 	int right_trig;
 	int old_l;
 	int old_r;

@@ -65,6 +65,8 @@ void ui_init(struct ui *ui)
 	ui->left_trig = 1;
 	ui->right_trig = 1;
 	
+	ui->left_page = 0;
+	
 	ui->main_win = newwin(LINES, COLS, 0, 0);
 	ui->main_panel = new_panel(ui->main_win);
 
@@ -156,6 +158,13 @@ void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 int table_trigger(struct ui *ui, int ch)
 {
 	int up = 0;
+	if (ch == 'P')
+	{
+		ui->left_page += 1;
+		if (ui->left_page > 1)
+			ui->left_page = 0;
+		up = 1;
+	}
 	if (ch == 'p' && ui->left_trig == 0)
 	{
 		ui->left_trig = 1;
@@ -283,18 +292,24 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	"as", "mc", "ds", "ic",
 	"  "};
 	
-	int p_count = 18;
+	int small = 22;
+	int large = 44;
+	int height = (ui->win_h < 44) ? small : large;
 	
 	mvwin(ui->left_win, 0, 0);
-	wresize(ui->left_win, 44, 33);
+	wresize(ui->left_win, height, 33);
 	
 	werase(ui->left_win);
 	
 	int starty = 1, startx = 1;
 	int j = 0;
+	if (height == small)
+		mvwprintw(ui->left_win, 0, 1, "page %d/2", ui->left_page+1);
 	
+	int p_count = 18;
 	for (int i = 0; i < p_count; ++i)
 	{
+		
 		int sign = ((int)planet[i][LONG] / 30) + 1;
 		
 		int full_deg = (int)planet[i][LONG];
@@ -368,6 +383,15 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	mvwprintw(ui->left_win, starty, startx,
 	"------------------------------");
 	++starty;
+	
+	if (height == small && ui->left_page == 0)
+		return;
+	if (height == small && ui->left_page == 1)
+	{
+		werase(ui->left_win);
+		starty = 1;
+		mvwprintw(ui->left_win, 0, 1, "page %d/2", ui->left_page+1);
+	}
 			
 	mvwprintw(ui->left_win, starty, startx, "pl:rul:exa:tri:bou:dec:det:fal:");
 	++starty;
