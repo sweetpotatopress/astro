@@ -141,7 +141,21 @@ void zxx_init(int *zodiac[])
 			zodiac[z][d] = zodia[z][d];
 }
 
-void cusp_init(struct cdata *cdata, struct pxx *pxx, double **planet)
+static void sep_deg_min(double **planet)
+{
+	for (int ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
+	{
+		planet[ipl][DEGREE] = (int)planet[ipl][LONG] % 30;
+		planet[ipl][MIN] = (int)((planet[ipl][LONG] - (int)planet[ipl][LONG]) * 60);
+		
+		planet[ipl][DEGREE_S] = planet[ipl][LONG_S];
+		planet[ipl][MIN_S] = (fabs(planet[ipl][LONG_S] - (int)planet[ipl][LONG_S]) * 60);
+		if (planet[ipl][LONG_S] < 0)
+			planet[ipl][DEGREE_S] *= -1;
+	}
+}
+
+static void cusp_init(struct cdata *cdata, struct pxx *pxx)
 {
 	double ascmc[10];
 	int ihsy = 'W';
@@ -157,11 +171,6 @@ void cusp_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
-	// turn mean node into south node
-	planet[SE_MEAN_NODE][LONG] = (planet[SE_TRUE_NODE][LONG] + 180);
-	if (planet[SE_MEAN_NODE][LONG] >= 360)
-		planet[SE_MEAN_NODE][LONG] -= 360;
-	
 	// calculates ic/mc and fills struct members
 	double asc = ascmc[0];
 	double dsc = (ascmc[0] + 180);
@@ -176,20 +185,6 @@ void cusp_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	pxx->ddsc[LONG] = dsc;
 	pxx->dic[LONG] = ic;
 	pxx->dmc[LONG] = mc;
-	
-	lots(pxx);
-	
-	// seperate degree and minutes
-	for (int ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
-	{
-		planet[ipl][DEGREE] = (int)planet[ipl][LONG] % 30;
-		planet[ipl][MIN] = (int)((planet[ipl][LONG] - (int)planet[ipl][LONG]) * 60);
-		
-		planet[ipl][DEGREE_S] = planet[ipl][LONG_S];
-		planet[ipl][MIN_S] = (fabs(planet[ipl][LONG_S] - (int)planet[ipl][LONG_S]) * 60);
-		if (planet[ipl][LONG_S] < 0)
-			planet[ipl][DEGREE_S] *= -1;
-	}
 }
 
 void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
@@ -223,7 +218,16 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	
 	eclipse(cdata->jd_ut, cdata->le, cdata->se);
 	
-	cusp_init(cdata, pxx, planet);
+	cusp_init(cdata, pxx);
+	
+	// turn mean node into south node
+	planet[SE_MEAN_NODE][LONG] = (planet[SE_TRUE_NODE][LONG] + 180);
+	if (planet[SE_MEAN_NODE][LONG] >= 360)
+		planet[SE_MEAN_NODE][LONG] -= 360;
+
+	lots(pxx);
+	
+	sep_deg_min(planet);
 
 	// moonphase
 	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
@@ -239,7 +243,7 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	cdata->moonphase = phase;
 }
 
-void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	curs_set(0);
 	werase(win);
