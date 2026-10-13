@@ -61,7 +61,7 @@ void path_check(char *path, const char *s)
 	memset(path, 0, MAXPATH);
 	char env[MAXBUF] = {0};
 
-	if (strcmp("cdir", s) == 0)
+	if (strcmp("config_home", s) == 0)
 	{
 		path_env(env, "XDG_CONFIG_HOME", ".config");
 		snprintf(path, MAXPATH, "%s/%s", env, "astro");
@@ -70,6 +70,11 @@ void path_check(char *path, const char *s)
 	{
 		path_env(env, "XDG_CONFIG_HOME", ".config");
 		snprintf(path, MAXPATH, "%s/%s", env, "astro/config");
+	}
+	else if (strcmp("data_home", s) == 0)
+	{
+		path_env(env, "DDG_DATA_HOME", ".local/share");
+		snprintf(path, MAXPATH, "%s/%s", env, "astro");
 	}
 	else if (strcmp("charts", s) == 0)
 	{
@@ -91,15 +96,22 @@ void path_check(char *path, const char *s)
 void datadir_check(void)
 {
 	char path[MAXPATH] = {0};
-	path_check(path, "cdir");
+	
+	path_check(path, "config_home");
 	if (access(path, F_OK) == -1)
 		if (mkdir(path, 0755) == -1)
-			ERR_EXIT("ERR: cdir mkdir");
+			ERR_EXIT("ERR: config_home mkdir");
+			
+	path_check(path, "data_home");
+	if (access(path, F_OK) == -1)
+		if (mkdir(path, 0755) == -1)
+			ERR_EXIT("ERR: data_home mkdir");
 	
 	path_check(path, "charts");
 	if (access(path, F_OK) == -1)
 		if (mkdir(path, 0755) == -1)
 			ERR_EXIT("ERR: charts mkdir");
+			
 	path_check(path, "ephe");
 	if (access(path, F_OK) == -1)
 		ERR_EXIT("ERR: no ephe installed");
