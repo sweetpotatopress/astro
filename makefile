@@ -1,6 +1,7 @@
-VERSION = 0.76.7
+VERSION = 0.76.8
 
 CC	= cc
+
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share/astro
