@@ -46,6 +46,7 @@ q			exit astro
 
 o 			toggle right table
 p			toggle left table
+	P		next page
 
 w			save chart  
 	m		make dir  
