@@ -304,27 +304,6 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	cdata->moonphase = phase;
 }
 
-void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao)
-{
-	getmaxyx(win, ui->win_h, ui->win_w);
-	
-	ui->cy = (ui->win_h / 2);
-	ui->cx = (ui->win_w / 2);
-	if ((ui->win_w - ui->win_h) > 80)
-		ui->cx += 9;
-	
-	int full_radius = (((ui->win_w / 2 < ui->win_h) ? ui->win_w / 2 : ui->win_h));
-	ui->radius = (full_radius - 5) - ro;
-	ui->or = ui->radius + 4;
-	ui->ir = (ui->radius / 2) - 1;
-	ui->hr = ui->radius + 4;
-	ui->zr = ui->radius + 3;
-	
-	ui->pr = ((full_radius - 10) + po) - ro;
-	ui->ar = ((ui->radius / 2) + 6) + ao;
-}
-
-
 static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, 
 double **planet, int **zodiac)
 {

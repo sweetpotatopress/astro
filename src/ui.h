@@ -155,6 +155,7 @@ struct ui {
 	struct ui_sym sym;
 };
 
+void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao);
 void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, bool x);
 int table_trigger(struct ui *ui, int ch);
 void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
