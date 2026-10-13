@@ -98,7 +98,8 @@ void datadir_check(void)
 	
 	path_check(path, "charts");
 	if (access(path, F_OK) == -1)
-		ERR_EXIT("ERR: no charts dir");
+		if (mkdir(path, 0755) == -1)
+			ERR_EXIT("ERR: charts mkdir");
 	path_check(path, "ephe");
 	if (access(path, F_OK) == -1)
 		ERR_EXIT("ERR: no ephe installed");
