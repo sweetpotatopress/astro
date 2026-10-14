@@ -35,6 +35,8 @@
 #define ZDAY 3
 #define LAYER_MAX 4
 
+#define YEAR_MAX 120
+
 struct node {
 	char *date;
 
@@ -115,9 +117,9 @@ static void advance_date(struct cdata *date, double days)
 	cpt(date, &temp, &t, 1);
 }
 
-static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int year, int mon, int mday, int sign, bool b)
+static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int year, int mon, int mday, int sign, bool bond_print)
 {
-	if (b == 1)
+	if (bond_print == TRUE)
 		snprintf(buffer, buffer_size, "%s:+%d.%s.%02d", ui->sym.zo_sym[sign], year, ui->sym.month[mon], mday);
 	else
 		snprintf(buffer, buffer_size, "%s: %d.%s.%02d", ui->sym.zo_sym[sign], year, ui->sym.month[mon], mday);
@@ -126,7 +128,7 @@ static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int yea
 static double node_end(const struct node *node, const double *layer_inc, const int *pl_period)
 {
 	if (node->level == ROOT) 
-		return node->jd_ut + 120 * layer_inc[ZYEAR];
+		return node->jd_ut + YEAR_MAX * layer_inc[ZYEAR];
 
 	return node->jd_ut + pl_period[node->sign] *layer_inc[node->level];
 }
@@ -154,8 +156,8 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 
 	int child_sign;
 	int bond_sign;
-	bool bond_switch = 0;
-	bool bond_print = 0;
+	bool bond_switch = FALSE;
+	bool bond_print = FALSE;
 	char date[MAXBUF];
 
 	if (parent->count != 0)
@@ -189,8 +191,8 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 			break;
 
 		date_string(date, sizeof(date), ui, parent_date.year, parent_date.mon, parent_date.mday, child_sign, bond_print);
-		if (bond_print == 1)
-			bond_print = 0;
+		if (bond_print == TRUE)
+			bond_print = FALSE;
 
 		node_add_child(parent, 
 		node_create(date, child_jd, child_sign, child_level, parent_date.year,
@@ -204,8 +206,8 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 
 		if (child_sign == bond_sign && !bond_switch)
 		{
-			bond_switch = 1;
-			bond_print = 1;
+			bond_switch = TRUE;
+			bond_print = TRUE;
 			child_sign += 6;
 			if (child_sign > 12)
 				child_sign -= 12;
@@ -233,7 +235,7 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 	if (sign < 1)
 		sign += 12;
 
-	date_string(date, sizeof(date), ui, cdata->year, cdata->mon, cdata->mday, sign, 0);
+	date_string(date, sizeof(date), ui, cdata->year, cdata->mon, cdata->mday, sign, FALSE);
 
 	struct node *root = node_create(date, cdata->jd_ut, sign, ROOT,
 	cdata->year, cdata->mon, cdata->mday, cdata->hour, cdata->min, cdata->sec, cdata->isdst);
@@ -343,7 +345,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 
 	parents[0] = root;
 
-	bool done = 0;
+	bool done = FALSE;
 	while (!done) 
 	{
 		rebuild_path(parents, selected, ui);
