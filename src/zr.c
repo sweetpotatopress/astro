@@ -110,11 +110,11 @@ static void advance_date(struct cdata *date, double days)
 	time_t t = 0;
 	time_t seconds;
 
-	cpt(date, &temp, &t, 0);
+	cpt(date, &temp, &t, IN);
 	
 	seconds = (time_t)llround(days * 86400.0);
 	t += seconds;
-	cpt(date, &temp, &t, 1);
+	cpt(date, &temp, &t, OUT);
 }
 
 static void date_string(char *buffer, size_t buffer_size, struct ui *ui, int year, int mon, int mday, int sign, bool bond_print)

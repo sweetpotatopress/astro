@@ -29,6 +29,10 @@
 #define NDST 0
 #define YDST 1
 
+// cpt
+#define IN 1
+#define OUT 0
+
 int sect(struct pxx *pxx);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);
 void retro_station(double jd_ut, double *planet[]);
@@ -38,4 +42,4 @@ void chart_timeset(struct cdata *cdata, int *day_offset);
 void lots(struct pxx *pxx);
 void weekday_check(struct cdata *cdata);
 void set_localtime(struct cdata *cdata);
-void cpt(struct cdata *cdata, struct tm *temp, time_t *t, int x);
+void cpt(struct cdata *cdata, struct tm *temp, time_t *t, bool x);

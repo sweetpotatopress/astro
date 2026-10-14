@@ -157,9 +157,9 @@ void calculate_utc(struct cdata *cdata)
 	cdata->utc_mday = tm_utc->tm_mday;
 }
 
-void cpt(struct cdata *cdata, struct tm *temp, time_t *t, int x)
+void cpt(struct cdata *cdata, struct tm *temp, time_t *t, bool x)
 {
-	if (!x || x == 2)
+	if (x == IN)
 	{
 		temp->tm_year = cdata->year - 1900;
 		temp->tm_mon = cdata->mon - 1;
@@ -171,7 +171,7 @@ void cpt(struct cdata *cdata, struct tm *temp, time_t *t, int x)
 		
 		*t = mktime(temp);
 	}
-	if (x)
+	else if (x == OUT)
 	{	
 		struct tm *result = localtime(t);
 		if(!result)
@@ -319,7 +319,7 @@ static void calc_return(struct cdata *cdata, double base_degree)
 	struct tm temp = {0};
 	time_t t = 0;
 
-	cpt(cdata, &temp, &t, 0);
+	cpt(cdata, &temp, &t, IN);
 	
 	int iflag = SEFLG_SWIEPH;
 	double xx[6];
@@ -344,7 +344,7 @@ static void calc_return(struct cdata *cdata, double base_degree)
 			
 		t+= (diff > 0.0 ? step : -step);
 		
-		cpt(cdata, &temp, &t, 1);
+		cpt(cdata, &temp, &t, OUT);
 		
 		if (fabs(diff) < JUL_SEC)
 			break;

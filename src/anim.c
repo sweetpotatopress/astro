@@ -296,7 +296,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	
 	struct tm temp = {0};
 	time_t t = 0;
-	cpt(cdata, &temp, &t, 0);
+	cpt(cdata, &temp, &t, IN);
 	
 	print_inc(ui->main_win, sy, sx, label, advance);
 	if (ui->cc == TRANSIT)
@@ -371,7 +371,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						break;
 				}
 				lesser_wrap(&temp, &t, inc);
-				cpt(cdata, &temp, &t, 1);
+				cpt(cdata, &temp, &t, OUT);
 				
 				if (ui->cc == TRANSIT)
 					arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
@@ -418,7 +418,7 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						break;
 				}
 				lesser_wrap(&temp, &t, inc);
-				cpt(cdata, &temp, &t, 1);
+				cpt(cdata, &temp, &t, OUT);
 				
 				if (ui->cc == TRANSIT)
 					arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
