@@ -121,7 +121,7 @@ void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao)
 
 void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, bool x)
 {
-	if (!x)
+	if (x == TRUE)
 	{
 		ui->old_l = ui->left_trig;
 		ui->old_r = ui->right_trig;
@@ -150,7 +150,7 @@ void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 		new_chart(cdata, pxx, ui, planet, zodiac);
 	}
 
-	if (x)
+	if (x == FALSE)
 	{
 		ui->left_trig = ui->old_l;
 		ui->right_trig = ui->old_r;

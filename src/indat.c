@@ -221,7 +221,7 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 	
 	mvwin(ui->indat_win, (LINES - IWINY), (COLS - IWINX));
 	wresize(ui->indat_win, IWINY, IWINX);
-	ui_resize(cdata, pxx, ui, planet, zodiac, 0);
+	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
 	box(ui->indat_win, 0, 0);
 	
 	curs_set(1);
@@ -390,7 +390,7 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 				snprintf(cdata->city, sizeof tmp_city, "%s", tmp_city);
 				snprintf(cdata->state, sizeof tmp_state, "%s", tmp_state);
 				snprintf(cdata->country, sizeof tmp_country, "%s", tmp_country);
-				ui_resize(cdata, pxx, ui, planet, zodiac, 1);
+				ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 				return;
 				break;
 				
@@ -428,7 +428,7 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 	
 	for (int i = CITY; i < FIELDMAX; ++i)
 		free_field(cdata_field[i]);
-	ui_resize(cdata, pxx, ui, planet, zodiac, 1);
+	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(ui->indat_win);
 }
 
