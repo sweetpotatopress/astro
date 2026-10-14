@@ -213,17 +213,17 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 		planet[ipl][LAT_S] = xx[LAT_S];
 		planet[ipl][DIST_S] = xx[DIST_S];
 	}
+	
+	// turn mean node into south node
+	planet[SE_MEAN_NODE][LONG] = (planet[SE_TRUE_NODE][LONG] + 180);
+	if (planet[SE_MEAN_NODE][LONG] >= 360)
+		planet[SE_MEAN_NODE][LONG] -= 360;
 
 	retro_station(cdata->jd_ut, planet);
 	
 	eclipse(cdata->jd_ut, cdata->le, cdata->se);
 	
 	cusp_init(cdata, pxx);
-	
-	// turn mean node into south node
-	planet[SE_MEAN_NODE][LONG] = (planet[SE_TRUE_NODE][LONG] + 180);
-	if (planet[SE_MEAN_NODE][LONG] >= 360)
-		planet[SE_MEAN_NODE][LONG] -= 360;
 
 	lots(pxx);
 	
