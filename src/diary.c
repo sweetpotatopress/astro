@@ -12,14 +12,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
+#include <dirent.h>
+#include <sys/stat.h>
+#include <stdlib.h>
 #include <astro.h>
 #include <ui.h>
-#include <stdlib.h>
 #include <swephexp.h>
 #include <chronos.h>
 
 #define PROW 10024
-#define PCOL 72
+#define PCOL 48
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
@@ -41,6 +43,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	int scr_h = LINES - 2; // height of displayed region
 	int scr_w = PCOL; // width
+	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	
 	int y = 1;
 	int x[MAXBUF] = {0};
@@ -48,7 +51,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	curs_set(1);
 	int ch;
 	bool done = FALSE;
-	while ((ch = wgetch(pad)) && !done)
+	while (!done && (ch = wgetch(pad)))
 	{
 		buf[i] = ch;
 		switch(ch)
@@ -78,7 +81,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				i++;
 				break;
 		}
-		if (x[y] >= PCOL)
+		if (x[y] >= PCOL-1)
 		{
 			y++;
 		}
@@ -87,32 +90,42 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	}
 	buf[i] = '\0';
 	curs_set(0);
-	mvwprintw(ui->main_win, 10, 10, "this -> %s", buf);
-	wrefresh(ui->main_win);
-	getch();
-	 char path[MAXPATH] = {0};
+	
+
+	struct cdata time = {0};
+	set_localtime(&time);
+	
+	char filename[MAXBUF] = {0};
+	snprintf(filename, MAXBUF, "%02d.%02d.md", time.mon, time.mday);
+	
+	char path[MAXPATH] = {0};
 	path_check(path, "diary");
 	
-	struct cdata time = {0};
+	char year_path[MAXPATH] = {0};
+	snprintf(year_path, MAXPATH, "%s/%d", path, time.year);
 	
-	set_localtime(&time);
+	if (access(year_path, R_OK) == -1)
+		if (mkdir(year_path, 0755) == -1)
+			ERR_EXIT("ERR: diary mkdir");
+		
+	char full_path[MAXPATH] = {0};
+	snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
+	
 	char header[MAXBUF] = {0};
-	char *divider = "---";
-	char filename[MAXBUF] = {0};
+	if (access(full_path, R_OK) == -1)
+		snprintf(header, MAXBUF, "%s, %f, %f\n---\n%02d:%02d:%02d", cdata->timezone, cdata->dlon, cdata->dlat,
+		time.hour, time.min, time.sec);
+	else
+		snprintf(header, MAXBUF, "%02d:%02d:%02d", time.hour, time.min, time.sec);
+	char *footer = "- - - - - - -";
 	
-	snprintf(header, MAXBUF, "%s, %f, %f", cdata->timezone, cdata->dlon, cdata->dlat);
-	snprintf(filename, MAXBUF, "%d.%02d.%02d-%02d:%02d:%02d.md", time.year, time.mon, time.mday, time.hour, time.min, time.sec);
-	
-	char fullpath[MAXPATH] = {0};
-	
-	snprintf(fullpath, MAXPATH, "%s/%s", path, filename);
-	
-	FILE *fp = fopen(fullpath, "w");
+	FILE *fp = fopen(full_path, "a");
 	if (!fp)
 		ERR_EXIT("ERR: diary fopen");
 
-	fprintf(fp, "%s\n%s\n%s\n", header, divider, buf);
+	fprintf(fp, "%s\n%s\n%s\n", header, buf, footer);
 		
 	fclose(fp);
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
+	delwin(pad);
 }
