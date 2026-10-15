@@ -51,7 +51,7 @@ void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[])
 void degree_color(WINDOW *win, int y, int x, int count,
 double *planet[], int *zodiac[])
 {
-	int sign = (int)(planet[count][LONG] / 30) + 1;
+	int sign = (int)(planet[count][LONG] / 30);
 	
 	switch(zodiac[sign][ELEMENT])
 	{
@@ -148,7 +148,7 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet
 		if (ui->cc == TRANSIT)
 			zo_sign = (int)(cdata->t_cusp / 30.0);
 		else
-			zo_sign = (int)(cdata->sign_cusp[1] / 30.0);
+			zo_sign = (int)(cdata->sign_cusp[0] / 30.0);
 		double as_sign = zo_sign * 30.0;
 	
 		double zo_pos_radian = (adjusted_pos[i] - as_sign) * M_PI / 180;
@@ -205,7 +205,7 @@ void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double *planet[]
 	int i = 12;
 	for (j = 0; i < 16; ++i, ++j)
 	{
-		double rad = (planet[i][LONG] - cdata->sign_cusp[1]) * M_PI / 180.0;
+		double rad = (planet[i][LONG] - cdata->sign_cusp[0]) * M_PI / 180.0;
 		
 		int x = ui->cx - (int)(ui->ar * cos(rad));
 		int y = ui->cy + (int)(ui->ar * sin(rad) * 0.5);
@@ -218,14 +218,12 @@ void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double *planet[]
 
 void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, int **zodiac)
 {
-	int asc_sign = (int)(pxx->dasc[LONG] / 30) - 1;
+	int asc_sign = (int)(pxx->dasc[LONG] / 30);
 	for (int i = ARI; i < ZMAX; ++i)
 	{
 		int sign = ((i + asc_sign) % 12);
-		if (sign == 0)
-			sign = 12;
 
-		int sign_inc = (((int)pxx->dasc[LONG] / 30) * 30) + 15;
+		int sign_inc = (((int)pxx->dasc[LONG] / 30) * 30) - 15;
 		
 		double rad = (cdata->sign_cusp[i] - sign_inc) * M_PI / 180.0;
 		

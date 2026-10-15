@@ -110,8 +110,8 @@ struct cdata {
 	int utc_mday;
 	int moonphase;
 	int rt; // realtime flag
-	double cusp[13];
-	double sign_cusp[13];
+	double cusp[12];
+	double sign_cusp[12];
 	double t_cusp; // transit cusp
 	double le[EMAX]; // lunar eclipse
 	double se[EMAX]; // solar eclipse

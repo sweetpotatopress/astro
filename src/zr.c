@@ -142,8 +142,7 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 		2.5 / 12
 	};
 
-	const int pl_period[13] = {
-		0,
+	const int pl_period[12] = {
 		15, 8, 20, 25,
 		19, 20, 8, 15,
 		12, 27, 30, 12
@@ -201,16 +200,16 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 		advance_date(&parent_date, child_length);
 
 		++child_sign;
-		if (child_sign > 12)
-			child_sign = 1;
+		if (child_sign > 11)
+			child_sign = 0;
 
 		if (child_sign == bond_sign && !bond_switch)
 		{
 			bond_switch = TRUE;
 			bond_print = TRUE;
-			child_sign += 6;
-			if (child_sign > 12)
-				child_sign -= 12;
+			child_sign += 5;
+			if (child_sign > 11)
+				child_sign -= 11;
 		}
 	}
 }
@@ -222,18 +221,18 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 
 	if (sign_switch == SPIRIT) 
 	{
-		sign = (int)(pxx->dspir[LONG] / 30.0) + 1;
+		sign = (int)(pxx->dspir[LONG] / 30.0);
 
 		if ((int)(pxx->dspir[LONG] / 30.0) == (int)(pxx->dfor[LONG] / 30.0))
 			sign++;
 	} 
 	else 
-		sign = (int)(pxx->dfor[LONG] / 30.0) + 1;
+		sign = (int)(pxx->dfor[LONG] / 30.0);
 
-	if (sign > 12)
-		sign -= 12;
-	if (sign < 1)
-		sign += 12;
+	if (sign > 11)
+		sign -= 11;
+	if (sign < 0)
+		sign += 11;
 
 	date_string(date, sizeof(date), ui, cdata->year, cdata->mon, cdata->mday, sign, FALSE);
 

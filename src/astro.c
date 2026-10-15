@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
 	struct zxx *zxx = ecalloc(1, sizeof(*zxx));
 		
 	int *zodiac[] = {
-		0,
 		zxx->iari, zxx->itau,
 		zxx->igem, zxx->ican,
 		zxx->ileo, zxx->ivir,

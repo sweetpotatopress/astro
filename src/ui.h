@@ -74,19 +74,19 @@
 
 #define PLMAX 16
 
-#define ARI 1
-#define TAU 2
-#define GEM 3
-#define CAN 4
-#define LEO 5
-#define VIR 6
-#define LIB 7
-#define SCO 8
-#define SAG 9
-#define CAP 10
-#define AQU 11
-#define PIS 12
-#define ZMAX 13
+#define ARI 0
+#define TAU 1
+#define GEM 2
+#define CAN 3
+#define LEO 4
+#define VIR 5
+#define LIB 6
+#define SCO 7
+#define SAG 8
+#define CAP 9
+#define AQU 10
+#define PIS 11
+#define ZMAX 12
 
 struct zxx {
 	int iari[MAXZXX];
@@ -104,7 +104,7 @@ struct zxx {
 };
 
 #define PL_SYM_MAX 12
-#define ZO_SYM_MAX 13
+#define ZO_SYM_MAX 12
 #define MOON_MAX 8
 #define TRANSIT 11
 #define SYNASTRY 12

@@ -130,7 +130,7 @@ void zxx_init(int *zodiac[])
 	SE_MERCURY, SE_MARS, SE_SATURN, SE_SATURN,
 	SE_JUPITER, SE_MARS, SE_MERCURY, SE_MERCURY }; 
 	
-	const int *zodia[] = { 0,
+	const int *zodia[] = {
 	ari, tau, gem, can,
 	leo, vir, lib, sco,
 	sag, cap, aqu, pis};

@@ -50,7 +50,7 @@ void ui_init(struct ui *ui)
 		"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
 		"(P)", "(u)", "(^)" },
 	
-		.zo_sym = { "err", "ari", "tau", "gem", "can",
+		.zo_sym = { "ari", "tau", "gem", "can",
 		"leo", "vir", "lib", "sco", "sag",
 		"cap", "aqu", "pis" },
 	
@@ -229,7 +229,7 @@ static int bound_check(int sign, int degree)
 	const int pis[] = 
 	{ 11, 15, 18, 27, 29 };
 	
-	const int *z[] = { 0,
+	const int *z[] = {
 	ari, tau, gem, can,
 	leo, vir, lib, sco,
 	sag, cap, aqu, pis };
@@ -245,7 +245,7 @@ static void dignity_check(int *zodiac[], double *planet[], int result[PLMAX][MAX
 	int ipl = 0;
 	for (; ipl < PLMAX; ++ipl)
 	{
-		int sign = (int)(planet[ipl][LONG] / 30) + 1;
+		int sign = (int)(planet[ipl][LONG] / 30);
 		int degree = (int)planet[ipl][DEGREE];
 		
 		result[ipl][RULER] = zodiac[sign][RULER];
@@ -314,7 +314,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	int p_count = 18;
 	for (int i = 0; i < p_count; ++i)
 	{
-		int sign = ((int)planet[i][LONG] / 30) + 1;
+		int sign = ((int)planet[i][LONG] / 30);
 		
 		int full_deg = (int)planet[i][LONG];
 		int deg = (int)planet[i][LONG] % 30;
@@ -471,12 +471,12 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 		struct cdata tmp = {0};
 		set_localtime(&tmp);
 		
-		int sign = ((int)planet[12][LONG] / 30) + 1;
+		int sign = ((int)planet[12][LONG] / 30);
 		int diff = tmp.year - cdata->year;
-		int profection = (((sign + diff) - 1) % 12 + 12) % 12 + 1;
+		int profection = (((sign + diff)) % 12 + 12) % 12;
 		
 		int mdiff = tmp.mon - cdata->mon;
-		int mprof = (((profection + mdiff) - 1) % 12 + 12) % 12 + 1;
+		int mprof = (((profection + mdiff)) % 12 + 12) % 12;
 		
 		mvwprintw(ui->left_win, starty, startx, "profection:     mon:");
 		zo_color(ui->left_win, ui, starty, startx + 12, profection, zodiac);
@@ -524,8 +524,8 @@ void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodi
     int i = 2, j = SE_MERCURY;
 	for (; i < p_count; ++i, ++j)
 	{
-		int nsign = (int)(planet[j][NEXT_Z] / 30) + 1;
-		int psign = (int)(planet[j][PREV_Z] / 30) + 1;
+		int nsign = (int)(planet[j][NEXT_Z] / 30);
+		int psign = (int)(planet[j][PREV_Z] / 30);
 		char dsign = (planet[j][LONG_S] > 0.0) ? ' ' : '-';
 		
 		mvwprintw(ui->right_win, i+1, 0, "%c%1.0f*%-2.02d':%-2s:",
