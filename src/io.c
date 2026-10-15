@@ -81,6 +81,11 @@ void path_check(char *path, const char *s)
 		path_env(env, "XDG_DATA_HOME", ".local/share");
 		snprintf(path, MAXPATH, "%s/%s", env, "astro/charts");
 	}
+	else if (strcmp("diary", s) == 0)
+	{
+		path_env(env, "XDG_DATA_HOME", ".local/share");
+		snprintf(path, MAXPATH, "%s/%s", env, "astro/diary");
+	}
 	else if (strcmp("ephe", s) == 0)
 	{
 		snprintf(path, MAXPATH, "%s/%s", ASTRO_DATA_DIR, "ephe");
@@ -112,6 +117,11 @@ void datadir_check(void)
 		if (mkdir(path, 0755) == -1)
 			ERR_EXIT("ERR: charts mkdir");
 			
+	path_check(path, "diary");
+	if (access(path, F_OK) == -1)
+		if (mkdir(path, 0755) == -1)
+			ERR_EXIT("ERR: diary mkdir");
+	
 	path_check(path, "ephe");
 	if (access(path, F_OK) == -1)
 		ERR_EXIT("ERR: no ephe installed");
