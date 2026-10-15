@@ -809,7 +809,9 @@ static double apc_sector(int n, double ph, double e, double az)
      kv = 0;
      dasc = 0;
    } else {
-     kv   = atan(tan(ph) * tan(e) * cos(az)/(1 + tan(ph) * tan(e) * sin(az))); if (fabs(ph * RADTODEG) < VERY_SMALL) { dasc = (90 - VERY_SMALL) * DEGTORAD;
+     kv   = atan(tan(ph) * tan(e) * cos(az)/(1 + tan(ph) * tan(e) * sin(az))); 
+     if (fabs(ph * RADTODEG) < VERY_SMALL) {
+       dasc = (90 - VERY_SMALL) * DEGTORAD;
        if (ph < 0)
          dasc = -dasc;
      } else {
