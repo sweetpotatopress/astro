@@ -32,9 +32,12 @@ static void d_timezone(char *timezone)
 	tzset();
 }
 
-static void save_diary(struct cdata *cdata, struct ui *ui, char *buf)
+static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 {
-	if (strlen(buf) < 1)
+	int i = 0;
+	for(; buf[i] != '\0' && isspace((unsigned char)buf[i]); ++i)
+		;
+	if (i == size || buf[i] == '\0')
 		return;
 		
 	struct cdata time = {0};
@@ -149,6 +152,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			case 127: case 8: case KEY_BACKSPACE:
 				if (y == 0 && x[y] == 0)
 					break;
+				if (i == 0 || c == 0)
+					break;
 				c = count_elements(y, x);
 	
 				if (x[y]-- <= 0)
@@ -162,6 +167,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				mvwprintw(pad, y, x[y], " ");
 				if (c-- <= 0)
 					c = 0;
+				if (i-- <= 0)
+					i = 0;
 				break;
 			default:
 				if (c < i)
@@ -209,9 +216,11 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	}
 	buf[i] = '\0';
+	if (buf[i-1] == '\n')
+		buf[i-1] = '\0';
 	curs_set(0);
 	
-	save_diary(cdata, ui, buf);
+	save_diary(cdata, ui, buf, i);
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
