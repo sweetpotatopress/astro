@@ -123,6 +123,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	int scr_h = LINES - 4; // height of displayed region
 	int scr_w = PCOL; // width
+	wmove(pad, y, x[y]);
 	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 
 	curs_set(1);
@@ -138,7 +139,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					++y;
 				break;
 			case KEY_UP:
-				if (y > 0)
+				if (y > 1)
 					--y;
 				break;
 			case 10:
