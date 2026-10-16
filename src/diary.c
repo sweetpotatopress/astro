@@ -76,6 +76,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	char *buf = ecalloc(1, tmpmax * sizeof(char *));
 	int i = 0;
 	
+	int y = 1;
+	int x[PLINE] = {0};
+	
 	int pad_y = 0; // upper left corner in pad
 	int pad_x = 0;
 	
@@ -85,10 +88,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	int scr_h = LINES - 4; // height of displayed region
 	int scr_w = PCOL; // width
 	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
-	
-	int y = 1;
-	int x[PLINE] = {0};
-	
+
 	curs_set(1);
 	int ch;
 	bool done = FALSE;
@@ -115,6 +115,14 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 			case 27:
 				done = TRUE;
+				break;
+			case KEY_DOWN:
+				if (pad_y < PLINE - scr_h -1)
+					++pad_y;
+				break;
+			case KEY_UP:
+				if (pad_y > 0)
+					--pad_y;
 				break;
 			default:
 				mvwprintw(pad, y, x[y], "%c", buf[i]);
