@@ -77,6 +77,14 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf)
 	fclose(fp);
 }
 
+int count_elements(int y, int *x)
+{
+	int count = 0;
+	for (int j = 0; j <= y; ++j)
+		count += x[j];
+	return count;
+}
+
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
@@ -92,8 +100,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	wrefresh(ui->main_win);
 	
 	size_t tmpmax = PLINE;
-	char *buf = ecalloc(1, tmpmax * sizeof(char *));
-	int i = 0;
+	char *buf = ecalloc(tmpmax, sizeof *buf);
+	int i = 0, c = 0;
+	//int z = 0;
 	
 	int y = 1;
 	int x[PLINE] = {0};
@@ -111,19 +120,30 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	curs_set(1);
 	int ch;
 	bool done = FALSE;
-	while (!done && (ch = wgetch(pad)))
+	while (!done && (ch = wgetch(pad)) != ERR)
 	{
 		buf[i] = ch;
 		switch(ch)
 		{
+			case KEY_DOWN:
+				if (y < PLINE)
+					++y;
+				break;
+			case KEY_UP:
+				if (y > 0)
+					--y;
+				break;
 			case 10:
 				y++;
-				mvwprintw(pad, y, x[y], "%c", buf[i]);
+				x[y] = 0;
+				x[y]++;
 				i++;
+				c++;
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
 				if (y == 0 && x[y] == 0)
 					break;
+				c = count_elements(y, x);
 	
 				if (x[y]-- <= 0)
 				{
@@ -131,28 +151,38 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					if (y-- <= 0)
 						y = 0;
 				}
-				buf[i] = ' ';
-				mvwprintw(pad, y, x[y], "%c", buf[i]);
-				if (i-- <= 0)
-					i = 0;
+				for (size_t j = c; j < strlen(buf)+1; j++)
+					buf[j-1] = buf[j];
+				mvwprintw(pad, y, x[y], " ");
+				if (c-- <= 0)
+					c = 0;
+				break;
+			default:
+				if (c < i)
+				{
+					for (int j = i; j > c; j--)
+						buf[j] = buf[j - 1];
+					buf[c] = ch;
+					mvwprintw(pad, y, x[y], "%c", buf[c]);
+					i++;
+				}
+				else
+				{
+					mvwprintw(pad, y, x[y], "%c", buf[i]);
+					i++;
+				}
+					
+				x[y]++;
+				c++;
 				break;
 			case 27:
 				done = TRUE;
 				break;
-			case KEY_DOWN:
-				if (pad_y < PLINE - scr_h -1)
-					++pad_y;
-				break;
-			case KEY_UP:
-				if (pad_y > 0)
-					--pad_y;
-				break;
-			default:
-				mvwprintw(pad, y, x[y], "%c", buf[i]);
-				x[y]++;
-				i++;
-				break;
+	
 		}
+		//z = count_elements(y, x);
+		//mvwprintw(pad, 0, 0, "                                       ");
+		//mvwprintw(pad, 0, 0, "c: %d, i: %d, z: %d, x[y]: %d, y: %d", c, i, z, x[y], y);
 		if (x[y] >= PCOL-1 && ch != KEY_BACKSPACE)
 		{
 			y++;
@@ -164,8 +194,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		if((size_t)i >= tmpmax)
 		{
 			tmpmax *= 2;
-			char *tmp = erealloc(buf, tmpmax * sizeof(char *));
-			buf = tmp;
+			char *tmpbuf = erealloc(buf, tmpmax * sizeof*buf);
+			buf = tmpbuf;
 		}
 	
 		wmove(pad, y, x[y]);
