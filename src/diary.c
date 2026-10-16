@@ -20,33 +20,74 @@
 #include <swephexp.h>
 #include <chronos.h>
 
-#define PROW 10024
+#define PLINE 2560
 #define PCOL 48
+
+#define PMAX (PLINE * PCOL)
+
+static void save_diary(struct cdata *cdata, char *buf)
+{
+	struct cdata time = {0};
+	set_localtime(&time);
+	
+	char filename[MAXBUF] = {0};
+	snprintf(filename, MAXBUF, "%02d.%02d.md", time.mon, time.mday);
+	
+	char path[MAXPATH] = {0};
+	path_check(path, "diary");
+	
+	char year_path[MAXPATH] = {0};
+	snprintf(year_path, MAXPATH, "%s/%d", path, time.year);
+	
+	if (access(year_path, R_OK) == -1)
+		if (mkdir(year_path, 0755) == -1)
+			ERR_EXIT("ERR: diary mkdir");
+		
+	char full_path[MAXPATH] = {0};
+	snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
+	
+	char header[MAXBUF] = {0};
+	if (access(full_path, R_OK) == -1)
+		snprintf(header, MAXBUF, "%s, %f, %f\n---\n%02d:%02d:%02d", cdata->timezone, cdata->dlon, cdata->dlat,
+		time.hour, time.min, time.sec);
+	else
+		snprintf(header, MAXBUF, "%02d:%02d:%02d", time.hour, time.min, time.sec);
+	char *footer = "- - - - - - -";
+	
+	FILE *fp = fopen(full_path, "a");
+	if (!fp)
+		ERR_EXIT("ERR: diary fopen");
+
+	fprintf(fp, "%s\n%s\n%s\n", header, buf, footer);
+		
+	fclose(fp);
+}
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
 	
-	WINDOW *pad = newpad(PROW, PCOL);
+	WINDOW *pad = newpad(PLINE, PCOL);
 	
 	wbkgdset(pad,COLOR_PAIR(M_COLOR));
 	keypad(pad, TRUE);
 	
-	char buf[MAXBUF] = {0};
+	size_t tmpmax = PLINE;
+	char *buf = ecalloc(1, tmpmax * sizeof(char *));
 	int i = 0;
 	
 	int pad_y = 0; // upper left corner in pad
 	int pad_x = 0;
 	
-	int scr_y = 1; // where on screen to start drawing
+	int scr_y = 2; // where on screen to start drawing
 	int scr_x = COLS - PCOL;
 	
-	int scr_h = LINES - 2; // height of displayed region
+	int scr_h = LINES - 4; // height of displayed region
 	int scr_w = PCOL; // width
 	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	
 	int y = 1;
-	int x[MAXBUF] = {0};
+	int x[PLINE] = {0};
 	
 	curs_set(1);
 	int ch;
@@ -85,47 +126,25 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		{
 			y++;
 		}
+		if (y > PLINE - 2 || strlen(buf) > PMAX - 2)
+		{
+			break;
+		}
+		if((size_t)i >= tmpmax)
+		{
+			tmpmax *= 2;
+			char *tmp = erealloc(buf, tmpmax * sizeof(char *));
+			buf = tmp;
+		}
+	
 		wmove(pad, y, x[y]);
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	}
 	buf[i] = '\0';
 	curs_set(0);
 	
-
-	struct cdata time = {0};
-	set_localtime(&time);
+	save_diary(cdata, buf);
 	
-	char filename[MAXBUF] = {0};
-	snprintf(filename, MAXBUF, "%02d.%02d.md", time.mon, time.mday);
-	
-	char path[MAXPATH] = {0};
-	path_check(path, "diary");
-	
-	char year_path[MAXPATH] = {0};
-	snprintf(year_path, MAXPATH, "%s/%d", path, time.year);
-	
-	if (access(year_path, R_OK) == -1)
-		if (mkdir(year_path, 0755) == -1)
-			ERR_EXIT("ERR: diary mkdir");
-		
-	char full_path[MAXPATH] = {0};
-	snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
-	
-	char header[MAXBUF] = {0};
-	if (access(full_path, R_OK) == -1)
-		snprintf(header, MAXBUF, "%s, %f, %f\n---\n%02d:%02d:%02d", cdata->timezone, cdata->dlon, cdata->dlat,
-		time.hour, time.min, time.sec);
-	else
-		snprintf(header, MAXBUF, "%02d:%02d:%02d", time.hour, time.min, time.sec);
-	char *footer = "- - - - - - -";
-	
-	FILE *fp = fopen(full_path, "a");
-	if (!fp)
-		ERR_EXIT("ERR: diary fopen");
-
-	fprintf(fp, "%s\n%s\n%s\n", header, buf, footer);
-		
-	fclose(fp);
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
 }
