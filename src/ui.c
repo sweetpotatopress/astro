@@ -97,6 +97,8 @@ void ui_init(struct ui *ui)
 	
 	keypad(ui->main_win, TRUE);
 	show_panel(ui->main_panel);
+	
+	ui->conf_timezone = ecalloc(1, MAXBUF);
 }
 
 void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao)

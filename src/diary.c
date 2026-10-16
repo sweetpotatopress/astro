@@ -25,10 +25,19 @@
 
 #define PMAX (PLINE * PCOL)
 
-static void save_diary(struct cdata *cdata, char *buf)
+static void d_timezone(char *timezone)
+{
+	if (setenv("TZ", timezone, 1) != 0)
+		ERR_EXIT("ERR: setenv diary.c");
+	tzset();
+}
+
+static void save_diary(struct cdata *cdata, struct ui *ui, char *buf)
 {
 	struct cdata time = {0};
+	d_timezone(ui->conf_timezone);
 	set_localtime(&time);
+	d_timezone(cdata->timezone);
 	
 	char filename[MAXBUF] = {0};
 	snprintf(filename, MAXBUF, "%02d.%02d.md", time.mon, time.mday);
@@ -151,7 +160,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	buf[i] = '\0';
 	curs_set(0);
 	
-	save_diary(cdata, buf);
+	save_diary(cdata, ui, buf);
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);

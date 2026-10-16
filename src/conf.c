@@ -89,6 +89,7 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 		ERR_EXIT("ERR: setenv conf.c");
 	tzset();
 	memcpy(cdata->timezone, buffer[C_TIMEZONE], strlen(buffer[C_TIMEZONE]) + 1);
+	memcpy(ui->conf_timezone, buffer[C_TIMEZONE], strlen(buffer[C_TIMEZONE]) + 1);
 	
 	char *endptr = NULL;
 	double dret;

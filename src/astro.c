@@ -276,6 +276,7 @@ int main(int argc, char *argv[])
 	free(cdata);
 	free(pxx);
 	free(zxx);
+	free(ui->conf_timezone);
 	free(ui);
 	
 	return 0;
