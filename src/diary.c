@@ -42,21 +42,27 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf)
 	set_localtime(&time);
 	d_timezone(cdata->timezone);
 	
-	char filename[MAXBUF] = {0};
-	snprintf(filename, MAXBUF, "%02d.%02d.md", time.mon, time.mday);
+	char filename[12] = {0};
+	int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
+	if (n > 12)
+		ERR_EXIT("ERR: diary filename too long");
 	
 	char path[MAXPATH] = {0};
 	path_check(path, "diary");
 	
 	char year_path[MAXPATH] = {0};
-	snprintf(year_path, MAXPATH, "%s/%d", path, time.year);
+	n = snprintf(year_path, MAXPATH, "%s/%d", path, time.year);
+	if (n > MAXPATH)
+		ERR_EXIT("ERR: diary.c year_path too long");
 	
 	if (access(year_path, R_OK) == -1)
 		if (mkdir(year_path, 0755) == -1)
 			ERR_EXIT("ERR: diary mkdir");
 		
 	char full_path[MAXPATH] = {0};
-	snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
+	n = snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
+	if (n > MAXPATH)
+		ERR_EXIT("ERR: diary.c full_path too long");
 	
 	char header[MAXBUF] = {0};
 	if (access(full_path, R_OK) == -1)
