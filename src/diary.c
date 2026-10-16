@@ -57,11 +57,13 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf)
 	
 	char header[MAXBUF] = {0};
 	if (access(full_path, R_OK) == -1)
-		snprintf(header, MAXBUF, "%s, %f, %f\n---\n%02d:%02d:%02d", cdata->timezone, cdata->dlon, cdata->dlat,
+		snprintf(header, MAXBUF, "%s, %f, %f\n%d.%d.%d\n%02d:%02d:%02d", 
+		cdata->timezone, cdata->dlon, cdata->dlat,
+		time.year, time.mon, time.mday,
 		time.hour, time.min, time.sec);
 	else
 		snprintf(header, MAXBUF, "%02d:%02d:%02d", time.hour, time.min, time.sec);
-	char *footer = "- - - - - - -";
+	char *footer = "/n- - - - - - -";
 	
 	FILE *fp = fopen(full_path, "a");
 	if (!fp)
@@ -139,7 +141,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				i++;
 				break;
 		}
-		if (x[y] >= PCOL-1)
+		if (x[y] >= PCOL-1 && ch != KEY_BACKSPACE)
 		{
 			y++;
 		}
