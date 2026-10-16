@@ -83,6 +83,11 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	wbkgdset(pad,COLOR_PAIR(M_COLOR));
 	keypad(pad, TRUE);
 	
+	wattron(ui->main_win, COLOR_PAIR(WATER));
+	mvwprintw(ui->main_win, 0, COLS - 14, "diary");
+	wattroff(ui->main_win, COLOR_PAIR(WATER));
+	wrefresh(ui->main_win);
+	
 	size_t tmpmax = PLINE;
 	char *buf = ecalloc(1, tmpmax * sizeof(char *));
 	int i = 0;
@@ -114,6 +119,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				i++;
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
+				if (y == 0 && x[y] == 0)
+					break;
+	
 				if (x[y]-- <= 0)
 				{
 					x[y] = 0;
@@ -122,7 +130,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				}
 				buf[i] = ' ';
 				mvwprintw(pad, y, x[y], "%c", buf[i]);
-				i--;
+				if (i-- <= 0)
+					i = 0;
 				break;
 			case 27:
 				done = TRUE;
@@ -158,6 +167,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 		wmove(pad, y, x[y]);
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
+	
 	}
 	buf[i] = '\0';
 	curs_set(0);
