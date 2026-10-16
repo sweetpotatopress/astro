@@ -34,6 +34,9 @@ static void d_timezone(char *timezone)
 
 static void save_diary(struct cdata *cdata, struct ui *ui, char *buf)
 {
+	if (strlen(buf) < 1)
+		return;
+		
 	struct cdata time = {0};
 	d_timezone(ui->conf_timezone);
 	set_localtime(&time);
@@ -63,7 +66,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf)
 		time.hour, time.min, time.sec);
 	else
 		snprintf(header, MAXBUF, "%02d:%02d:%02d", time.hour, time.min, time.sec);
-	char *footer = "/n- - - - - - -";
+	char *footer = "\n- - - - - - -";
 	
 	FILE *fp = fopen(full_path, "a");
 	if (!fp)
