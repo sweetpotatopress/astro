@@ -25,6 +25,9 @@ t			transits
 
 s			solar return
 
+j			diary
+	esc		save entry
+
 z			zodiacal releasing
 	k/j		up/down period
 	h/l		up/down layer
