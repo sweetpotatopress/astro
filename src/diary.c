@@ -111,7 +111,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	size_t tmpmax = PLINE;
 	char *buf = ecalloc(tmpmax, sizeof *buf);
 	int i = 0, c = 0;
-	//int z = 0;
 	
 	int y = 1;
 	int x[PLINE] = {0};
@@ -144,7 +143,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 			case 10:
 				y++;
-				x[y] = 0;
 				x[y]++;
 				i++;
 				c++;
@@ -161,6 +159,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					x[y] = 0;
 					if (y-- <= 0)
 						y = 0;
+					break;
 				}
 				for (size_t j = c; j < strlen(buf)+1; j++)
 					buf[j-1] = buf[j];
@@ -193,7 +192,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 	
 		}
-		//z = count_elements(y, x);
+		//int z = count_elements(y, x);
 		//mvwprintw(pad, 0, 0, "                                       ");
 		//mvwprintw(pad, 0, 0, "c: %d, i: %d, z: %d, x[y]: %d, y: %d", c, i, z, x[y], y);
 		if (x[y] >= PCOL-1 && ch != KEY_BACKSPACE)
