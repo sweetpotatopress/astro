@@ -221,13 +221,13 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 
 	if (sign_switch == SPIRIT) 
 	{
-		sign = (int)(pxx->dspir[LONG] / 30.0);
+		sign = (int)pxx->dspir[SIGN];
 
-		if ((int)(pxx->dspir[LONG] / 30.0) == (int)(pxx->dfor[LONG] / 30.0))
+		if ((int)pxx->dspir[SIGN] == (int)pxx->dfor[SIGN])
 			sign++;
 	} 
 	else 
-		sign = (int)(pxx->dfor[LONG] / 30.0);
+		sign = (int)pxx->dfor[SIGN];
 
 	if (sign > 11)
 		sign -= 11;

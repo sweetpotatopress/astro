@@ -40,17 +40,18 @@
 #define DEGREE 8
 #define MIN 9
 #define DEGREE_S 10
-#define MIN_S 11
-#define NEXT_S 12
-#define NEXT_Z 13
-#define NEXT_JUL 14
-#define PREV_S 15
-#define PREV_Z 16
-#define PREV_JUL 17
-#define RET_INIT 18
-#define PL_X 19
-#define PL_Y 20
-#define MAXPXX 21
+#define SIGN 11
+#define MIN_S 12
+#define NEXT_S 13
+#define NEXT_Z 14
+#define NEXT_JUL 15
+#define PREV_S 16
+#define PREV_Z 17
+#define PREV_JUL 18
+#define RET_INIT 19
+#define PL_X 20
+#define PL_Y 21
+#define MAXPXX 22
 
 #define SPXXMAX 18 // struct member count
 struct pxx {

@@ -145,6 +145,7 @@ static void sep_deg_min(double **planet)
 {
 	for (int ipl = SE_SUN; ipl < SPXXMAX; ++ipl)
 	{
+		planet[ipl][SIGN] = (int)planet[ipl][LONG] / 30;
 		planet[ipl][DEGREE] = (int)planet[ipl][LONG] % 30;
 		planet[ipl][MIN] = (int)((planet[ipl][LONG] - (int)planet[ipl][LONG]) * 60);
 		

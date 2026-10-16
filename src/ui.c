@@ -247,7 +247,7 @@ static void dignity_check(int *zodiac[], double *planet[], int result[PLMAX][MAX
 	int ipl = 0;
 	for (; ipl < PLMAX; ++ipl)
 	{
-		int sign = (int)(planet[ipl][LONG] / 30);
+		int sign = (int)planet[ipl][SIGN];
 		int degree = (int)planet[ipl][DEGREE];
 		
 		result[ipl][RULER] = zodiac[sign][RULER];
@@ -316,11 +316,10 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	int p_count = 18;
 	for (int i = 0; i < p_count; ++i)
 	{
-		int sign = ((int)planet[i][LONG] / 30);
-		
+		int sign = (int)planet[i][SIGN];
 		int full_deg = (int)planet[i][LONG];
-		int deg = (int)planet[i][LONG] % 30;
-		int minute = (int)((planet[i][LONG] - (int)planet[i][LONG]) * 60);
+		int deg = (int)planet[i][DEGREE];
+		int minute = (int)planet[i][MIN];
 		
 		if (i < 12) // sun -> north node 
 		{
@@ -473,7 +472,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 		struct cdata tmp = {0};
 		set_localtime(&tmp);
 		
-		int sign = ((int)planet[12][LONG] / 30);
+		int sign = (int)planet[12][SIGN];
 		int diff = tmp.year - cdata->year;
 		int profection = (((sign + diff)) % 12 + 12) % 12;
 		
