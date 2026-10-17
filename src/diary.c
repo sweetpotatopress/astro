@@ -109,13 +109,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	wattroff(ui->main_win, COLOR_PAIR(WATER));
 	wrefresh(ui->main_win);
 	
-	char **buf = ecalloc(PLINE, sizeof*buf);
-	for (size_t j = 0; j < PLINE; ++j)
-		buf[j] = ecalloc(1, sizeof(*buf[j]));
+	char buf[PLINE][PCOL] = {0};
+	char buf1[PMAX] = {0};
 		
-	size_t tmpmax = PLINE;
-	char *buf1 = ecalloc(tmpmax, sizeof*buf1);
-	
 	int idx = 0;
 	int rl[PLINE] = {0};
 	
@@ -171,8 +167,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			case 127: case 8: case KEY_BACKSPACE:
 				if (y == 0 && x[y] == 0)
 					break;
-				if (idx == 0)
-					break;
 	
 				if (x[y]-- <= 0)
 				{
@@ -184,21 +178,18 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				
 				// calculate cursor buf position
 				int idxa = (PCOL * y) + x[y];
-				for (int j = idxa; j <= idx; ++j)
+
+				for (int j = idxa; j < idx; ++j)
 					buf1[j] = buf1[j+1];
-					
 				while (idxa > PCOL)
 					idxa -= PCOL;
-				
-				for (int ty = my; ty > y; --ty)
-					for (int j = idxa; j < PCOL; j++)
+			
+				for (int ty = my; ty >= y; --ty)
+					for (int j = idxa; j <= PCOL; j++)
 						buf[ty][j] = buf[ty][j+1];
 					
-				for (int j = my; j >= y; --j)
-				{
-					if (rl[j]-- <= 0)
-						rl[j] = 0;
-				}
+				if (--rl[y] <= 0)
+					rl[y] = 0;
 				if (--idx <= 0)
 					idx = 0;
 				break;
@@ -217,12 +208,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		if (y > PLINE - 2)
 		{
 			break;
-		}
-		if((size_t)idx >= tmpmax)
-		{
-			tmpmax *= 2;
-			char *tmp1  = erealloc(buf1, tmpmax *sizeof*buf1);
-			buf1 = tmp1;
 		}
 			
 		werase(pad);
@@ -244,8 +229,4 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
-	for (int j = 0; j < PLINE; ++j)
-		free(buf[j]);
-	free(buf);
-	free(buf1);
 }
