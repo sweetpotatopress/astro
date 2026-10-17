@@ -94,6 +94,12 @@ int count_elements(int y, int *x)
 	return count;
 }
 
+struct bx {
+	char c;
+	int y;
+	int x;
+};
+
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
@@ -108,10 +114,18 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	wattroff(ui->main_win, COLOR_PAIR(WATER));
 	wrefresh(ui->main_win);
 	
+	const int col_max = PCOL-1;
 	size_t tmpmax = PLINE;
-	char *buf = ecalloc(tmpmax, sizeof *buf);
-	int i = 0, c = 0;
 	
+	char *buf = ecalloc(tmpmax, sizeof*buf);
+	int i = 0;
+	int n = 0;
+	
+	struct bx **a = ecalloc(tmpmax, sizeof(*a));
+	for (size_t j = 0; j < tmpmax; j++)
+		a[j] = ecalloc(1, sizeof(*a[j]));
+	
+	int my = 1;
 	int y = 1;
 	int x[PLINE] = {0};
 	
@@ -131,7 +145,16 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	bool done = FALSE;
 	while (!done && (ch = wgetch(pad)) != ERR)
 	{
-		buf[i] = ch;
+		if (isascii(ch))
+		{
+			buf[n] = ch;
+			a[n]->c = ch;
+			a[n]->y = y;
+			a[n]->x = x[y];
+			if (y > my)
+				my = y;
+			++n;
+		}
 		switch(ch)
 		{
 			case KEY_DOWN:
@@ -142,82 +165,98 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				if (y > 1)
 					--y;
 				break;
+			case KEY_LEFT:
+				if (x[y] > 0)
+					--x[y];
+				else if (x[y] == 0 && y > 1)
+					--y;
+				break;
+			case KEY_RIGHT:
+				if (x[y] < col_max)
+					++x[y];
+				else if (x[y] >= col_max)
+				{
+					x[y] = col_max;
+					++y;
+				}
+				break;
 			case 10:
 				y++;
-				x[y]++;
+				x[y] = 0;
 				i++;
-				c++;
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
-				if (y == 0 && x[y] == 0)
+				if (y == 1 && x[y] == 0)
 					break;
-				if (i == 0 || c == 0)
+				if (i == 0)
 					break;
-				c = count_elements(y, x);
 	
 				if (x[y]-- <= 0)
 				{
 					x[y] = 0;
-					if (y-- <= 0)
-						y = 0;
+					if (y-- <= 1)
+						y = 1;
 					break;
 				}
-				for (size_t j = c; j < strlen(buf)+1; j++)
+				
+				// calculate cursor buf position
+				int cy = (col_max * y);
+				int cx = (col_max - x[y]);
+				int re = (cy - cx) + 1;
+				for (int j = re; j < cy; ++j)
+				{
 					buf[j-1] = buf[j];
-				mvwprintw(pad, y, x[y], " ");
-				if (c-- <= 0)
-					c = 0;
-				if (i-- <= 0)
-					i = 0;
-				break;
-			default:
-				if (c < i)
-				{
-					for (int j = i; j > c; j--)
-						buf[j] = buf[j - 1];
-					buf[c] = ch;
-					mvwprintw(pad, y, x[y], "%c", buf[c]);
-					i++;
-				}
-				else
-				{
-					mvwprintw(pad, y, x[y], "%c", buf[i]);
-					i++;
 				}
 					
+				for (int j = re; j < cy; j++)
+				{
+					a[j-1]->c = a[j]->c;
+					a[j-1]->x = a[j]->x;
+					a[j-1]->y = a[j]->y;
+				}
+				--n;
+				break;
+			default:
+				i++;
 				x[y]++;
-				c++;
+			
 				break;
 			case 27:
 				done = TRUE;
 				break;
 	
 		}
-		//int z = count_elements(y, x);
-		//mvwprintw(pad, 0, 0, "                                       ");
-		//mvwprintw(pad, 0, 0, "c: %d, i: %d, z: %d, x[y]: %d, y: %d", c, i, z, x[y], y);
-		if (x[y] >= PCOL-1 && ch != KEY_BACKSPACE)
+		werase(pad);
+		int z = count_elements(y, x);
+		mvwprintw(pad, 0, 0, "                                       ");
+		mvwprintw(pad, 0, 0, "n: %d, z: %d, x[y]: %d, y: %d", n, z, x[y], y);
+		if (x[y] > col_max && ch != KEY_BACKSPACE && ch != KEY_LEFT)
 		{
 			y++;
 		}
-		if (y > PLINE - 2 || strlen(buf) > PMAX - 2)
+		if (y > PLINE - 2)
 		{
 			break;
 		}
 		if((size_t)i >= tmpmax)
 		{
 			tmpmax *= 2;
-			char *tmpbuf = erealloc(buf, tmpmax * sizeof*buf);
-			buf = tmpbuf;
+			char *tmp0 = erealloc(buf, tmpmax * sizeof*buf);
+			buf = tmp0;
+			struct bx **tmp1 = erealloc(a, tmpmax * sizeof*a);
+			a = tmp1;
+			for (size_t j = 0; j < tmpmax; j++)
+			{
+				tmp1[j] = erealloc(a[j], tmpmax * sizeof(*a[j]));
+				a[j] = tmp1[j];
+			}
 		}
-	
+		
+		mvwprintw(pad, 1, 0, "%s", buf);
 		wmove(pad, y, x[y]);
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	
 	}
-	buf[i] = '\0';
-	if (buf[i-1] == '\n')
-		buf[i-1] = '\0';
 	curs_set(0);
 	
 	save_diary(cdata, ui, buf, i);
