@@ -100,12 +100,11 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	wattroff(ui->main_win, COLOR_PAIR(WATER));
 	wrefresh(ui->main_win);
 	
-	size_t tmpmax = PLINE;
-	
-	char **buf = ecalloc(tmpmax, sizeof*buf);
-	for (size_t j = 0; j < tmpmax; ++j)
+	char **buf = ecalloc(PLINE, sizeof*buf);
+	for (size_t j = 0; j < PLINE; ++j)
 		buf[j] = ecalloc(1, sizeof(*buf[j]));
 		
+	size_t tmpmax = PLINE;
 	char *buf1 = ecalloc(tmpmax, sizeof*buf1);
 	
 	int idx = 0;
@@ -206,7 +205,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				for (int j = my; j >= y; --j)
 					rl[j]--;
 				idx--;
-				idx1--;
+				if (--idx1 <= 0)
+					idx1 = 0;
 				break;
 			default:
 				idx++;
@@ -225,11 +225,11 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		{
 			break;
 		}
-		if((size_t)idx >= tmpmax)
+		if((size_t)idx1 >= tmpmax)
 		{
 			tmpmax *= 2;
-			char **tmp0 = erealloc(buf, tmpmax * sizeof*buf);
-			buf = tmp0;
+			char *tmp1  = erealloc(buf1, tmpmax *sizeof*buf1);
+			buf1 = tmp1;
 		}
 			
 		werase(pad);
@@ -251,5 +251,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
+	for (int j = 0; j < PLINE; ++j)
+		free(buf[j]);
 	free(buf);
+	free(buf1);
 }
