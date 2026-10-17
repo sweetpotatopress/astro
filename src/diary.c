@@ -162,7 +162,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 			case 10:
 				y++;
-				x[y] = 0;
+				x[y] = rl[y];
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
 				if (y == 0 && x[y] == 0)
@@ -181,12 +181,18 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 
 				for (int j = idxa; j < idx; ++j)
 					buf1[j] = buf1[j+1];
+					
+				buf1[idx] = '\0';
+	
 				while (idxa > PCOL)
 					idxa -= PCOL;
 			
 				for (int ty = my; ty >= y; --ty)
-					for (int j = idxa; j <= PCOL; j++)
+				{
+					buf[ty][PCOL-1] = '\0';
+					for (int j = idxa; j < PCOL; j++)
 						buf[ty][j] = buf[ty][j+1];
+				}
 					
 				if (--rl[y] <= 0)
 					rl[y] = 0;
@@ -201,6 +207,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 	
 		}
+		buf1[idx] = '\0';
+		
 		if (x[y] > PCOL && ch != KEY_BACKSPACE && ch != KEY_LEFT)
 		{
 			y++;
@@ -223,7 +231,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	}
 	curs_set(0);
-	buf1[idx] = '\0';
 	
 	save_diary(cdata, ui, buf1, idx);
 	
