@@ -45,6 +45,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	set_localtime(&time);
 	d_timezone(cdata->timezone);
 	
+	// DONT FORGET TO CHANGE BACK
 	char filename[12] = {0};
 	int n = snprintf(filename, 12, "test.md");
 	if (n > 12)
@@ -94,6 +95,14 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	wbkgdset(pad,COLOR_PAIR(M_COLOR));
 	keypad(pad, TRUE);
+	int pad_y = 0; // upper left corner in pad
+	int pad_x = 0;
+	
+	int scr_y = 2; // where on screen to start drawing
+	int scr_x = COLS - PCOL;
+	
+	int scr_h = LINES - 4; // height of displayed region
+	int scr_w = PCOL; // width
 	
 	wattron(ui->main_win, COLOR_PAIR(WATER));
 	mvwprintw(ui->main_win, 0, COLS - 14, "diary");
@@ -108,21 +117,12 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	char *buf1 = ecalloc(tmpmax, sizeof*buf1);
 	
 	int idx = 0;
-	int idx1 = 0;
 	int rl[PLINE] = {0};
 	
 	int my = 0;
 	int y = 0;
 	int x[PLINE] = {0};
 	
-	int pad_y = 0; // upper left corner in pad
-	int pad_x = 0;
-	
-	int scr_y = 2; // where on screen to start drawing
-	int scr_x = COLS - PCOL;
-	
-	int scr_h = LINES - 4; // height of displayed region
-	int scr_w = PCOL; // width
 	wmove(pad, y, x[y]);
 	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 
@@ -134,8 +134,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
 		{
 			buf[y][rl[y]] = ch;
-			buf1[idx1] = ch;
-			idx1++;
+			buf1[idx] = ch;
+			idx++;
 		}
 		if (isalnum(ch) || ispunct(ch) || isblank(ch))
 			rl[y]++;
@@ -146,32 +146,25 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		{
 			case KEY_DOWN:
 				if (y < PLINE)
-					idx += PCOL - rl[y++];
+					y++;
 				break;
 			case KEY_UP:
 				if (y > 0)
-					idx -= PCOL - rl[y--];
+					y--;
 				break;
 			case KEY_LEFT:
 				if (x[y] > 0)
-				{
-					--idx;
 					--x[y];
-				}
 				else if (x[y] == 0 && y > 0)
-					idx -= PCOL - rl[y--];
+					y--;
 				break;
 			case KEY_RIGHT:
 				if (x[y] < PCOL)
-				{
-					++idx;
 					++x[y];
-				}
 				else if (x[y] >= PCOL)
-					idx += PCOL - rl[y++];
+					y++;
 				break;
 			case 10:
-				idx += PCOL - rl[y];
 				y++;
 				x[y] = 0;
 				break;
@@ -186,30 +179,30 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					x[y] = 0;
 					if (y-- <= 0)
 						y = 0;
-					idx -= PCOL - rl[y];
 					break;
 				}
 				
 				// calculate cursor buf position
 				int idxa = (PCOL * y) + x[y];
-				for (int j = idxa; j <= idx1; ++j)
+				for (int j = idxa; j <= idx; ++j)
 					buf1[j] = buf1[j+1];
 					
 				while (idxa > PCOL)
 					idxa -= PCOL;
 				
-				for (int ty = my; ty >= y; --ty)
-					for (int j = idxa; j <= idx; j++)
+				for (int ty = my; ty > y; --ty)
+					for (int j = idxa; j < PCOL; j++)
 						buf[ty][j] = buf[ty][j+1];
 					
 				for (int j = my; j >= y; --j)
-					rl[j]--;
-				idx--;
-				if (--idx1 <= 0)
-					idx1 = 0;
+				{
+					if (rl[j]-- <= 0)
+						rl[j] = 0;
+				}
+				if (--idx <= 0)
+					idx = 0;
 				break;
 			default:
-				idx++;
 				x[y]++;	
 				break;
 			case 27:
@@ -225,7 +218,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		{
 			break;
 		}
-		if((size_t)idx1 >= tmpmax)
+		if((size_t)idx >= tmpmax)
 		{
 			tmpmax *= 2;
 			char *tmp1  = erealloc(buf1, tmpmax *sizeof*buf1);
@@ -234,7 +227,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			
 		werase(pad);
 		
-		mvwprintw(pad, 9, 0, "idx: %d, idx1: %d, rl: %d, x[y]: %d, y: %d", idx, idx1, rl[y], x[y], y);
+		mvwprintw(pad, 9, 0, "idx: %d, rl: %d, x[y]: %d, y: %d", idx, rl[y], x[y], y);
 		mvwprintw(pad, 11, 0, "%s", buf1);
 		
 		for (int ty = my; ty >= 0; --ty)
@@ -245,9 +238,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	}
 	curs_set(0);
-	buf1[idx1+1] = '\0';
+	buf1[idx] = '\0';
 	
-	save_diary(cdata, ui, buf1, idx1);
+	save_diary(cdata, ui, buf1, idx);
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
