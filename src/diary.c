@@ -94,12 +94,6 @@ int count_elements(int y, int *x)
 	return count;
 }
 
-struct bx {
-	char c;
-	int y;
-	int x;
-};
-
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
@@ -118,15 +112,11 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	size_t tmpmax = PLINE;
 	
 	char *buf = ecalloc(tmpmax, sizeof*buf);
-	int i = 0;
-	int n = 0;
+	int idx = 0;
+	int rl[PLINE] = {0};
 	
-	struct bx **a = ecalloc(tmpmax, sizeof(*a));
-	for (size_t j = 0; j < tmpmax; j++)
-		a[j] = ecalloc(1, sizeof(*a[j]));
-	
-	int my = 1;
-	int y = 1;
+	int my = 0;
+	int y = 0;
 	int x[PLINE] = {0};
 	
 	int pad_y = 0; // upper left corner in pad
@@ -145,91 +135,81 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	bool done = FALSE;
 	while (!done && (ch = wgetch(pad)) != ERR)
 	{
-		if (isascii(ch))
-		{
-			buf[n] = ch;
-			a[n]->c = ch;
-			a[n]->y = y;
-			a[n]->x = x[y];
-			if (y > my)
-				my = y;
-			++n;
+		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
+		{	
+			buf[idx] = ch;
+			rl[y]++;
 		}
+		if (y > my)
+			my = y;
+	
 		switch(ch)
 		{
 			case KEY_DOWN:
 				if (y < PLINE)
-					++y;
+					idx += col_max - rl[y++];
 				break;
 			case KEY_UP:
-				if (y > 1)
-					--y;
+				if (y > 0)
+					idx -= col_max - rl[y--];
 				break;
 			case KEY_LEFT:
 				if (x[y] > 0)
+				{
+					--idx;
 					--x[y];
-				else if (x[y] == 0 && y > 1)
-					--y;
+				}
+				else if (x[y] == 0 && y > 0)
+					idx -= col_max - rl[y--];
 				break;
 			case KEY_RIGHT:
 				if (x[y] < col_max)
-					++x[y];
-				else if (x[y] >= col_max)
 				{
-					x[y] = col_max;
-					++y;
+					++idx;
+					++x[y];
 				}
+				else if (x[y] >= col_max)
+					idx += col_max - rl[y++];
 				break;
 			case 10:
+				idx += col_max - rl[y];
 				y++;
 				x[y] = 0;
-				i++;
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
-				if (y == 1 && x[y] == 0)
+				if (y == 0 && x[y] == 0)
 					break;
-				if (i == 0)
+				if (idx == 0)
 					break;
 	
 				if (x[y]-- <= 0)
 				{
 					x[y] = 0;
-					if (y-- <= 1)
-						y = 1;
+					if (y-- <= 0)
+						y = 0;
+					idx -= col_max - rl[y];
 					break;
 				}
 				
 				// calculate cursor buf position
-				int cy = (col_max * y);
-				int cx = (col_max - x[y]);
-				int re = (cy - cx) + 1;
-				for (int j = re; j < cy; ++j)
-				{
-					buf[j-1] = buf[j];
-				}
+				int idxa = (col_max * y) + x[y];
+				
+				for (int j = idxa; j <= idx; j++)
+					buf[j] = buf[j+1];
 					
-				for (int j = re; j < cy; j++)
-				{
-					a[j-1]->c = a[j]->c;
-					a[j-1]->x = a[j]->x;
-					a[j-1]->y = a[j]->y;
-				}
-				--n;
+				for (int j = my; j >= y; --j)
+					rl[j]--;
+				idx--;
 				break;
 			default:
-				i++;
-				x[y]++;
-			
+				idx++;
+				x[y]++;	
 				break;
 			case 27:
 				done = TRUE;
 				break;
 	
 		}
-		werase(pad);
-		int z = count_elements(y, x);
-		mvwprintw(pad, 0, 0, "                                       ");
-		mvwprintw(pad, 0, 0, "n: %d, z: %d, x[y]: %d, y: %d", n, z, x[y], y);
 		if (x[y] > col_max && ch != KEY_BACKSPACE && ch != KEY_LEFT)
 		{
 			y++;
@@ -238,28 +218,24 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		{
 			break;
 		}
-		if((size_t)i >= tmpmax)
+		if((size_t)idx >= tmpmax)
 		{
 			tmpmax *= 2;
 			char *tmp0 = erealloc(buf, tmpmax * sizeof*buf);
 			buf = tmp0;
-			struct bx **tmp1 = erealloc(a, tmpmax * sizeof*a);
-			a = tmp1;
-			for (size_t j = 0; j < tmpmax; j++)
-			{
-				tmp1[j] = erealloc(a[j], tmpmax * sizeof(*a[j]));
-				a[j] = tmp1[j];
-			}
 		}
+		werase(pad);
+		mvwprintw(pad, 9, 0, "idx: %d, rl: %d, x[y]: %d, y: %d", idx, rl[y], x[y], y);
 		
-		mvwprintw(pad, 1, 0, "%s", buf);
+		mvwprintw(pad, 0, 0, "%s", buf);
+		
 		wmove(pad, y, x[y]);
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	
 	}
 	curs_set(0);
 	
-	save_diary(cdata, ui, buf, i);
+	save_diary(cdata, ui, buf, idx);
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
