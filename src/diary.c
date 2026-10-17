@@ -35,7 +35,7 @@ static void d_timezone(char *timezone)
 static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 {
 	int i = 0;
-	for(; buf[i] != '\0' && isspace((unsigned char)buf[i]); ++i)
+	for (; buf[i] != '\0' && isspace((unsigned char)buf[i]); ++i)
 		;
 	if (i == size || buf[i] == '\0')
 		return;
@@ -46,7 +46,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	d_timezone(cdata->timezone);
 	
 	char filename[12] = {0};
-	int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
+	int n = snprintf(filename, 12, "test.md");
 	if (n > 12)
 		ERR_EXIT("ERR: diary filename too long");
 	
@@ -86,14 +86,6 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	fclose(fp);
 }
 
-int count_elements(int y, int *x)
-{
-	int count = 0;
-	for (int j = 0; j <= y; ++j)
-		count += x[j];
-	return count;
-}
-
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
@@ -108,11 +100,16 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	wattroff(ui->main_win, COLOR_PAIR(WATER));
 	wrefresh(ui->main_win);
 	
-	const int col_max = PCOL-1;
 	size_t tmpmax = PLINE;
 	
-	char *buf = ecalloc(tmpmax, sizeof*buf);
+	char **buf = ecalloc(tmpmax, sizeof*buf);
+	for (size_t j = 0; j < tmpmax; ++j)
+		buf[j] = ecalloc(1, sizeof(*buf[j]));
+		
+	char *buf1 = ecalloc(tmpmax, sizeof*buf1);
+	
 	int idx = 0;
+	int idx1 = 0;
 	int rl[PLINE] = {0};
 	
 	int my = 0;
@@ -136,22 +133,25 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	while (!done && (ch = wgetch(pad)) != ERR)
 	{
 		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
-		{	
-			buf[idx] = ch;
-			rl[y]++;
+		{
+			buf[y][rl[y]] = ch;
+			buf1[idx1] = ch;
+			idx1++;
 		}
+		if (isalnum(ch) || ispunct(ch) || isblank(ch))
+			rl[y]++;
+			
 		if (y > my)
 			my = y;
-	
 		switch(ch)
 		{
 			case KEY_DOWN:
 				if (y < PLINE)
-					idx += col_max - rl[y++];
+					idx += PCOL - rl[y++];
 				break;
 			case KEY_UP:
 				if (y > 0)
-					idx -= col_max - rl[y--];
+					idx -= PCOL - rl[y--];
 				break;
 			case KEY_LEFT:
 				if (x[y] > 0)
@@ -160,19 +160,19 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					--x[y];
 				}
 				else if (x[y] == 0 && y > 0)
-					idx -= col_max - rl[y--];
+					idx -= PCOL - rl[y--];
 				break;
 			case KEY_RIGHT:
-				if (x[y] < col_max)
+				if (x[y] < PCOL)
 				{
 					++idx;
 					++x[y];
 				}
-				else if (x[y] >= col_max)
-					idx += col_max - rl[y++];
+				else if (x[y] >= PCOL)
+					idx += PCOL - rl[y++];
 				break;
 			case 10:
-				idx += col_max - rl[y];
+				idx += PCOL - rl[y];
 				y++;
 				x[y] = 0;
 				break;
@@ -187,19 +187,26 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					x[y] = 0;
 					if (y-- <= 0)
 						y = 0;
-					idx -= col_max - rl[y];
+					idx -= PCOL - rl[y];
 					break;
 				}
 				
 				// calculate cursor buf position
-				int idxa = (col_max * y) + x[y];
+				int idxa = (PCOL * y) + x[y];
+				for (int j = idxa; j <= idx1; ++j)
+					buf1[j] = buf1[j+1];
+					
+				while (idxa > PCOL)
+					idxa -= PCOL;
 				
-				for (int j = idxa; j <= idx; j++)
-					buf[j] = buf[j+1];
+				for (int ty = my; ty >= y; --ty)
+					for (int j = idxa; j <= idx; j++)
+						buf[ty][j] = buf[ty][j+1];
 					
 				for (int j = my; j >= y; --j)
 					rl[j]--;
 				idx--;
+				idx1--;
 				break;
 			default:
 				idx++;
@@ -210,7 +217,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 	
 		}
-		if (x[y] > col_max && ch != KEY_BACKSPACE && ch != KEY_LEFT)
+		if (x[y] > PCOL && ch != KEY_BACKSPACE && ch != KEY_LEFT)
 		{
 			y++;
 		}
@@ -221,21 +228,26 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		if((size_t)idx >= tmpmax)
 		{
 			tmpmax *= 2;
-			char *tmp0 = erealloc(buf, tmpmax * sizeof*buf);
+			char **tmp0 = erealloc(buf, tmpmax * sizeof*buf);
 			buf = tmp0;
 		}
+			
 		werase(pad);
-		mvwprintw(pad, 9, 0, "idx: %d, rl: %d, x[y]: %d, y: %d", idx, rl[y], x[y], y);
 		
-		mvwprintw(pad, 0, 0, "%s", buf);
+		mvwprintw(pad, 9, 0, "idx: %d, idx1: %d, rl: %d, x[y]: %d, y: %d", idx, idx1, rl[y], x[y], y);
+		mvwprintw(pad, 11, 0, "%s", buf1);
+		
+		for (int ty = my; ty >= 0; --ty)
+			mvwprintw(pad, ty, 0, "%s", buf[ty]);
 		
 		wmove(pad, y, x[y]);
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	
 	}
 	curs_set(0);
+	buf1[idx1+1] = '\0';
 	
-	save_diary(cdata, ui, buf, idx);
+	save_diary(cdata, ui, buf1, idx1);
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
