@@ -146,9 +146,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			wf = FALSE;
 		}
 		if (isalnum(ch) || ispunct(ch) || isblank(ch))
-		{
 			len[y]++;
-		}
 		if (isalnum(ch) || ispunct(ch))
 			wf = TRUE;
 			
@@ -185,7 +183,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 						y = 0;
 					break;
 				}
-	
 				break;
 			case 27:
 				done = TRUE;
