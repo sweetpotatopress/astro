@@ -49,8 +49,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	d_timezone(cdata->timezone);
 	
 	char filename[12] = {0};
-	int n = snprintf(filename, 12, "test.md");
-	//int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
+	int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
 	if (n > 12)
 		ERR_EXIT("ERR: diary filename too long");
 	
@@ -210,11 +209,26 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			{
 				++i;
 				c = 0;
+				if (len[y+1] > 0 && my+1 < PLINE)
+				{
+					my++;
+					for (int j = my; j > y; --j)
+					{
+						memcpy(buf[j+1], buf[j], PCOL);
+						len[j+1] = len[j];
+						x[j+1] = x[j];
+					}
+					memset(buf[y+1], 0, PCOL);
+					len[y+1] = 0;
+					x[y+1] = 0;
+				}
+					
 				for (;i < NCOL; i++, c++)
 				{
 					buf[y+1][c] = buf[y][i];
 					buf[y][i] = 0;
 					len[y]--;
+					x[y]--;
 				}
 				end_line(buf, len, y);
 				y++;
@@ -222,7 +236,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				x[y] += c;
 			}
 		}
-				
 		end_line(buf, len, y);
 		
 		if (y >= OLINE)
@@ -230,7 +243,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			
 		werase(pad);
 		
-		mvwprintw(pad, 10, 0, "len[y]: %d, len[y+1]: %d", len[y], len[y+1]);
 		for (int ty = 0; ty <= my; ty++)
 			mvwprintw(pad, ty, 0, "%s", buf[ty]);
 		
