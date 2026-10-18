@@ -126,7 +126,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	{
 		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
 		{
-			if (rl[y] >= PCOL-1)
+			if (rl[y] >= PCOL-2)
 				y++;
 			if (y > PLINE-1)
 				y = PLINE-1;
