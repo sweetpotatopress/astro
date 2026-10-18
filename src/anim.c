@@ -141,10 +141,7 @@ void realtime_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, doubl
 		wheel_init(ui->main_win, ui, 0, 0, 0);
 		new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 		
-		wattron(ui->main_win, COLOR_PAIR(FIRE));
-		mvwprintw(ui->main_win, 0, COLS - 14, "*live");
-		wattroff(ui->main_win, COLOR_PAIR(FIRE));
-		
+		status_bar(ui, FIRE, "*live");
 		wnoutrefresh(ui->main_win);
 	
 		table_trigger(ui, ch);

@@ -161,6 +161,13 @@ void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 	}
 }
 
+void status_bar(struct ui *ui, int c, char *str)
+{
+	wattron(ui->main_win, COLOR_PAIR(c));
+	mvwprintw(ui->main_win, 0, COLS - 14, "%s", str);
+	wattroff(ui->main_win, COLOR_PAIR(c));
+}
+
 int table_trigger(struct ui *ui, int ch)
 {
 	int up = 0;
