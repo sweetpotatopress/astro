@@ -127,6 +127,10 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	{
 		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
 		{
+			if (rl[y] >= PCOL-1)
+				y++;
+			if (y > PLINE-1)
+				y = PLINE-1;
 			buf[y][rl[y]] = ch;
 		}
 		if (isalnum(ch) || ispunct(ch) || isblank(ch))
@@ -143,18 +147,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			case KEY_UP:
 				if (y > 0)
 					y--;
-				break;
-			case KEY_LEFT:
-				if (x[y] > 0)
-					--x[y];
-				else if (x[y] == 0 && y > 0)
-					y--;
-				break;
-			case KEY_RIGHT:
-				if (x[y] < PCOL)
-					++x[y];
-				else if (x[y] >= PCOL)
-					y++;
 				break;
 			case 10:
 				y++;
@@ -193,9 +185,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		}
 		buf[y][rl[y]] = '\n';
 		buf[y][rl[y]+1] = '\0';
+		buf[y][PCOL-2] = '\n';
+		buf[y][PCOL-1] = '\0';
 		
-		if (x[y] > PCOL && ch != KEY_BACKSPACE && ch != KEY_LEFT)
-			y++;
 		if (y > PLINE-1)
 			break;
 			
