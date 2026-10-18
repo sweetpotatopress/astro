@@ -202,19 +202,19 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	curs_set(0);
 	
 	char buf1[PMAX] = {0};
-	int c = 0;
+	int n = 0;
 	for (int ty = 0; ty <= my; ++ty)
 	{
-		for(int z = 0; c < (PCOL + (PCOL * y)); ++c, ++z)
+		for(int z = 0; n < (PCOL + (PCOL * y)); ++n, ++z)
 		{
 			if (buf[ty][z] == '\0')
 				break;
-			buf1[c] = buf[ty][z];
+			buf1[n] = buf[ty][z];
 		}
 	}
-	buf1[c] = '\0';
+	buf1[n] = '\0';
 	
-	save_diary(cdata, ui, buf1, c);
+	save_diary(cdata, ui, buf1, n);
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
