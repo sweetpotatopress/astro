@@ -97,13 +97,16 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	wbkgdset(pad,COLOR_PAIR(M_COLOR));
 	keypad(pad, TRUE);
 	
-	int pad_y = 0; // upper left corner in pad
+	// upper left corner in pad
+	int pad_y = 0; 
 	int pad_x = 0;
 	
-	int scr_y = 2; // where on screen to start drawing
+	// where on screen to start drawing
+	int scr_y = 2; 
 	int scr_x = COLS - PCOL;
 	
-	int scr_h = LINES - 4; // height of displayed region
+	// height of displayed region
+	int scr_h = LINES - 4;
 	int scr_w = PCOL; // width
 	
 	status_bar(ui, WATER, "diary");
@@ -112,6 +115,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	char buf[PLINE][PCOL] = {0};
 	int len[PLINE] = {0};
 	
+	// cursor
 	int my = 0;
 	int y = 0;
 	int x[PLINE] = {0};
