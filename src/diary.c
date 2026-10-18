@@ -21,7 +21,10 @@
 #include <chronos.h>
 
 #define PLINE 2560
+#define OLINE (PLINE-1)
 #define PCOL 48
+#define NCOL (PCOL-2)
+#define OCOL (PCOL-1)
 
 #define PMAX (PLINE * PCOL)
 
@@ -91,9 +94,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
 	
 	WINDOW *pad = newpad(PLINE, PCOL);
-	
 	wbkgdset(pad,COLOR_PAIR(M_COLOR));
 	keypad(pad, TRUE);
+	
 	int pad_y = 0; // upper left corner in pad
 	int pad_x = 0;
 	
@@ -123,10 +126,10 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	{
 		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
 		{
-			if (len[y] >= PCOL-2)
+			if (len[y] >= NCOL)
 				y++;
-			if (y > PLINE-1)
-				y = PLINE-1;
+			if (y > OLINE)
+				y = OLINE;
 			buf[y][len[y]] = ch;
 		}
 		if (isalnum(ch) || ispunct(ch) || isblank(ch))
@@ -161,7 +164,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				}
 				
 				int j;
-				for (j = x[y]; j < PCOL-1; j++)
+				for (j = x[y]; j < OCOL; j++)
 				{
 					if (buf[y][j] == '\0')
 						break;
@@ -182,10 +185,10 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		buf[y][len[y]] = '\n';
 		buf[y][len[y]+1] = '\0';
 		
-		buf[y][PCOL-2] = '\n';
-		buf[y][PCOL-1] = '\0';
+		buf[y][NCOL] = '\n';
+		buf[y][OCOL] = '\0';
 		
-		if (y >= PLINE-1)
+		if (y >= OLINE)
 			break;
 			
 		werase(pad);
@@ -195,7 +198,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		
 		wmove(pad, y, x[y]);
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
-	
 	}
 	curs_set(0);
 	
