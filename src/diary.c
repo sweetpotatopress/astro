@@ -110,9 +110,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	wrefresh(ui->main_win);
 	
 	char buf[PLINE][PCOL] = {0};
-	char buf1[PMAX] = {0};
 		
-	int idx = 0;
 	int rl[PLINE] = {0};
 	
 	int my = 0;
@@ -130,8 +128,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
 		{
 			buf[y][rl[y]] = ch;
-			buf1[idx] = ch;
-			idx++;
 		}
 		if (isalnum(ch) || ispunct(ch) || isblank(ch))
 			rl[y]++;
@@ -176,28 +172,18 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					break;
 				}
 				
-				// calculate cursor buf position
-				int idxa = (PCOL * y) + x[y];
-
-				for (int j = idxa; j < idx; ++j)
-					buf1[j] = buf1[j+1];
-					
-				buf1[idx] = '\0';
-	
-				while (idxa > PCOL)
-					idxa -= PCOL;
-			
-				for (int ty = my; ty >= y; --ty)
+				int j;
+				for (j = x[y]; j < PCOL-1; j++)
 				{
-					buf[ty][PCOL-1] = '\0';
-					for (int j = idxa; j < PCOL; j++)
-						buf[ty][j] = buf[ty][j+1];
+					if (buf[y][j] == '\0')
+						break;
+					buf[y][j] = buf[y][j+1];
 				}
+				buf[y][j-1] = '\n';
+				buf[y][j] = '\0';
 					
 				if (--rl[y] <= 0)
 					rl[y] = 0;
-				if (--idx <= 0)
-					idx = 0;
 				break;
 			default:
 				x[y]++;	
@@ -207,23 +193,17 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 	
 		}
-		buf1[idx] = '\0';
 		
 		if (x[y] > PCOL && ch != KEY_BACKSPACE && ch != KEY_LEFT)
-		{
 			y++;
-		}
-		if (y > PLINE - 2)
-		{
+		if (y > PLINE-1)
 			break;
-		}
 			
 		werase(pad);
 		
-		mvwprintw(pad, 9, 0, "idx: %d, rl: %d, x[y]: %d, y: %d", idx, rl[y], x[y], y);
-		mvwprintw(pad, 11, 0, "%s", buf1);
+		mvwprintw(pad, 9, 0, "rl: %d, x[y]: %d, y: %d", rl[y], x[y], y);
 		
-		for (int ty = my; ty >= 0; --ty)
+		for (int ty = 0; ty <= my; ty++)
 			mvwprintw(pad, ty, 0, "%s", buf[ty]);
 		
 		wmove(pad, y, x[y]);
@@ -232,7 +212,20 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	}
 	curs_set(0);
 	
-	save_diary(cdata, ui, buf1, idx);
+	char buf1[PMAX] = {0};
+	int c = 0;
+	for (int ty = 0; ty <= my; ++ty)
+	{
+		for(int z = 0; c < (PCOL + (PCOL * y)); ++c, ++z)
+		{
+			if (buf[ty][z] == '\0')
+				break;
+			buf1[c] = buf[ty][z];
+		}
+	}
+	buf1[c] = '\0';
+	
+	save_diary(cdata, ui, buf1, c);
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(pad);
