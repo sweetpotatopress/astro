@@ -82,7 +82,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	if (!fp)
 		ERR_EXIT("ERR: diary fopen");
 
-	fprintf(fp, "%s\n%s\n%s\n", header, buf, footer);
+	fprintf(fp, "%s\n%s%s\n", header, buf, footer);
 		
 	fclose(fp);
 }
@@ -179,9 +179,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 						break;
 					buf[y][j] = buf[y][j+1];
 				}
-				buf[y][j-1] = '\n';
-				buf[y][j] = '\0';
-					
+				
 				if (--rl[y] <= 0)
 					rl[y] = 0;
 				break;
@@ -193,6 +191,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 	
 		}
+		buf[y][rl[y]] = '\n';
+		buf[y][rl[y]+1] = '\0';
 		
 		if (x[y] > PCOL && ch != KEY_BACKSPACE && ch != KEY_LEFT)
 			y++;
