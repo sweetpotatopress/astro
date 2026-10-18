@@ -121,16 +121,14 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	status_bar(ui, WATER, "diary");
 	wrefresh(ui->main_win);
 	
+	int my = 0;
+	int y = 0;
+	
 	char buf[PLINE][PCOL] = {0};
 	int len[PLINE] = {0};
 	bool wf = FALSE;
-	
-	// cursor
-	int my = 0;
-	int y = 0;
-	int x[PLINE] = {0};
-	
-	wmove(pad, y, x[y]);
+
+	wmove(pad, y, len[y]);
 	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 
 	curs_set(1);
@@ -150,7 +148,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		if (isalnum(ch) || ispunct(ch) || isblank(ch))
 		{
 			len[y]++;
-			x[y]++;	
 		}
 		if (isalnum(ch) || ispunct(ch))
 			wf = TRUE;
@@ -169,42 +166,39 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 			case 10:
 				y++;
-				x[y] = len[y];
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
-				if (y == 0 && x[y] == 0)
+				if (y == 0 && len[y] == 0)
 					break;
-	
-				if (x[y]-- <= 0)
-				{
-					x[y] = 0;
-					if (y-- <= 0)
-						y = 0;
-					break;
-				}
-				
+			
 				int j;
-				for (j = x[y]; j < OCOL; j++)
+				for (j = len[y]; j < OCOL; j++)
 				{
 					if (buf[y][j] == '\0')
 						break;
 					buf[y][j] = buf[y][j+1];
 				}
-				
-				if (--len[y] <= 0)
+				if (len[y]-- <= 0)
+				{
 					len[y] = 0;
+					if (y-- <= 0)
+						y = 0;
+					break;
+				}
+	
 				break;
 			case 27:
 				done = TRUE;
 				break;
-	
 		}
 		if (len[y] == NCOL && wf == TRUE)
 		{
 			int i, c = 0;
 			for (i = len[y]; !isblank((unsigned char)buf[y][i]); i--, ++c)
+			{
 				if (c == NCOL)
 					break;
+			}
 			if (c < NCOL)
 			{
 				++i;
@@ -216,11 +210,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					{
 						memcpy(buf[j+1], buf[j], PCOL);
 						len[j+1] = len[j];
-						x[j+1] = x[j];
 					}
 					memset(buf[y+1], 0, PCOL);
 					len[y+1] = 0;
-					x[y+1] = 0;
 				}
 					
 				for (;i < NCOL; i++, c++)
@@ -228,25 +220,21 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					buf[y+1][c] = buf[y][i];
 					buf[y][i] = 0;
 					len[y]--;
-					x[y]--;
 				}
 				end_line(buf, len, y);
 				y++;
 				len[y] += c;
-				x[y] += c;
 			}
 		}
 		end_line(buf, len, y);
-		
 		if (y >= OLINE)
 			break;
 			
 		werase(pad);
-		
 		for (int ty = 0; ty <= my; ty++)
 			mvwprintw(pad, ty, 0, "%s", buf[ty]);
 		
-		wmove(pad, y, x[y]);
+		wmove(pad, y, len[y]);
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	}
 	curs_set(0);
