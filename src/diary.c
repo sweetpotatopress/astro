@@ -103,14 +103,11 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	int scr_h = LINES - 4; // height of displayed region
 	int scr_w = PCOL; // width
 	
-	wattron(ui->main_win, COLOR_PAIR(WATER));
-	mvwprintw(ui->main_win, 0, COLS - 14, "diary");
-	wattroff(ui->main_win, COLOR_PAIR(WATER));
+	status_bar(ui, WATER, "diary");
 	wrefresh(ui->main_win);
 	
 	char buf[PLINE][PCOL] = {0};
-		
-	int rl[PLINE] = {0};
+	int len[PLINE] = {0};
 	
 	int my = 0;
 	int y = 0;
@@ -126,14 +123,14 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	{
 		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
 		{
-			if (rl[y] >= PCOL-2)
+			if (len[y] >= PCOL-2)
 				y++;
 			if (y > PLINE-1)
 				y = PLINE-1;
-			buf[y][rl[y]] = ch;
+			buf[y][len[y]] = ch;
 		}
 		if (isalnum(ch) || ispunct(ch) || isblank(ch))
-			rl[y]++;
+			len[y]++;
 			
 		if (y > my)
 			my = y;
@@ -149,7 +146,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 			case 10:
 				y++;
-				x[y] = rl[y];
+				x[y] = len[y];
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
 				if (y == 0 && x[y] == 0)
@@ -171,8 +168,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					buf[y][j] = buf[y][j+1];
 				}
 				
-				if (--rl[y] <= 0)
-					rl[y] = 0;
+				if (--len[y] <= 0)
+					len[y] = 0;
 				break;
 			default:
 				x[y]++;	
@@ -182,8 +179,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 	
 		}
-		buf[y][rl[y]] = '\n';
-		buf[y][rl[y]+1] = '\0';
+		buf[y][len[y]] = '\n';
+		buf[y][len[y]+1] = '\0';
 		
 		buf[y][PCOL-2] = '\n';
 		buf[y][PCOL-1] = '\0';
