@@ -49,6 +49,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	d_timezone(cdata->timezone);
 	
 	char filename[12] = {0};
+	//int n = snprintf(filename, 12, "test.md");
 	int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
 	if (n > 12)
 		ERR_EXIT("ERR: diary filename too long");
@@ -89,6 +90,15 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	fclose(fp);
 }
 
+static void end_line(char buf[PLINE][PCOL], int len[PLINE], int y)
+{
+	buf[y][len[y]] = '\n';
+	buf[y][len[y]+1] = '\0';
+		
+	buf[y][NCOL] = '\n';
+	buf[y][OCOL] = '\0';
+}
+
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
@@ -114,6 +124,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	char buf[PLINE][PCOL] = {0};
 	int len[PLINE] = {0};
+	bool wf = FALSE;
 	
 	// cursor
 	int my = 0;
@@ -135,9 +146,15 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			if (y > OLINE)
 				y = OLINE;
 			buf[y][len[y]] = ch;
+			wf = FALSE;
 		}
 		if (isalnum(ch) || ispunct(ch) || isblank(ch))
+		{
 			len[y]++;
+			x[y]++;	
+		}
+		if (isalnum(ch) || ispunct(ch))
+			wf = TRUE;
 			
 		if (y > my)
 			my = y;
@@ -178,25 +195,38 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				if (--len[y] <= 0)
 					len[y] = 0;
 				break;
-			default:
-				x[y]++;	
-				break;
 			case 27:
 				done = TRUE;
 				break;
 	
 		}
-		buf[y][len[y]] = '\n';
-		buf[y][len[y]+1] = '\0';
-		
-		buf[y][NCOL] = '\n';
-		buf[y][OCOL] = '\0';
+		if (len[y] == NCOL && wf == TRUE)
+		{
+			int i, c = 0;
+			for (i = len[y]; !isblank((unsigned char)buf[y][i]); i--)
+				;
+			++i;
+			for (;i < NCOL; i++, c++)
+			{
+				buf[y+1][c] = buf[y][i];
+				buf[y][i] = 0;
+				len[y]--;
+			}
+				
+			end_line(buf, len, y);
+			y++;
+			len[y] += c;
+			x[y] += c;
+		}
+				
+		end_line(buf, len, y);
 		
 		if (y >= OLINE)
 			break;
 			
 		werase(pad);
 		
+		//mvwprintw(pad, 10, 0, "len[y]: %d, len[y+1]: %d", len[y], len[y+1]);
 		for (int ty = 0; ty <= my; ty++)
 			mvwprintw(pad, ty, 0, "%s", buf[ty]);
 		
