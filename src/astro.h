@@ -72,7 +72,7 @@ struct pxx {
 	double ddsc[MAXPXX];
 	double dic[MAXPXX];
 	double dfor[MAXPXX];
-	double dspir[MAXPXX];
+	double ddai[MAXPXX];
 };
 
 #define E_INIT 0

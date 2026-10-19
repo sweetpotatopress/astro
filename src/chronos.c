@@ -88,12 +88,12 @@ void lots(struct pxx *pxx)
 	if (chart_sect == DAY_SECT)
 	{
 		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
-		pxx->dspir[LONG] = pxx->dasc[LONG] - diff;
+		pxx->ddai[LONG] = pxx->dasc[LONG] - diff;
 	}
 	else // night
 	{
 		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
-		pxx->dspir[LONG] = pxx->dasc[LONG] + diff;
+		pxx->ddai[LONG] = pxx->dasc[LONG] + diff;
 	}
 	
 	while (pxx->dfor[LONG] < 0.0)
@@ -101,10 +101,10 @@ void lots(struct pxx *pxx)
 	while (pxx->dfor[LONG] > 360.0)
 		pxx->dfor[LONG] -= 360.0;
 		
-	while (pxx->dspir[LONG] < 0.0)
-		pxx->dspir[LONG] += 360.0;
-	while (pxx->dspir[LONG] > 360.0)
-		pxx->dspir[LONG] -= 360.0;
+	while (pxx->ddai[LONG] < 0.0)
+		pxx->ddai[LONG] += 360.0;
+	while (pxx->ddai[LONG] > 360.0)
+		pxx->ddai[LONG] -= 360.0;
 }
 
 static int lmt_check(const struct cdata *cdata, const struct lmt *rule)

@@ -49,7 +49,7 @@ void planet_init(double *planet[], int cc, struct pxx **pxx)
 		pxx[cc]->dmnod, pxx[cc]->dtnod,
 		pxx[cc]->dasc, pxx[cc]->dmc,
 		pxx[cc]->ddsc, pxx[cc]->dic,
-		pxx[cc]->dfor, pxx[cc]->dspir};
+		pxx[cc]->dfor, pxx[cc]->ddai};
 		
 	memcpy(planet, new_planet, sizeof(new_planet));
 }

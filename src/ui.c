@@ -375,7 +375,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 			}
 			
 			const char *points[] = {
-			"as", "mc", "ds", "ic", "fortune", "spirit"};
+			"as", "mc", "ds", "ic", "fortune", "daimon"};
 			
 			char point_buff[MAXBUF];
 			

@@ -26,7 +26,7 @@
 #include "init.h"
 
 #define FORTUNE 0
-#define SPIRIT 1
+#define DAIMON 1
 
 #define ROOT -1
 #define ZYEAR 0
@@ -219,11 +219,11 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 	char date[MAXBUF];
 	int sign;
 
-	if (sign_switch == SPIRIT) 
+	if (sign_switch == DAIMON) 
 	{
-		sign = (int)pxx->dspir[SIGN];
+		sign = (int)pxx->ddai[SIGN];
 
-		if ((int)pxx->dspir[SIGN] == (int)pxx->dfor[SIGN])
+		if ((int)pxx->ddai[SIGN] == (int)pxx->dfor[SIGN])
 			sign++;
 	} 
 	else 
@@ -361,7 +361,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		wattroff(win, COLOR_PAIR(current_layer+3));
 		mvwprintw(win, 1, 5+11, "}");
 		
-		const char *lot = sign_switch == SPIRIT ? "spirit" : "fortune";
+		const char *lot = sign_switch == DAIMON ? "daimon" : "fortune";
 		mvwprintw(win, 1, width - 17, "[tab] %s", lot);
 		
 		// highlight current layer
@@ -416,7 +416,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 				break;
 
 			case '\t':
-				sign_switch = sign_switch == FORTUNE ? SPIRIT : FORTUNE;
+				sign_switch = sign_switch == FORTUNE ? DAIMON : FORTUNE;
 
 				node_free(root);
 
