@@ -86,15 +86,9 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		sy += 1;
 		if (cdata->hour >= 0)
 		{
-			int hour = cdata->hour;
-			if (hour == 12)
-				mvwprintw(win, sy, sx, "%02d:%02d:%02dPM", cdata->hour, cdata->min, cdata->sec);
-			else if (hour > 12)	
-				mvwprintw(win, sy, sx, "%02d:%02d:%02dPM", cdata->hour - 12, cdata->min, cdata->sec);
-			else if (hour == 0)
-				mvwprintw(win, sy, sx, "12:%02d:%02dAM", cdata->min, cdata->sec);
-			else if (hour > 0 && hour < 12)
-				mvwprintw(win, sy, sx, "%02d:%02d:%02dAM", cdata->hour, cdata->min, cdata->sec);
+			char *tod = (cdata->hour > 11) ? "PM" : "AM";
+			int th = time_format(cdata->hour);
+			mvwprintw(win, sy, sx, "%02d:%02d:%02d%s", th, cdata->min, cdata->sec, tod);
 		}
 		sy += 1;
 		

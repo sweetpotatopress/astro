@@ -30,38 +30,32 @@ static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 		return;
 	tzset();
 	
-	struct tm gettime;
+	struct tm gt;
 		
 	time_t now = time(NULL);
-	localtime_r(&now, &gettime);
+	localtime_r(&now, &gt);
 	
-	if (gettime.tm_hour == 0)
-		gettime.tm_hour = 12;
+	char *tod = (gt.tm_hour > 11) ? "PM" : "AM";
+	int th = time_format(gt.tm_hour);
 	
-	if (gettime.tm_hour > 12)
-	{
-		gettime.tm_hour -= 12;
-		set_field_buffer(cdata_field[AMPM], 0, "pm");
-	}
-	else
-		set_field_buffer(cdata_field[AMPM], 0, "am");
+	set_field_buffer(cdata_field[AMPM], 0, tod);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime.tm_year+1900);
+	snprintf(buff, sizeof(buff), "%d", gt.tm_year+1900);
 	set_field_buffer(cdata_field[YEAR], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime.tm_mon + 1);
+	snprintf(buff, sizeof(buff), "%d", gt.tm_mon + 1);
 	set_field_buffer(cdata_field[MONTH], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime.tm_mday);
+	snprintf(buff, sizeof(buff), "%d", gt.tm_mday);
 	set_field_buffer(cdata_field[DAY], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime.tm_hour);
+	snprintf(buff, sizeof(buff), "%d", th);
 	set_field_buffer(cdata_field[HOUR], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime.tm_min);
+	snprintf(buff, sizeof(buff), "%d", gt.tm_min);
 	set_field_buffer(cdata_field[MINUTE], 0, buff);
 	
-	snprintf(buff, sizeof(buff), "%d", gettime.tm_sec);
+	snprintf(buff, sizeof(buff), "%d", gt.tm_sec);
 	set_field_buffer(cdata_field[SECOND], 0, buff);
 }
 

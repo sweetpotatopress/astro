@@ -40,6 +40,15 @@ void set_localtime(struct cdata *cdata)
 	cdata->isdst = gt.tm_isdst;
 }
 
+int time_format(int th)
+{
+	if (th == 0)
+		th = 12;
+	if (th > 12)
+		th -= 12;
+	return th;
+}
+
 void weekday_check(struct cdata *cdata)
 {
 	struct tm gt = {0};

@@ -49,12 +49,8 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	set_localtime(&time);
 	d_timezone(cdata->timezone);
 	
-	char *tod = (time.hour > 11) ? "pm" : "am";
-	int th = time.hour;
-	if (th == 0)
-		th = 12;
-	if (th > 12)
-		th -= 12;
+	char *tod = (cdata->hour > 11) ? "PM" : "AM";
+	int th = time_format(time.hour);
 	
 	char filename[12] = {0};
 	int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
