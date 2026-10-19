@@ -23,6 +23,7 @@
 #define PLINE 2560
 #define OLINE (PLINE-1)
 #define PCOL 48
+#define CCOL (PCOL-3)
 #define NCOL (PCOL-2)
 #define OCOL (PCOL-1)
 
@@ -93,9 +94,6 @@ static void end_line(char buf[PLINE][PCOL], int len[PLINE], int y)
 {
 	buf[y][len[y]] = '\n';
 	buf[y][len[y]+1] = '\0';
-		
-	buf[y][NCOL] = '\n';
-	buf[y][OCOL] = '\0';
 }
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
@@ -127,7 +125,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	char buf[PLINE][PCOL] = {0};
 	int len[PLINE] = {0};
 	bool wf = FALSE;
-
+	
 	wmove(pad, y, len[y]);
 	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 
@@ -136,17 +134,13 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	bool done = FALSE;
 	while (!done && (ch = wgetch(pad)) != ERR)
 	{
+		wf = FALSE;
 		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
 		{
-			if (len[y] >= NCOL)
-				y++;
-			if (y > OLINE)
-				y = OLINE;
 			buf[y][len[y]] = ch;
-			wf = FALSE;
-		}
-		if (isalnum(ch) || ispunct(ch) || isblank(ch))
 			len[y]++;
+		}
+		
 		if (isalnum(ch) || ispunct(ch))
 			wf = TRUE;
 			
@@ -179,7 +173,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				if (len[y]-- <= 0)
 				{
 					len[y] = 0;
-					if (y-- <= 0)
+					y--;
+					len[y]--;
+					if (y <= 0)
 						y = 0;
 					break;
 				}
@@ -188,22 +184,20 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				done = TRUE;
 				break;
 		}
-		if (len[y] == NCOL && wf == TRUE)
+		if (len[y] == CCOL && wf == TRUE)
 		{
 			int i, c = 0;
-			for (i = len[y]; !isblank((unsigned char)buf[y][i]); i--, ++c)
+			for (i = len[y]; !isblank((unsigned char)buf[y][i]); i--, c++)
 			{
-				if (c == NCOL)
+				if (c == CCOL)
 					break;
 			}
-			if (c < NCOL)
+			if (c < CCOL)
 			{
-				++i;
-				c = 0;
 				if (len[y+1] > 0 && my+1 < PLINE)
 				{
 					my++;
-					for (int j = my; j > y; --j)
+					for (int j = my; j > y; j--)
 					{
 						memcpy(buf[j+1], buf[j], PCOL);
 						len[j+1] = len[j];
@@ -211,18 +205,27 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					memset(buf[y+1], 0, PCOL);
 					len[y+1] = 0;
 				}
-					
-				for (;i < NCOL; i++, c++)
+				
+				i++;
+				c = 0;
+				for (;i < CCOL; i++, c++)
 				{
 					buf[y+1][c] = buf[y][i];
 					buf[y][i] = 0;
 					len[y]--;
 				}
+	
 				end_line(buf, len, y);
 				y++;
 				len[y] += c;
 			}
 		}
+		if (len[y] >= CCOL)
+		{
+			end_line(buf, len, y);
+			y++;
+		}
+	
 		end_line(buf, len, y);
 		if (y >= OLINE)
 			break;
