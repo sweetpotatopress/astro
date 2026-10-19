@@ -70,15 +70,22 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	n = snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
 	if (n > MAXPATH)
 		ERR_EXIT("ERR: diary.c full_path too long");
+		
+	char *tod = (time.hour > 12) ? "pm" : "am";
+	int th = time.hour;
+	if (th == 0)
+		th = 12;
+	if (th > 12)
+		th -= 12;
 	
 	char header[MAXBUF] = {0};
 	if (access(full_path, R_OK) == -1)
-		snprintf(header, MAXBUF, "%s, %f, %f\n%d.%d.%d\n%02d:%02d:%02d", 
+		snprintf(header, MAXBUF, "%s, %f, %f\n%d.%d.%d\n%02d:%02d:%02d%s", 
 		cdata->timezone, cdata->dlon, cdata->dlat,
 		time.year, time.mon, time.mday,
-		time.hour, time.min, time.sec);
+		th, time.min, time.sec, tod);
 	else
-		snprintf(header, MAXBUF, "%02d:%02d:%02d", time.hour, time.min, time.sec);
+		snprintf(header, MAXBUF, "%02d:%02d:%02d%s", th, time.min, time.sec, tod);
 	char *footer = "\n- - - - - - -";
 	
 	FILE *fp = fopen(full_path, "a");
