@@ -111,6 +111,26 @@ static void down_line(int *y)
 		(*y)++;
 }
 
+static void down_pad(int *pad_y, int scr_h, int *tl, int *bl, int c)
+{
+	if (*pad_y < OLINE - scr_h - 1)
+	{
+		*pad_y += c;
+		*tl += c;
+		*bl += c;
+	}
+}
+
+static void up_pad(int *pad_y, int *tl, int *bl, int c)
+{
+	if (*pad_y > 0) 
+	{
+		*pad_y -= c;
+		*tl -= c;
+		*bl -= c;
+	}
+}
+
 static void minus_len(int len[PLINE], int y)
 {
 	if (len[y] > 0)
@@ -154,6 +174,9 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	bool wf = FALSE;
 	
 	const int ts = 4;
+	int inc = 4;
+	int tl = 0;
+	int bl = scr_h;
 	
 	wmove(pad, y, len[y]);
 	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
@@ -163,6 +186,11 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	bool done = FALSE;
 	while (!done && (ch = wgetch(pad)) != ERR)
 	{
+		if (y >= bl)
+			down_pad(&pad_y, scr_h, &tl, &bl, inc);
+		else if (y <= tl)
+			up_pad(&pad_y, &tl, &bl, inc);
+	
 		wf = FALSE;
 		if (ch > 31 && ch < 127)
 		{
@@ -175,6 +203,12 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 			my = y;
 		switch(ch)
 		{
+			case CTRLE:
+				down_pad(&pad_y, scr_h, &tl, &bl, inc);
+				break;
+			case CTRLY:
+				up_pad(&pad_y, &tl, &bl, inc);
+				break;
 			case KEY_DOWN:
 				down_line(&y);
 				break;
@@ -222,7 +256,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				if (c == CCOL)
 					break;
 			}
-			if (c < CCOL)
+			if (c < CCOL-2)
 			{
 				if (len[y+1] > 0 && my+1 < OLINE)
 				{
@@ -239,6 +273,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				c = 0;
 				for (;i < CCOL; i++, c++)
 				{
+					if (buf[y+1][c] == '\0')
+						buf[y+1][c] = ' ';
 					buf[y+1][c] = buf[y][i];
 					buf[y][i] = 0;
 					minus_len(len, y);
@@ -262,7 +298,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		werase(pad);
 		for (int ty = 0; ty <= my; ty++)
 			mvwprintw(pad, ty, 0, "%s", buf[ty]);
-		
+	
 		wmove(pad, y, len[y]);
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	}

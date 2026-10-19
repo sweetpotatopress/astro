@@ -45,6 +45,9 @@ void ui_init(struct ui *ui)
 	define_key("\0339", ALT9);
 	define_key("\0330", ALT0);
 	
+	define_key("\031", CTRLY);
+	define_key("\005", CTRLE);
+	
 	ui->sym = (struct ui_sym) {
 		.pl_sym = { "(o)", "(()", "(-o<)",
 		"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",

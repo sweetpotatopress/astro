@@ -53,6 +53,9 @@
 #define ALT9 1009
 #define ALT0 1000
 
+#define CTRLY 25
+#define CTRLE 5
+
 #define ELEMENT 0
 #define RULER 1
 #define EXALT 2
