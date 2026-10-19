@@ -49,6 +49,13 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	set_localtime(&time);
 	d_timezone(cdata->timezone);
 	
+	char *tod = (time.hour > 12) ? "pm" : "am";
+	int th = time.hour;
+	if (th == 0)
+		th = 12;
+	if (th > 12)
+		th -= 12;
+	
 	char filename[12] = {0};
 	int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
 	if (n > 12)
@@ -70,14 +77,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	n = snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
 	if (n > MAXPATH)
 		ERR_EXIT("ERR: diary.c full_path too long");
-		
-	char *tod = (time.hour > 12) ? "pm" : "am";
-	int th = time.hour;
-	if (th == 0)
-		th = 12;
-	if (th > 12)
-		th -= 12;
-	
+
 	char header[MAXBUF] = {0};
 	if (access(full_path, R_OK) == -1)
 		snprintf(header, MAXBUF, "%s, %f, %f\n%d.%d.%d\n%02d:%02d:%02d%s", 
@@ -121,6 +121,12 @@ static void minus_len(int len[PLINE], int y)
 		--len[y];	
 }
 
+static void add_len(int len[PLINE], int y, int c)
+{
+	if ((len[y] + c) < NCOL)
+		len[y] += c;
+}
+
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
@@ -151,6 +157,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	int len[PLINE] = {0};
 	bool wf = FALSE;
 	
+	const int ts = 4;
+	
 	wmove(pad, y, len[y]);
 	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 
@@ -163,7 +171,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		if (ch > 31 && ch < 127)
 		{
 			buf[y][len[y]] = ch;
-			len[y]++;
+			add_len(len, y, 1);
 			if (ch > 31)
 				wf = TRUE;
 		}
@@ -179,6 +187,14 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				break;
 			case '\n':
 				down_line(&y);
+				break;
+			case '\t':
+				if (len[y]+ts < NCOL)
+				{
+					for (int i = 0; i < ts; ++i)
+						buf[y][len[y]+i] = ' ';
+				}
+				add_len(len, y, ts);
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
 				if (y == 0 && len[y] == 0)
@@ -234,7 +250,7 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 				end_line(buf, len, y);
 				down_line(&y);
-				len[y] += c;
+				add_len(len, y, c);
 			}
 		}
 		if (len[y] == CCOL)
