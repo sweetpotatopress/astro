@@ -49,7 +49,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	set_localtime(&time);
 	d_timezone(cdata->timezone);
 	
-	char *tod = (time.hour > 12) ? "pm" : "am";
+	char *tod = (time.hour > 11) ? "pm" : "am";
 	int th = time.hour;
 	if (th == 0)
 		th = 12;
