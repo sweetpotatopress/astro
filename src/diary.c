@@ -292,8 +292,6 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		}
 	
 		end_line(buf, len, y);
-		if (y >= OLINE)
-			break;
 			
 		werase(pad);
 		for (int ty = 0; ty <= my; ty++)
