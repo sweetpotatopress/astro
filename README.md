@@ -19,8 +19,8 @@ enter		animate chart
 	k/j 	up/down  
 	0...9	increment count
 
-0...9		select chart number
-alt+0...9	synastry with selected chart
+0...9		chart number
+alt+0...9	synastry w/ chart
 t			transits
 
 s			solar return
@@ -37,7 +37,7 @@ tab			live update
 d			toggle dst
 
 r			redraw chart  
-R			redraw config chart
+[R]			redraw config chart
 
 c			config
 	tab		set current chart info to config
@@ -49,7 +49,7 @@ q			exit astro
 
 o 			toggle right table
 p			toggle left table
-	P		next page
+	[P]		next page
 
 w			save chart  
 	m		make dir  
@@ -68,26 +68,6 @@ i			input chart data
 	esc		cancel
 ```
 
-##### TODO  
-- [x] save and load charts
-- [x] animate chart
-- [x] lot of spirit + fortune
-- [x] next retrograde/ next station
-- [x] element colors
-- [x] solar return
-- [x] essential dignities
-- [x] synastry/ transit view
-- [ ] house system selection		
-- [ ] secondary progressions
-- [x] aspects
-- [ ] planet day/hour
-- [ ] primary directions
-- [x] eclipse data
-- [x] multiple charts
-- [x] terminal window resize refresh
-- [x] user default config
-- [x] zodiacal releasing
- 
 ##### LICENSE  
 astro  
 <sub>AGPLv3</sub>
