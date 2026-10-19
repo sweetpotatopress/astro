@@ -165,6 +165,8 @@ void realtime_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, doubl
 			cdata[ui->bcc]->rt = 1;
 			break;
 		}
+		if (ch == 'j')
+			diary(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 	}
 	wmove(ui->main_win, 0, COLS - 14);
 	wclrtoeol(ui->main_win);
