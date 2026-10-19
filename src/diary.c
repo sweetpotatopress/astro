@@ -96,6 +96,24 @@ static void end_line(char buf[PLINE][PCOL], int len[PLINE], int y)
 	buf[y][len[y]+1] = '\0';
 }
 
+static void up_line(int *y)
+{
+	if (*y > 0)
+		(*y)--;
+}
+
+static void down_line(int *y)
+{
+	if (*y < OLINE)
+		(*y)++;
+}
+
+static void minus_len(int len[PLINE], int y)
+{
+	if (len[y] > 0)
+		--len[y];	
+}
+
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
@@ -135,36 +153,31 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	while (!done && (ch = wgetch(pad)) != ERR)
 	{
 		wf = FALSE;
-		if (isalnum(ch) || isspace(ch) || ispunct(ch) || isblank(ch))
+		if (ch > 31 && ch < 127)
 		{
 			buf[y][len[y]] = ch;
 			len[y]++;
+			if (ch > 31)
+				wf = TRUE;
 		}
-		
-		if (isalnum(ch) || ispunct(ch))
-			wf = TRUE;
-			
 		if (y > my)
 			my = y;
 		switch(ch)
 		{
 			case KEY_DOWN:
-				if (y < PLINE)
-					y++;
+				down_line(&y);
 				break;
 			case KEY_UP:
-				if (y > 0)
-					y--;
+				up_line(&y);
 				break;
-			case 10:
-				y++;
+			case '\n':
+				down_line(&y);
 				break;
 			case 127: case 8: case KEY_BACKSPACE:
 				if (y == 0 && len[y] == 0)
 					break;
 			
-				int j;
-				for (j = len[y]; j < OCOL; j++)
+				for (int j = len[y]; j < OCOL; j++)
 				{
 					if (buf[y][j] == '\0')
 						break;
@@ -173,10 +186,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 				if (len[y]-- <= 0)
 				{
 					len[y] = 0;
-					y--;
-					len[y]--;
-					if (y <= 0)
-						y = 0;
+					up_line(&y);
+					minus_len(len, y);
 					break;
 				}
 				break;
@@ -187,14 +198,14 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		if (len[y] == CCOL && wf == TRUE)
 		{
 			int i, c = 0;
-			for (i = len[y]; !isblank((unsigned char)buf[y][i]); i--, c++)
+			for (i = len[y]; !isblank((unsigned char)buf[y][i-1]); i--, c++)
 			{
 				if (c == CCOL)
 					break;
 			}
 			if (c < CCOL)
 			{
-				if (len[y+1] > 0 && my+1 < PLINE)
+				if (len[y+1] > 0 && my+1 < OLINE)
 				{
 					my++;
 					for (int j = my; j > y; j--)
@@ -206,24 +217,23 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 					len[y+1] = 0;
 				}
 				
-				i++;
 				c = 0;
 				for (;i < CCOL; i++, c++)
 				{
 					buf[y+1][c] = buf[y][i];
 					buf[y][i] = 0;
-					len[y]--;
+					minus_len(len, y);
 				}
 	
 				end_line(buf, len, y);
-				y++;
+				down_line(&y);
 				len[y] += c;
 			}
 		}
-		if (len[y] >= CCOL)
+		if (len[y] == CCOL)
 		{
 			end_line(buf, len, y);
-			y++;
+			down_line(&y);
 		}
 	
 		end_line(buf, len, y);
@@ -238,6 +248,12 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
 	}
 	curs_set(0);
+	
+	for(int j = 0; j <= my; ++j)
+	{
+		if (buf[j][0] == '\n' && buf[j+1][0] < 31)
+			buf[j][0] = '\0';
+	}
 	
 	char buf1[PMAX] = {0};
 	int n = 0;
