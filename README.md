@@ -36,7 +36,6 @@ z			zodiacal releasing
 	tab		switch lot
 	
 tab			live update  
-d			toggle dst
 
 r			redraw chart  
 [R]			redraw config chart
