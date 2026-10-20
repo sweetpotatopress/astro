@@ -70,10 +70,11 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		if (ui->cc != TRANSIT || ui->cc != SYNASTRY)
 		{
 			sy += 1;
-			if (cdata->state && !isdigit((unsigned char)cdata->state[0]) && strlen(cdata->state) > 1)
+			if (cdata->state && !isdigit((unsigned char)cdata->state[0]) && strlen(cdata->state) > 1 &&
+			strlen(cdata->city) > 1 && strlen(cdata->country) > 1)
 				mvwprintw(win, sy, sx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
 			
-			else if (cdata->country && cdata->city && strlen(cdata->country) > 0 && strlen(cdata->city) > 0)
+			else if (cdata->country && cdata->city && strlen(cdata->country) > 1 && strlen(cdata->city) > 1)
 				mvwprintw(win, sy, sx, "%.22s, %s", cdata->city, cdata->country);
 		}
 			
