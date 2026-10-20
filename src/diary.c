@@ -87,7 +87,7 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 		cdata->city, cdata->state, cdata->country,
 		time.year, time.mon, time.mday,
 		time.hour, time.min, time.sec, 
-		ui->conf_timezone, ui->conf_dlon, ui->conf_dlat);
+		ui->conf_timezone, ui->conf_dlat, ui->conf_dlon);
 	else
 		snprintf(header, MAXBUF, "%02d:%02d:%02d%s", th, time.min, time.sec, tod);
 	char *footer = "\n- - - - - - -";
