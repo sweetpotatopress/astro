@@ -388,7 +388,8 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	int hour = cdata->hour;
 	int min = cdata->min;
 	int sec = cdata->sec;
-	char *tz = cdata->timezone;
+	char tz[MAXBUF];
+	memcpy(tz, cdata->timezone, MAXBUF);
 	double lat = cdata->dlat;
 	double lon = cdata->dlon;
 	

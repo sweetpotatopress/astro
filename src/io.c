@@ -497,7 +497,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 	if (strlen(cdata->state) < 2)
 		strncpy(cdata->state, "0", MAXBUF);
 	if (strlen(cdata->country) < 2)
-		strncpy(cdata->state, "0", MAXBUF);
+		strncpy(cdata->country, "0", MAXBUF);
 
 	FILE *ifp = fopen(newpath, "w");
 	if (!ifp)
@@ -565,7 +565,7 @@ static void converttocomma(char *path)
 	
 	for (size_t j = 0; j <= strlen(buf); j++)
 	{
-		if (buf[j-1] == '\n' && buf[j] == '\n')
+		if (j > 0 && buf[j-1] == '\n' && buf[j] == '\n')
 		{
 			buf[j] = '0';
 			for (size_t c = strlen(buf)+1; c > j; c--)
@@ -677,7 +677,8 @@ void print_load_menu(struct cdata *cdata, char *path, char *head)
 				
 				snprintf(cdata->chart_name, MAXBUF, "%s", selected);
 				
-				converttocomma(newpath);
+				if (strcmp(head, "/charts") == 0)
+					converttocomma(newpath);
 				
 				fp = fopen(newpath, "r");
 				if (fp == NULL)
