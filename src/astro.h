@@ -147,8 +147,7 @@ struct ui;
 #define FTZ 9
 #define FLAT 10
 #define FLON 11
-#define FDST 12
-#define FMAX 13
+#define FMAX 12
 
 void *ecalloc(size_t n, size_t size);
 void *erealloc(void *p, size_t size);

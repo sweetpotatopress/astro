@@ -219,14 +219,6 @@ int main(int argc, char *argv[])
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
-			case 'd':
-				if (cdata[ui->cc]->isdst == NDST)
-					cdata[ui->cc]->isdst = YDST;
-				else if (cdata[ui->cc]->isdst >= YDST)
-					cdata[ui->cc]->isdst = NDST;
-				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-				doupdate();
-				break;
 			case 'i':
 				in_cdata(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				ecst_init(planet, cdata[ui->cc]->se);

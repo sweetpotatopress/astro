@@ -503,7 +503,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 	if (!ifp)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
-	fprintf(ifp, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f,%d",
+	fprintf(ifp, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f",
 		cdata->city,
 		cdata->state,
 		cdata->country,
@@ -515,8 +515,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 		cdata->sec,
 		cdata->timezone,
 		cdata->dlat,
-		cdata->dlon,
-		cdata->isdst);
+		cdata->dlon);
 		
 		fclose(ifp);
 		unpost_form(save_form);
@@ -563,7 +562,7 @@ static void converttocomma(char *path)
 		buf[i++] = ch;
 	buf[i] = '\0';
 	
-	for (size_t j = 0; j <= strlen(buf); j++)
+	for (size_t j = 0; j < strlen(buf); j++)
 	{
 		if (j > 0 && buf[j-1] == '\n' && buf[j] == '\n')
 		{
@@ -573,7 +572,7 @@ static void converttocomma(char *path)
 			buf[j+1] = ',';
 		}
 	}
-	for (size_t j = 0; j <= strlen(buf); j++)
+	for (size_t j = 0; j < strlen(buf); j++)
 	{
 		if (buf[j] == '\n')
 			buf[j] = ',';
@@ -760,13 +759,6 @@ void print_load_menu(struct cdata *cdata, char *path, char *head)
 					cdata->dlon = 0.0;
 				errno = 0;
 				
-				lret = strtol(field[FDST], &endptr, 10);
-				if (lret > 0)
-					cdata->isdst = YDST;
-				else if (lret == 0)
-					cdata->isdst = NDST;
-				errno = 0;
-					
 				fclose(fp);
 				
 				menu_done = 1;

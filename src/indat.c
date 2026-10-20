@@ -325,7 +325,6 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 				if (index == DRAW)
 				{
 					memset(cdata->chart_name, 0, MAXBUF);
-					cdata->isdst = -1;
 					cdata_entry = 1;
 					break;
 				}

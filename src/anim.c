@@ -70,11 +70,13 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		if (ui->cc != TRANSIT || ui->cc != SYNASTRY)
 		{
 			sy += 1;
-			if (cdata->state && !isdigit((unsigned char)cdata->state[0]) && strlen(cdata->state) > 1 &&
+			if (cdata->state && !isdigit((unsigned char)cdata->state[0])
+			&& strlen(cdata->state) > 1 &&
 			strlen(cdata->city) > 1 && strlen(cdata->country) > 1)
 				mvwprintw(win, sy, sx, "%.22s, %s, %s", cdata->city, cdata->state, cdata->country);
 			
-			else if (cdata->country && cdata->city && strlen(cdata->country) > 1 && strlen(cdata->city) > 1)
+			else if (cdata->country && cdata->city && strlen(cdata->country) > 1 &&
+			strlen(cdata->city) > 1)
 				mvwprintw(win, sy, sx, "%.22s, %s", cdata->city, cdata->country);
 		}
 			
@@ -105,7 +107,7 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		int off_hour = abs_min / 60;
 		int rem_min = abs_min % 60;
 		
-		mvwprintw(win, sy, sx, "%sUTC%c%02d:%02d", cdata->isdst == YDST ? "DST " : "",
+		mvwprintw(win, sy, sx, "%sUTC%c%02d:%02d", cdata->isdst == 1 ? "DST " : "",
 		usign < 0 ? '-' : '+', off_hour, rem_min);
 			
 		if (i > 0)

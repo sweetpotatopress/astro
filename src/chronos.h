@@ -25,10 +25,6 @@
 #define PREV_E 1
 #define JUL_SEC 0.00001157407407
 
-// dst trigger
-#define NDST 0
-#define YDST 1
-
 // cpt
 #define IN 1
 #define OUT 0
