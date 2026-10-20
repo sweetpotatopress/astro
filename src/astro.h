@@ -14,6 +14,7 @@
 #pragma once
 
 #include <ncurses.h>
+#include <menu.h>
 #include <panel.h>
 #include <form.h>
 
@@ -134,8 +135,24 @@ struct ui;
 #define LONGITUDE 11
 #define FIELDMAX 12
 
+#define FCITY 0
+#define FSTATE 1
+#define FCOUNTRY 2
+#define FYEAR 3
+#define FMONTH 4
+#define FDAY 5
+#define FHOUR 6
+#define FMIN 7
+#define FSEC 8
+#define FTZ 9
+#define FLAT 10
+#define FLON 11
+#define FDST 12
+#define FMAX 13
+
 void *ecalloc(size_t n, size_t size);
 void *erealloc(void *p, size_t size);
+char *xstrdup(const char *s);
 void config_init(struct cdata *cdata, struct ui *ui);
 void config_menu(struct cdata *cdata, struct ui *ui);
 void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
@@ -146,4 +163,7 @@ void load_chart(struct cdata *cdata);
 void save_chart(struct cdata *cdata);
 void set_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int ch);
 void datadir_check(void);
+size_t file_count(const char *path, const int r);
+size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc);
+void back_dir(char *filepath, char *cur_dir);
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch);

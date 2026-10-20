@@ -138,6 +138,8 @@ struct ui {
 	PANEL *right_panel;
 	PANEL *transit_panel;
 	char *conf_timezone;
+	double conf_dlat;
+	double conf_dlon;
 	int aspect_trig;
 	int left_trig;
 	int left_page;

@@ -27,21 +27,6 @@
 #include "chronos.h"
 #include "ui.h"
 
-#define FCITY 0
-#define FSTATE 1
-#define FCOUNTRY 2
-#define FYEAR 3
-#define FMONTH 4
-#define FDAY 5
-#define FHOUR 6
-#define FMIN 7
-#define FSEC 8
-#define FTZ 9
-#define FLAT 10
-#define FLON 11
-#define FDST 12
-#define FMAX 13
-
 static void path_env(char *env, const char *xdg,  const char *f)
 {
 	const char *dir = getenv(xdg);
@@ -130,7 +115,7 @@ void datadir_check(void)
 		ERR_EXIT("ERR: no city-db installed");
 }
 
-static size_t file_count(const char *path, const int r)
+size_t file_count(const char *path, const int r)
 {
 	DIR *dir;
 	struct dirent *entry;
@@ -159,7 +144,7 @@ static size_t file_count(const char *path, const int r)
 	return count;
 }
 
-static size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc)
+size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc)
 {
 	struct dirent *entry;
 	struct stat st;
@@ -196,7 +181,7 @@ static size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc
 	return count;
 }
 
-static void back_dir(char *filepath, char *cur_dir)
+void back_dir(char *filepath, char *cur_dir)
 {
 	char *last = strrchr(filepath, '/');
 	char name[128] = {0};

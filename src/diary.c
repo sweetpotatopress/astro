@@ -16,9 +16,11 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <astro.h>
+#include <init.h>
 #include <ui.h>
 #include <swephexp.h>
 #include <chronos.h>
+#include <errno.h>
 
 #define PLINE 2560
 #define OLINE (PLINE-1)
@@ -36,10 +38,10 @@ static void d_timezone(char *timezone)
 	tzset();
 }
 
-static void diary_path(struct cdata time, char *full_path)
+static void diary_path(char *full_path, int year, int mon, int mday)
 {
 	char filename[12] = {0};
-	int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
+	int n = snprintf(filename, 12, "%02d.%02d.md", mon, mday);
 	if (n > 12)
 		ERR_EXIT("ERR: diary filename too long");
 	
@@ -47,7 +49,7 @@ static void diary_path(struct cdata time, char *full_path)
 	path_check(path, "diary");
 	
 	char year_path[MAXPATH] = {0};
-	n = snprintf(year_path, MAXPATH, "%s/%d", path, time.year);
+	n = snprintf(year_path, MAXPATH, "%s/%d", path, year);
 	if (n > MAXPATH)
 		ERR_EXIT("ERR: diary.c year_path too long");
 	
@@ -77,14 +79,15 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 	int th = time_format(time.hour);
 	
 	char full_path[MAXPATH] = {0};
-	diary_path(time, full_path);
+	diary_path(full_path, time.year, time.mon, time.mday);
 
 	char header[MAXBUF] = {0};
 	if (access(full_path, R_OK) == -1)
-		snprintf(header, MAXBUF, "%s, %f, %f\n%d.%d.%d\n%02d:%02d:%02d%s", 
-		cdata->timezone, cdata->dlon, cdata->dlat,
+		snprintf(header, MAXBUF, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f\n",
+		cdata->city, cdata->state, cdata->country,
 		time.year, time.mon, time.mday,
-		th, time.min, time.sec, tod);
+		time.hour, time.min, time.sec, 
+		ui->conf_timezone, ui->conf_dlon, ui->conf_dlat);
 	else
 		snprintf(header, MAXBUF, "%02d:%02d:%02d%s", th, time.min, time.sec, tod);
 	char *footer = "\n- - - - - - -";
@@ -306,6 +309,252 @@ static void diary_write(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 	delwin(ui->pad);
 }
 
+static void print_menu(struct cdata *cdata, char *path)
+{
+	char *diary_path = ecalloc(1, MAXPATH);
+	size_t size = file_count(path, 1) + 1;
+	
+	ITEM **item = ecalloc(size, sizeof(ITEM *));
+	char **name = ecalloc(size, sizeof(char *));
+	char **desc = ecalloc(size, sizeof(char *));
+	
+	size_t icount = name_to_item(path, item, name, desc);
+	
+	int header = 4;
+	int width = 25;
+	int height = (int)icount + header;
+	if (icount > 16)
+		height = 16 + header;
+	
+	int starty = (LINES - height) / 2;
+	int startx = (COLS - width) / 2;
+	
+	WINDOW *win = newwin(height, width, starty, startx);
+	WINDOW *subwin = derwin(win, height - header, width - 2, 3, 1);
+	MENU *menu = new_menu(item);
+	FILE *fp;
+	
+	wbkgdset(win, COLOR_PAIR(M_COLOR));
+	keypad(win, TRUE);
+	box(win, 0, 0);
+	
+	menu_opts_off(menu, O_NONCYCLIC);
+	menu_opts_off(menu, O_SHOWDESC);
+	set_menu_back(menu, COLOR_PAIR(M_COLOR));
+	set_menu_fore(menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+	set_menu_win(menu, win);
+	set_menu_sub(menu, subwin);
+	
+	mvwprintw(win, 1, 1, " /diary");
+	mvwprintw(win, 1, width - 4, "{l}");
+	mvwhline(win, 2, 1, ACS_HLINE, width - 2);
+	
+	post_menu(menu);
+	wrefresh(win);
+	
+	struct stat st;
+	const char *selected = NULL;
+	ITEM *cur = NULL;
+	
+	char buffer[MAXBUF] = {0};
+	char field[FMAX][MAXBUF] = {0};
+	char newpath[MAXPATH] = {0};
+	char cur_dir[MAXBUF] = {0};
+	snprintf(cur_dir, MAXBUF, " /diary");
+	
+	char *endptr = NULL;
+	long lret;
+	double dret;
+	errno = 0;
+	
+	int ch = 0, count = 0, menu_done = 0;
+	while (!menu_done && (ch = wgetch(win)))
+	{
+		cur = current_item(menu);
+		selected = item_description(cur);
+		
+		switch(ch)
+		{
+			case 'j': case KEY_DOWN:
+				menu_driver(menu, REQ_DOWN_ITEM);
+				break;
+			case 'k': case KEY_UP:
+				menu_driver(menu, REQ_UP_ITEM);
+				break;
+			case 'l': case KEY_RIGHT: case '\n':
+				if ((int)icount == 0)
+					break;
+				
+				int n = snprintf(newpath, MAXPATH, "%s/%s", path, selected);
+				if (n >= MAXPATH)
+					ERR_EXIT("diary newpath too long");
+		
+				if (stat(newpath, &st) == 0 && S_ISDIR(st.st_mode))
+				{
+					memcpy(path, newpath, strlen(newpath) + 1);
+					snprintf(cur_dir, MAXBUF, " /%s", selected);
+					break;
+				}
+				
+				snprintf(cdata->chart_name, MAXBUF, "%s", selected);
+				
+				fp = fopen(newpath, "r");
+				if (fp == NULL)
+					ERR_EXIT("diary newpath fopen");
+				
+				if (fgets(buffer, MAXBUF, fp) != NULL)
+				{
+					char *it = strtok(buffer, ",");
+				
+					while(it)
+					{
+						snprintf(field[count++], MAXBUF, "%s", it);
+						it = strtok(NULL, ",");
+					}
+				}
+				
+				memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
+				memcpy(cdata->state, field[FSTATE], strlen(field[FSTATE]) + 1);
+				memcpy(cdata->country, field[FCOUNTRY], strlen(field[FCOUNTRY]) + 1);
+					
+				lret = strtol(field[FYEAR], &endptr, 10);
+				if (errno != ERANGE)
+					cdata->year = (int)lret;
+				else
+					cdata->year = 1970;
+				errno = 0;
+							
+				lret = strtol(field[FMONTH], &endptr, 10);
+				if (errno != ERANGE && lret != -1)
+					cdata->mon = (int)lret;
+				else
+					cdata->mon = 1;
+				errno = 0;
+							
+				lret = strtol(field[FDAY], &endptr, 10);
+				if (errno != ERANGE && lret != -1)
+					cdata->mday = (int)lret;
+				else
+					cdata->mday = 1;
+				errno = 0;
+							
+				lret = strtol(field[FHOUR], &endptr, 10);
+				if (errno != ERANGE && lret != -1) 
+					cdata->hour = (int)lret;
+				else
+					cdata->hour = 1;
+				errno = 0;
+								
+				lret = strtol(field[FMIN], &endptr, 10);
+				if (errno != ERANGE && lret != -1)
+					cdata->min = (int)lret;
+				else
+					cdata->min = 1;
+				errno = 0;
+					
+				lret = strtol(field[FSEC], &endptr, 10);
+				if (errno != ERANGE && lret != -1)
+					cdata->sec = (int)lret;
+				else
+					cdata->sec = 0;
+				errno = 0;
+							
+				if (setenv("TZ", field[FTZ], 1) != 0)
+					ERR_EXIT("ERR: dairy print_menu TZ setenv");
+				tzset();
+				memcpy(cdata->timezone, field[FTZ], strlen(field[FTZ]) + 1);
+						
+				dret = strtod(field[FLAT], &endptr);
+				if (errno != ERANGE)
+					cdata->dlat = dret;
+				else
+					cdata->dlat = 0.0;
+				errno = 0;
+						
+				dret = strtod(field[FLON], &endptr);
+				if (errno != ERANGE)
+					cdata->dlon = dret;
+				else
+					cdata->dlon = 0.0;
+				errno = 0;
+				
+				lret = strtol(field[FDST], &endptr, 10);
+				if (lret > 0)
+					cdata->isdst = YDST;
+				else if (lret == 0)
+					cdata->isdst = NDST;
+				errno = 0;
+					
+				fclose(fp);
+				
+				menu_done = 1;
+				break;
+			case 'h': case KEY_LEFT:
+				if (strcmp(path, diary_path) == 0)
+					break;
+				back_dir(path, cur_dir);
+				break;
+			case 'q': case 27:
+				menu_done = 1;
+				break;
+		}
+		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT || ch == 'm')
+		{
+			unpost_menu(menu);
+			set_menu_items(menu, NULL);
+			for (size_t i = 0; i < icount; ++i)
+			{
+				free_item(item[i]);
+				free(name[i]);
+				free(desc[i]);
+			}
+			
+			werase(win);
+			wnoutrefresh(win);
+			mvwprintw(win, 1, 1, "%s", cur_dir);
+			mvwprintw(win, 1, width - 4, "{l}");
+			mvwhline(win, 2, 1, ACS_HLINE, width - 2);
+			
+			icount = name_to_item(path, item, name, desc);
+			set_menu_items(menu, item);
+			
+			width = 25;
+			height = (int)icount + header;
+			if (icount > 16)
+				height = 16 + header;
+			
+			starty = (LINES - height) / 2;
+			startx = (COLS - width) / 2;
+			
+			wresize(win, height, width);
+			wresize(subwin, height - header, width -2);
+			mvwin(win, starty, startx);
+			mvwin(subwin, starty, startx);
+		}
+		box(win, 0, 0);
+		post_menu(menu);
+		doupdate();
+	}
+	memcpy(path, newpath, strlen(newpath)+1);
+	
+	unpost_menu(menu);
+	free_menu(menu);
+	for (size_t j = 0; j < icount; ++j)
+	{
+		free_item(item[j]);
+		free(name[j]);
+		free(desc[j]);
+	}
+	free(name);
+	free(desc);
+	free(item);
+	
+	werase(win);
+	wrefresh(win);
+	delwin(subwin);
+	delwin(win);
+}
+
 static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	FILE *fp;
@@ -314,19 +563,17 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	int y = 0;
 	int ly = 1;
 	
-	struct cdata time = {0};
-	d_timezone(ui->conf_timezone);
-	set_localtime(&time);
-	d_timezone(cdata->timezone);
-	char full_path[MAXPATH];
+	char path[MAXPATH];
+	path_check(path, "diary");
 	
-	diary_path(time, full_path);
+	print_menu(cdata, path);
+	diary_path(path, cdata->year, cdata->mon, cdata->mday);
 	
-	fp = fopen(full_path, "r");
+	fp = fopen(path, "r");
 	if (!fp)
 		ERR_EXIT("read_diary fopen");
 	ssize_t n;
-	mvwprintw(ui->pad, 0, 0, "%.*s", PCOL, full_path);
+	mvwprintw(ui->pad, 0, 0, "%.*s", PCOL, path);
 	while ((n = getline(&buf, &bm, fp)) != -1)
 	{
 		mvwprintw(ui->pad, ly, 0, "%s", buf);
@@ -335,7 +582,10 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 			wresize(ui->pad, bm, PCOL);
 	}
 	
+	new_chart(cdata, pxx, ui, planet, zodiac);
+	wrefresh(ui->main_win);
 	prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
+	
 	curs_set(1);
 	int ch;
 	bool done = FALSE;
@@ -378,6 +628,16 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
 {
+	int year = cdata->year;
+	int mon = cdata->mon;
+	int day = cdata->mday;
+	int hour = cdata->hour;
+	int min = cdata->min;
+	int sec = cdata->sec;
+	char *tz = cdata->timezone;
+	double lat = cdata->dlat;
+	double lon = cdata->dlon;
+	
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
 	status_bar(ui, WATER, "diary");
 	wrefresh(ui->main_win);
@@ -407,6 +667,17 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	if (ch == 'J')
 		diary_read(cdata, pxx, ui, planet, zodiac);
 		
+	cdata_clear(cdata);
+	cdata->year = year;
+	cdata->mon = mon;
+	cdata->mday = day;
+	cdata->hour = hour;
+	cdata->min = min;
+	cdata->sec = sec;
+	strncpy(cdata->timezone, tz, MAXBUF);
+	cdata->dlat = lat;
+	cdata->dlon = lon;
+	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(ui->pad);
 }

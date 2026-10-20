@@ -28,7 +28,6 @@ void cdata_clear(struct cdata *cdata)
 	memset(cdata->city, 0, MAXBUF);
 	memset(cdata->country, 0, MAXBUF);
 	memset(cdata->state, 0, MAXBUF);
-	cdata->isdst = -1;
 }
 
 void ecst_init(double *planet[], double *se)

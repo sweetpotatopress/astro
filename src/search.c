@@ -76,13 +76,6 @@ static char *xstrtok(char *s, const char *delim)
 	return start;
 }
 
-static char *xstrdup(const char *s)
-{
-	size_t l = strlen(s);
-	char *d = ecalloc(1,l+1);
-	return memcpy(d, s, l+1);
-}
-
 static ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
 {
 	if (first > item_count)

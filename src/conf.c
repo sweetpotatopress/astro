@@ -98,12 +98,18 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 
 	dret = strtod(buffer[C_LATITUDE], &endptr);
 	if (errno != ERANGE)
+	{
 		cdata->dlat = dret;
+		ui->conf_dlat = dret;
+	}
 	errno = 0;
 	
 	dret = strtod(buffer[C_LONGITUDE], &endptr);
 	if (errno != ERANGE)
+	{
 		cdata->dlon = dret;
+		ui->conf_dlon = dret;
+	}
 	errno = 0;
 	
 	lret = strtol(buffer[C_ASP], &endptr, 10);

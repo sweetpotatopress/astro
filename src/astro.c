@@ -38,6 +38,13 @@ void *erealloc(void *p, size_t size)
 	return p;
 }
 
+char *xstrdup(const char *s)
+{
+	size_t l = strlen(s);
+	char *d = ecalloc(1,l+1);
+	return memcpy(d, s, l+1);
+}
+
 static void iana_check(void)
 {
 	const char *iana_path[] = { 
@@ -106,6 +113,9 @@ int main(int argc, char *argv[])
 		cdata[i]->country = ecalloc(1, MAXBUF);
 		cdata[i]->timezone = ecalloc(1, MAXBUF);
 		cdata[i]->chart_name = ecalloc(1, MAXBUF);
+		strncpy(cdata[i]->city, "0", MAXBUF);
+		strncpy(cdata[i]->state, "0", MAXBUF);
+		strncpy(cdata[i]->country, "0", MAXBUF);
 	}
 	
 	struct zxx *zxx = ecalloc(1, sizeof(*zxx));
