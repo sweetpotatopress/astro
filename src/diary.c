@@ -325,12 +325,14 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	fp = fopen(full_path, "r");
 	if (!fp)
 		ERR_EXIT("read_diary fopen");
-	size_t n;
+	ssize_t n;
 	mvwprintw(ui->pad, 0, 0, "%.*s", PCOL, full_path);
-	while ((n = getline(&buf, &bm, fp)) != EOF)
+	while ((n = getline(&buf, &bm, fp)) != -1)
 	{
 		mvwprintw(ui->pad, ly, 0, "%s", buf);
 		ly++;
+		if (ly == PLINE)
+			wresize(ui->pad, bm, PCOL);
 	}
 	
 	prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
@@ -371,6 +373,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 		prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
 	}
 	curs_set(0);
+	free(buf);
 }
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
