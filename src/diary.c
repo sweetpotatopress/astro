@@ -306,6 +306,36 @@ static void diary_write(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 	delwin(ui->pad);
 }
 
+static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+{
+	FILE *fp;
+	size_t bm = PLINE;
+	char *buf = NULL;
+	int ly = 0;
+	
+	struct cdata time = {0};
+	d_timezone(ui->conf_timezone);
+	set_localtime(&time);
+	d_timezone(cdata->timezone);
+	char full_path[MAXPATH];
+	
+	diary_path(time, full_path);
+	
+	fp = fopen(full_path, "r");
+	if (!fp)
+		ERR_EXIT("read_diary fopen");
+	size_t n;
+	while ((n = getline(&buf, &bm, fp)) != EOF)
+	{
+		mvwprintw(ui->pad, ly, 0, "%s", buf);
+		ly++;
+	}
+	
+	mvwprintw(ui->pad, 0, 0, "%s", full_path);
+	prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
+	getch();
+}
+
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
 {
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
@@ -334,29 +364,11 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 	if (ch == 'j')
 		diary_write(cdata, pxx, ui, planet, zodiac);
+	if (ch == 'J')
+		diary_read(cdata, pxx, ui, planet, zodiac);
 		
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(ui->pad);
 }
 
-/*
-static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
-{
-	FILE *fp;
-	size_t tmpmax = 1;
-	char *buf = ecalloc(tmpmax, PLINE);
-	
-	struct cdata time = {0};
-	d_timezone(ui->conf_timezone);
-	set_localtime(&time);
-	d_timezone(cdata->timezone);
-	char full_path[MAXPATH];
-	
-	diary_path(time, full_path);
-	
-	fp = fopen(full_path, "r");
-	if (!fp)
-		ERR_EXIT("read_diary fopen");
-	getline(buf, tmpmax * PLINE, fp);
-}
-*/
+
