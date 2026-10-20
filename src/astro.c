@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 				doupdate();
 				break;
 			case 'j':
-				diary(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				diary(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, ch);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;

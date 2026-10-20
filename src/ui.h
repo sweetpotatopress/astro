@@ -160,6 +160,24 @@ struct ui {
 	int pr; // planet radius
 	int ar; // angle radius
 	struct ui_sym sym;
+	WINDOW *pad;
+	
+	// upper left corner in pad
+	int pad_y;
+	int pad_x;
+	
+	// where on screen to start drawing
+	int scr_y; 
+	int scr_x;
+	
+	// height of displayed region
+	int scr_h;
+	int scr_w; // width
+	
+	// inc, top/bottom line
+	int inc;
+	int tl;
+	int bl;
 };
 
 void ui_init(struct ui *ui);

@@ -36,22 +36,8 @@ static void d_timezone(char *timezone)
 	tzset();
 }
 
-static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
+static void diary_path(struct cdata time, char *full_path)
 {
-	int i = 0;
-	for (; buf[i] != '\0' && isspace((unsigned char)buf[i]); ++i)
-		;
-	if (i == size || buf[i] == '\0')
-		return;
-		
-	struct cdata time = {0};
-	d_timezone(ui->conf_timezone);
-	set_localtime(&time);
-	d_timezone(cdata->timezone);
-	
-	char *tod = (cdata->hour > 11) ? "PM" : "AM";
-	int th = time_format(time.hour);
-	
 	char filename[12] = {0};
 	int n = snprintf(filename, 12, "%02d.%02d.md", time.mon, time.mday);
 	if (n > 12)
@@ -69,10 +55,29 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 		if (mkdir(year_path, 0755) == -1)
 			ERR_EXIT("ERR: diary mkdir");
 		
-	char full_path[MAXPATH] = {0};
 	n = snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
 	if (n > MAXPATH)
 		ERR_EXIT("ERR: diary.c full_path too long");
+}
+
+static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
+{
+	int i = 0;
+	for (; buf[i] != '\0' && isspace((unsigned char)buf[i]); ++i)
+		;
+	if (i == size || buf[i] == '\0')
+		return;
+		
+	struct cdata time = {0};
+	d_timezone(ui->conf_timezone);
+	set_localtime(&time);
+	d_timezone(cdata->timezone);
+	
+	char *tod = (time.hour > 11) ? "PM" : "AM";
+	int th = time_format(time.hour);
+	
+	char full_path[MAXPATH] = {0};
+	diary_path(time, full_path);
 
 	char header[MAXBUF] = {0};
 	if (access(full_path, R_OK) == -1)
@@ -111,23 +116,23 @@ static void down_line(int *y)
 		(*y)++;
 }
 
-static void down_pad(int *pad_y, int scr_h, int *tl, int *bl, int c)
+static void down_pad(struct ui *ui)
 {
-	if (*pad_y < OLINE - scr_h - 1)
+	if (ui->pad_y < OLINE - ui->scr_h - 1)
 	{
-		*pad_y += c;
-		*tl += c;
-		*bl += c;
+		ui->pad_y += ui->inc;
+		ui->tl += ui->inc;
+		ui->bl += ui->inc;
 	}
 }
 
-static void up_pad(int *pad_y, int *tl, int *bl, int c)
+static void up_pad(struct ui *ui)
 {
-	if (*pad_y > 0) 
+	if (ui->pad_y > 0) 
 	{
-		*pad_y -= c;
-		*tl -= c;
-		*bl -= c;
+		ui->pad_y -= ui->inc;
+		ui->tl -= ui->inc;
+		ui->bl -= ui->inc;
 	}
 }
 
@@ -143,53 +148,27 @@ static void add_len(int len[PLINE], int y, int c)
 		len[y] += c;
 }
 
-void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+static void diary_write(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
-	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
-	
-	WINDOW *pad = newpad(PLINE, PCOL);
-	wbkgdset(pad,COLOR_PAIR(M_COLOR));
-	keypad(pad, TRUE);
-	
-	// upper left corner in pad
-	int pad_y = 0; 
-	int pad_x = 0;
-	
-	// where on screen to start drawing
-	int scr_y = 2; 
-	int scr_x = COLS - PCOL;
-	
-	// height of displayed region
-	int scr_h = LINES - 4;
-	int scr_w = PCOL; // width
-	
-	status_bar(ui, WATER, "diary");
-	wrefresh(ui->main_win);
-	
 	int my = 0;
 	int y = 0;
 	
 	char buf[PLINE][PCOL] = {0};
 	int len[PLINE] = {0};
 	bool wf = FALSE;
+	int ts = 4;
 	
-	const int ts = 4;
-	int inc = 4;
-	int tl = 0;
-	int bl = scr_h;
-	
-	wmove(pad, y, len[y]);
-	prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
-
+	wmove(ui->pad, y, len[y]);
+	prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
 	curs_set(1);
 	int ch;
 	bool done = FALSE;
-	while (!done && (ch = wgetch(pad)) != ERR)
+	while (!done && (ch = wgetch(ui->pad)) != ERR)
 	{
-		if (y >= bl)
-			down_pad(&pad_y, scr_h, &tl, &bl, inc);
-		else if (y <= tl)
-			up_pad(&pad_y, &tl, &bl, inc);
+		if (y >= ui->bl)
+			down_pad(ui);
+		else if (y <= ui->tl)
+			up_pad(ui);
 	
 		wf = FALSE;
 		if (ch > 31 && ch < 127)
@@ -204,10 +183,10 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		switch(ch)
 		{
 			case CTRLE:
-				down_pad(&pad_y, scr_h, &tl, &bl, inc);
+				down_pad(ui);
 				break;
 			case CTRLY:
-				up_pad(&pad_y, &tl, &bl, inc);
+				up_pad(ui);
 				break;
 			case KEY_DOWN:
 				down_line(&y);
@@ -293,12 +272,12 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	
 		end_line(buf, len, y);
 			
-		werase(pad);
+		werase(ui->pad);
 		for (int ty = 0; ty <= my; ty++)
-			mvwprintw(pad, ty, 0, "%s", buf[ty]);
+			mvwprintw(ui->pad, ty, 0, "%s", buf[ty]);
 	
-		wmove(pad, y, len[y]);
-		prefresh(pad, pad_y, pad_x, scr_y, scr_x, scr_y + scr_h, scr_x + scr_w);
+		wmove(ui->pad, y, len[y]);
+		prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
 	}
 	curs_set(0);
 	
@@ -324,5 +303,60 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 	save_diary(cdata, ui, buf1, n);
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
-	delwin(pad);
+	delwin(ui->pad);
 }
+
+void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
+{
+	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
+	status_bar(ui, WATER, "diary");
+	wrefresh(ui->main_win);
+	
+	ui->pad = newpad(PLINE, PCOL);
+	wbkgdset(ui->pad,COLOR_PAIR(M_COLOR));
+	keypad(ui->pad, TRUE);
+	
+	// upper left corner in pad
+	ui->pad_y = 0; 
+	ui->pad_x = 0;
+	
+	// where on screen to start drawing
+	ui->scr_y = 2; 
+	ui->scr_x = COLS - PCOL;
+	
+	// height of displayed region
+	ui->scr_h = LINES - 4;
+	ui->scr_w = PCOL; // width
+
+	ui->inc = 4;
+	ui->tl = 0;
+	ui->bl = ui->scr_h;
+	
+	if (ch == 'j')
+		diary_write(cdata, pxx, ui, planet, zodiac);
+		
+	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
+	delwin(ui->pad);
+}
+
+/*
+static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+{
+	FILE *fp;
+	size_t tmpmax = 1;
+	char *buf = ecalloc(tmpmax, PLINE);
+	
+	struct cdata time = {0};
+	d_timezone(ui->conf_timezone);
+	set_localtime(&time);
+	d_timezone(cdata->timezone);
+	char full_path[MAXPATH];
+	
+	diary_path(time, full_path);
+	
+	fp = fopen(full_path, "r");
+	if (!fp)
+		ERR_EXIT("read_diary fopen");
+	getline(buf, tmpmax * PLINE, fp);
+}
+*/
