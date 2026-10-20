@@ -491,12 +491,19 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 				ch = getch();
 		}
 	}
+	
+	if (strlen(cdata->city) < 2)
+		strncpy(cdata->city, "0", MAXBUF);
+	if (strlen(cdata->state) < 2)
+		strncpy(cdata->state, "0", MAXBUF);
+	if (strlen(cdata->country) < 2)
+		strncpy(cdata->state, "0", MAXBUF);
 
 	FILE *ifp = fopen(newpath, "w");
 	if (!ifp)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
-	fprintf(ifp, "%s\n%s\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n%s\n%f\n%f\n%d",
+	fprintf(ifp, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f,%d",
 		cdata->city,
 		cdata->state,
 		cdata->country,
@@ -543,10 +550,54 @@ void save_chart(struct cdata *cdata)
 		save_file_name(cdata, filepath);
 }
 
-
-static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_load, char **name, char **desc, char *chart_path)
+static void converttocomma(char *path)
 {
-	size_t icount = name_to_item(filepath, item_load, name, desc);
+	FILE *fp = fopen(path, "r");
+	if (fp == NULL)
+		ERR_EXIT("converttocomma fopen");
+			
+	int ch;
+	char buf[MAXBUF] = {0};
+	int i = 0;
+	while ((ch = fgetc(fp)) != EOF)
+		buf[i++] = ch;
+	buf[i] = '\0';
+	
+	for (size_t j = 0; j <= strlen(buf); j++)
+	{
+		if (buf[j-1] == '\n' && buf[j] == '\n')
+		{
+			buf[j] = '0';
+			for (size_t c = strlen(buf)+1; c > j; c--)
+				buf[c] = buf[c-1];
+			buf[j+1] = ',';
+		}
+	}
+	for (size_t j = 0; j <= strlen(buf); j++)
+	{
+		if (buf[j] == '\n')
+			buf[j] = ',';
+	}
+	
+	fclose(fp);
+	
+	fp = fopen(path, "w");
+	if (!fp)
+		ERR_EXIT("convertocomma fopen");
+	fprintf(fp, "%s", buf);
+	fclose(fp);
+}
+
+void print_load_menu(struct cdata *cdata, char *path, char *head)
+{
+	char *diary_path = ecalloc(1, MAXPATH);
+	size_t size = file_count(path, 1) + 1;
+	
+	ITEM **item = ecalloc(size, sizeof(ITEM *));
+	char **name = ecalloc(size, sizeof(char *));
+	char **desc = ecalloc(size, sizeof(char *));
+	
+	size_t icount = name_to_item(path, item, name, desc);
 	
 	int header = 4;
 	int width = 25;
@@ -557,28 +608,28 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 	int starty = (LINES - height) / 2;
 	int startx = (COLS - width) / 2;
 	
-	WINDOW *load_win = newwin(height, width, starty, startx);
-	WINDOW *load_subwin = derwin(load_win, height - header, width - 2, 3, 1);
-	MENU *load_menu = new_menu(item_load);
+	WINDOW *win = newwin(height, width, starty, startx);
+	WINDOW *subwin = derwin(win, height - header, width - 2, 3, 1);
+	MENU *menu = new_menu(item);
 	FILE *fp;
 	
-	wbkgdset(load_win, COLOR_PAIR(M_COLOR));
-	keypad(load_win, TRUE);
-	box(load_win, 0, 0);
+	wbkgdset(win, COLOR_PAIR(M_COLOR));
+	keypad(win, TRUE);
+	box(win, 0, 0);
 	
-	menu_opts_off(load_menu, O_NONCYCLIC);
-	menu_opts_off(load_menu, O_SHOWDESC);
-	set_menu_back(load_menu, COLOR_PAIR(M_COLOR));
-	set_menu_fore(load_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
-	set_menu_win(load_menu, load_win);
-	set_menu_sub(load_menu, load_subwin);
+	menu_opts_off(menu, O_NONCYCLIC);
+	menu_opts_off(menu, O_SHOWDESC);
+	set_menu_back(menu, COLOR_PAIR(M_COLOR));
+	set_menu_fore(menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+	set_menu_win(menu, win);
+	set_menu_sub(menu, subwin);
 	
-	mvwprintw(load_win, 1, 1, " /charts");
-	mvwprintw(load_win, 1, width - 4, "{l}");
-	mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
+	mvwprintw(win, 1, 1, "%s", head);
+	mvwprintw(win, 1, width - 4, "{l}");
+	mvwhline(win, 2, 1, ACS_HLINE, width - 2);
 	
-	post_menu(load_menu);
-	wrefresh(load_win);
+	post_menu(menu);
+	wrefresh(win);
 	
 	struct stat st;
 	const char *selected = NULL;
@@ -586,9 +637,9 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 	
 	char buffer[MAXBUF] = {0};
 	char field[FMAX][MAXBUF] = {0};
-	char newpath[MAXBUF] = {0};
+	char newpath[MAXPATH] = {0};
 	char cur_dir[MAXBUF] = {0};
-	snprintf(cur_dir, MAXBUF, " /charts");
+	snprintf(cur_dir, MAXBUF, " %s", head);
 	
 	char *endptr = NULL;
 	long lret;
@@ -596,49 +647,57 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 	errno = 0;
 	
 	int ch = 0, count = 0, menu_done = 0;
-	while (!menu_done && (ch = wgetch(load_win)))
+	while (!menu_done && (ch = wgetch(win)))
 	{
-		cur = current_item(load_menu);
+		cur = current_item(menu);
 		selected = item_description(cur);
 		
 		switch(ch)
 		{
 			case 'j': case KEY_DOWN:
-				menu_driver(load_menu, REQ_DOWN_ITEM);
+				menu_driver(menu, REQ_DOWN_ITEM);
 				break;
 			case 'k': case KEY_UP:
-				menu_driver(load_menu, REQ_UP_ITEM);
+				menu_driver(menu, REQ_UP_ITEM);
 				break;
 			case 'l': case KEY_RIGHT: case '\n':
 				if ((int)icount == 0)
 					break;
 				
-				snprintf(newpath, MAXBUF,
-				"%s/%s", filepath, selected);
+				int n = snprintf(newpath, MAXPATH, "%s/%s", path, selected);
+				if (n >= MAXPATH)
+					ERR_EXIT("print_menu newpath too long");
 		
 				if (stat(newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
-					memcpy(filepath, newpath, strlen(newpath) + 1);
+					memcpy(path, newpath, strlen(newpath) + 1);
 					snprintf(cur_dir, MAXBUF, " /%s", selected);
 					break;
 				}
 				
 				snprintf(cdata->chart_name, MAXBUF, "%s", selected);
 				
+				converttocomma(newpath);
+				
 				fp = fopen(newpath, "r");
 				if (fp == NULL)
-					ERR_EXIT("load_chart fopen fail");
+					ERR_EXIT("print_menu newpath fopen");
 				
-				while (fgets(buffer, MAXBUF, fp) != NULL && count < FMAX)
+				if (fgets(buffer, MAXBUF, fp) != NULL)
 				{
-					buffer[strcspn(buffer, "\n")] = 0;
-					snprintf(field[count++], MAXBUF, "%s", buffer);
+					char *it = strtok(buffer, ",\n");
+				
+					while(it)
+					{
+						snprintf(field[count++], MAXBUF, "%s", it);
+						it = strtok(NULL, ",\n");
+					}
 				}
-					
+				
 				memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
 				memcpy(cdata->state, field[FSTATE], strlen(field[FSTATE]) + 1);
 				memcpy(cdata->country, field[FCOUNTRY], strlen(field[FCOUNTRY]) + 1);
-							
+					
 				lret = strtol(field[FYEAR], &endptr, 10);
 				if (errno != ERANGE)
 					cdata->year = (int)lret;
@@ -682,7 +741,7 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 				errno = 0;
 							
 				if (setenv("TZ", field[FTZ], 1) != 0)
-					ERR_EXIT("ERR: TZ setenv fail field_to_member");
+					ERR_EXIT("ERR: print_menu TZ setenv");
 				tzset();
 				memcpy(cdata->timezone, field[FTZ], strlen(field[FTZ]) + 1);
 						
@@ -712,9 +771,9 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 				menu_done = 1;
 				break;
 			case 'h': case KEY_LEFT:
-				if (strcmp(filepath, chart_path) == 0)
+				if (strcmp(path, diary_path) == 0)
 					break;
-				back_dir(filepath, cur_dir);
+				back_dir(path, cur_dir);
 				break;
 			case 'q': case 27:
 				menu_done = 1;
@@ -722,23 +781,23 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 		}
 		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT || ch == 'm')
 		{
-			unpost_menu(load_menu);
-			set_menu_items(load_menu, NULL);
+			unpost_menu(menu);
+			set_menu_items(menu, NULL);
 			for (size_t i = 0; i < icount; ++i)
 			{
-				free_item(item_load[i]);
+				free_item(item[i]);
 				free(name[i]);
 				free(desc[i]);
 			}
 			
-			werase(load_win);
-			wnoutrefresh(load_win);
-			mvwprintw(load_win, 1, 1, "%s", cur_dir);
-			mvwprintw(load_win, 1, width - 4, "{l}");
-			mvwhline(load_win, 2, 1, ACS_HLINE, width - 2);
+			werase(win);
+			wnoutrefresh(win);
+			mvwprintw(win, 1, 1, "%s", cur_dir);
+			mvwprintw(win, 1, width - 4, "{l}");
+			mvwhline(win, 2, 1, ACS_HLINE, width - 2);
 			
-			icount = name_to_item(filepath, item_load, name, desc);
-			set_menu_items(load_menu, item_load);
+			icount = name_to_item(path, item, name, desc);
+			set_menu_items(menu, item);
 			
 			width = 25;
 			height = (int)icount + header;
@@ -748,32 +807,33 @@ static void print_load_menu(struct cdata *cdata, char *filepath, ITEM **item_loa
 			starty = (LINES - height) / 2;
 			startx = (COLS - width) / 2;
 			
-			wresize(load_win, height, width);
-			wresize(load_subwin, height - header, width -2);
-			mvwin(load_win, starty, startx);
-			mvwin(load_subwin, starty, startx);
+			wresize(win, height, width);
+			wresize(subwin, height - header, width -2);
+			mvwin(win, starty, startx);
+			mvwin(subwin, starty, startx);
 		}
-		box(load_win, 0, 0);
-		post_menu(load_menu);
+		box(win, 0, 0);
+		post_menu(menu);
 		doupdate();
 	}
+	memcpy(path, newpath, strlen(newpath)+1);
 	
-	unpost_menu(load_menu);
-	free_menu(load_menu);
+	unpost_menu(menu);
+	free_menu(menu);
 	for (size_t j = 0; j < icount; ++j)
 	{
-		free_item(item_load[j]);
+		free_item(item[j]);
 		free(name[j]);
 		free(desc[j]);
 	}
 	free(name);
 	free(desc);
-	free(item_load);
+	free(item);
 	
-	werase(load_win);
-	wrefresh(load_win);
-	delwin(load_subwin);
-	delwin(load_win);
+	werase(win);
+	wrefresh(win);
+	delwin(subwin);
+	delwin(win);
 }
 
 void load_chart(struct cdata *cdata)
@@ -784,11 +844,5 @@ void load_chart(struct cdata *cdata)
 	char filepath[MAXPATH] = {0};
 	memcpy(filepath, chart_path, strlen(chart_path)+1);
 	
-	size_t count = file_count(chart_path, 1) + 1;
-	
-	ITEM **item_load = ecalloc(count, sizeof(ITEM *));
-	char **name = ecalloc(count, sizeof(char *));
-	char **desc = ecalloc(count, sizeof(char *));
-	
-	print_load_menu(cdata, filepath, item_load, name, desc, chart_path);
+	print_load_menu(cdata, filepath, "/charts");
 }
