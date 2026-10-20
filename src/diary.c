@@ -311,7 +311,8 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	FILE *fp;
 	size_t bm = PLINE;
 	char *buf = NULL;
-	int ly = 0;
+	int y = 0;
+	int ly = 1;
 	
 	struct cdata time = {0};
 	d_timezone(ui->conf_timezone);
@@ -325,15 +326,51 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	if (!fp)
 		ERR_EXIT("read_diary fopen");
 	size_t n;
+	mvwprintw(ui->pad, 0, 0, "%.*s", PCOL, full_path);
 	while ((n = getline(&buf, &bm, fp)) != EOF)
 	{
 		mvwprintw(ui->pad, ly, 0, "%s", buf);
 		ly++;
 	}
 	
-	mvwprintw(ui->pad, 0, 0, "%s", full_path);
 	prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
-	getch();
+	curs_set(1);
+	int ch;
+	bool done = FALSE;
+	while (!done && (ch = wgetch(ui->pad)) != ERR)
+	{
+		if (y >= ui->bl)
+			down_pad(ui);
+		else if (y <= ui->tl)
+			up_pad(ui);
+	
+		switch(ch)
+		{
+			case CTRLE:
+				down_pad(ui);
+				y+= ui->inc;
+				break;
+			case CTRLY:
+				up_pad(ui);
+				y-= ui->inc;
+				break;
+			case KEY_DOWN: case 'j':
+				down_line(&y);
+				break;
+			case KEY_UP: case 'k':
+				up_line(&y);
+				break;
+			case '\n':
+				down_line(&y);
+				break;
+			case 'q': case 27:
+				done = TRUE;
+				break;
+		}
+		wmove(ui->pad, y, 0);
+		prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
+	}
+	curs_set(0);
 }
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
