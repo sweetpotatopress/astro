@@ -589,7 +589,7 @@ static void converttocomma(char *path)
 
 void print_load_menu(struct cdata *cdata, char *path, char *head)
 {
-	char *diary_path = ecalloc(1, MAXPATH);
+	char *main_path = ecalloc(1, MAXPATH);
 	size_t size = file_count(path, 1) + 1;
 	
 	ITEM **item = ecalloc(size, sizeof(ITEM *));
@@ -764,7 +764,7 @@ void print_load_menu(struct cdata *cdata, char *path, char *head)
 				menu_done = 1;
 				break;
 			case 'h': case KEY_LEFT:
-				if (strcmp(path, diary_path) == 0)
+				if (strcmp(path, main_path) == 0)
 					break;
 				back_dir(path, cur_dir);
 				break;
@@ -822,6 +822,7 @@ void print_load_menu(struct cdata *cdata, char *path, char *head)
 	free(name);
 	free(desc);
 	free(item);
+	free(main_path);
 	
 	werase(win);
 	wrefresh(win);
