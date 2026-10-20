@@ -136,12 +136,14 @@ void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 		
 		if (totx > 163)
 		{
-			ui->cx = (ui->radius + 35);
+			ui->cx = (ui->radius + 45);
 			if (toty > 50)
 			{
 				wheel_init(ui->main_win, ui, 7, 0, 0);
 				ui->cx = (ui->radius + 40);
 			}
+			ui->right_trig = 0;
+			hide_panel(ui->right_panel);
 		}
 		else
 		{
