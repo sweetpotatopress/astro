@@ -25,8 +25,10 @@ t			transits
 
 s			solar return
 
-j			diary
+j			write diary
 	esc		save entry
+	
+[J]			read diary
 
 z			zodiacal releasing
 	k/j		up/down period
