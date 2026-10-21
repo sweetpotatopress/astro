@@ -191,6 +191,7 @@ struct ui {
 	char **fb_desc;
 	char fb_newpath[MAXPATH];
 	char fb_cur_dir[MAXPATH];
+	char *fb_base_dir;
 	
 	size_t fb_c;
 	int fb_header;

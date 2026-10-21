@@ -229,8 +229,6 @@ static void rebuild_menu(struct ui *ui, char *path, char ls)
 
 static int save_options(struct ui *ui, char *path, char *head, char ls)
 {
-	char *main_path = ecalloc(1, MAXPATH);
-	
 	struct stat st;
 	const char *selected = NULL;
 	ITEM *cur = NULL;
@@ -281,7 +279,7 @@ static int save_options(struct ui *ui, char *path, char *head, char ls)
 				}
 				break;
 			case 'h': case KEY_LEFT: 
-				if (strcmp(path, main_path) == 0)
+				if (strcmp(path, ui->fb_base_dir) == 0)
 					break;
 				back_dir(path, ui->fb_cur_dir);
 				break;
@@ -523,8 +521,7 @@ static void converttocomma(char *path)
 
 void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls)
 {
-	char *main_path = ecalloc(1, MAXPATH);
-	
+
 	struct stat st;
 	const char *selected = NULL;
 	ITEM *cur = NULL;
@@ -657,7 +654,7 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				menu_done = 1;
 				break;
 			case 'h': case KEY_LEFT:
-				if (strcmp(path, main_path) == 0)
+				if (strcmp(path, ui->fb_base_dir) == 0)
 					break;
 				back_dir(path, ui->fb_cur_dir);
 				break;
@@ -682,6 +679,9 @@ void print_menu(struct cdata *cdata, struct ui *ui, char *path, char *head, char
 	ui->fb_item = ecalloc(ui->fb_c, sizeof(ITEM *));
 	ui->fb_name = ecalloc(ui->fb_c, sizeof(char *));
 	ui->fb_desc = ecalloc(ui->fb_c, sizeof(char *));
+	
+	ui->fb_base_dir = ecalloc(1, MAXPATH);
+	memcpy(ui->fb_base_dir, path, MAXPATH);
 	
 	ui->fb_c = name_to_item(path, ui->fb_item, ui->fb_name, ui->fb_desc);
 	
@@ -739,6 +739,7 @@ void print_menu(struct cdata *cdata, struct ui *ui, char *path, char *head, char
 	free(ui->fb_desc);
 	free(ui->fb_name);
 	free(ui->fb_item);
+	free(ui->fb_base_dir);
 	
 	werase(ui->fb_win);
 	wrefresh(ui->fb_win);
