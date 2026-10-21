@@ -29,6 +29,7 @@ j			write diary
 	esc		save entry
 	
 [J]			read diary
+	h/l		jump to prev/next entry
 
 z			zodiacal releasing
 	k/j		up/down period
