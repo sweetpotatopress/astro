@@ -482,7 +482,7 @@ static void save_file_name(struct cdata *cdata, char *path)
 }
 
 static void converttocomma(char *path)
-{
+{ // temporary function to convert legacy \n delim'd chart files
 	FILE *fp = fopen(path, "r");
 	if (fp == NULL)
 		ERR_EXIT("converttocomma fopen");
@@ -521,7 +521,6 @@ static void converttocomma(char *path)
 
 void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls)
 {
-
 	struct stat st;
 	const char *selected = NULL;
 	ITEM *cur = NULL;
@@ -660,6 +659,7 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				break;
 			case 'q': case 27:
 				menu_done = 1;
+				ui->fb_cancel = TRUE;
 				break;
 		}
 		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT || ch == 'm')
@@ -723,10 +723,7 @@ void print_menu(struct cdata *cdata, struct ui *ui, char *path, char *head, char
 			save_file_name(cdata, path);
 	}
 	else
-	{
 		load_options(cdata, ui, path, head, ls);
-		memcpy(path, ui->fb_newpath, strlen(ui->fb_newpath)+1);
-	}
 	
 	unpost_menu(ui->fb_menu);
 	free_menu(ui->fb_menu);

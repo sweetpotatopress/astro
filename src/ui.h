@@ -200,6 +200,8 @@ struct ui {
 	int fb_sy;
 	int fb_sx;
 	int fb_save;
+	
+	bool fb_cancel;
 };
 
 void ui_init(struct ui *ui);

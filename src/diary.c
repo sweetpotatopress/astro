@@ -321,6 +321,11 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	path_check(path, "diary");
 	
 	print_menu(cdata, ui, path, "/diary", 'l', LOAD);
+	if (ui->fb_cancel == TRUE)
+	{
+		ui->fb_cancel = FALSE;
+		return;
+	}
 	diary_path(path, cdata->year, cdata->mon, cdata->mday);
 	
 	fp = fopen(path, "r");
