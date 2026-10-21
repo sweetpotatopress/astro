@@ -317,7 +317,7 @@ struct ct {
 	char y;
 };
 
-static void next_entry(struct cdata *cdata, struct ui* ui, struct ct **ct, int *c, int cm, int sign)
+static void next_entry(struct cdata *cdata, struct ct **ct, int *c, int cm, int sign)
 {
 	*c += sign;
 	if (*c >= cm)
@@ -438,7 +438,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 				y-= ui->inc;
 				break;
 			case 'l':
-				next_entry(cdata, ui, ct, &c, cm, 1);
+				next_entry(cdata, ct, &c, cm, 1);
 				
 				y = ct[c]->y;
 				while(y+dif > ui->bl)
@@ -446,7 +446,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 				new_chart(cdata, pxx, ui, planet, zodiac);
 				break;
 			case 'h':
-				next_entry(cdata, ui, ct, &c, cm, -1);
+				next_entry(cdata, ct, &c, cm, -1);
 				
 				y = ct[c]->y;	
 				int tmp = y;
