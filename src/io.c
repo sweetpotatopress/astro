@@ -193,112 +193,112 @@ void back_dir(char *filepath, char *cur_dir)
 	snprintf(cur_dir, MAXBUF, " %s", name);
 }
 
-static int print_save_menu(char *filepath, ITEM **item_save, char **name, char **desc, char *chart_path)
+static void rebuild_menu(struct ui *ui, char *path, char ls)
 {
-	size_t icount = name_to_item(filepath, item_save, name, desc);
+	unpost_menu(ui->fb_menu);
+	set_menu_items(ui->fb_menu, NULL);
+	for (size_t i = 0; i < ui->fb_c; ++i)
+	{
+		free_item(ui->fb_item[i]);
+		free(ui->fb_name[i]);
+		free(ui->fb_desc[i]);
+	}
+			
+	werase(ui->fb_win);
+	wnoutrefresh(ui->fb_win);
+	mvwprintw(ui->fb_win, 1, 1, "%s", ui->fb_cur_dir);
+	mvwprintw(ui->fb_win, 1, ui->fb_width - 4, "{%c}", ls);
+	mvwhline(ui->fb_win, 2, 1, ACS_HLINE, ui->fb_width - 2);
+			
+	ui->fb_c = name_to_item(path, ui->fb_item, ui->fb_name, ui->fb_desc);
+	set_menu_items(ui->fb_menu, ui->fb_item);
+			
+	ui->fb_width = 25;
+	ui->fb_height = (int)ui->fb_c + ui->fb_header;
+	if (ui->fb_c > 16)
+		ui->fb_height = 16 + ui->fb_header;
+			
+	ui->fb_sy = (LINES - ui->fb_height) / 2;
+	ui->fb_sx = (COLS - ui->fb_width) / 2;
 	
-	int header = 4;
-	int width = 25;
-	int height = (int)icount + header;
-	if (icount > 16)
-		height = 16 + header;
-	
-	int starty = (LINES - height) / 2;
-	int startx = (COLS - width) / 2;
-	int save = 0;
-	
-	WINDOW *save_win = newwin(height, width, starty, startx);
-	WINDOW *save_subwin = derwin(save_win, height - header, width - 2, 3, 1);
-	MENU *save_menu = new_menu(item_save);
-	
-	box(save_win, 0, 0);
-	keypad(save_win, TRUE);
-	wbkgdset(save_win, COLOR_PAIR(M_COLOR));
-	
-	menu_opts_off(save_menu, O_NONCYCLIC);
-	menu_opts_off(save_menu, O_SHOWDESC);
-	set_menu_fore(save_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
-	set_menu_back(save_menu, COLOR_PAIR(M_COLOR));
-	set_menu_win(save_menu, save_win);
-	set_menu_sub(save_menu, save_subwin);
-	
-	mvwprintw(save_win, 1, 1, " /charts");
-	mvwprintw(save_win, 1, width - 4, "{s}");
-	mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
-	
-	post_menu(save_menu);
-	wrefresh(save_win);
+	wresize(ui->fb_win, ui->fb_height, ui->fb_width);
+	wresize(ui->fb_subwin, ui->fb_height - ui->fb_header, ui->fb_width -2);
+	mvwin(ui->fb_win, ui->fb_sy, ui->fb_sx);
+	mvwin(ui->fb_subwin, ui->fb_sy, ui->fb_sx);
+}
+
+static int save_options(struct ui *ui, char *path, char *head, char ls)
+{
+	char *main_path = ecalloc(1, MAXPATH);
 	
 	struct stat st;
 	const char *selected = NULL;
 	ITEM *cur = NULL;
-	char *mdir = NULL;
-	char newpath[MAXPATH] = {0};
-	char cur_dir[MAXPATH] = {0};
-	snprintf(cur_dir, MAXBUF, " /charts");
+	snprintf(ui->fb_cur_dir, MAXBUF, " %s", head);
 	
+	char *mdir = NULL;
 	int menu_done = 0, ch = 0;
-	while (!menu_done && (ch = wgetch(save_win)))
+	while (!menu_done && (ch = wgetch(ui->fb_win)))
 	{
-		cur = current_item(save_menu);
+		cur = current_item(ui->fb_menu);
 		selected = item_description(cur);
 	
 		switch(ch)
 		{
 			case 'j': case KEY_DOWN:
-				menu_driver(save_menu, REQ_DOWN_ITEM);
+				menu_driver(ui->fb_menu, REQ_DOWN_ITEM);
 				break;
 			case 'k': case KEY_UP:
-				menu_driver(save_menu, REQ_UP_ITEM);
+				menu_driver(ui->fb_menu, REQ_UP_ITEM);
 				break;
 			case '\n':
-				snprintf(newpath, MAXPATH, "%s/%s", filepath, selected);
-				if (stat(newpath, &st) == 0 && S_ISDIR(st.st_mode))
+				snprintf(ui->fb_newpath, MAXPATH, "%s/%s", path, selected);
+				if (stat(ui->fb_newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
-					memcpy(filepath, newpath, strlen(newpath) + 1);
-					snprintf(cur_dir, MAXBUF, "/%s", selected);
+					memcpy(path, ui->fb_newpath, strlen(ui->fb_newpath) + 1);
+					snprintf(ui->fb_cur_dir, MAXBUF, "/%s", selected);
 				}
-				mvwprintw(save_win, 1, 1, "save to %s?", cur_dir);
-				if ((ch = wgetch(save_win)) == '\n')
+				mvwprintw(ui->fb_win, 1, 1, "save to %s?", ui->fb_cur_dir);
+				if ((ch = wgetch(ui->fb_win)) == '\n')
 				{
-					save = 1;
+					ui->fb_save = 1;
 					menu_done = 1;
 				}
 				else
 				{
-					mvwhline(save_win, 1, 1, ' ',  width - 2);
-					wrefresh(save_win);
-					mvwprintw(save_win, 1, 1, "canceled save");
+					mvwhline(ui->fb_win, 1, 1, ' ',  ui->fb_width - 2);
+					wrefresh(ui->fb_win);
+					mvwprintw(ui->fb_win, 1, 1, "canceled save");
 				}
 				break;
 			case 'l': case KEY_RIGHT:
-				snprintf(newpath, MAXPATH, "%s/%s", filepath, selected);
-				if (stat(newpath, &st) == 0 && S_ISDIR(st.st_mode))
+				snprintf(ui->fb_newpath, MAXPATH, "%s/%s", path, selected);
+				if (stat(ui->fb_newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
-					memcpy(filepath, newpath, strlen(newpath) + 1);
-					snprintf(cur_dir, MAXBUF, " /%s", selected);
+					memcpy(path, ui->fb_newpath, strlen(ui->fb_newpath) + 1);
+					snprintf(ui->fb_cur_dir, MAXBUF, " /%s", selected);
 					break;
 				}
 				break;
 			case 'h': case KEY_LEFT: 
-				if (strcmp(filepath, chart_path) == 0)
+				if (strcmp(path, main_path) == 0)
 					break;
-				back_dir(filepath, cur_dir);
+				back_dir(path, ui->fb_cur_dir);
 				break;
 			case 'm':
 				mdir = ecalloc(1, 128);
 				
 				echo();
-				mvwprintw(save_win, 1, 1, "dir name?:");
-				mvwgetnstr(save_win, 1, 12, mdir, 127);
+				mvwprintw(ui->fb_win, 1, 1, "dir name?:");
+				mvwgetnstr(ui->fb_win, 1, 12, mdir, 127);
 				noecho();
 				
-				snprintf(newpath, MAXPATH, "%s/%s/", filepath, mdir);
+				snprintf(ui->fb_newpath, MAXPATH, "%s/%s/", path, mdir);
 				
-				if (mkdir(newpath, 0755) == -1)
-					ERR_EXIT("save_menu mkdir fail");
+				if (mkdir(ui->fb_newpath, 0755) == -1)
+					ERR_EXIT("menu mkdir fail");
 				
-				snprintf(cur_dir, MAXBUF, "%s/", mdir);
+				snprintf(ui->fb_cur_dir, MAXBUF, "%s/", mdir);
 				
 				free(mdir);
 				break;
@@ -307,64 +307,16 @@ static int print_save_menu(char *filepath, ITEM **item_save, char **name, char *
 				break;
 		}
 		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT || ch == 'm')
-		{
-			unpost_menu(save_menu);
-			set_menu_items(save_menu, NULL); // ncurses doesnt free connected items
-			for (size_t i = 0; i < icount; ++i)
-			{
-				free_item(item_save[i]);
-				free(name[i]);
-				free(desc[i]);
-			}
+			rebuild_menu(ui, path, ls);
 			
-			werase(save_win);
-			wnoutrefresh(save_win);
-			mvwprintw(save_win, 1, 1, "%s", cur_dir);
-			mvwprintw(save_win, 1, width - 4, "{s}");
-			mvwhline(save_win, 2, 1, ACS_HLINE, width - 2);
-			
-			icount = name_to_item(filepath, item_save, name, desc);
-			set_menu_items(save_menu, item_save);
-			
-			width = 25;
-			height = (int)icount + header;
-			if (icount > 16)
-				height = 16 + header;
-	
-			starty = (LINES - height) / 2;
-			startx = (COLS - width) / 2;
-		
-			mvwin(save_win, starty, startx);
-			mvwin(save_subwin, starty, startx);
-			wresize(save_win, height, width);
-			wresize(save_subwin, height - header, width -2);
-		}
-		box(save_win, 0, 0);
-		post_menu(save_menu);
+		box(ui->fb_win, 0, 0);
+		post_menu(ui->fb_menu);
 		doupdate();
 	}
-	
-	unpost_menu(save_menu);
-	free_menu(save_menu);
-	for (size_t i = 0; i < icount; ++i)
-	{
-		free_item(item_save[i]);
-		free(name[i]);
-		free(desc[i]);
-	}
-	free(desc);
-	free(name);
-	free(item_save);
-	
-	werase(save_win);
-	wrefresh(save_win);
-	delwin(save_subwin);
-	delwin(save_win);
-	
-	return save;
+	return ui->fb_save;
 }
 
-static void save_file_name(struct cdata *cdata, char *filepath)
+static void save_file_name(struct cdata *cdata, char *path)
 {
 	struct stat buff;
 	
@@ -374,13 +326,13 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 	int starty = (LINES- height) / 2;
 	int startx = (COLS - width) / 2;
 	
-	WINDOW *save_win = newwin(height, width, starty, startx);
-	WINDOW *save_subwin = derwin(save_win, height - 2, width - 2, 0, 0);
+	WINDOW *win = newwin(height, width, starty, startx);
+	WINDOW *subwin = derwin(win, height - 2, width - 2, 0, 0);
 	
-	wbkgdset(save_win, COLOR_PAIR(M_COLOR));
+	wbkgdset(win, COLOR_PAIR(M_COLOR));
 	
 	cbreak();
-	keypad(save_win, TRUE);
+	keypad(win, TRUE);
 	
 	FIELD *save_field[2];
 	save_field[0] = new_field(1, 25, 2, 2, 0, 0);
@@ -391,19 +343,19 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 	save_field[1] = NULL;
 	
 	FORM *save_form = new_form(save_field);
-	set_form_win(save_form, save_win);
-	set_form_sub(save_form, save_subwin);
+	set_form_win(save_form, win);
+	set_form_sub(save_form, subwin);
 	
 	post_form(save_form);
-	box(save_win, 0, 0);
-	mvwaddstr(save_win, 1, 1, "-o--filename?-o");
+	box(win, 0, 0);
+	mvwaddstr(win, 1, 1, "-o--filename?-o");
 	
 	set_current_field(save_form, save_field[0]);
-	wrefresh(save_win);
+	wrefresh(win);
 	pos_form_cursor(save_form);
 	
 	int done = 0, ch = 0;
-	while(!done && (ch = wgetch(save_win)))
+	while(!done && (ch = wgetch(win)))
 	{
 		switch (ch)
 		{
@@ -422,12 +374,12 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 				break;
 			case 27:
 				done = 1;
-				werase(save_subwin);
-				wrefresh(save_subwin);
-				werase(save_win);
-				wrefresh(save_win);
-				delwin(save_subwin);
-				delwin(save_win);
+				werase(subwin);
+				wrefresh(subwin);
+				werase(win);
+				wrefresh(win);
+				delwin(subwin);
+				delwin(win);
 				
 				unpost_form(save_form);
 				set_form_fields(save_form, NULL);
@@ -441,7 +393,7 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 				form_driver(save_form, ch);
 				break;
 		}
-		wrefresh(save_win);
+		wrefresh(win);
 	}
 	
 	char *filename = field_buffer(save_field[0], 0);
@@ -457,34 +409,34 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 		len--;
 	fn[len] = '\0';
 	
-	snprintf(newpath, MAXPATH, "%s/%s", filepath, fn);
+	snprintf(newpath, MAXPATH, "%s/%s", path, fn);
 	
 	if (stat(newpath, &buff) == 0)
 	{
-		werase(save_win);
-		mvwprintw(save_win, 1, 1,
+		werase(win);
+		mvwprintw(win, 1, 1,
 		"overwrite:'%s'?\n -o--(y/n)-o:", filename);
-		box(save_win, 0, 0);
-		wrefresh(save_win);
+		box(win, 0, 0);
+		wrefresh(win);
 		ch = getch();
 		switch (ch)
 		{
 			case 'y':
-				werase(save_win);
-				mvwprintw(save_win, 2, 1, "overwritten!--o-");
-				box(save_win, 0, 0);
-				wrefresh(save_win);
-				delwin(save_subwin);
-				delwin(save_win);
+				werase(win);
+				mvwprintw(win, 2, 1, "overwritten!--o-");
+				box(win, 0, 0);
+				wrefresh(win);
+				delwin(subwin);
+				delwin(win);
 				getch();
 				break;
 			case 'n':
-				werase(save_win);
-				mvwprintw(save_win, 2, 1, "your file is safe >w<");
-				box(save_win, 0, 0);
-				wrefresh(save_win);
-				delwin(save_subwin);
-				delwin(save_win);
+				werase(win);
+				mvwprintw(win, 2, 1, "your file is safe >w<");
+				box(win, 0, 0);
+				wrefresh(win);
+				delwin(subwin);
+				delwin(win);
 				getch();
 				return;
 			default:
@@ -519,34 +471,16 @@ static void save_file_name(struct cdata *cdata, char *filepath)
 		
 		fclose(ifp);
 		unpost_form(save_form);
-		werase(save_win);
-		wrefresh(save_win);
+		werase(win);
+		wrefresh(win);
 		
 		set_form_fields(save_form, NULL);
 		for (size_t j = 0; j < 2; ++j)
 			free_field(save_field[j]);
 		free_form(save_form);
 		
-		delwin(save_subwin);
-		delwin(save_win);
-}
-
-void save_chart(struct cdata *cdata)
-{
-	char chart_path[MAXPATH] = {0};
-	path_check(chart_path, "charts");
-	
-	char filepath[MAXPATH] = {0};
-	memcpy(filepath, chart_path, strlen(chart_path)+1);
-	
-	size_t size = file_count(chart_path, 1) + 1;
-	
-	ITEM **item_save = ecalloc(size, sizeof(ITEM *));
-	char **name = ecalloc(size, sizeof(char *));
-	char **desc = ecalloc(size, sizeof(char *));
-	
-	if (print_save_menu(filepath, item_save, name, desc, chart_path) == 1)
-		save_file_name(cdata, filepath);
+		delwin(subwin);
+		delwin(win);
 }
 
 static void converttocomma(char *path)
@@ -587,48 +521,9 @@ static void converttocomma(char *path)
 	fclose(fp);
 }
 
-void print_load_menu(struct cdata *cdata, char *path, char *head)
+void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls)
 {
 	char *main_path = ecalloc(1, MAXPATH);
-	size_t size = file_count(path, 1) + 1;
-	
-	ITEM **item = ecalloc(size, sizeof(ITEM *));
-	char **name = ecalloc(size, sizeof(char *));
-	char **desc = ecalloc(size, sizeof(char *));
-	
-	size_t icount = name_to_item(path, item, name, desc);
-	
-	int header = 4;
-	int width = 25;
-	int height = (int)icount + header;
-	if (icount > 16)
-		height = 16 + header;
-	
-	int starty = (LINES - height) / 2;
-	int startx = (COLS - width) / 2;
-	
-	WINDOW *win = newwin(height, width, starty, startx);
-	WINDOW *subwin = derwin(win, height - header, width - 2, 3, 1);
-	MENU *menu = new_menu(item);
-	FILE *fp;
-	
-	wbkgdset(win, COLOR_PAIR(M_COLOR));
-	keypad(win, TRUE);
-	box(win, 0, 0);
-	
-	menu_opts_off(menu, O_NONCYCLIC);
-	menu_opts_off(menu, O_SHOWDESC);
-	set_menu_back(menu, COLOR_PAIR(M_COLOR));
-	set_menu_fore(menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
-	set_menu_win(menu, win);
-	set_menu_sub(menu, subwin);
-	
-	mvwprintw(win, 1, 1, "%s", head);
-	mvwprintw(win, 1, width - 4, "{l}");
-	mvwhline(win, 2, 1, ACS_HLINE, width - 2);
-	
-	post_menu(menu);
-	wrefresh(win);
 	
 	struct stat st;
 	const char *selected = NULL;
@@ -636,9 +531,7 @@ void print_load_menu(struct cdata *cdata, char *path, char *head)
 	
 	char buffer[MAXBUF] = {0};
 	char field[FMAX][MAXBUF] = {0};
-	char newpath[MAXPATH] = {0};
-	char cur_dir[MAXBUF] = {0};
-	snprintf(cur_dir, MAXBUF, " %s", head);
+	snprintf(ui->fb_cur_dir, MAXBUF, " %s", head);
 	
 	char *endptr = NULL;
 	long lret;
@@ -646,40 +539,40 @@ void print_load_menu(struct cdata *cdata, char *path, char *head)
 	errno = 0;
 	
 	int ch = 0, count = 0, menu_done = 0;
-	while (!menu_done && (ch = wgetch(win)))
+	while (!menu_done && (ch = wgetch(ui->fb_win)))
 	{
-		cur = current_item(menu);
+		cur = current_item(ui->fb_menu);
 		selected = item_description(cur);
 		
 		switch(ch)
 		{
 			case 'j': case KEY_DOWN:
-				menu_driver(menu, REQ_DOWN_ITEM);
+				menu_driver(ui->fb_menu, REQ_DOWN_ITEM);
 				break;
 			case 'k': case KEY_UP:
-				menu_driver(menu, REQ_UP_ITEM);
+				menu_driver(ui->fb_menu, REQ_UP_ITEM);
 				break;
 			case 'l': case KEY_RIGHT: case '\n':
-				if ((int)icount == 0)
+				if ((int)ui->fb_c == 0)
 					break;
 				
-				int n = snprintf(newpath, MAXPATH, "%s/%s", path, selected);
+				int n = snprintf(ui->fb_newpath, MAXPATH, "%s/%s", path, selected);
 				if (n >= MAXPATH)
 					ERR_EXIT("print_menu newpath too long");
 		
-				if (stat(newpath, &st) == 0 && S_ISDIR(st.st_mode))
+				if (stat(ui->fb_newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
-					memcpy(path, newpath, strlen(newpath) + 1);
-					snprintf(cur_dir, MAXBUF, " /%s", selected);
+					memcpy(path, ui->fb_newpath, strlen(ui->fb_newpath) + 1);
+					snprintf(ui->fb_cur_dir, MAXBUF, " /%s", selected);
 					break;
 				}
 				
 				snprintf(cdata->chart_name, MAXBUF, "%s", selected);
 				
 				if (strcmp(head, "/charts") == 0)
-					converttocomma(newpath);
+					converttocomma(ui->fb_newpath);
 				
-				fp = fopen(newpath, "r");
+				FILE *fp = fopen(ui->fb_newpath, "r");
 				if (fp == NULL)
 					ERR_EXIT("print_menu newpath fopen");
 				
@@ -766,77 +659,105 @@ void print_load_menu(struct cdata *cdata, char *path, char *head)
 			case 'h': case KEY_LEFT:
 				if (strcmp(path, main_path) == 0)
 					break;
-				back_dir(path, cur_dir);
+				back_dir(path, ui->fb_cur_dir);
 				break;
 			case 'q': case 27:
 				menu_done = 1;
 				break;
 		}
 		if (ch == 'h' || ch == 'l' || ch == '\n' || ch == KEY_LEFT || ch == KEY_RIGHT || ch == 'm')
-		{
-			unpost_menu(menu);
-			set_menu_items(menu, NULL);
-			for (size_t i = 0; i < icount; ++i)
-			{
-				free_item(item[i]);
-				free(name[i]);
-				free(desc[i]);
-			}
+			rebuild_menu(ui, path, ls);
 			
-			werase(win);
-			wnoutrefresh(win);
-			mvwprintw(win, 1, 1, "%s", cur_dir);
-			mvwprintw(win, 1, width - 4, "{l}");
-			mvwhline(win, 2, 1, ACS_HLINE, width - 2);
-			
-			icount = name_to_item(path, item, name, desc);
-			set_menu_items(menu, item);
-			
-			width = 25;
-			height = (int)icount + header;
-			if (icount > 16)
-				height = 16 + header;
-			
-			starty = (LINES - height) / 2;
-			startx = (COLS - width) / 2;
-			
-			wresize(win, height, width);
-			wresize(subwin, height - header, width -2);
-			mvwin(win, starty, startx);
-			mvwin(subwin, starty, startx);
-		}
-		box(win, 0, 0);
-		post_menu(menu);
+		box(ui->fb_win, 0, 0);
+		post_menu(ui->fb_menu);
 		doupdate();
 	}
-	memcpy(path, newpath, strlen(newpath)+1);
-	
-	unpost_menu(menu);
-	free_menu(menu);
-	for (size_t j = 0; j < icount; ++j)
-	{
-		free_item(item[j]);
-		free(name[j]);
-		free(desc[j]);
-	}
-	free(name);
-	free(desc);
-	free(item);
-	free(main_path);
-	
-	werase(win);
-	wrefresh(win);
-	delwin(subwin);
-	delwin(win);
 }
 
-void load_chart(struct cdata *cdata)
+void print_menu(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls, bool sl)
 {
-	char chart_path[MAXPATH] = {0};
-	path_check(chart_path, "charts");
+	ui->fb_save = 0;
+	ui->fb_c = file_count(path, 1) + 1;
 	
-	char filepath[MAXPATH] = {0};
-	memcpy(filepath, chart_path, strlen(chart_path)+1);
+	ui->fb_item = ecalloc(ui->fb_c, sizeof(ITEM *));
+	ui->fb_name = ecalloc(ui->fb_c, sizeof(char *));
+	ui->fb_desc = ecalloc(ui->fb_c, sizeof(char *));
 	
-	print_load_menu(cdata, filepath, "/charts");
+	ui->fb_c = name_to_item(path, ui->fb_item, ui->fb_name, ui->fb_desc);
+	
+	ui->fb_header = 4;
+	ui->fb_width = 25;
+	ui->fb_height = (int)ui->fb_c + ui->fb_header;
+	if (ui->fb_c > 16)
+		ui->fb_height = 16 + ui->fb_header;
+	
+	ui->fb_sy = (LINES - ui->fb_height) / 2;
+	ui->fb_sx = (COLS - ui->fb_width) / 2;
+	ui->fb_save = 0;
+	
+	ui->fb_win = newwin(ui->fb_height, ui->fb_width, ui->fb_sy, ui->fb_sx);
+	ui->fb_subwin = derwin(ui->fb_win, ui->fb_height - ui->fb_header, ui->fb_width - 2, 3, 1);
+	ui->fb_menu = new_menu(ui->fb_item);
+	
+	box(ui->fb_win, 0, 0);
+	keypad(ui->fb_win, TRUE);
+	wbkgdset(ui->fb_win, COLOR_PAIR(M_COLOR));
+	
+	menu_opts_off(ui->fb_menu, O_NONCYCLIC);
+	menu_opts_off(ui->fb_menu, O_SHOWDESC);
+	set_menu_fore(ui->fb_menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+	set_menu_back(ui->fb_menu, COLOR_PAIR(M_COLOR));
+	set_menu_win(ui->fb_menu, ui->fb_win);
+	set_menu_sub(ui->fb_menu, ui->fb_subwin);
+	
+	mvwprintw(ui->fb_win, 1, 1, " %s", head);
+	mvwprintw(ui->fb_win, 1, ui->fb_width - 4, "{%c}", ls);
+	mvwhline(ui->fb_win, 2, 1, ACS_HLINE, ui->fb_width - 2);
+	
+	post_menu(ui->fb_menu);
+	wrefresh(ui->fb_win);
+	
+	if (sl == SAVE)
+	{
+		if (save_options(ui, path, head, ls) == 1)
+			save_file_name(cdata, path);
+	}
+	else
+	{
+		load_options(cdata, ui, path, head, ls);
+		memcpy(path, ui->fb_newpath, strlen(ui->fb_newpath)+1);
+	}
+	
+	unpost_menu(ui->fb_menu);
+	free_menu(ui->fb_menu);
+	for (size_t i = 0; i < ui->fb_c; ++i)
+	{
+		free_item(ui->fb_item[i]);
+		free(ui->fb_name[i]);
+		free(ui->fb_desc[i]);
+	}
+	free(ui->fb_desc);
+	free(ui->fb_name);
+	free(ui->fb_item);
+	
+	werase(ui->fb_win);
+	wrefresh(ui->fb_win);
+	delwin(ui->fb_subwin);
+	delwin(ui->fb_win);
+}
+
+void save_chart(struct cdata *cdata, struct ui *ui)
+{
+	char path[MAXPATH] = {0};
+	path_check(path, "charts");
+	
+	print_menu(cdata, ui, path, "/charts", 's', SAVE);
+}
+
+void load_chart(struct cdata *cdata, struct ui *ui)
+{
+	char path[MAXPATH] = {0};
+	path_check(path, "charts");
+	
+	print_menu(cdata, ui, path, "/charts", 'l', LOAD);
 }

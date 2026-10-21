@@ -93,7 +93,7 @@ static ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t l
 	return range;
 }
 
-static void print_menu(struct cdata *cdata, struct ui *ui, FIELD *cdata_field[], FORM *cdata_form,
+static void print_search_menu(struct cdata *cdata, struct ui *ui, FIELD *cdata_field[], FORM *cdata_form,
 struct cdata **search_result, ITEM **item_result, size_t search_count)
 {
 	size_t page_max_item = 16;
@@ -297,7 +297,7 @@ void city_search(struct cdata *cdata,  struct ui *ui, FIELD *cdata_field[], FORM
 		item_result[i] = new_item(full_result[i], NULL);
 	}
 	
-	print_menu(cdata, ui, cdata_field, cdata_form, search_result, item_result, search_count);
+	print_search_menu(cdata, ui, cdata_field, cdata_form, search_result, item_result, search_count);
 	
 	cleanup:
 	for (size_t i = 0; i < search_count; ++i)

@@ -180,6 +180,25 @@ struct ui {
 	int inc;
 	int tl;
 	int bl;
+	
+	// file browser
+	WINDOW *fb_win;
+	WINDOW *fb_subwin;
+	MENU *fb_menu;
+	ITEM **fb_item;
+	
+	char **fb_name;
+	char **fb_desc;
+	char fb_newpath[MAXPATH];
+	char fb_cur_dir[MAXPATH];
+	
+	size_t fb_c;
+	int fb_header;
+	int fb_width;
+	int fb_height;
+	int fb_sy;
+	int fb_sx;
+	int fb_save;
 };
 
 void ui_init(struct ui *ui);

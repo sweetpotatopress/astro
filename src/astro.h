@@ -149,6 +149,9 @@ struct ui;
 #define FLON 11
 #define FMAX 12
 
+#define SAVE 1
+#define LOAD 0
+
 void *ecalloc(size_t n, size_t size);
 void *erealloc(void *p, size_t size);
 char *xstrdup(const char *s);
@@ -158,9 +161,9 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 void city_search(struct cdata *cdata,  struct ui *ui, FIELD *cdata_field[], FORM *cdata_form, char *search);
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
 void path_check(char *path, const char *s);
-void load_chart(struct cdata *cdata);
-void print_load_menu(struct cdata *cdata, char *path, char *head);
-void save_chart(struct cdata *cdata);
+void load_chart(struct cdata *cdata, struct ui *ui);
+void save_chart(struct cdata *cdata, struct ui *ui);
+void print_menu(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls, bool sl);
 void set_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int ch);
 void datadir_check(void);
 size_t file_count(const char *path, const int r);

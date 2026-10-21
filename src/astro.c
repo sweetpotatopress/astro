@@ -226,12 +226,12 @@ int main(int argc, char *argv[])
 				doupdate();
 				break;
 			case 'w':
-				save_chart(cdata[ui->cc]);
+				save_chart(cdata[ui->cc], ui);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
 			case 'e':
-				load_chart(cdata[ui->cc]);
+				load_chart(cdata[ui->cc], ui);
 				ecst_init(planet, cdata[ui->cc]->se);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();

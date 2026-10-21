@@ -320,7 +320,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	char path[MAXPATH];
 	path_check(path, "diary");
 	
-	print_load_menu(cdata, path, "/diary");
+	print_menu(cdata, ui, path, "/diary", 'l', LOAD);
 	diary_path(path, cdata->year, cdata->mon, cdata->mday);
 	
 	fp = fopen(path, "r");
