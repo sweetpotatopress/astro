@@ -723,7 +723,10 @@ void print_menu(struct cdata *cdata, struct ui *ui, char *path, char *head, char
 			save_file_name(cdata, path);
 	}
 	else
+	{
 		load_options(cdata, ui, path, head, ls);
+		memcpy(path, ui->fb_newpath, strlen(ui->fb_newpath) + 1);
+	}
 	
 	unpost_menu(ui->fb_menu);
 	free_menu(ui->fb_menu);
