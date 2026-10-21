@@ -309,6 +309,34 @@ static void diary_write(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 	delwin(ui->pad);
 }
 
+struct ct {
+	int hour;
+	int min;
+	int sec;
+	char y;
+};
+
+static void next_entry(struct cdata *cdata, struct ui* ui, struct ct **ct, int *c, int *lc, int cm, int sign)
+{
+	*c += sign;
+	if (*c > cm)
+		*c = 0;
+	else if (*c < 0)
+		*c = cm;
+		
+	cdata->hour = ct[*c]->hour;
+	cdata->min = ct[*c]->min;
+	cdata->sec = ct[*c]->sec;
+			
+	mvwprintw(ui->pad, ct[*lc]->y, 12, "   ");
+	wattron(ui->pad, COLOR_PAIR(AIR));
+	mvwprintw(ui->pad, ct[*c]->y, 12, "<--");
+	wattroff(ui->pad, COLOR_PAIR(AIR));
+	
+	*lc = *c;
+}
+
+
 static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	FILE *fp;
@@ -316,6 +344,10 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	char *buf = NULL;
 	int y = 0;
 	int ly = 1;
+	
+	struct ct **ct = ecalloc(256, sizeof(*ct));
+	for (int i = 0; i < 256; ++i)
+		ct[i] = ecalloc(1, sizeof(*ct[i]));
 	
 	char path[MAXPATH];
 	path_check(path, "diary");
@@ -333,9 +365,46 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 		ERR_EXIT("read_diary fopen");
 	ssize_t n;
 	mvwprintw(ui->pad, 0, 0, "%.*s", PCOL, path);
+	bool s = FALSE;
+	int c = 0;
 	while ((n = getline(&buf, &bm, fp)) != -1)
 	{
 		mvwprintw(ui->pad, ly, 0, "%s", buf);
+		
+		if (s == TRUE)
+		{
+			char hour[3];
+			char min[3];
+			char sec[3];
+			hour[0] = buf[0];
+			hour[1] = buf[1];
+			hour[2] = '\0';
+			min[0] = buf[3];
+			min[1] = buf[4];
+			min[2] = '\0';
+			sec[0] = buf[6];
+			sec[1] = buf[7];
+			sec[2] = '\0';
+			
+			ct[c]->hour = atoi(hour);
+			if (buf[8] == 'P')
+			{
+				ct[c]->hour += 12;
+				if (ct[c]->hour == 24)
+					ct[c]->hour = 0;
+			}
+			ct[c]->min = atoi(min);
+			ct[c]->sec = atoi(sec);
+			ct[c]->y = ly;
+			s = FALSE;
+			c++;
+		}
+			
+		if (buf[0] == '-' && buf[2] == '-' && buf[4] == '-')
+		{
+			s = TRUE;
+		}
+			
 		ly++;
 		if (ly == PLINE)
 			wresize(ui->pad, bm, PCOL);
@@ -346,7 +415,12 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
 	
 	curs_set(1);
+	
+	int cm = c;
+	c = 0;
+	
 	int ch;
+	int lc = 0;
 	bool done = FALSE;
 	while (!done && (ch = wgetch(ui->pad)) != ERR)
 	{
@@ -364,6 +438,17 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 			case CTRLY:
 				up_pad(ui);
 				y-= ui->inc;
+				break;
+			case 'l':
+				next_entry(cdata, ui, ct, &c, &lc, cm, 1);
+				
+				new_chart(cdata, pxx, ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'h':
+				next_entry(cdata, ui, ct, &c, &lc, cm, -1);
+				new_chart(cdata, pxx, ui, planet, zodiac);
+				doupdate();
 				break;
 			case KEY_DOWN: case 'j':
 				down_line(&y);
@@ -383,6 +468,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	}
 	curs_set(0);
 	free(buf);
+	free(ct);
 }
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
