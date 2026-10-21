@@ -41,7 +41,8 @@ static void d_timezone(char *timezone)
 static void diary_path(char *full_path, int year, int mon, int mday)
 {
 	char filename[12] = {0};
-	int n = snprintf(filename, 12, "%02d.%02d.md", mon, mday);
+	//int n = snprintf(filename, 12, "%02d.%02d.md", mon, mday);
+	int n = snprintf(filename, 12, "tmp.md");
 	if (n > 12)
 		ERR_EXIT("ERR: diary filename too long");
 	
@@ -83,11 +84,12 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 
 	char header[MAXBUF] = {0};
 	if (access(full_path, R_OK) == -1)
-		snprintf(header, MAXBUF, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f",
+		snprintf(header, MAXBUF, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f\n- - - - - - -\n%02d:%02d:%02d%s",
 		cdata->city, cdata->state, cdata->country,
 		time.year, time.mon, time.mday,
 		time.hour, time.min, time.sec, 
-		ui->conf_timezone, ui->conf_dlat, ui->conf_dlon);
+		ui->conf_timezone, ui->conf_dlat, ui->conf_dlon,
+		th, time.min, time.sec, tod);
 	else
 		snprintf(header, MAXBUF, "%02d:%02d:%02d%s", th, time.min, time.sec, tod);
 	char *footer = "\n- - - - - - -";
@@ -316,26 +318,18 @@ struct ct {
 	char y;
 };
 
-static void next_entry(struct cdata *cdata, struct ui* ui, struct ct **ct, int *c, int *lc, int cm, int sign)
+static void next_entry(struct cdata *cdata, struct ui* ui, struct ct **ct, int *c, int cm, int sign)
 {
 	*c += sign;
-	if (*c > cm)
-		*c = 0;
-	else if (*c < 0)
+	if (*c >= cm)
 		*c = cm;
+	else if (*c < 0)
+		*c = 0;
 		
 	cdata->hour = ct[*c]->hour;
 	cdata->min = ct[*c]->min;
 	cdata->sec = ct[*c]->sec;
-			
-	mvwprintw(ui->pad, ct[*lc]->y, 12, "   ");
-	wattron(ui->pad, COLOR_PAIR(AIR));
-	mvwprintw(ui->pad, ct[*c]->y, 12, "<--");
-	wattroff(ui->pad, COLOR_PAIR(AIR));
-	
-	*lc = *c;
 }
-
 
 static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
@@ -344,9 +338,10 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	char *buf = NULL;
 	int y = 0;
 	int ly = 1;
+	int ent_max = 1024;	
 	
-	struct ct **ct = ecalloc(256, sizeof(*ct));
-	for (int i = 0; i < 256; ++i)
+	struct ct **ct = ecalloc(ent_max, sizeof(*ct));
+	for (int i = 0; i < ent_max; ++i)
 		ct[i] = ecalloc(1, sizeof(*ct[i]));
 	
 	char path[MAXPATH];
@@ -365,6 +360,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 		ERR_EXIT("read_diary fopen");
 	ssize_t n;
 	mvwprintw(ui->pad, 0, 0, "%.*s", PCOL, path);
+
 	bool s = FALSE;
 	int c = 0;
 	while ((n = getline(&buf, &bm, fp)) != -1)
@@ -410,17 +406,20 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 			wresize(ui->pad, bm, PCOL);
 	}
 	
+	int cm = c-1;
+	int dif = LINES / 2;
+	
+	c = 0;
+	y = ct[0]->y;
+	
+	wmove(ui->pad, y, 0);
+	
 	new_chart(cdata, pxx, ui, planet, zodiac);
 	wrefresh(ui->main_win);
 	prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
-	
 	curs_set(1);
-	
-	int cm = c;
-	c = 0;
-	
+
 	int ch;
-	int lc = 0;
 	bool done = FALSE;
 	while (!done && (ch = wgetch(ui->pad)) != ERR)
 	{
@@ -440,15 +439,24 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 				y-= ui->inc;
 				break;
 			case 'l':
-				next_entry(cdata, ui, ct, &c, &lc, cm, 1);
+				next_entry(cdata, ui, ct, &c, cm, 1);
 				
+				y = ct[c]->y;
+				while(y+dif > ui->bl)
+					down_pad(ui);
 				new_chart(cdata, pxx, ui, planet, zodiac);
-				doupdate();
 				break;
 			case 'h':
-				next_entry(cdata, ui, ct, &c, &lc, cm, -1);
+				next_entry(cdata, ui, ct, &c, cm, -1);
+				
+				y = ct[c]->y;	
+				int tmp = y;
+				tmp -= dif;
+				if (tmp < 0)
+					tmp = 0;
+				while(tmp < ui->tl)
+					up_pad(ui);
 				new_chart(cdata, pxx, ui, planet, zodiac);
-				doupdate();
 				break;
 			case KEY_DOWN: case 'j':
 				down_line(&y);
@@ -464,11 +472,15 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 				break;
 		}
 		wmove(ui->pad, y, 0);
+		wrefresh(ui->main_win);
 		prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
 	}
 	curs_set(0);
-	free(buf);
+	
+	for (int i = 0; i < ent_max; ++i)
+		free(ct[i]);
 	free(ct);
+	free(buf);
 }
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
