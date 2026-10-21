@@ -329,7 +329,6 @@ static void save_file_name(struct cdata *cdata, char *path)
 	
 	wbkgdset(win, COLOR_PAIR(M_COLOR));
 	
-	cbreak();
 	keypad(win, TRUE);
 	
 	FIELD *save_field[2];

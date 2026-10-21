@@ -375,7 +375,6 @@ void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **
 	
 	wbkgdset(sr_win, COLOR_PAIR(M_COLOR));
 	
-	cbreak();
 	keypad(sr_win, TRUE);	
 	
 	FIELD *sr_field[2];

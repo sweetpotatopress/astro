@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
 	initscr();
 	set_escdelay(25);
-	cbreak();
+	raw();
 	noecho();
 	
 	struct cdata **cdata = ecalloc(CHARTMAX, sizeof(*cdata));
