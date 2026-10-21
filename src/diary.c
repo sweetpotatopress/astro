@@ -41,7 +41,7 @@ static void d_timezone(char *timezone)
 static void diary_path(char *full_path, int year, int mon, int mday)
 {
 	char filename[12] = {0};
-	int n = snprintf(filename, 12, "%02d.%02d.md", mon, mday);
+	int n = snprintf(filename, 12, "%02d.md", mday);
 	if (n > 12)
 		ERR_EXIT("ERR: diary filename too long");
 	
@@ -55,9 +55,18 @@ static void diary_path(char *full_path, int year, int mon, int mday)
 	
 	if (access(year_path, R_OK) == -1)
 		if (mkdir(year_path, 0755) == -1)
-			ERR_EXIT("ERR: diary mkdir");
+			ERR_EXIT("ERR: year_path mkdir");
+			
+	char mon_path[MAXPATH] = {0};
+	n = snprintf(mon_path, MAXPATH, "%s/%d", year_path, mon);
+	if (n > MAXPATH)
+		ERR_EXIT("ERR: mon_path too long");
 		
-	n = snprintf(full_path, MAXPATH, "%s/%s", year_path, filename);
+	if (access(mon_path, R_OK) == -1)
+		if (mkdir(mon_path, 0755) == -1)
+			ERR_EXIT("ERR: mon path mkdir");
+		
+	n = snprintf(full_path, MAXPATH, "%s/%s", mon_path, filename);
 	if (n > MAXPATH)
 		ERR_EXIT("ERR: diary.c full_path too long");
 }
