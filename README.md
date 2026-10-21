@@ -1,5 +1,5 @@
-further documentation and news  
-<sub>--o https://sweetpotato.press --o</sub>
+<sub>further documentation and news</sub>  
+<sub>--o https://sweetpotato.press --o</sub>  
 <sub>~:o irc.libera.chat #astro</sub>
 --- --- --- --- --- --- ---   
 ![miles davis birth chart drawn in astro](https://sweetpotato.press/img/astro.png)
@@ -29,7 +29,6 @@ enter		animate chart
 0...9		chart number
 alt+0...9	synastry w/ chart
 t			transits
-
 s			solar return
 
 tab			live update  
@@ -71,7 +70,6 @@ p			toggle left table
 	[P]		next page
 
 q			exit astro  
-
 ```
 ##### LICENSE  
 astro  
