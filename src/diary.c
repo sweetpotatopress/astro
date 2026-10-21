@@ -471,6 +471,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 				done = TRUE;
 				break;
 		}
+		curs_set(1);
 		wmove(ui->pad, y, 0);
 		wrefresh(ui->main_win);
 		prefresh(ui->pad, ui->pad_y, ui->pad_x, ui->scr_y, ui->scr_x, ui->scr_y + ui->scr_h, ui->scr_x + ui->scr_w);
