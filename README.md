@@ -14,6 +14,13 @@ install `doas make install`
 
 ##### KEYBINDS  
 ```
+i			input chart data  
+	F1		clear fields  
+	tab		fill local time  
+	arrows	navigate  
+	\		draw chart
+	esc		cancel
+	
 enter		animate chart  
 	h/l 	time increment  
 	k/j 	up/down  
@@ -25,36 +32,10 @@ t			transits
 
 s			solar return
 
-j			write diary
-	esc		save entry
-	
-[J]			read diary
-	j/k		down/up line
-	h/l		jump to prev/next entry
-	^e		scroll down
-	^y		scroll up
-
-z			zodiacal releasing
-	k/j		up/down period
-	h/l		up/down layer
-	tab		switch lot
-	
 tab			live update  
 
 r			redraw chart  
 [R]			redraw config chart
-
-c			config
-	tab		set current chart info to config
-	enter	set config default
-	space	toggle buttons
-	esc		cancel
-	
-q			exit astro  
-
-o 			toggle right table
-p			toggle left table
-	[P]		next page
 
 w			save chart  
 	m		make dir  
@@ -64,15 +45,34 @@ w			save chart
 e		 	load chart  
 	l/enter	choose  
 	esc		cancel  
- 
-i			input chart data  
-	F1		clear fields  
-	tab		fill local time  
-	arrows	navigate  
-	\		draw chart
-	esc		cancel
-```
 
+j			write diary
+	esc		save entry
+	
+[J]			read diary
+	j/k		down/up line
+	h/l		prev/next entry
+	ctrl+e	scroll down
+	ctrl+y	scroll up
+
+z			zodiacal releasing
+	k/j		up/down period
+	h/l		up/down layer
+	tab		switch lot
+	
+c			config
+	tab		set current chart info to config
+	enter	set config default
+	space	toggle buttons
+	esc		cancel
+	
+o 			toggle right table
+p			toggle left table
+	[P]		next page
+
+q			exit astro  
+
+```
 ##### LICENSE  
 astro  
 <sub>AGPLv3</sub>
