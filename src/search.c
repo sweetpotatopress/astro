@@ -54,28 +54,6 @@ static char *xstrcasestr(const char *h, const char *n)
 	return NULL;
 }
 
-static char *xstrtok(char *s, const char *delim)
-{ // doesnt skip repeating delims :3
-	static char *p = NULL;
-	char *start;
-	
-	if (s)
-		p = s;
-	if (!p || !*p)
-		return NULL;
-	if (strchr(delim, *p))
-	{
-		p++;
-		return "E";
-	}
-	start = p;
-	while (*p && !strchr(delim, *p))
-		p++;
-	if (*p)
-		*p++ = 0;
-	return start;
-}
-
 static ITEM **item_range(ITEM **items, size_t item_count, size_t first, size_t last)
 {
 	if (first > item_count)

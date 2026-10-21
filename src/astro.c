@@ -45,6 +45,28 @@ char *xstrdup(const char *s)
 	return memcpy(d, s, l+1);
 }
 
+char *xstrtok(char *s, const char *delim)
+{ // doesnt skip repeating delims :3
+	static char *p = NULL;
+	char *start;
+	
+	if (s)
+		p = s;
+	if (!p || !*p)
+		return NULL;
+	if (strchr(delim, *p))
+	{
+		p++;
+		return "E";
+	}
+	start = p;
+	while (*p && !strchr(delim, *p))
+		p++;
+	if (*p)
+		*p++ = 0;
+	return start;
+}
+
 static void iana_check(void)
 {
 	const char *iana_path[] = { 

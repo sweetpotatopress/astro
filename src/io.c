@@ -498,7 +498,7 @@ static void converttocomma(char *path)
 	{
 		if (j > 0 && buf[j-1] == '\n' && buf[j] == '\n')
 		{
-			buf[j] = '0';
+			buf[j] = 'E';
 			for (size_t c = strlen(buf)+1; c > j; c--)
 				buf[c] = buf[c-1];
 			buf[j+1] = ',';
@@ -574,12 +574,12 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				
 				if (fgets(buffer, MAXBUF, fp) != NULL)
 				{
-					char *it = strtok(buffer, ",\n");
+					char *it = xstrtok(buffer, ",");
 				
 					while(it)
 					{
 						snprintf(field[count++], MAXBUF, "%s", it);
-						it = strtok(NULL, ",\n");
+						it = xstrtok(NULL, ",");
 					}
 				}
 				
