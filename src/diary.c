@@ -41,8 +41,7 @@ static void d_timezone(char *timezone)
 static void diary_path(char *full_path, int year, int mon, int mday)
 {
 	char filename[12] = {0};
-	//int n = snprintf(filename, 12, "%02d.%02d.md", mon, mday);
-	int n = snprintf(filename, 12, "tmp.md");
+	int n = snprintf(filename, 12, "%02d.%02d.md", mon, mday);
 	if (n > 12)
 		ERR_EXIT("ERR: diary filename too long");
 	
