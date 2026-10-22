@@ -201,10 +201,27 @@ size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc)
 			else
 				snprintf(name[count], sizeof(buf), " %s", entry->d_name);
 				
-			item[count] = new_item(name[count], desc[count]);
 			++count;
 		}
 	}
+	for (size_t i = 0; i < count-1; i++)
+	{
+		for (size_t j = 0; j < count-1; j++)
+		{
+			if (atoi(name[j]) > atoi(name[j+1]))
+			{
+				char *tmp = desc[j];
+				desc[j] = desc[j + 1];
+				desc[j + 1] = tmp;
+				tmp = name[j];
+				name[j] = name[j+1];
+				name[j+1] = tmp;
+			}
+		}
+	}
+		
+	for (size_t i = 0; i < count; ++i)
+		item[i] = new_item(name[i], desc[i]);
 	item[count] = NULL;
 	
 	closedir(dir);
