@@ -272,9 +272,27 @@ void city_search(struct cdata *cdata,  struct ui *ui, FIELD *cdata_field[], FORM
 			search_result[i]->latitude,
 			search_result[i]->longitude);
 			
-		item_result[i] = new_item(full_result[i], NULL);
+	}
+		
+	for (size_t i = 0; i < search_count-1; i++)
+	{
+		for (size_t j = 0; j < search_count-1; j++)
+		{
+			if (strlen(search_result[j]->city) > strlen(search_result[j+1]->city))
+			{
+				struct cdata *m = search_result[j];
+				search_result[j] = search_result[j+1];
+				search_result[j+1] = m;
+				char *tmp = full_result[j];
+				full_result[j] = full_result[j+1];
+				full_result[j+1] = tmp;
+			}
+		}
 	}
 	
+	for (size_t i = 0; i < search_count; i++)
+		item_result[i] = new_item(full_result[i], NULL);
+		
 	print_search_menu(cdata, ui, cdata_field, cdata_form, search_result, item_result, search_count);
 	
 	cleanup:
