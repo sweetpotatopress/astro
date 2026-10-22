@@ -45,8 +45,13 @@ void path_check(char *path, const char *s)
 {
 	memset(path, 0, MAXPATH);
 	char env[MAXBUF] = {0};
-
-	if (strcmp("config_home", s) == 0)
+	
+	if (strcmp("config_dir", s) == 0)
+	{
+		path_env(env, "XDG_CONFIG_HOME", ".config");
+		snprintf(path, MAXPATH, "%s", env);
+	}
+	else if (strcmp("config_home", s) == 0)
 	{
 		path_env(env, "XDG_CONFIG_HOME", ".config");
 		snprintf(path, MAXPATH, "%s/%s", env, "astro");
@@ -56,9 +61,19 @@ void path_check(char *path, const char *s)
 		path_env(env, "XDG_CONFIG_HOME", ".config");
 		snprintf(path, MAXPATH, "%s/%s", env, "astro/config");
 	}
+	else if (strcmp("local_dir", s) == 0)
+	{
+		path_env(env, "XDG_DATA_HOME", ".local");
+		snprintf(path, MAXPATH, "%s", env);
+	}
+	else if (strcmp("share_dir", s) == 0)
+	{
+		path_env(env, "XDG_DATA_HOME", ".local/share");
+		snprintf(path, MAXPATH, "%s", env);
+	}
 	else if (strcmp("data_home", s) == 0)
 	{
-		path_env(env, "DDG_DATA_HOME", ".local/share");
+		path_env(env, "XDG_DATA_HOME", ".local/share");
 		snprintf(path, MAXPATH, "%s/%s", env, "astro");
 	}
 	else if (strcmp("charts", s) == 0)
@@ -86,6 +101,21 @@ void path_check(char *path, const char *s)
 void datadir_check(void)
 {
 	char path[MAXPATH] = {0};
+	
+	path_check(path, "local_dir");
+	if (access(path, F_OK) == -1)
+		if (mkdir(path, 0755) == -1)
+			ERR_EXIT("ERR: local_dir mkdir");
+			
+	path_check(path, "share_dir");
+	if (access(path, F_OK) == -1)
+		if (mkdir(path, 0755) == -1)
+			ERR_EXIT("ERR: share_dir mkdir");
+			
+	path_check(path, "config_dir");
+	if (access(path, F_OK) == -1)
+		if (mkdir(path, 0755) == -1)
+			ERR_EXIT("ERR: config_dir mkdir");
 	
 	path_check(path, "config_home");
 	if (access(path, F_OK) == -1)
