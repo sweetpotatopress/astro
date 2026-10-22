@@ -339,18 +339,12 @@ static void next_entry(struct cdata *cdata, struct ct **ct, int *c, int cm, int 
 	cdata->sec = ct[*c]->sec;
 }
 
-static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+static int diary_menu(struct cdata *cdata, struct ui *ui, struct ct **ct)
 {
 	FILE *fp;
 	size_t bm = PLINE;
 	char *buf = NULL;
-	int y = 0;
 	int ly = 1;
-	int ent_max = 1024;	
-	
-	struct ct **ct = ecalloc(ent_max, sizeof(*ct));
-	for (int i = 0; i < ent_max; ++i)
-		ct[i] = ecalloc(1, sizeof(*ct[i]));
 	
 	char path[MAXPATH];
 	path_check(path, "diary");
@@ -359,7 +353,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	if (ui->fb_cancel == TRUE)
 	{
 		ui->fb_cancel = FALSE;
-		return;
+		return -1;
 	}
 	
 	fp = fopen(path, "r");
@@ -412,12 +406,31 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 		if (ly == PLINE)
 			wresize(ui->pad, bm, PCOL);
 	}
+	free(buf);
+	return c;
+}
+
+static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+{
+	int ent_max = 1024;	
 	
-	int cm = c-1;
+	struct ct **ct = ecalloc(ent_max, sizeof(*ct));
+	for (int i = 0; i < ent_max; ++i)
+		ct[i] = ecalloc(1, sizeof(*ct[i]));
+	
+	int cm = diary_menu(cdata, ui, ct);
+	if (cm == -1)
+	{
+		for (int i = 0; i < ent_max; ++i)
+			free(ct[i]);
+		free(ct);
+		return;
+	}
+		
 	int dif = LINES / 2;
 	
-	c = 0;
-	y = ct[0]->y;
+	int c = 0;
+	int y = ct[0]->y;
 	
 	wmove(ui->pad, y, 0);
 	
@@ -472,6 +485,17 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 			case KEY_UP: case 'k':
 				up_line(&y);
 				break;
+			case 'J':
+				werase(ui->pad);
+				cm = diary_menu(cdata, ui, ct);
+				if (cm == -1)
+				{
+					for (int i = 0; i < ent_max; ++i)
+						free(ct[i]);
+					free(ct);
+					return;
+				}
+				break;
 			case '\n':
 				down_line(&y);
 				break;
@@ -491,7 +515,6 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	for (int i = 0; i < ent_max; ++i)
 		free(ct[i]);
 	free(ct);
-	free(buf);
 }
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
