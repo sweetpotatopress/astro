@@ -339,23 +339,13 @@ static void next_entry(struct cdata *cdata, struct ct **ct, int *c, int cm, int 
 	cdata->sec = ct[*c]->sec;
 }
 
-static int diary_menu(struct cdata *cdata, struct ui *ui, struct ct **ct)
+static int diary_to_pad(struct ui *ui, struct ct **ct, char *path)
 {
 	FILE *fp;
 	size_t bm = PLINE;
 	char *buf = NULL;
 	int ly = 1;
-	
-	char path[MAXPATH];
-	path_check(path, "diary");
-	
-	print_menu(cdata, ui, path, "/diary", 'l', LOAD);
-	if (ui->fb_cancel == TRUE)
-	{
-		ui->fb_cancel = FALSE;
-		return -1;
-	}
-	
+
 	fp = fopen(path, "r");
 	if (!fp)
 		ERR_EXIT("read_diary fopen");
@@ -407,7 +397,14 @@ static int diary_menu(struct cdata *cdata, struct ui *ui, struct ct **ct)
 			wresize(ui->pad, bm, PCOL);
 	}
 	free(buf);
-	return c;
+	return c-1;
+}
+
+static void free_ct(struct ct **ct, int n)
+{
+	for (int i = 0; i < n; ++i)
+		free(ct[i]);
+	free(ct);
 }
 
 static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
@@ -418,15 +415,18 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	for (int i = 0; i < ent_max; ++i)
 		ct[i] = ecalloc(1, sizeof(*ct[i]));
 	
-	int cm = diary_menu(cdata, ui, ct);
-	if (cm == -1)
+	char path[MAXPATH];
+	path_check(path, "diary");
+	
+	print_menu(cdata, ui, path, "/diary", 'l', LOAD);
+	if (ui->fb_cancel == TRUE)
 	{
-		for (int i = 0; i < ent_max; ++i)
-			free(ct[i]);
-		free(ct);
+		ui->fb_cancel = FALSE;
+		free_ct(ct, ent_max);
 		return;
 	}
-		
+
+	int cm = diary_to_pad(ui, ct, path);	
 	int dif = LINES / 2;
 	
 	int c = 0;
@@ -486,15 +486,15 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 				up_line(&y);
 				break;
 			case 'J':
-				werase(ui->pad);
-				cm = diary_menu(cdata, ui, ct);
-				if (cm == -1)
+				path_check(path, "diary");
+				print_menu(cdata, ui, path, "/diary", 'l', LOAD);
+				if (ui->fb_cancel == TRUE)
 				{
-					for (int i = 0; i < ent_max; ++i)
-						free(ct[i]);
-					free(ct);
-					return;
+					ui->fb_cancel = FALSE;
+					break;
 				}
+				werase(ui->pad);
+				cm = diary_to_pad(ui, ct, path);
 				break;
 			case '\n':
 				down_line(&y);
