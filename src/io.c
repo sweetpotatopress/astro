@@ -398,14 +398,15 @@ static void save_file_name(struct cdata *cdata, char *path)
 	wrefresh(win);
 	pos_form_cursor(save_form);
 	
-	int done = 0, ch = 0;
-	while(!done && (ch = wgetch(win)))
+	bool done = FALSE;
+	int ch = 0;
+	while(done == FALSE && (ch = wgetch(win)))
 	{
 		switch (ch)
 		{
 			case '\n':
 				form_driver(save_form, REQ_VALIDATION);
-				done = 1;
+				done = TRUE;
 				break;
 			case KEY_BACKSPACE:
 				form_driver(save_form, REQ_DEL_PREV);
@@ -417,7 +418,7 @@ static void save_file_name(struct cdata *cdata, char *path)
 				form_driver(save_form, REQ_RIGHT_CHAR);
 				break;
 			case 27:
-				done = 1;
+				done = TRUE;
 				werase(subwin);
 				wrefresh(subwin);
 				werase(win);
@@ -462,29 +463,32 @@ static void save_file_name(struct cdata *cdata, char *path)
 		"overwrite:'%s'?\n -o--(y/n)-o:", filename);
 		box(win, 0, 0);
 		wrefresh(win);
-		ch = getch();
-		switch (ch)
+		done = FALSE;
+		while (done == FALSE && (ch = getch()))
 		{
-			case 'y':
-				werase(win);
-				mvwprintw(win, 2, 1, "overwritten!--o-");
-				box(win, 0, 0);
-				wrefresh(win);
-				delwin(subwin);
-				delwin(win);
-				getch();
-				break;
-			case 'n':
-				werase(win);
-				mvwprintw(win, 2, 1, "your file is safe >w<");
-				box(win, 0, 0);
-				wrefresh(win);
-				delwin(subwin);
-				delwin(win);
-				getch();
-				return;
-			default:
-				ch = getch();
+			switch (ch)
+			{
+				case 'y':
+					werase(win);
+					mvwprintw(win, 2, 1, "overwritten!--o-");
+					box(win, 0, 0);
+					wrefresh(win);
+					delwin(subwin);
+					delwin(win);
+					sleep(1);
+					done = TRUE;
+					break;
+				case 'n': case 'q': case 27:
+					werase(win);
+					mvwprintw(win, 2, 1, "your file is safe >w<");
+					box(win, 0, 0);
+					wrefresh(win);
+					delwin(subwin);
+					delwin(win);
+					sleep(1);
+					return;
+					break;
+			}
 		}
 	}
 	
