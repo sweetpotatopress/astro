@@ -183,7 +183,7 @@ size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc)
 	if (!dir)
 		ERR_EXIT("name_to_item opendir failure");
 	
-	size_t count = 0;
+	int count = 0;
 	while ((entry = readdir(dir)) != NULL)
 	{
 		if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
@@ -204,15 +204,15 @@ size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc)
 			++count;
 		}
 	}
-	for (size_t i = 0; i < count-1; i++)
+	for (int i = 0; i < count-1; i++)
 	{
-		for (size_t j = 0; j < count-1; j++)
+		for (int j = 0; j < count-1; j++)
 		{
 			if (atoi(name[j]) > atoi(name[j+1]))
 			{
 				char *tmp = desc[j];
-				desc[j] = desc[j + 1];
-				desc[j + 1] = tmp;
+				desc[j] = desc[j+1];
+				desc[j+1] = tmp;
 				tmp = name[j];
 				name[j] = name[j+1];
 				name[j+1] = tmp;
@@ -220,12 +220,12 @@ size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc)
 		}
 	}
 		
-	for (size_t i = 0; i < count; ++i)
+	for (int i = 0; i < count; ++i)
 		item[i] = new_item(name[i], desc[i]);
 	item[count] = NULL;
 	
 	closedir(dir);
-	return count;
+	return (size_t)count;
 }
 
 void back_dir(char *filepath, char *cur_dir)
@@ -723,6 +723,7 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 
 void print_fb(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls, bool sl)
 {
+	
 	ui->fb_save = 0;
 	ui->fb_c = file_count(path, 1) + 1;
 	
@@ -763,7 +764,7 @@ void print_fb(struct cdata *cdata, struct ui *ui, char *path, char *head, char l
 	mvwprintw(ui->fb_win, 1, 1, " %s", head);
 	mvwprintw(ui->fb_win, 1, ui->fb_width - 4, "{%c}", ls);
 	mvwhline(ui->fb_win, 2, 1, ACS_HLINE, ui->fb_width - 2);
-	
+
 	post_menu(ui->fb_menu);
 	wrefresh(ui->fb_win);
 	
