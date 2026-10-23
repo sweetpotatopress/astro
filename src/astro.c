@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 		switch(ch)
 		{
 			case '\n':
-				animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				animate_chart(cdata, pxx, ui, planet, zodiac);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;

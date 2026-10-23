@@ -170,6 +170,24 @@ void realtime_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, doubl
 	nodelay(ui->main_win, FALSE);
 }
 
+static void profections(WINDOW *win, struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
+{
+		planet_init(planet, ui->bcc, pxx);
+		int x = LINES-2;
+		
+		int sign = (int)planet[12][SIGN];
+		int diff = cdata[ui->cc]->year - cdata[ui->bcc]->year;
+		int profection = (((sign + diff)) % 12 + 12) % 12;
+		
+		int mdiff = cdata[ui->cc]->mon - cdata[ui->bcc]->mon;
+		int mprof = (((profection + mdiff)) % 12 + 12) % 12;
+		
+		mvwprintw(win, x, 1, "profection:     mon:");
+		zo_color(win, ui, x, 13, profection, zodiac);
+		zo_color(win, ui, x, 22, mprof, zodiac);
+		planet_init(planet, ui->cc, pxx);
+}
+
 void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	ui->transit_win = newwin(LINES, COLS, 0, 0);
@@ -186,7 +204,7 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	pxx_init(cdata[ui->cc], pxx[ui->cc], planet);
 	
 	doupdate();
-	animate_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+	animate_chart(cdata, pxx, ui, planet, zodiac);
 				
 	ui->cc = ui->bcc;
 	wheel_init(ui->main_win, ui, 0, 0, 0);
@@ -282,7 +300,7 @@ static void lesser_wrap(struct tm *temp, time_t *t, size_t inc)
 	}
 }
 
-void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	int sy = 0, sx = COLS - 14;
 	int advance = 1, next_advance = 0;
@@ -292,21 +310,27 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	
 	struct tm temp = {0};
 	time_t t = 0;
-	cpt(cdata, &temp, &t, IN);
+	cpt(cdata[ui->cc], &temp, &t, IN);
 	
 	print_inc(ui->main_win, sy, sx, label, advance);
 	if (ui->cc == TRANSIT)
-		arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
+	{
+		profections(ui->main_win, cdata, pxx, ui, planet, zodiac);
+		arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
+	}
 
 	int ch = 0, anim_done = 0;
 	while(!anim_done && (ch = wgetch(ui->main_win)))
 	{
 		if (ui->cc == TRANSIT)
+		{
+			profections(ui->main_win, cdata, pxx, ui, planet, zodiac);
 			top_panel(ui->transit_panel);
+		}
 			
 		if (table_trigger(ui, ch) == 1)
 		{
-			new_chart(cdata, pxx, ui, planet, zodiac);
+			new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 			doupdate();
 		}
 		
@@ -367,12 +391,12 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						break;
 				}
 				lesser_wrap(&temp, &t, inc);
-				cpt(cdata, &temp, &t, OUT);
+				cpt(cdata[ui->cc], &temp, &t, OUT);
 				
 				if (ui->cc == TRANSIT)
-					arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
+					arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
 				else
-					new_chart(cdata, pxx, ui, planet, zodiac);
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				break;
 				
 			case 'j': case KEY_DOWN:
@@ -414,12 +438,12 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 						break;
 				}
 				lesser_wrap(&temp, &t, inc);
-				cpt(cdata, &temp, &t, OUT);
+				cpt(cdata[ui->cc], &temp, &t, OUT);
 				
 				if (ui->cc == TRANSIT)
-					arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
+					arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
 				else
-					new_chart(cdata, pxx, ui, planet, zodiac);
+					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				break;
 				
 			case 'h': case KEY_LEFT:
@@ -436,14 +460,14 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 				anim_done = 1;
 				break;
 			case 'd':
-				cdata->dt = !cdata->dt;
-				new_chart(cdata, pxx, ui, planet, zodiac);
+				cdata[ui->cc]->dt = !cdata[ui->cc]->dt;
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
 	
 		}
 		if (ui->cc == TRANSIT)
-			arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);
+			arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
 	
 		flushinp();
 		enanosleep(10);

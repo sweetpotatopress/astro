@@ -461,23 +461,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	mvwprintw(ui->left_win, starty, startx, 
 	"moon phase: %s", ui->sym.moon[cdata->moonphase]);
 	
-	++starty;
-	if (strlen(cdata->chart_name) > 0)
-	{
-		struct cdata tmp = {0};
-		set_localtime(&tmp);
-		
-		int sign = (int)planet[12][SIGN];
-		int diff = tmp.year - cdata->year;
-		int profection = (((sign + diff)) % 12 + 12) % 12;
-		
-		int mdiff = tmp.mon - cdata->mon;
-		int mprof = (((profection + mdiff)) % 12 + 12) % 12;
-		
-		mvwprintw(ui->left_win, starty, startx, "profection:     mon:");
-		zo_color(ui->left_win, ui, starty, startx + 12, profection, zodiac);
-		zo_color(ui->left_win, ui, starty, startx + 21, mprof, zodiac);
-	}
+	
 }
 
 void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodiac[])
