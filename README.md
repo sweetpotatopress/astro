@@ -65,6 +65,7 @@ c			config
 	space	toggle buttons
 	esc		cancel
 	
+d			toggle DST
 o 			toggle right table
 p			toggle left table
 	[P]		next page
