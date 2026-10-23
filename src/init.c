@@ -270,6 +270,12 @@ static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct
 	mvwvline(win, 0, ui->win_w - bar_end, ':', 1);
 	
 	mvwprintw(win, 0, ui->win_w - (bar_end - 2), "%d :", ui->cc);
+	if (cdata->dt == TRUE)
+	{
+		wattron(win, COLOR_PAIR(WATER));
+		mvwprintw(win, 0, ui->win_w - (bar_end + 2), "d");
+		wattroff(win, COLOR_PAIR(WATER));
+	}
 }
 
 void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)

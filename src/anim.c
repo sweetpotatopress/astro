@@ -435,6 +435,12 @@ void animate_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 			case '\n': case 'q': case 't':
 				anim_done = 1;
 				break;
+			case 'd':
+				cdata->dt = !cdata->dt;
+				new_chart(cdata, pxx, ui, planet, zodiac);
+				doupdate();
+				break;
+	
 		}
 		if (ui->cc == TRANSIT)
 			arrange_panel(cdata, pxx, ui, planet, zodiac, sy, sx, label, advance);

@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
 		set_localtime(cdata[i]);
 		config_init(cdata[i], ui);
 		ecst_init(planet, cdata[i]->se);
+		cdata[i]->dt = FALSE;
 	}
 	
 	wheel_init(ui->main_win, ui, 0, 0, 0);
@@ -211,6 +212,11 @@ int main(int argc, char *argv[])
 			case 9: // tab
 				ecst_init(planet, cdata[ui->cc]->se);
 				realtime_chart(cdata, pxx, ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'd':
+				cdata[ui->cc]->dt = !cdata[ui->cc]->dt;
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
 			case 'z':

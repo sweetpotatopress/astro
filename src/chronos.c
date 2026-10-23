@@ -149,6 +149,8 @@ void calculate_utc(struct cdata *cdata)
 	
 	time_t t = mktime(&tm_in);
 	cdata->isdst = tm_in.tm_isdst;
+	if (cdata->dt == TRUE)
+		cdata->isdst = !cdata->isdst;
 	
 	if (is_lmt_date(cdata))
 	{
