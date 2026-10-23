@@ -156,10 +156,12 @@ void calculate_utc(struct cdata *cdata)
 		t = mktime(&tm_in);
 	}
 	
+	cdata->lt = FALSE;
 	if (is_lmt_date(cdata))
 	{
 		int offset = (int)lround(cdata->dlon * 240.0);
 		t += (int)tm_in.tm_gmtoff - offset;
+		cdata->lt = TRUE;
 	}
 	
 	struct tm *tm_utc = gmtime(&t);

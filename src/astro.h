@@ -111,6 +111,7 @@ struct cdata {
 	int utc_mon;
 	int utc_mday;
 	int moonphase;
+	bool lt; // LMT flag
 	bool dt; // dst reverse
 	int rt; // realtime flag
 	double cusp[12];

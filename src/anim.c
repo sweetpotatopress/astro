@@ -109,8 +109,12 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 			off_hour = 0;
 		int rem_min = abs_min % 60;
 		
-		mvwprintw(win, sy, sx, "%sUTC%c%02d:%02d", cdata->isdst == 1 ? "DST " : "",
-		usign < 0 ? '-' : '+', off_hour, rem_min);
+		if (cdata->lt == TRUE)
+			mvwprintw(win, sy, sx, "LMT");
+			
+		else
+			mvwprintw(win, sy, sx, "%sUTC%c%02d:%02d", cdata->isdst == 1 ? "DST " : "",
+			usign < 0 ? '-' : '+', off_hour, rem_min);
 			
 		if (i > 0)
 			return;
