@@ -178,20 +178,21 @@ void realtime_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, doubl
 
 static void profections(WINDOW *win, struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)
 {
-		planet_init(planet, ui->bcc, pxx);
-		int x = LINES-2;
+	planet_init(planet, ui->bcc, pxx);
+	
+	int x = LINES-2;
 		
-		int sign = (int)planet[12][SIGN];
-		int diff = cdata[ui->cc]->year - cdata[ui->bcc]->year;
-		int profection = (((sign + diff)) % 12 + 12) % 12;
-		
-		int mdiff = cdata[ui->cc]->mon - cdata[ui->bcc]->mon;
-		int mprof = (((profection + mdiff)) % 12 + 12) % 12;
-		
-		mvwprintw(win, x, 1, "profection:     mon:");
-		zo_color(win, ui, x, 13, profection, zodiac);
-		zo_color(win, ui, x, 22, mprof, zodiac);
-		planet_init(planet, ui->cc, pxx);
+	int sign = (int)planet[12][SIGN];
+	int age = (int)((cdata[ui->cc]->jd_ut - cdata[ui->bcc]->jd_ut) / 365.25) % 12;
+	int profection = (((sign + age)) % 12);
+	
+	int mdiff = cdata[ui->cc]->mon - cdata[ui->bcc]->mon;
+	int mprof = (((profection + mdiff)) % 12);
+	
+	mvwprintw(win, x, 1, "profection:     mon:");
+	zo_color(win, ui, x, 13, profection, zodiac);
+	zo_color(win, ui, x, 22, mprof, zodiac);
+	planet_init(planet, ui->cc, pxx);
 }
 
 void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac)

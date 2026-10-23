@@ -332,7 +332,7 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 	}
 }
 
-static void calc_return(struct cdata *cdata, double base_degree)
+void calc_return(struct cdata *cdata, double base_degree)
 {
 	struct tm temp = {0};
 	time_t t = 0;

@@ -33,6 +33,7 @@ int sect(struct pxx *pxx);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);
 void retro_station(double jd_ut, double *planet[]);
 void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void calc_return(struct cdata *cdata, double base_degree);
 void calculate_utc(struct cdata *cdata);
 void chart_timeset(struct cdata *cdata, int *day_offset);
 void lots(struct pxx *pxx);
