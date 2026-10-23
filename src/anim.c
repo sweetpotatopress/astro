@@ -104,7 +104,7 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 			off_min -= 24 * 60;
 		int usign = off_min < 0 ? -1 : 1;
 		int abs_min = abs(off_min);
-		int off_hour = (abs_min / 60) -1;
+		int off_hour = (abs_min / 60);
 		if (off_hour < 0)
 			off_hour = 0;
 		int rem_min = abs_min % 60;
