@@ -48,6 +48,7 @@ char *xstrdup(const char *s)
 char *xstrtok(char *s, const char *delim)
 { // doesnt skip repeating delims :3
 	static char *p = NULL;
+	static char *e = "E";
 	char *start;
 	
 	if (s)
@@ -57,7 +58,7 @@ char *xstrtok(char *s, const char *delim)
 	if (strchr(delim, *p))
 	{
 		p++;
-		return "E";
+		return e;
 	}
 	start = p;
 	while (*p && !strchr(delim, *p))
