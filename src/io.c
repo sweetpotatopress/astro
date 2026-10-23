@@ -604,7 +604,7 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				
 				int n = snprintf(ui->fb_newpath, MAXPATH, "%s/%s", path, selected);
 				if (n >= MAXPATH)
-					ERR_EXIT("print_menu newpath too long");
+					ERR_EXIT("print_fb newpath too long");
 		
 				if (stat(ui->fb_newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
@@ -620,7 +620,7 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				
 				FILE *fp = fopen(ui->fb_newpath, "r");
 				if (fp == NULL)
-					ERR_EXIT("print_menu newpath fopen");
+					ERR_EXIT("print_fb newpath fopen");
 				
 				if (fgets(buffer, MAXBUF, fp) != NULL)
 				{
@@ -680,7 +680,7 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				errno = 0;
 							
 				if (setenv("TZ", field[FTZ], 1) != 0)
-					ERR_EXIT("ERR: print_menu TZ setenv");
+					ERR_EXIT("ERR: print_fb TZ setenv");
 				tzset();
 				memcpy(cdata->timezone, field[FTZ], strlen(field[FTZ]) + 1);
 						
@@ -721,7 +721,7 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 	}
 }
 
-void print_menu(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls, bool sl)
+void print_fb(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls, bool sl)
 {
 	ui->fb_save = 0;
 	ui->fb_c = file_count(path, 1) + 1;
@@ -802,7 +802,7 @@ void save_chart(struct cdata *cdata, struct ui *ui)
 	char path[MAXPATH] = {0};
 	path_check(path, "charts");
 	
-	print_menu(cdata, ui, path, "/charts", 's', SAVE);
+	print_fb(cdata, ui, path, "/charts", 's', SAVE);
 }
 
 void load_chart(struct cdata *cdata, struct ui *ui)
@@ -810,5 +810,5 @@ void load_chart(struct cdata *cdata, struct ui *ui)
 	char path[MAXPATH] = {0};
 	path_check(path, "charts");
 	
-	print_menu(cdata, ui, path, "/charts", 'l', LOAD);
+	print_fb(cdata, ui, path, "/charts", 'l', LOAD);
 }

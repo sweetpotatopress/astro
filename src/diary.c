@@ -418,7 +418,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 	char path[MAXPATH];
 	path_check(path, "diary");
 	
-	print_menu(cdata, ui, path, "/diary", 'l', LOAD);
+	print_fb(cdata, ui, path, "/diary", 'l', LOAD);
 	if (ui->fb_cancel == TRUE)
 	{
 		ui->fb_cancel = FALSE;
@@ -487,7 +487,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 				break;
 			case 'J':
 				path_check(path, "diary");
-				print_menu(cdata, ui, path, "/diary", 'l', LOAD);
+				print_fb(cdata, ui, path, "/diary", 'l', LOAD);
 				if (ui->fb_cancel == TRUE)
 				{
 					ui->fb_cancel = FALSE;

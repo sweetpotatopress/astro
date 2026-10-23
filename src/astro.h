@@ -164,7 +164,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 void path_check(char *path, const char *s);
 void load_chart(struct cdata *cdata, struct ui *ui);
 void save_chart(struct cdata *cdata, struct ui *ui);
-void print_menu(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls, bool sl);
+void print_fb(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls, bool sl);
 void set_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int ch);
 void datadir_check(void);
 size_t file_count(const char *path, const int r);
