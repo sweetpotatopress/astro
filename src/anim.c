@@ -105,6 +105,8 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		int usign = off_min < 0 ? -1 : 1;
 		int abs_min = abs(off_min);
 		int off_hour = (abs_min / 60) -1;
+		if (off_hour < 0)
+			off_hour = 0;
 		int rem_min = abs_min % 60;
 		
 		mvwprintw(win, sy, sx, "%sUTC%c%02d:%02d", cdata->isdst == 1 ? "DST " : "",
