@@ -274,9 +274,9 @@ void city_search(struct cdata *cdata,  struct ui *ui, FIELD *cdata_field[], FORM
 			
 	}
 		
-	for (size_t i = 0; i < search_count-1; i++)
+	for (int i = 0; i < (int)search_count-1; i++)
 	{
-		for (size_t j = 0; j < search_count-1; j++)
+		for (int j = 0; j < (int)search_count-1; j++)
 		{
 			if (strlen(search_result[j]->city) > strlen(search_result[j+1]->city))
 			{
