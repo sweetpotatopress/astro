@@ -163,7 +163,7 @@ struct cdata **search_result, ITEM **item_result, size_t search_count)
 					menu_done = 1;
 					city_choice = 1;
 					break;
-				case 'q':
+				case 'q': case 27:
 					form_driver(cdata_form, REQ_CLR_FIELD);
 					werase(ui->search_win);
 					menu_done = 1;
