@@ -168,9 +168,7 @@ void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 
 void status_bar(struct ui *ui, int c, char *str)
 {
-	wattron(ui->main_win, COLOR_PAIR(c));
-	mvwprintw(ui->main_win, 0, COLS - 14, "%s", str);
-	wattroff(ui->main_win, COLOR_PAIR(c));
+	string_color(ui->main_win, 0, COLS-14, str, c);
 }
 
 int table_trigger(struct ui *ui, int ch)
@@ -291,11 +289,7 @@ static void mutual_reception(WINDOW *win, int starty, int planet, int result[PLM
 	for (int c = 0; c < PLMAX; ++c)
 	{
 		if (result[planet][RULER] == c && result[c][RULER] == planet && c != planet)
-		{
-			wattron(win, COLOR_PAIR(AIR));
-			mvwprintw(win, starty, 4, "+");
-			wattroff(win, COLOR_PAIR(AIR));
-		}
+			string_color(win, starty, 4, "+", AIR);
 	}
 }
 
@@ -345,24 +339,13 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 			mvwprintw(ui->left_win, starty, startx, "%s ", buff);
 			
 			if (planet[i][RETRO] > 0)
-			{
-				wattron(ui->left_win, COLOR_PAIR(FIRE));
-				mvwprintw(ui->left_win, starty, startx + 12, "r");
-				wattroff(ui->left_win, COLOR_PAIR(FIRE));
-			}
+				string_color(ui->left_win, starty, startx+12, "r", FIRE);
 				
 			if ((int)planet[i][STATION] == STATION_R)
-			{
-				wattron(ui->left_win, COLOR_PAIR(EARTH));
-				mvwaddstr(ui->left_win, starty, startx + 12, "sr");
-				wattroff(ui->left_win, COLOR_PAIR(EARTH));
-			}
+				string_color(ui->left_win, starty, startx+12, "sr", EARTH);
+				
 			else if ((int)planet[i][STATION] == STATION_D)
-			{
-				wattron(ui->left_win, COLOR_PAIR(EARTH));
-				mvwaddstr(ui->left_win, starty, startx + 12, "sd");
-				wattroff(ui->left_win, COLOR_PAIR(EARTH));
-			}
+				string_color(ui->left_win, starty, startx+12, "sd", EARTH);
 			
 			int color_x = startx + (int)strlen(buff) + 1;
 			zo_color(ui->left_win, ui, starty, color_x, sign, zodiac);

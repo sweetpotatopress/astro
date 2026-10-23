@@ -18,6 +18,7 @@
 
 void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[]);
 void degree_color(WINDOW *win, int y, int x, int count, double *planet[], int *zodiac[]);
+void string_color(WINDOW *win, int y, int x, char *str, int color);
 void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet, int **zodiac);
 void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet, int **zodiac);
 void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, int **zodiac);

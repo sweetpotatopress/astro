@@ -82,6 +82,13 @@ double *planet[], int *zodiac[])
 	}
 }
 
+void string_color(WINDOW *win, int y, int x, char *str, int color)
+{
+	wattron(win, COLOR_PAIR(color));
+	mvwprintw(win, y, x, "%s", str);
+	wattroff(win, COLOR_PAIR(color));
+}
+
 void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet, int **zodiac)
 {
 	const int iter_count = 64;
@@ -176,24 +183,13 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet
 			mvwaddch(win, y_in_m, x_in_m, '+');
 	
 		if (planet[i][RETRO] > 0 && i != SE_TRUE_NODE)
-		{
-			wattron(win, COLOR_PAIR(FIRE));
-			mvwprintw(win, y, pl_x-1, "r");
-			wattroff(win, COLOR_PAIR(FIRE));
-		}
+			string_color(win, y, pl_x-1, "r", FIRE);
 			
 		if ((int)planet[i][STATION] == STATION_R)
-		{
-			wattron(win, COLOR_PAIR(EARTH));
-			mvwaddstr(win, y, pl_x-2, "sr");
-			wattroff(win, COLOR_PAIR(EARTH));
-		}
+			string_color(win, y, pl_x-2, "sr", EARTH);
+			
 		else if ((int)planet[i][STATION] == STATION_D)
-		{
-			wattron(win, COLOR_PAIR(EARTH));
-			mvwaddstr(win, y, pl_x-2, "sd");
-			wattroff(win, COLOR_PAIR(EARTH));
-		}
+			string_color(win, y, pl_x-2, "sd", EARTH);
 	}
 }
 
