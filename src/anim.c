@@ -200,7 +200,7 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	ui->transit_panel = new_panel(ui->transit_win);
 	
 	ui->bcc = ui->cc;
-	cdata[TRANSIT]->t_cusp = cdata[ui->bcc]->sign_cusp[1];
+	cdata[TRANSIT]->t_cusp = cdata[ui->bcc]->sign_cusp[0];
 	
 	wheel_init(ui->main_win, ui, 3, 0, 0);
 	new_chart(cdata[ui->bcc], pxx[ui->bcc], ui, planet, zodiac);
@@ -227,8 +227,8 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	planet_init(planet, key, pxx);
 	pxx_init(cdata[key], pxx[key], planet);
 	
-	double tmp = cdata[key]->sign_cusp[1];
-	cdata[key]->sign_cusp[1] = cdata[ui->cc]->sign_cusp[1];
+	double tmp = cdata[key]->sign_cusp[0];
+	cdata[key]->sign_cusp[0] = cdata[ui->cc]->sign_cusp[0];
 	
 	wheel_init(ui->main_win, ui, 0, 9, 0);
 	
@@ -238,7 +238,7 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	cc_data(ui->main_win, cdata[key], ui);
 	ui->cc = ui->bcc;
 	
-	cdata[key]->sign_cusp[1] = tmp;
+	cdata[key]->sign_cusp[0] = tmp;
 	
 	wnoutrefresh(ui->main_win);
 	doupdate();
