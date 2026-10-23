@@ -2,7 +2,7 @@
 <sub>--o https://sweetpotato.press --o</sub>  
 <sub>~:o irc.libera.chat #astro</sub>
 --- --- --- --- --- --- ---   
-![miles davis birth chart drawn in astro](https://sweetpotato.press/img/astro.png)
+![birth chart drawn in astro](https://sweetpotato.press/img/astro.png)
 
 ##### DEPENDENCIES  
 ncurses  
