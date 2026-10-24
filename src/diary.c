@@ -378,7 +378,7 @@ static int diary_to_pad(struct ui *ui, struct ct **ct, char *path)
 			{
 				ct[c]->hour += 12;
 				if (ct[c]->hour == 24)
-					ct[c]->hour = 0;
+					ct[c]->hour = 12;
 			}
 			ct[c]->min = atoi(min);
 			ct[c]->sec = atoi(sec);
