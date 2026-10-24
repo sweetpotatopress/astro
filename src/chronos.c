@@ -167,8 +167,7 @@ void calculate_utc(struct cdata *cdata)
 	
 	struct tm *tm_utc = gmtime(&t);
 	
-	cdata->utc_hour = tm_utc->tm_hour + tm_utc->tm_min / 60.0 +
-	tm_utc->tm_sec / 3600.0;
+	cdata->utc_hour = tm_utc->tm_hour + tm_utc->tm_min / 60.0 + tm_utc->tm_sec / 3600.0;
 	
 	cdata->utc_year = tm_utc->tm_year + 1900;
 	cdata->utc_mon = tm_utc->tm_mon + 1;
@@ -332,7 +331,7 @@ void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse)
 	}
 }
 
-void calc_return(struct cdata *cdata, double base_degree)
+static void calc_return(struct cdata *cdata, double base_degree)
 {
 	struct tm temp = {0};
 	time_t t = 0;
