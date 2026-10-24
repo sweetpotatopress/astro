@@ -316,8 +316,15 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 			
 		if (table_trigger(ui, ch) == 1)
 		{
-			new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-			doupdate();
+			if (ui->cc == TRANSIT)
+			{
+				top_panel(ui->transit_panel);
+			}
+			else
+			{
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+			}
 		}
 		
 		if (isdigit((unsigned char)ch))
