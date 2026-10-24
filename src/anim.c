@@ -318,7 +318,14 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 		{
 			if (ui->cc == TRANSIT)
 			{
-				top_panel(ui->transit_panel);
+				ui->cc = ui->bcc;
+				planet_init(planet, ui->bcc, pxx);
+				wheel_init(ui->main_win, ui, 3, 0, 0);
+				new_chart(cdata[ui->bcc], pxx[ui->bcc], ui, planet, zodiac);
+				ui->cc = TRANSIT;
+	
+				planet_init(planet, ui->cc, pxx);
+				arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
 			}
 			else
 			{
