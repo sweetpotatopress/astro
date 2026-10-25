@@ -284,10 +284,9 @@ static void diary_write(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		}
 	
 		end_line(buf, len, y);
+		my = (my < y) ? y : my;
 			
 		werase(ui->pad);
-		
-		my = (my < y) ? y : my;
 		for (int ty = 0; ty <= my; ty++)
 			mvwprintw(ui->pad, ty, 0, "%s", buf[ty]);
 	
@@ -521,16 +520,11 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch)
 {
-	int year = cdata->year;
-	int mon = cdata->mon;
-	int day = cdata->mday;
-	int hour = cdata->hour;
-	int min = cdata->min;
-	int sec = cdata->sec;
+	struct cdata *tmp = ecalloc(1, sizeof(*tmp));
+	memcpy(tmp, cdata, sizeof(*tmp));
+	
 	char tz[MAXBUF];
 	memcpy(tz, cdata->timezone, MAXBUF);
-	double lat = cdata->dlat;
-	double lon = cdata->dlon;
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, TRUE);
 	status_bar(ui, WATER, "diary");
@@ -562,18 +556,13 @@ void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet,
 		diary_read(cdata, pxx, ui, planet, zodiac);
 		
 	cdata_clear(cdata);
-	cdata->year = year;
-	cdata->mon = mon;
-	cdata->mday = day;
-	cdata->hour = hour;
-	cdata->min = min;
-	cdata->sec = sec;
+	memcpy(cdata, tmp, sizeof(*cdata));
+	
 	strncpy(cdata->timezone, tz, MAXBUF);
-	cdata->dlat = lat;
-	cdata->dlon = lon;
 	
 	ui_resize(cdata, pxx, ui, planet, zodiac, FALSE);
 	delwin(ui->pad);
+	free(tmp);
 }
 
 
