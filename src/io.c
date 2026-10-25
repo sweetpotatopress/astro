@@ -626,7 +626,7 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				{
 					char *it = xstrtok(buffer, ",");
 				
-					while(it)
+					while(count < FMAX)
 					{
 						snprintf(field[count++], MAXBUF, "%s", it);
 						it = xstrtok(NULL, ",");
