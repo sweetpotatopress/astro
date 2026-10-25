@@ -297,6 +297,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 {
 	if (ui->cc >= TRANSIT)
 		return;
+		
 	const char *name[17] = { 
 	"su", "mo", "me", "ve",
 	"ma", "ju", "sa", "ur",
@@ -386,6 +387,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	
 	if (ui->left_height == SMALL && ui->left_page == 0)
 		return;
+		
 	if (ui->left_height == SMALL && ui->left_page == 1)
 	{
 		werase(ui->left_win);
@@ -460,8 +462,6 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	++starty;
 	mvwprintw(ui->left_win, starty, startx, 
 	"moon phase: %s", ui->sym.moon[cdata->moonphase]);
-	
-	
 }
 
 void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodiac[])
