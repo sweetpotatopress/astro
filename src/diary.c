@@ -243,12 +243,12 @@ static void diary_write(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		if (len[y] == CCOL && wf == TRUE)
 		{
 			int i, c = 0;
-			for (i = len[y]; !isblank((unsigned char)buf[y][i-1]); i--, c++)
+			for (i = PCOL; !isblank((unsigned char)buf[y][i-1]); i--, c++)
 			{
 				if (c == CCOL)
 					break;
 			}
-			if (c < CCOL-2)
+			if (c < CCOL)
 			{
 				if (len[y+1] > 0 && my+1 < OLINE)
 				{
@@ -286,6 +286,8 @@ static void diary_write(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		end_line(buf, len, y);
 			
 		werase(ui->pad);
+		
+		my = (my < y) ? y : my;
 		for (int ty = 0; ty <= my; ty++)
 			mvwprintw(ui->pad, ty, 0, "%s", buf[ty]);
 	
