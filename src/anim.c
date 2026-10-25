@@ -326,12 +326,11 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 				ui->cc = TRANSIT;
 				planet_init(planet, ui->cc, pxx);
 				
-				arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
+				top_panel(ui->transit_panel);
 			}
 			else
 			{
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
-				doupdate();
 			}
 		}
 		
@@ -509,7 +508,6 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 			FALSE);
 			print_inc(ui->transit_win, sy, sx, label, advance);
 			update_panels();
-			doupdate();
 		}
 	}
 	wmove(ui->main_win, sy, sx);
