@@ -1,4 +1,4 @@
-VERSION = 0.77.2
+VERSION = 0.77.3
 
 CC	= cc
 
