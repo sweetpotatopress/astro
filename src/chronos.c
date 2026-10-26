@@ -368,6 +368,16 @@ static void calc_return(struct cdata *cdata, double base_degree)
 	}
 }
 	
+static void ftrim(FIELD *field, char *buf)
+{
+	int len = 0;
+	field_info(field, NULL, &len, NULL, NULL, NULL, NULL);
+	
+	while (len > 0 && buf[len - 1] == ' ')
+		len--;
+	buf[len] = '\0';
+}
+
 void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	double base_degree = pxx->dsun[LONG];
@@ -442,13 +452,8 @@ void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **
 		errno = 0;
 		
 		char *sr_year = field_buffer(sr_field[0], 0);
-		int len = 0;
 		
-		field_info(sr_field[0], NULL, &len, NULL, NULL, NULL, NULL);
-		
-		while (len > 0 && sr_year[len - 1] == ' ')
-			len--;
-		sr_year[len] = '\0';
+		ftrim(sr_field[0], sr_year);
 		
 		iret = strtol(sr_year, &endptr, 10);
 		if (errno != ERANGE)
@@ -474,4 +479,247 @@ void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **
 	
 	new_chart(cdata, pxx, ui, planet, zodiac);
 	doupdate();
+}
+
+void sign_long(char *str, int *du)
+{
+	if (strcmp(str, "ari") == 0)
+	{
+		du[0] = 0;
+		du[1] = 30;
+	}
+	else if (strcmp(str, "tau") == 0)
+	{
+		du[0] = 30;
+		du[1] = 60;
+	}
+	else if (strcmp(str, "gem") == 0)
+	{
+		du[0] = 60;
+		du[1] = 90;
+	}
+	else if (strcmp(str, "can") == 0)
+	{
+		du[0] = 90;
+		du[1] = 120;
+	}
+	else if (strcmp(str, "leo") == 0)
+	{
+		du[0] = 120;
+		du[1] = 150;
+	}
+	else if (strcmp(str, "vir") == 0)
+	{
+		du[0] = 150;
+		du[1] = 180;
+	}
+	else if (strcmp(str, "lib") == 0)
+	{
+		du[0] = 180;
+		du[1] = 210;
+	}
+	else if (strcmp(str, "sco") == 0)
+	{
+		du[0] = 210;
+		du[1] = 240;
+	}
+	else if (strcmp(str, "sag") == 0)
+	{
+		du[0] = 210;
+		du[1] = 270;
+	}
+	else if (strcmp(str, "cap") == 0)
+	{
+		du[0] = 270;
+		du[1] = 300;
+	}
+	else if (strcmp(str, "aqu") == 0)
+	{
+		du[0] = 300;
+		du[1] = 330;
+	}
+	else if (strcmp(str, "pis") == 0)
+	{
+		du[0] = 330;
+		du[1] = 360;
+	}
+}
+
+void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, int r1)
+{
+	struct tm temp = {0};
+	time_t t = 0;
+
+	cpt(cdata, &temp, &t, IN);
+	
+	int iflag = SEFLG_SWIEPH;
+	double xx0[6], xx1[6];
+	char serr[AS_MAXCH];
+	double diff;
+	
+	for(;;)
+	{
+		calculate_utc(cdata);
+	
+		double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
+		cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
+	
+		swe_calc_ut(jd_ut, p0, iflag, xx0, serr);
+		swe_calc_ut(jd_ut, p1, iflag, xx1, serr);
+			
+		diff = fabs(xx0[LONG] - xx1[LONG]);
+		
+		time_t step = 
+			fabs(diff) > 24.0 ? 86400*12 :
+			fabs(diff) > 12.0 ? 86400*6 :
+			fabs(diff) > 6.0 ? 86400*3 :
+			fabs(diff) > 2.0 ? 86400 :
+			fabs(diff) > 0.1 ? 3600 :
+			fabs(diff) > 0.002 ? 60 : 1;
+			
+		t+= step;
+		
+		cpt(cdata, &temp, &t, OUT);
+		
+		if (xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
+		{
+			if (fabs(diff) < JUL_SEC)
+				break;
+		}
+		
+		if (cdata->year < r0 || cdata->year > r1)
+			break;
+	}
+}
+
+void aspect_search(struct cdata *cdata)
+{
+	int height = 20;
+	int width = 30;
+	
+	int starty = (LINES- height) / 2;
+	int startx = (COLS - width) / 2;
+	
+	WINDOW *win = newwin(height, width, starty, startx);
+	WINDOW *subwin = derwin(win, height - 2, width - 2, 0, 0);
+	
+	wbkgdset(win, COLOR_PAIR(M_COLOR));
+	
+	keypad(win, TRUE);	
+	
+	FIELD *field[6];
+	field[0] = new_field(1, 25, 2, 2, 0, 0);
+	set_field_back(field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[0], O_STATIC);
+	field_opts_off(field[0], O_AUTOSKIP);
+	
+	field[1] = new_field(1, 25, 5, 2, 0, 0);
+	set_field_back(field[1], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[1], O_STATIC);
+	field_opts_off(field[1], O_AUTOSKIP);
+	
+	field[2] = new_field(1, 25, 8, 2, 0, 0);
+	set_field_back(field[2], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[2], O_STATIC);
+	field_opts_off(field[2], O_AUTOSKIP);
+	
+	field[3] = new_field(1, 25, 11, 2, 0, 0);
+	set_field_back(field[3], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[3], O_STATIC);
+	field_opts_off(field[3], O_AUTOSKIP);
+	
+	field[4] = new_field(1, 25, 14, 2, 0, 0);
+	set_field_back(field[4], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[4], O_STATIC);
+	field_opts_off(field[4], O_AUTOSKIP);
+	
+	field[5] = NULL;
+	
+	FORM *form = new_form(field);
+	set_form_win(form, win);
+	set_form_sub(form, subwin);
+	
+	post_form(form);
+	
+	mvwaddstr(win, 1, 1, "sign");
+	mvwaddstr(win, 4, 1, "planet");
+	mvwaddstr(win, 7, 1, "planet");
+	mvwaddstr(win, 10, 1, "low range");
+	mvwaddstr(win, 13, 1, "hi range");
+	box(win, 0, 0);
+	
+	set_current_field(form, field[0]);
+	wrefresh(win);
+	pos_form_cursor(form);
+	curs_set(1);
+	
+	int done = 0, ch = 0, c = 0;
+	while(!done && (ch = wgetch(win)))
+	{
+		switch (ch)
+		{
+			case '\n':
+				form_driver(form, REQ_VALIDATION);
+				done = 1;
+				break;
+			case KEY_DOWN: case ';':
+				form_driver(form, REQ_NEXT_FIELD);
+				form_driver(form, REQ_END_LINE);
+				break;
+				
+			case KEY_UP: case '\'':
+				form_driver(form, REQ_PREV_FIELD);
+				form_driver(form, REQ_END_LINE);
+				break;
+				
+			case KEY_LEFT:
+				form_driver(form, REQ_LEFT_CHAR);
+				break;
+				
+			case KEY_RIGHT:
+				form_driver(form, REQ_RIGHT_CHAR);
+				break;
+				
+			case KEY_BACKSPACE:
+				form_driver(form, REQ_DEL_PREV);
+				break;
+			case 27:
+				c = 1;
+				done = 1;
+				break;
+			default:
+				form_driver(form, ch);
+				break;
+		}
+		wrefresh(win);
+	}
+	char *sign = field_buffer(field[0], 0);
+	char *p0 = field_buffer(field[1], 0);
+	char *p1 = field_buffer(field[2], 0);
+	char *r0 = field_buffer(field[3], 0);
+	char *r1 = field_buffer(field[4], 0);
+	ftrim(field[0], sign);
+	ftrim(field[1], p0);
+	ftrim(field[2], p1);
+	ftrim(field[3], r0);
+	ftrim(field[4], r1);
+	
+	int du[2] = {0};
+	sign_long(sign, du);
+	
+	find_conj(cdata, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1));
+	
+	curs_set(0);
+	werase(subwin);
+	wrefresh(subwin);
+	werase(win);
+	wrefresh(win);
+	delwin(subwin);
+	delwin(win);
+				
+	unpost_form(form);
+	set_form_fields(form, NULL);
+	for (int i = 0; i < 4; ++i)
+		free_field(field[i]);
+	free_form(form);
 }

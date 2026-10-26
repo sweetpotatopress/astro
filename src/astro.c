@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
 	initscr();
 	set_escdelay(25);
-	raw();
+	cbreak();
 	noecho();
 	
 	struct cdata **cdata = ecalloc(CHARTMAX, sizeof(*cdata));
@@ -276,6 +276,11 @@ int main(int argc, char *argv[])
 				break;
 			case 'j': case 'J':
 				diary(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, ch);
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'x':
+				aspect_search(cdata[ui->cc]);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
