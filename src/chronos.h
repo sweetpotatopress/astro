@@ -40,4 +40,4 @@ void weekday_check(struct cdata *cdata);
 void set_localtime(struct cdata *cdata);
 int time_format(int th);
 void cpt(struct cdata *cdata, struct tm *temp, time_t *t, bool x);
-void aspect_search(struct cdata *cdata);
+void aspect_search(struct cdata *cdata, struct ui *ui);

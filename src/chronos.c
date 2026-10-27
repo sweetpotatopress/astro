@@ -481,71 +481,19 @@ void solar_return(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **
 	doupdate();
 }
 
-void sign_long(char *str, int *du)
+void sign_long(struct ui *ui, char *str, int *du)
 {
-	if (strcmp(str, "ari") == 0)
+	for (int i = 0; i < 12; ++i)
 	{
-		du[0] = 0;
-		du[1] = 30;
-	}
-	else if (strcmp(str, "tau") == 0)
-	{
-		du[0] = 30;
-		du[1] = 60;
-	}
-	else if (strcmp(str, "gem") == 0)
-	{
-		du[0] = 60;
-		du[1] = 90;
-	}
-	else if (strcmp(str, "can") == 0)
-	{
-		du[0] = 90;
-		du[1] = 120;
-	}
-	else if (strcmp(str, "leo") == 0)
-	{
-		du[0] = 120;
-		du[1] = 150;
-	}
-	else if (strcmp(str, "vir") == 0)
-	{
-		du[0] = 150;
-		du[1] = 180;
-	}
-	else if (strcmp(str, "lib") == 0)
-	{
-		du[0] = 180;
-		du[1] = 210;
-	}
-	else if (strcmp(str, "sco") == 0)
-	{
-		du[0] = 210;
-		du[1] = 240;
-	}
-	else if (strcmp(str, "sag") == 0)
-	{
-		du[0] = 210;
-		du[1] = 270;
-	}
-	else if (strcmp(str, "cap") == 0)
-	{
-		du[0] = 270;
-		du[1] = 300;
-	}
-	else if (strcmp(str, "aqu") == 0)
-	{
-		du[0] = 300;
-		du[1] = 330;
-	}
-	else if (strcmp(str, "pis") == 0)
-	{
-		du[0] = 330;
-		du[1] = 360;
+		if (strcmp(str, ui->sym.zo_sym[i]) == 0)
+		{
+			du[0] = i*30;
+			du[1] = (i+1)*30;
+		}
 	}
 }
 
-void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, int r1)
+void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, int r1, int orb)
 {
 	struct tm temp = {0};
 	time_t t = 0;
@@ -583,7 +531,7 @@ void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, 
 		
 		if (xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
 		{
-			if (fabs(diff) < JUL_SEC)
+			if (fabs(diff) < orb + JUL_SEC)
 				break;
 		}
 		
@@ -592,7 +540,7 @@ void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, 
 	}
 }
 
-void aspect_search(struct cdata *cdata)
+void aspect_search(struct cdata *cdata, struct ui *ui)
 {
 	int height = 20;
 	int width = 30;
@@ -607,7 +555,7 @@ void aspect_search(struct cdata *cdata)
 	
 	keypad(win, TRUE);	
 	
-	FIELD *field[6];
+	FIELD *field[7];
 	field[0] = new_field(1, 25, 2, 2, 0, 0);
 	set_field_back(field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[0], O_STATIC);
@@ -633,7 +581,12 @@ void aspect_search(struct cdata *cdata)
 	field_opts_off(field[4], O_STATIC);
 	field_opts_off(field[4], O_AUTOSKIP);
 	
-	field[5] = NULL;
+	field[5] = new_field(1, 25, 17, 2, 0, 0);
+	set_field_back(field[5], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[5], O_STATIC);
+	field_opts_off(field[5], O_AUTOSKIP);
+	
+	field[6] = NULL;
 	
 	FORM *form = new_form(field);
 	set_form_win(form, win);
@@ -646,6 +599,7 @@ void aspect_search(struct cdata *cdata)
 	mvwaddstr(win, 7, 1, "planet");
 	mvwaddstr(win, 10, 1, "low range");
 	mvwaddstr(win, 13, 1, "hi range");
+	mvwaddstr(win, 16, 1, "orb");
 	box(win, 0, 0);
 	
 	set_current_field(form, field[0]);
@@ -698,16 +652,17 @@ void aspect_search(struct cdata *cdata)
 	char *p1 = field_buffer(field[2], 0);
 	char *r0 = field_buffer(field[3], 0);
 	char *r1 = field_buffer(field[4], 0);
+	char *orb = field_buffer(field[5], 0);
 	ftrim(field[0], sign);
 	ftrim(field[1], p0);
 	ftrim(field[2], p1);
 	ftrim(field[3], r0);
-	ftrim(field[4], r1);
+	ftrim(field[5], r1);
 	
 	int du[2] = {0};
-	sign_long(sign, du);
+	sign_long(ui, sign, du);
 	
-	find_conj(cdata, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1));
+	find_conj(cdata, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb));
 	
 	curs_set(0);
 	werase(subwin);
