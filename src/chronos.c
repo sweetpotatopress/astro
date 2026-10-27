@@ -518,7 +518,6 @@ void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, 
 		diff = fabs(xx0[LONG] - xx1[LONG]);
 		
 		time_t step = 
-			fabs(diff) > 24.0 ? 86400*12 :
 			fabs(diff) > 12.0 ? 86400*6 :
 			fabs(diff) > 6.0 ? 86400*3 :
 			fabs(diff) > 2.0 ? 86400 :
@@ -542,11 +541,11 @@ void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, 
 
 void aspect_search(struct cdata *cdata, struct ui *ui)
 {
-	int height = 20;
+	int height = 25;
 	int width = 30;
 	
 	int starty = (LINES- height) / 2;
-	int startx = (COLS - width) / 2;
+	int startx = (COLS - width);
 	
 	WINDOW *win = newwin(height, width, starty, startx);
 	WINDOW *subwin = derwin(win, height - 2, width - 2, 0, 0);
@@ -555,7 +554,7 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 	
 	keypad(win, TRUE);	
 	
-	FIELD *field[7];
+	FIELD *field[8];
 	field[0] = new_field(1, 25, 2, 2, 0, 0);
 	set_field_back(field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[0], O_STATIC);
@@ -575,6 +574,7 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 	set_field_back(field[3], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[3], O_STATIC);
 	field_opts_off(field[3], O_AUTOSKIP);
+	set_field_buffer(field[3], 0, "0");
 	
 	field[4] = new_field(1, 25, 14, 2, 0, 0);
 	set_field_back(field[4], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
@@ -585,8 +585,13 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 	set_field_back(field[5], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[5], O_STATIC);
 	field_opts_off(field[5], O_AUTOSKIP);
+	set_field_buffer(field[5], 0, "0");
 	
-	field[6] = NULL;
+	field[6] = new_field(1, 8, 20, 9, 0, 0);
+	set_field_buffer(field[6], 0, "[ search ]");
+	field_opts_off(field[6], O_EDIT);
+	
+	field[7] = NULL;
 	
 	FORM *form = new_form(field);
 	set_form_win(form, win);
@@ -607,14 +612,29 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 	pos_form_cursor(form);
 	curs_set(1);
 	
+	FIELD *current = NULL;
+	int index = 0;
+	
 	int done = 0, ch = 0, c = 0;
 	while(!done && (ch = wgetch(win)))
 	{
 		switch (ch)
 		{
-			case '\n':
+			case '\\': case '[': case ']':
 				form_driver(form, REQ_VALIDATION);
 				done = 1;
+				break;	
+	
+			case '\n':
+				if (index == 6)
+				{
+					form_driver(form, REQ_VALIDATION);
+					done = 1;
+					break;
+				}
+	
+				form_driver(form, REQ_NEXT_FIELD);
+				form_driver(form, REQ_END_LINE);
 				break;
 			case KEY_DOWN: case ';':
 				form_driver(form, REQ_NEXT_FIELD);
@@ -645,24 +665,44 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 				form_driver(form, ch);
 				break;
 		}
+		current = current_field(form);
+		index = field_index(current);
+		
+		if (index == 6)
+		{
+			wattron(win, A_REVERSE);
+			mvwprintw(win, 20, 9, "[ search ]");
+			wattroff(win, A_REVERSE);
+		}
+		else
+			mvwprintw(win, 20, 9, "[ search ]");
+			
+		pos_form_cursor(form);
+		box(win, 0, 0);
+	
 		wrefresh(win);
 	}
-	char *sign = field_buffer(field[0], 0);
-	char *p0 = field_buffer(field[1], 0);
-	char *p1 = field_buffer(field[2], 0);
-	char *r0 = field_buffer(field[3], 0);
-	char *r1 = field_buffer(field[4], 0);
-	char *orb = field_buffer(field[5], 0);
-	ftrim(field[0], sign);
-	ftrim(field[1], p0);
-	ftrim(field[2], p1);
-	ftrim(field[3], r0);
-	ftrim(field[5], r1);
-	
-	int du[2] = {0};
-	sign_long(ui, sign, du);
-	
-	find_conj(cdata, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb));
+	if (!c)
+	{
+		char *sign = field_buffer(field[0], 0);
+		char *p0 = field_buffer(field[1], 0);
+		char *p1 = field_buffer(field[2], 0);
+		char *r0 = field_buffer(field[3], 0);
+		char *r1 = field_buffer(field[4], 0);
+		char *orb = field_buffer(field[5], 0);
+		
+		ftrim(field[0], sign);
+		ftrim(field[1], p0);
+		ftrim(field[2], p1);
+		ftrim(field[3], r0);
+		ftrim(field[4], r1);
+		ftrim(field[5], orb);
+		
+		int du[2] = {0};
+		sign_long(ui, sign, du);
+		
+		find_conj(cdata, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb));
+	}
 	
 	curs_set(0);
 	werase(subwin);
