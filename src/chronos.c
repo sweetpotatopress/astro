@@ -493,7 +493,43 @@ void sign_long(struct ui *ui, char *str, int *du)
 	}
 }
 
-void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, int r1, int orb)
+struct tmp {
+	int year;
+	int mon;
+	int mday;
+	int hour;
+	int min;
+	int sec;
+};
+
+void fill_tmp(struct tmp *dst, struct cdata *src)
+{
+	int year = src->year;
+	int mon = src->mon;
+	int mday = src->mday;
+	int hour = src->hour;
+	int min = src->min;
+	int sec = src->sec;
+	
+	dst->year = year;
+	dst->mon = mon;
+	dst->mday = mday;
+	dst->hour = hour;
+	dst->min = min;
+	dst->sec = sec;
+}
+
+void fill_cdata(struct cdata *dst, struct tmp *tmp)
+{
+	dst->year = tmp->year;
+	dst->mon = tmp->mon;
+	dst->mday = tmp->mday;
+	dst->hour = tmp->hour;
+	dst->min = tmp->min;
+	dst->sec = tmp->sec;
+}
+
+int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 {
 	struct tm temp = {0};
 	time_t t = 0;
@@ -504,6 +540,8 @@ void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, 
 	double xx0[6], xx1[6];
 	char serr[AS_MAXCH];
 	double diff;
+	int i = 0;
+	int ld[2] = {0};
 	
 	for(;;)
 	{
@@ -531,16 +569,91 @@ void find_conj(struct cdata *cdata, double d, double u, int p0, int p1, int r0, 
 		if (xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
 		{
 			if (fabs(diff) < orb + JUL_SEC)
-				break;
+			{
+				if (cdata->year != ld[0] && cdata->mon != ld[1])
+				{
+					list[i] = ecalloc(1, MAXBUF);
+					tmp[i] = ecalloc(1, sizeof(*tmp));
+					fill_tmp(tmp[i], cdata);
+					snprintf(list[i], MAXBUF, "%d.%d.%d ", cdata->year, cdata->mon, cdata->mday);
+					i++;
+					ld[0] = cdata->year;
+					ld[1] = cdata->mon;
+				}
+			}
 		}
 		
 		if (cdata->year < r0 || cdata->year > r1)
+		{
+			return i;
 			break;
+		}
 	}
+	return -1;
 }
 
-void aspect_search(struct cdata *cdata, struct ui *ui)
+void print_asp_menu(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, 
+WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 {
+	ITEM **item = ecalloc(idx, sizeof(*item));
+	
+	for (int i = 0; i < idx; ++i)
+		item[i] = new_item(list[i], list[i]);
+	item[idx] = NULL;
+
+	MENU *menu = new_menu(item);	
+	
+	set_menu_win(menu, win);
+	set_menu_sub(menu, subwin);
+	
+	set_menu_fore(menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+	set_menu_back(menu, COLOR_PAIR(M_COLOR));
+	menu_opts_off(menu, O_NONCYCLIC);
+	
+	post_menu(menu);
+	
+	ITEM *s = NULL;
+	
+	int ch, done = 0, iret = 0;
+	while(!done && (ch = wgetch(win)))
+	{
+		switch(ch)
+		{
+			case 'j': case KEY_DOWN:
+				menu_driver(menu, REQ_DOWN_ITEM);
+				s = current_item(menu);
+				iret = item_index(s);
+				fill_cdata(cdata, tmp[iret]);
+				
+				new_chart(cdata, pxx, ui, planet, zodiac);
+				doupdate();
+				break;
+			case 'k': case KEY_UP:
+				menu_driver(menu, REQ_UP_ITEM);
+				s = current_item(menu);
+				iret = item_index(s);
+				fill_cdata(cdata, tmp[iret]);
+				
+				new_chart(cdata, pxx, ui, planet, zodiac);
+				doupdate();
+	
+				break;
+			case 'l': case KEY_RIGHT:
+				done = 1;
+				break;
+			case 'q': case 27:
+				done = 1;
+				break;
+		}	
+	}
+	unpost_menu(menu);
+	free_menu(menu);
+	free(item);
+}
+
+void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+{
+	char **list = ecalloc(MAXBUF, sizeof(*list));
 	int height = 25;
 	int width = 30;
 	
@@ -593,6 +706,13 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 	
 	field[7] = NULL;
 	
+	set_field_buffer(field[0], 0, "vir");
+	set_field_buffer(field[1], 0, "2");
+	set_field_buffer(field[2], 0, "3");
+	set_field_buffer(field[3], 0, "2000");
+	set_field_buffer(field[4], 0, "2030");
+	set_field_buffer(field[5], 0, "0");
+	
 	FORM *form = new_form(field);
 	set_form_win(form, win);
 	set_form_sub(form, subwin);
@@ -607,7 +727,7 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 	mvwaddstr(win, 16, 1, "orb");
 	box(win, 0, 0);
 	
-	set_current_field(form, field[0]);
+	set_current_field(form, field[6]);
 	wrefresh(win);
 	pos_form_cursor(form);
 	curs_set(1);
@@ -682,6 +802,11 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 	
 		wrefresh(win);
 	}
+	int idx = 0;
+	struct tmp **tmp = ecalloc(MAXBUF, sizeof(*tmp));
+	char tz[MAXBUF];
+	memcpy(tz, cdata->timezone, MAXBUF);
+	
 	if (!c)
 	{
 		char *sign = field_buffer(field[0], 0);
@@ -701,20 +826,39 @@ void aspect_search(struct cdata *cdata, struct ui *ui)
 		int du[2] = {0};
 		sign_long(ui, sign, du);
 		
-		find_conj(cdata, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb));
+		cdata->year = atoi(r0);
+		idx = find_conj(cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), list);
+		cdata->timezone = tz;
 	}
 	
 	curs_set(0);
+			
+	unpost_form(form);
+	set_form_fields(form, NULL);
+	for (int i = 0; i < 4; ++i)
+		free_field(field[i]);
+	free_form(form);
+	
+	if (idx > 0)
+	{
+		printw("year %d ", tmp[1]->year);
+		getch();
+	
+		werase(win);
+		print_asp_menu(cdata, pxx, ui, planet, zodiac, win, subwin, tmp, list, idx);
+	}
+		
 	werase(subwin);
 	wrefresh(subwin);
 	werase(win);
 	wrefresh(win);
 	delwin(subwin);
 	delwin(win);
-				
-	unpost_form(form);
-	set_form_fields(form, NULL);
-	for (int i = 0; i < 4; ++i)
-		free_field(field[i]);
-	free_form(form);
+	
+	for (int i = 0; i < idx; ++i)
+		free(list[i]);
+	free(list);
+	for (int i = 0; i < idx; ++i)
+		free(tmp[i]);
+	free(tmp);
 }
