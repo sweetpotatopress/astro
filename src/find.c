@@ -42,19 +42,12 @@ struct tmp {
 
 void fill_tmp(struct tmp *dst, struct cdata *src)
 {
-	int year = src->year;
-	int mon = src->mon;
-	int mday = src->mday;
-	int hour = src->hour;
-	int min = src->min;
-	int sec = src->sec;
-	
-	dst->year = year;
-	dst->mon = mon;
-	dst->mday = mday;
-	dst->hour = hour;
-	dst->min = min;
-	dst->sec = sec;
+	dst->year = src->year;
+	dst->mon = src->mon;
+	dst->mday = src->mday;
+	dst->hour = src->hour;
+	dst->min = src->min;
+	dst->sec = src->sec;
 }
 
 void fill_cdata(struct cdata *dst, struct tmp *tmp)
