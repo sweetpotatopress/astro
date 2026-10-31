@@ -12,10 +12,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
-#include <math.h>
-#include <time.h>
-#include <errno.h>
-#include <unistd.h>
 #include <ncurses.h>
 #include "swephexp.h"
 #include "astro.h"
@@ -98,6 +94,8 @@ int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0,
 		diff = fabs(xx0[LONG] - xx1[LONG]);
 		
 		time_t step = 
+			fabs(diff) > 48.0 ? 86400*24 :
+			fabs(diff) > 24.0 ? 86400*12 :
 			fabs(diff) > 12.0 ? 86400*6 :
 			fabs(diff) > 6.0 ? 86400*3 :
 			fabs(diff) > 2.0 ? 86400 :
@@ -114,8 +112,10 @@ int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0,
 			{
 				if (cdata->year != ld[0] && cdata->mon != ld[1])
 				{
+					if (i >= MAXBUF)
+						return i;
 					list[i] = ecalloc(1, MAXBUF);
-					tmp[i] = ecalloc(1, sizeof(*tmp));
+					tmp[i] = ecalloc(1, sizeof(*tmp[i]));
 					fill_tmp(tmp[i], cdata);
 					snprintf(list[i], MAXBUF, "%d.%d.%d ", cdata->year, cdata->mon, cdata->mday);
 					i++;
@@ -137,7 +137,7 @@ int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0,
 void print_asp_menu(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, 
 WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 {
-	ITEM **item = ecalloc(idx, sizeof(*item));
+	ITEM **item = ecalloc(idx+1, sizeof(*item));
 	
 	for (int i = 0; i < idx; ++i)
 		item[i] = new_item(list[i], list[i]);
@@ -190,6 +190,10 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 	}
 	unpost_menu(menu);
 	free_menu(menu);
+	set_menu_items(menu, NULL);
+	
+	for (int i = 0; i <= idx; ++i)
+		free_item(item[i]);
 	free(item);
 }
 
@@ -366,7 +370,7 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 			
 	unpost_form(form);
 	set_form_fields(form, NULL);
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 7; ++i)
 		free_field(field[i]);
 	free_form(form);
 	
