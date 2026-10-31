@@ -133,7 +133,7 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 	ITEM **item = ecalloc(idx+1, sizeof(*item));
 	
 	for (int i = 0; i < idx; ++i)
-		item[i] = new_item(list[i], list[i]);
+		item[i] = new_item(list[i], NULL);
 	item[idx] = NULL;
 
 	MENU *menu = new_menu(item);	
@@ -146,6 +146,9 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 	menu_opts_off(menu, O_NONCYCLIC);
 	
 	post_menu(menu);
+	fill_cdata(cdata, tmp[0]);
+	new_chart(cdata, pxx, ui, planet, zodiac);
+	doupdate();
 	
 	ITEM *s = NULL;
 	
@@ -171,7 +174,6 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 				
 				new_chart(cdata, pxx, ui, planet, zodiac);
 				doupdate();
-	
 				break;
 			case 'l': case KEY_RIGHT:
 				done = 1;
