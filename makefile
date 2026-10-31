@@ -11,9 +11,9 @@ LIBS = -lform -lmenu -lpanel -lncurses $$( [ "$$(uname -s)" = Linux ] && printf 
 CPPFLAGS =	-Isrc -Iswisseph -DASTRO_DATA_DIR='"$(DATADIR)"' -DVERSION=\"$(VERSION)\"
 CFLAGS	= 	-Wall -Wextra -Wpedantic -O3
 
-SRC		=	src/anim.c src/astro.c src/chronos.c src/conf.c \
-			src/draw.c src/indat.c src/init.c src/io.c \
-			src/search.c src/ui.c src/zr.c src/diary.c
+SRC		=	src/anim.c src/astro.c src/chronos.c src/conf.c src/draw.c \
+			src/indat.c src/init.c src/io.c src/search.c src/ui.c \
+			src/zr.c src/diary.c src/find.c
 
 SWE_SRC = 	swisseph/swedate.c swisseph/swehouse.c swisseph/swejpl.c \
 			swisseph/swemmoon.c swisseph/swemplan.c swisseph/sweph.c \
