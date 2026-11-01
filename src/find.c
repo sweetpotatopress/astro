@@ -89,7 +89,7 @@ static double wrap_deg(double angle)
 }
 
 static int find_conj(WINDOW *win, struct cdata *cdata, struct tmp **tmp,
-double d, double u, int p0, int p1, int r0, int r1, char **list)
+double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 {
 	struct tm temp = {0};
 	time_t t = 0, last = 0;
@@ -101,7 +101,13 @@ double d, double u, int p0, int p1, int r0, int r1, char **list)
 	char serr[AS_MAXCH];
 	double diff, diff_s;
 	time_t step;
-	int i = 0;
+	int c = 0;
+	
+	const double arcsec = 1.0 / 3600.0;
+	const double day_sec = 86400.0;
+	const double max_angle = 0.5;
+	const double max_step = day_sec * 24.0;
+	const double min_step = 1.0;
 	
 	long iter = 0;
 	werase(win);
@@ -117,44 +123,37 @@ double d, double u, int p0, int p1, int r0, int r1, char **list)
 		swe_calc_ut(jd_ut, p1, iflag, xx1, serr);
 		
 		diff = wrap_deg(xx0[LONG] - xx1[LONG]);
-		diff_s = xx0[3] - xx1[3];
+		diff_s = xx0[LONG_S] - xx1[LONG_S];
 		
 		if (cdata->year < r0 || cdata->year > r1)
-			return i;
+			return c;
 	
-		const double arcsec = 1.0 / 3600.0;
-		if (fabs(diff) <= arcsec)
+		if (fabs(diff) <= arcsec+orb)
 		{
-			if (llabs((long long)(t - last)) > 60 && 
+			if (llabs((long long)(t - last)) > day_sec && 
 			xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
 			{
-				if (i >= MAXBUF)
-					return i;
-				list[i] = ecalloc(1, MAXBUF);
-				tmp[i] = ecalloc(1, sizeof(*tmp[i]));
-				fill_tmp(tmp[i], cdata);
-				snprintf(list[i], MAXBUF, "%d.%d.%d ", cdata->year, cdata->mon, cdata->mday);
-				i++;
+				if (c >= MAXBUF)
+					return c;
+				list[c] = ecalloc(1, MAXBUF);
+				tmp[c] = ecalloc(1, sizeof(*tmp[c]));
+				fill_tmp(tmp[c], cdata);
+				snprintf(list[c], MAXBUF, "%d.%d.%d ", cdata->year, cdata->mon, cdata->mday);
+				c++;
 				last = t;
 			}
 			
-			t+= 60;
+			t+= day_sec;
 			cpt(cdata, &temp, &t, OUT);
 		}
 		else
 		{
 			double correction_sec = 0.0;
-			bool use_newton = FALSE;
 			
-			if (fabs(diff) < 0.5 && fabs(diff_s) > 1e-9)
-			{
-				correction_sec = -diff / diff_s * 86400.0;
-				
-				if (correction_sec > 0.0 && correction_sec < 86400.0 * 24.0)
-					use_newton = TRUE;
-			}
+			if (fabs(diff) < max_angle && fabs(diff_s) > 1e-9)
+				correction_sec = -diff / diff_s * day_sec;
 			
-			if (use_newton)
+			if (correction_sec > 0.0 && correction_sec < max_step)
 			{
 				step = (time_t)llround(correction_sec);
 				if (step < 1)
@@ -163,15 +162,11 @@ double d, double u, int p0, int p1, int r0, int r1, char **list)
 			}
 			else
 			{
-				const double max_angle = 0.5;
-				const double max_step = 86400.0 * 24.0;
-				const double min_step = 1.0;
-				
-				double step_sec;
+			double step_sec;
 				if (fabs(diff_s) < 1e-9)
 					step_sec = max_step;
 				else
-					step_sec = max_angle / fabs(diff_s) * 86400.0;
+					step_sec = max_angle / fabs(diff_s) * day_sec;
 					
 				if (step_sec > max_step)
 					step_sec = max_step;
@@ -424,8 +419,7 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		sign_long(ui, sign, du);
 		
 		cdata->year = atoi(r0);
-		idx = find_conj(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), list);
-		(void)orb;
+		idx = find_conj(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), list);
 	}
 	
 	curs_set(0);
