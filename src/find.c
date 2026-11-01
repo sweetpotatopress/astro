@@ -60,7 +60,29 @@ void fill_cdata(struct cdata *dst, struct tmp *tmp)
 	dst->sec = tmp->sec;
 }
 
-int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
+void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
+{
+	double whole = r1 - r0;
+	double part = r1 - cdata->year;
+	double percent = (part/whole) * 100;
+	
+	int rp = 100 - percent;
+	
+	int star = 0;
+	if (rp > 0)
+		star = rp / 10;
+		
+	for(int i = 0; i <= star; ++i)
+	{
+		mvwprintw(win, 2, 0, "searching...");
+		mvwprintw(win, 3, i, "*");
+		mvwprintw(win, 3, 11, "%d%%", rp);
+		wrefresh(win);
+	}
+}
+
+int find_conj(WINDOW *win, struct cdata *cdata, struct tmp **tmp,
+double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 {
 	struct tm temp = {0};
 	time_t t = 0;
@@ -75,6 +97,8 @@ int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0,
 	int ld[2] = {0};
 	
 	long iter = 0;
+	werase(win);
+	wrefresh(win);
 	for(;;)
 	{
 		calculate_utc(cdata);
@@ -101,7 +125,10 @@ int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0,
 		cpt(cdata, &temp, &t, OUT);
 		
 		if (iter++ % 10000 == 0)
+		{
+			progress_bar(win, cdata, r0, r1);
 			enanosleep(10);
+		}
 		
 		if (xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
 		{
@@ -361,7 +388,7 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		sign_long(ui, sign, du);
 		
 		cdata->year = atoi(r0);
-		idx = find_conj(cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), list);
+		idx = find_conj(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), list);
 	}
 	
 	curs_set(0);
