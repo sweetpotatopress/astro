@@ -29,6 +29,7 @@
 #define IN 1
 #define OUT 0
 
+void enanosleep(unsigned int ms);
 int sect(struct pxx *pxx);
 void eclipse(double jd_ut, double *luna_eclipse, double *sol_eclipse);
 void retro_station(double jd_ut, double *planet[]);

@@ -23,6 +23,14 @@
 #include "init.h"
 #include "chronos.h"
 
+void enanosleep(unsigned int ms)
+{
+	struct timespec ts;
+	ts.tv_sec = ms / 1000;
+	ts.tv_nsec = (ms % 1000) * 1000000;
+	nanosleep(&ts, NULL);
+}
+
 void set_localtime(struct cdata *cdata)
 {	
 	time_t now = time(NULL);

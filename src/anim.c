@@ -33,14 +33,6 @@
 #define MIN_YEAR -14098
 #define MAX_YEAR 14098
 
-static void enanosleep(unsigned int ms)
-{
-	struct timespec ts;
-	ts.tv_sec = ms / 1000;
-	ts.tv_nsec = (ms % 1000) * 1000000;
-	nanosleep(&ts, NULL);
-}
-
 void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 {	
 	int sy, sx;
