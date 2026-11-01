@@ -80,20 +80,28 @@ static void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
 	}
 }
 
+static double wrap_deg(double angle)
+{
+	angle = fmod(angle+180.0, 360);
+	if (angle < 0.0)
+		angle += 360.0;
+	return angle - 180.0;
+}
+
 static int find_conj(WINDOW *win, struct cdata *cdata, struct tmp **tmp,
-double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
+double d, double u, int p0, int p1, int r0, int r1, char **list)
 {
 	struct tm temp = {0};
-	time_t t = 0;
+	time_t t = 0, last = 0;
 
 	cpt(cdata, &temp, &t, IN);
 	
-	int iflag = SEFLG_SWIEPH;
+	int iflag = SEFLG_SWIEPH | SEFLG_SPEED;
 	double xx0[6], xx1[6];
 	char serr[AS_MAXCH];
-	double diff;
+	double diff, diff_s;
+	time_t step;
 	int i = 0;
-	int ld[2] = {0};
 	
 	long iter = 0;
 	werase(win);
@@ -107,56 +115,85 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 	
 		swe_calc_ut(jd_ut, p0, iflag, xx0, serr);
 		swe_calc_ut(jd_ut, p1, iflag, xx1, serr);
-			
-		diff = fabs(xx0[LONG] - xx1[LONG]);
 		
-		time_t step = 
-			fabs(diff) > 48.0 ? 86400*24 :
-			fabs(diff) > 24.0 ? 86400*12 :
-			fabs(diff) > 12.0 ? 86400*6 :
-			fabs(diff) > 6.0 ? 86400*3 :
-			fabs(diff) > 2.0 ? 86400 :
-			fabs(diff) > 0.1 ? 3600 :
-			fabs(diff) > 0.002 ? 60 : 1;
-			
-		t+= step;
+		diff = wrap_deg(xx0[LONG] - xx1[LONG]);
+		diff_s = xx0[3] - xx1[3];
 		
-		cpt(cdata, &temp, &t, OUT);
+		if (cdata->year < r0 || cdata->year > r1)
+			return i;
+	
+		const double arcsec = 1.0 / 3600.0;
+		if (fabs(diff) <= arcsec)
+		{
+			if (llabs((long long)(t - last)) > 60 && 
+			xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
+			{
+				if (i >= MAXBUF)
+					return i;
+				list[i] = ecalloc(1, MAXBUF);
+				tmp[i] = ecalloc(1, sizeof(*tmp[i]));
+				fill_tmp(tmp[i], cdata);
+				snprintf(list[i], MAXBUF, "%d.%d.%d ", cdata->year, cdata->mon, cdata->mday);
+				i++;
+				last = t;
+			}
+			
+			t+= 60;
+			cpt(cdata, &temp, &t, OUT);
+		}
+		else
+		{
+			double correction_sec = 0.0;
+			bool use_newton = FALSE;
+			
+			if (fabs(diff) < 0.5 && fabs(diff_s) > 1e-9)
+			{
+				correction_sec = -diff / diff_s * 86400.0;
+				
+				if (correction_sec > 0.0 && correction_sec < 86400.0 * 24.0)
+					use_newton = TRUE;
+			}
+			
+			if (use_newton)
+			{
+				step = (time_t)llround(correction_sec);
+				if (step < 1)
+					step = 1;
+				t+= step;
+			}
+			else
+			{
+				const double max_angle = 0.5;
+				const double max_step = 86400.0 * 24.0;
+				const double min_step = 1.0;
+				
+				double step_sec;
+				if (fabs(diff_s) < 1e-9)
+					step_sec = max_step;
+				else
+					step_sec = max_angle / fabs(diff_s) * 86400.0;
+					
+				if (step_sec > max_step)
+					step_sec = max_step;
+				if (step_sec < min_step)
+					step_sec = min_step;
+				step = (time_t)llround(step_sec);
+				
+				t+= step;
+			}
+			cpt(cdata, &temp, &t, OUT);
+		}
 		
 		if (iter++ % 10000 == 0)
 		{
 			progress_bar(win, cdata, r0, r1);
 			enanosleep(10);
 		}
-		
-		if (xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
-		{
-			if (fabs(diff) < orb + JUL_SEC)
-			{
-				if (cdata->year != ld[0] && cdata->mon != ld[1])
-				{
-					if (i >= MAXBUF)
-						return i;
-					list[i] = ecalloc(1, MAXBUF);
-					tmp[i] = ecalloc(1, sizeof(*tmp[i]));
-					fill_tmp(tmp[i], cdata);
-					snprintf(list[i], MAXBUF, "%d.%d.%d ", cdata->year, cdata->mon, cdata->mday);
-					i++;
-					ld[0] = cdata->year;
-					ld[1] = cdata->mon;
-				}
-			}
-		}
-		
-		if (cdata->year < r0 || cdata->year > r1)
-		{
-			return i;
-		}
 	}
 	return -1;
 }
 
-static void print_asp_menu(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, 
+void print_asp_menu(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, 
 WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 {
 	ITEM **item = ecalloc(idx+1, sizeof(*item));
@@ -387,7 +424,8 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		sign_long(ui, sign, du);
 		
 		cdata->year = atoi(r0);
-		idx = find_conj(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), list);
+		idx = find_conj(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), list);
+		(void)orb;
 	}
 	
 	curs_set(0);
