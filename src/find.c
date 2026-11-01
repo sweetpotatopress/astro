@@ -74,6 +74,7 @@ int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0,
 	int i = 0;
 	int ld[2] = {0};
 	
+	long iter = 0;
 	for(;;)
 	{
 		calculate_utc(cdata);
@@ -99,6 +100,9 @@ int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0,
 		
 		cpt(cdata, &temp, &t, OUT);
 		
+		if (iter++ % 10000 == 0)
+			enanosleep(10);
+		
 		if (xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
 		{
 			if (fabs(diff) < orb + JUL_SEC)
@@ -121,7 +125,6 @@ int find_conj(struct cdata *cdata, struct tmp **tmp, double d, double u, int p0,
 		if (cdata->year < r0 || cdata->year > r1)
 		{
 			return i;
-			break;
 		}
 	}
 	return -1;
