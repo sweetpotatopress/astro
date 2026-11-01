@@ -19,7 +19,7 @@
 #include "init.h"
 #include "chronos.h"
 
-void sign_long(struct ui *ui, char *str, int *du)
+static void sign_long(struct ui *ui, char *str, int *du)
 {
 	for (int i = 0; i < 12; ++i)
 	{
@@ -40,7 +40,7 @@ struct tmp {
 	int sec;
 };
 
-void fill_tmp(struct tmp *dst, struct cdata *src)
+static void fill_tmp(struct tmp *dst, struct cdata *src)
 {
 	dst->year = src->year;
 	dst->mon = src->mon;
@@ -50,7 +50,7 @@ void fill_tmp(struct tmp *dst, struct cdata *src)
 	dst->sec = src->sec;
 }
 
-void fill_cdata(struct cdata *dst, struct tmp *tmp)
+static void fill_cdata(struct cdata *dst, struct tmp *tmp)
 {
 	dst->year = tmp->year;
 	dst->mon = tmp->mon;
@@ -60,7 +60,7 @@ void fill_cdata(struct cdata *dst, struct tmp *tmp)
 	dst->sec = tmp->sec;
 }
 
-void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
+static void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
 {
 	double whole = r1 - r0;
 	double part = r1 - cdata->year;
@@ -74,14 +74,13 @@ void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
 		
 	for(int i = 0; i <= star; ++i)
 	{
-		mvwprintw(win, 2, 0, "searching...");
 		mvwprintw(win, 3, i, "*");
 		mvwprintw(win, 3, 11, "%d%%", rp);
 		wrefresh(win);
 	}
 }
 
-int find_conj(WINDOW *win, struct cdata *cdata, struct tmp **tmp,
+static int find_conj(WINDOW *win, struct cdata *cdata, struct tmp **tmp,
 double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 {
 	struct tm temp = {0};
@@ -157,7 +156,7 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 	return -1;
 }
 
-void print_asp_menu(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, 
+static void print_asp_menu(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, 
 WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 {
 	ITEM **item = ecalloc(idx+1, sizeof(*item));
