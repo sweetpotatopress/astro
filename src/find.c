@@ -19,6 +19,16 @@
 #include "init.h"
 #include "chronos.h"
 
+#define F_SIGN 0
+#define F_PL0 1
+#define F_PL1 2
+#define F_LR 3
+#define F_HR 4
+#define F_ORB 5
+#define F_FIND 6
+#define F_NULL 7
+#define F_MAX F_NULL+1
+
 static void sign_long(struct ui *ui, char *str, int *du)
 {
 	for (int i = 0; i < 12; ++i)
@@ -298,7 +308,7 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	char **list = ecalloc(MAXBUF, sizeof(*list));
-	int height = 23;
+	int height = 22;
 	int width = 16;
 	int sb = 1;
 	int fl = 12;
@@ -313,42 +323,42 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 	
 	keypad(win, TRUE);	
 	
-	FIELD *field[8];
-	field[0] = new_field(1, fl, 2, 2, 0, 0);
-	set_field_back(field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(field[0], O_STATIC);
-	field_opts_off(field[0], O_AUTOSKIP);
+	FIELD *field[F_MAX];
+	field[F_SIGN] = new_field(1, fl, 2, 2, 0, 0);
+	set_field_back(field[F_SIGN], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[F_SIGN], O_STATIC);
+	field_opts_off(field[F_SIGN], O_AUTOSKIP);
 	
-	field[1] = new_field(1, fl, 5, 2, 0, 0);
-	set_field_back(field[1], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(field[1], O_STATIC);
-	field_opts_off(field[1], O_AUTOSKIP);
+	field[F_PL0] = new_field(1, fl, 5, 2, 0, 0);
+	set_field_back(field[F_PL0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[F_PL0], O_STATIC);
+	field_opts_off(field[F_PL0], O_AUTOSKIP);
 	
-	field[2] = new_field(1, fl, 8, 2, 0, 0);
-	set_field_back(field[2], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(field[2], O_STATIC);
-	field_opts_off(field[2], O_AUTOSKIP);
+	field[F_PL1] = new_field(1, fl, 8, 2, 0, 0);
+	set_field_back(field[F_PL1], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[F_PL1], O_STATIC);
+	field_opts_off(field[F_PL1], O_AUTOSKIP);
 	
-	field[3] = new_field(1, fl, 11, 2, 0, 0);
-	set_field_back(field[3], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(field[3], O_STATIC);
-	field_opts_off(field[3], O_AUTOSKIP);
+	field[F_LR] = new_field(1, fl, 11, 2, 0, 0);
+	set_field_back(field[F_LR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[F_LR], O_STATIC);
+	field_opts_off(field[F_LR], O_AUTOSKIP);
 	
-	field[4] = new_field(1, fl, 14, 2, 0, 0);
-	set_field_back(field[4], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(field[4], O_STATIC);
-	field_opts_off(field[4], O_AUTOSKIP);
+	field[F_HR] = new_field(1, fl, 14, 2, 0, 0);
+	set_field_back(field[F_HR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[F_HR], O_STATIC);
+	field_opts_off(field[F_HR], O_AUTOSKIP);
 	
-	field[5] = new_field(1, fl, 17, 2, 0, 0);
-	set_field_back(field[5], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(field[5], O_STATIC);
-	field_opts_off(field[5], O_AUTOSKIP);
-	set_field_buffer(field[5], 0, "0");
+	field[F_ORB] = new_field(1, fl, 17, 2, 0, 0);
+	set_field_back(field[F_ORB], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[F_ORB], O_STATIC);
+	field_opts_off(field[F_ORB], O_AUTOSKIP);
+	set_field_buffer(field[F_ORB], 0, "0");
 	
-	field[6] = new_field(1, 8, 20, sb, 0, 0);
-	field_opts_off(field[6], O_EDIT);
+	field[F_FIND] = new_field(1, 8, 19, sb, 0, 0);
+	field_opts_off(field[F_FIND], O_EDIT);
 	
-	field[7] = NULL;
+	field[F_NULL] = NULL;
 	
 	FORM *form = new_form(field);
 	set_form_win(form, win);
@@ -362,7 +372,7 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 	mvwaddstr(win, 10, 1, "low range");
 	mvwaddstr(win, 13, 1, "hi range");
 	mvwaddstr(win, 16, 1, "orb");
-	mvwprintw(win, 20, sb, "[ find ]");
+	mvwprintw(win, 19, sb, "[ find ]");
 	
 	box(win, 0, 0);
 	
@@ -385,7 +395,7 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 				break;	
 	
 			case '\n':
-				if (index == 6)
+				if (index == F_FIND)
 				{
 					form_driver(form, REQ_VALIDATION);
 					done = 1;
@@ -427,14 +437,14 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 		current = current_field(form);
 		index = field_index(current);
 		
-		if (index == 6)
+		if (index == F_FIND)
 		{
 			wattron(win, A_REVERSE);
-			mvwprintw(win, 20, sb, "[ find ]");
+			mvwprintw(win, 19, sb, "[ find ]");
 			wattroff(win, A_REVERSE);
 		}
 		else
-			mvwprintw(win, 20, sb, "[ find ]");
+			mvwprintw(win, 19, sb, "[ find ]");
 			
 		pos_form_cursor(form);
 		box(win, 0, 0);
@@ -448,19 +458,19 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 	
 	if (!c)
 	{
-		char *sign = field_buffer(field[0], 0);
-		char *p0 = field_buffer(field[1], 0);
-		char *p1 = field_buffer(field[2], 0);
-		char *r0 = field_buffer(field[3], 0);
-		char *r1 = field_buffer(field[4], 0);
-		char *orb = field_buffer(field[5], 0);
+		char *sign = field_buffer(field[F_SIGN], 0);
+		char *p0 = field_buffer(field[F_PL0], 0);
+		char *p1 = field_buffer(field[F_PL1], 0);
+		char *r0 = field_buffer(field[F_LR], 0);
+		char *r1 = field_buffer(field[F_HR], 0);
+		char *orb = field_buffer(field[F_ORB], 0);
 		
-		ftrim(field[0], sign);
-		ftrim(field[1], p0);
-		ftrim(field[2], p1);
-		ftrim(field[3], r0);
-		ftrim(field[4], r1);
-		ftrim(field[5], orb);
+		ftrim(field[F_SIGN], sign);
+		ftrim(field[F_PL0], p0);
+		ftrim(field[F_PL1], p1);
+		ftrim(field[F_LR], r0);
+		ftrim(field[F_HR], r1);
+		ftrim(field[F_ORB], orb);
 		
 		int du[2] = {0};
 		sign_long(ui, sign, du);
@@ -473,7 +483,7 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 			
 	unpost_form(form);
 	set_form_fields(form, NULL);
-	for (int i = 0; i < 7; ++i)
+	for (int i = 0; i < F_MAX; ++i)
 		free_field(field[i]);
 	free_form(form);
 	
