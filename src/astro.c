@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 				doupdate();
 				break;
 			case 'f':
-				aspect_search(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				aspect_find(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;

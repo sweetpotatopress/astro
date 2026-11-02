@@ -295,7 +295,7 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 	free(item);
 }
 
-void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	char **list = ecalloc(MAXBUF, sizeof(*list));
 	int height = 23;
@@ -362,7 +362,7 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	mvwaddstr(win, 10, 1, "low range");
 	mvwaddstr(win, 13, 1, "hi range");
 	mvwaddstr(win, 16, 1, "orb");
-	mvwprintw(win, 20, sb, "[ search ]");
+	mvwprintw(win, 20, sb, "[ find ]");
 	
 	box(win, 0, 0);
 	
@@ -430,11 +430,11 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		if (index == 6)
 		{
 			wattron(win, A_REVERSE);
-			mvwprintw(win, 20, sb, "[ search ]");
+			mvwprintw(win, 20, sb, "[ find ]");
 			wattroff(win, A_REVERSE);
 		}
 		else
-			mvwprintw(win, 20, sb, "[ search ]");
+			mvwprintw(win, 20, sb, "[ find ]");
 			
 		pos_form_cursor(form);
 		box(win, 0, 0);
