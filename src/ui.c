@@ -62,6 +62,10 @@ void ui_init(struct ui *ui)
 		.zo_sym = { "ari", "tau", "gem", "can",
 		"leo", "vir", "lib", "sco", "sag",
 		"cap", "aqu", "pis" },
+		
+		.zo_fname = { "aries", "taurus", "gemini", "cancer",
+		"leo", "virgo", "libra", "scorpio", "sagittarius",
+		"capricorn", "aquarius", "pisces" },
 	
 		.moon = { "new", "crescent", "quarter", "gibbous", "full",
 		"2nd gibbous", "2nd quarter", "2nd crescent" },
