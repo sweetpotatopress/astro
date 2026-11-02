@@ -45,8 +45,11 @@ e		 	load chart
 	l/enter	choose  
 	esc		cancel  
 
+f			conjunction find
+
 j			write diary
 	esc		save entry
+	
 	
 [J]			read diary
 	j/k		down/up line
