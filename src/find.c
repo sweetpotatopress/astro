@@ -74,8 +74,9 @@ static void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
 		
 	for(int i = 0; i <= star; ++i)
 	{
-		mvwprintw(win, 3, i, "*");
-		mvwprintw(win, 3, 11, "%d%%", rp);
+		mvwprintw(win, 1, 0, "[");
+		mvwprintw(win, 1, i+1, "|");
+		mvwprintw(win, 1, 11, "]%d%%", rp);
 		wrefresh(win);
 	}
 }
@@ -87,6 +88,7 @@ static double wrap_deg(double angle)
 		angle += 360.0;
 	return angle - 180.0;
 }
+
 static void meantosouth(double *xx)
 {
 	xx[LONG] = (xx[LONG] + 180);
@@ -281,13 +283,15 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	char **list = ecalloc(MAXBUF, sizeof(*list));
-	int height = 25;
-	int width = 30;
+	int height = 23;
+	int width = 16;
+	int sb = 1;
+	int fl = 12;
 	
-	int starty = (LINES- height) / 2;
-	int startx = (COLS - width);
+	int sy = 3;
+	int sx = (COLS - width);
 	
-	WINDOW *win = newwin(height, width, starty, startx);
+	WINDOW *win = newwin(height, width, sy, sx);
 	WINDOW *subwin = derwin(win, height - 2, width - 2, 0, 0);
 	
 	wbkgdset(win, COLOR_PAIR(M_COLOR));
@@ -295,39 +299,38 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	keypad(win, TRUE);	
 	
 	FIELD *field[8];
-	field[0] = new_field(1, 25, 2, 2, 0, 0);
+	field[0] = new_field(1, fl, 2, 2, 0, 0);
 	set_field_back(field[0], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[0], O_STATIC);
 	field_opts_off(field[0], O_AUTOSKIP);
 	
-	field[1] = new_field(1, 25, 5, 2, 0, 0);
+	field[1] = new_field(1, fl, 5, 2, 0, 0);
 	set_field_back(field[1], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[1], O_STATIC);
 	field_opts_off(field[1], O_AUTOSKIP);
 	
-	field[2] = new_field(1, 25, 8, 2, 0, 0);
+	field[2] = new_field(1, fl, 8, 2, 0, 0);
 	set_field_back(field[2], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[2], O_STATIC);
 	field_opts_off(field[2], O_AUTOSKIP);
 	
-	field[3] = new_field(1, 25, 11, 2, 0, 0);
+	field[3] = new_field(1, fl, 11, 2, 0, 0);
 	set_field_back(field[3], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[3], O_STATIC);
 	field_opts_off(field[3], O_AUTOSKIP);
 	
-	field[4] = new_field(1, 25, 14, 2, 0, 0);
+	field[4] = new_field(1, fl, 14, 2, 0, 0);
 	set_field_back(field[4], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[4], O_STATIC);
 	field_opts_off(field[4], O_AUTOSKIP);
 	
-	field[5] = new_field(1, 25, 17, 2, 0, 0);
+	field[5] = new_field(1, fl, 17, 2, 0, 0);
 	set_field_back(field[5], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[5], O_STATIC);
 	field_opts_off(field[5], O_AUTOSKIP);
 	set_field_buffer(field[5], 0, "0");
 	
-	field[6] = new_field(1, 8, 20, 9, 0, 0);
-	set_field_buffer(field[6], 0, "[ search ]");
+	field[6] = new_field(1, 8, 20, sb, 0, 0);
 	field_opts_off(field[6], O_EDIT);
 	
 	field[7] = NULL;
@@ -344,6 +347,8 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 	mvwaddstr(win, 10, 1, "low range");
 	mvwaddstr(win, 13, 1, "hi range");
 	mvwaddstr(win, 16, 1, "orb");
+	mvwprintw(win, 20, sb, "[ search ]");
+	
 	box(win, 0, 0);
 	
 	set_current_field(form, field[0]);
@@ -410,17 +415,19 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		if (index == 6)
 		{
 			wattron(win, A_REVERSE);
-			mvwprintw(win, 20, 9, "[ search ]");
+			mvwprintw(win, 20, sb, "[ search ]");
 			wattroff(win, A_REVERSE);
 		}
 		else
-			mvwprintw(win, 20, 9, "[ search ]");
+			mvwprintw(win, 20, sb, "[ search ]");
 			
 		pos_form_cursor(form);
 		box(win, 0, 0);
 	
 		wrefresh(win);
 	}
+	curs_set(0);
+	
 	int idx = 0;
 	struct tmp **tmp = ecalloc(MAXBUF, sizeof(*tmp));
 	
@@ -446,8 +453,6 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		cdata->year = atoi(r0);
 		idx = find_conj(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), list);
 	}
-	
-	curs_set(0);
 			
 	unpost_form(form);
 	set_form_fields(form, NULL);
