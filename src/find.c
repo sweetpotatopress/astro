@@ -288,9 +288,6 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 				new_chart(cdata, pxx, ui, planet, zodiac);
 				doupdate();
 				break;
-			case 'l': case KEY_RIGHT:
-				done = 1;
-				break;
 			case 'q': case 27:
 				done = 1;
 				break;
