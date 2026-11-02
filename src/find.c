@@ -31,6 +31,15 @@ static void sign_long(struct ui *ui, char *str, int *du)
 	}
 }
 
+static void pl_name(struct ui *ui, char *p)
+{
+	for (int i = 0; i < 12; ++i)
+	{
+		if (strcmp(p, ui->sym.pl_name[i]) == 0 || strcmp(p, ui->sym.pl_fname[i]) == 0)
+			snprintf(p, strlen(p)+1, "%d", i);
+	}
+}
+
 struct tmp {
 	int year;
 	int mon;
@@ -455,6 +464,8 @@ void aspect_search(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double *
 		
 		int du[2] = {0};
 		sign_long(ui, sign, du);
+		pl_name(ui, p0);
+		pl_name(ui, p1);
 		
 		cdata->year = atoi(r0);
 		idx = find_conj(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), list);
