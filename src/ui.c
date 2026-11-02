@@ -52,6 +52,12 @@ void ui_init(struct ui *ui)
 		.pl_sym = { "(o)", "(()", "(-o<)",
 		"(~:o)", "(o->)", "(\\+)", "(h)", "(\\*/)", "(?)",
 		"(P)", "(u)", "(^)" },
+		
+		.pl_name = { "su", "mo", "me", "ve", "ma", "ju",
+		"sa", "ur", "ne", "pl", "so", "no" },
+		
+		.pl_fname = { "sun", "moon", "mercury", "venus", "mars",
+		"jupiter", "saturn", "uranus", "neptune", "pluto", "south node", "north node" },
 	
 		.zo_sym = { "ari", "tau", "gem", "can",
 		"leo", "vir", "lib", "sco", "sag",

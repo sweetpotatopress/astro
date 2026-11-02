@@ -116,6 +116,8 @@ struct zxx {
 
 struct ui_sym {
 	const char *pl_sym[PL_SYM_MAX];
+	const char *pl_name[PL_SYM_MAX];
+	const char *pl_fname[PL_SYM_MAX];
 	const char *zo_sym[ZO_SYM_MAX];
 	const char *moon[MOON_MAX];
 	const char *month[MONTH_MAX];
