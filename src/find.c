@@ -66,6 +66,8 @@ static void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
 	double part = r1 - cdata->year;
 	double percent = (part/whole) * 100;
 	
+	char *dance[10] = { "<(^_^)>", "<(^.^<)~", "~(>^.^)>", "~(>^.^<)", "<(0.0)>"};
+	
 	int rp = 100 - percent;
 	
 	int star = 0;
@@ -74,6 +76,10 @@ static void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
 		
 	for(int i = 0; i <= star; ++i)
 	{
+		srand(part);
+		int d = rand() % 5;
+		mvwprintw(win, 2, 3, "        ");
+		mvwprintw(win, 2, 3, "%s", dance[d]);
 		mvwprintw(win, 1, 0, "[");
 		mvwprintw(win, 1, i+1, "|");
 		mvwprintw(win, 1, 11, "]%d%%", rp);
