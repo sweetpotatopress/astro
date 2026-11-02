@@ -87,10 +87,19 @@ static double wrap_deg(double angle)
 		angle += 360.0;
 	return angle - 180.0;
 }
+static void meantosouth(double *xx)
+{
+	xx[LONG] = (xx[LONG] + 180);
+	if (xx[LONG] >= 360)
+		xx[LONG] -= 360;
+}
 
 static int find_conj(WINDOW *win, struct cdata *cdata, struct tmp **tmp,
 double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 {
+	werase(win);
+	wrefresh(win);
+	
 	struct tm temp = {0};
 	time_t t = 0, last = 0;
 
@@ -109,9 +118,20 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 	const double max_step = day_sec * 24.0;
 	const double min_step = 1.0;
 	
+	bool sn0 = FALSE;
+	bool sn1 = FALSE;
+	if (p0 == 10)
+	{
+		p0 = 11;
+		sn0 = TRUE;
+	}
+	if (p1 == 10)
+	{
+		p1 = 11;
+		sn1 = TRUE;
+	}
+		
 	long iter = 0;
-	werase(win);
-	wrefresh(win);
 	for(;;)
 	{
 		calculate_utc(cdata);
@@ -122,6 +142,11 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 		swe_calc_ut(jd_ut, p0, iflag, xx0, serr);
 		swe_calc_ut(jd_ut, p1, iflag, xx1, serr);
 		
+		if (sn0 == TRUE)
+			meantosouth(xx0);
+		if (sn1 == TRUE)
+			meantosouth(xx1);
+	
 		diff = wrap_deg(xx0[LONG] - xx1[LONG]);
 		diff_s = xx0[LONG_S] - xx1[LONG_S];
 		
@@ -130,7 +155,7 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 	
 		if (fabs(diff) <= arcsec+orb)
 		{
-			if (llabs((long long)(t - last)) > day_sec && 
+			if (llabs((long long)(t - last)) > max_step && 
 			xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
 			{
 				if (c >= MAXBUF)
@@ -143,7 +168,7 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 				last = t;
 			}
 			
-			t+= day_sec;
+			t+= max_step;
 			cpt(cdata, &temp, &t, OUT);
 		}
 		else
