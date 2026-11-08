@@ -458,9 +458,7 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 				break;
 	
 		}
-		if (ui->cc == TRANSIT)
-			arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
-	
+		
 		flushinp();
 		enanosleep(10);
 		switch(inc)
@@ -498,8 +496,8 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 			sy, sx,
 			sy, sx + 5,
 			FALSE);
-			print_inc(ui->transit_win, sy, sx, label, advance);
 			update_panels();
+			arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
 		}
 	}
 	wmove(ui->main_win, sy, sx);
