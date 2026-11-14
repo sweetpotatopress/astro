@@ -531,44 +531,6 @@ static void save_file_name(struct cdata *cdata, char *path)
 		delwin(win);
 }
 
-static void converttocomma(char *path)
-{ // temporary function to convert legacy \n delim'd chart files
-	FILE *fp = fopen(path, "r");
-	if (fp == NULL)
-		ERR_EXIT("converttocomma fopen");
-			
-	int ch;
-	char buf[MAXBUF] = {0};
-	int i = 0;
-	while ((ch = fgetc(fp)) != EOF)
-		buf[i++] = ch;
-	buf[i] = '\0';
-	
-	for (size_t j = 0; j < strlen(buf); j++)
-	{
-		if (j > 0 && buf[j-1] == '\n' && buf[j] == '\n')
-		{
-			buf[j] = 'E';
-			for (size_t c = strlen(buf)+1; c > j; c--)
-				buf[c] = buf[c-1];
-			buf[j+1] = ',';
-		}
-	}
-	for (size_t j = 0; j < strlen(buf); j++)
-	{
-		if (buf[j] == '\n')
-			buf[j] = ',';
-	}
-	
-	fclose(fp);
-	
-	fp = fopen(path, "w");
-	if (!fp)
-		ERR_EXIT("convertocomma fopen");
-	fprintf(fp, "%s", buf);
-	fclose(fp);
-}
-
 void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls)
 {
 	struct stat st;
@@ -614,9 +576,6 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				}
 				
 				snprintf(cdata->chart_name, MAXBUF, "%s", selected);
-				
-				if (strcmp(head, "/charts") == 0)
-					converttocomma(ui->fb_newpath);
 				
 				FILE *fp = fopen(ui->fb_newpath, "r");
 				if (fp == NULL)
