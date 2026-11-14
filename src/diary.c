@@ -31,6 +31,8 @@
 
 #define PMAX (PLINE * PCOL)
 
+static char *file_extension = ".md";
+
 static void d_timezone(char *timezone)
 {
 	if (setenv("TZ", timezone, 1) != 0)
@@ -41,7 +43,7 @@ static void d_timezone(char *timezone)
 static void diary_path(char *full_path, int year, int mon, int mday)
 {
 	char filename[12] = {0};
-	int n = snprintf(filename, 12, "%02d.md", mday);
+	int n = snprintf(filename, 12, "%02d%s", mday, file_extension);
 	if (n > 12)
 		ERR_EXIT("ERR: diary filename too long");
 	
@@ -399,12 +401,12 @@ static int next_page(struct cdata *cdata, struct ui *ui, char *path, struct ct *
 	(*last)++;
 	int file = atoi(last) + sign;
 	*last = '\0';
-	snprintf(np, MAXPATH, "%s/%02d.md", cp, file);
+	snprintf(np, MAXPATH, "%s/%02d%s", cp, file, file_extension);
 	if (access(np, R_OK) == 0)
 	{
 		werase(ui->pad);
 		memcpy(path, np, MAXPATH);
-		snprintf(cdata->chart_name, MAXBUF, "%02d.md", file);
+		snprintf(cdata->chart_name, MAXBUF, "%02d%s", file, file_extension);
 		*cm = diary_to_pad(ui, ct, path);
 		*c = 0;
 		*y = ct[0]->y;
