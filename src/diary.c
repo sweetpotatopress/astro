@@ -396,17 +396,23 @@ static int next_page(struct cdata *cdata, struct ui *ui, char *path, struct ct *
 {
 	char cp[MAXPATH];
 	char np[MAXPATH];
+	char date[128];
 	memcpy(cp, path, MAXPATH);
 	char *last = strrchr(cp, '/');
 	(*last)++;
-	int file = atoi(last) + sign;
-	for (int i = file; i < 32; ++i)
+	memcpy(date, last, strlen(last) + 1);
+	*last = '\0';
+	int file = atoi(date) + sign;
+	
+	while(TRUE)
 	{
-		file = atoi(last) + sign;
-		*last = '\0';
 		snprintf(np, MAXPATH, "%s/%02d%s", cp, file, file_extension);
-		if (access(np, R_OK) == 0)
+		if (access(np, R_OK) == 0 || file <= 1 || file >= 31)
 			break;
+		memcpy(cp, path, MAXPATH);
+		last = strrchr(cp, '/');
+		*last = '\0';
+		file += sign;
 	}
 		
 	if (access(np, R_OK) == 0)
