@@ -409,14 +409,14 @@ static int next_page(struct cdata *cdata, struct ui *ui, char *path, struct ct *
 		*c = 0;
 		*y = ct[0]->y;
 		ui->pad_y = 0;
-		return 1;
+		return TRUE;
 	}
-	return 0;
+	return FALSE;
 }
 
 static void next_entry(struct cdata *cdata, struct ui *ui, char *path, struct ct **ct, int *c, int *cm, int *y, int dif, int sign)
 {
-	int f = 0;
+	bool f = FALSE;
 	*c += sign;
 	if (*c > *cm)
 	{
@@ -430,13 +430,13 @@ static void next_entry(struct cdata *cdata, struct ui *ui, char *path, struct ct
 		f = next_page(cdata, ui, path, ct, c, cm, y, sign);
 	}
 	
-	if (sign > 0 && f == 0)
+	if (sign > 0 && f == FALSE)
 	{
 		*y = ct[*c]->y;
 		while(*y+dif > ui->bl)
 			down_pad(ui);
 	}
-	else if (sign < 0 && f == 0)
+	else if (sign < 0 && f == FALSE)
 	{
 		*y = ct[*c]->y;	
 		int tmp = *y;
@@ -514,7 +514,7 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 			case 'l':
 				next_entry(cdata, ui, path, ct, &c, &cm, &y, dif, 1);
 				new_chart(cdata, pxx, ui, planet, zodiac);
-			break;
+				break;
 			case 'h':
 				next_entry(cdata, ui, path, ct, &c, &cm, &y, dif, -1);
 				new_chart(cdata, pxx, ui, planet, zodiac);
