@@ -377,7 +377,7 @@ static int diary_to_pad(struct ui *ui, struct ct **ct, char *path)
 			c++;
 		}
 			
-		if (buf[0] == '-' && buf[2] == '-' && buf[4] == '-')
+		if (buf[0] == '-' && buf[1] == ' ' && buf[2] == '-' && buf[3] == ' ' && buf[4] == '-')
 		{
 			s = TRUE;
 		}
