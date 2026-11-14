@@ -141,12 +141,14 @@ static void down_pad(struct ui *ui)
 
 static void up_pad(struct ui *ui)
 {
-	if (ui->pad_y > 0) 
+	if (ui->pad_y >= 0) 
 	{
 		ui->pad_y -= ui->inc;
 		ui->tl -= ui->inc;
 		ui->bl -= ui->inc;
 	}
+	if (ui->pad_y < 0)
+		ui->pad_y = 0;
 }
 
 static void minus_len(int len[PLINE], int y)
@@ -327,19 +329,6 @@ struct ct {
 	char y;
 };
 
-static void next_entry(struct cdata *cdata, struct ct **ct, int *c, int cm, int sign)
-{
-	*c += sign;
-	if (*c >= cm)
-		*c = cm;
-	else if (*c < 0)
-		*c = 0;
-		
-	cdata->hour = ct[*c]->hour;
-	cdata->min = ct[*c]->min;
-	cdata->sec = ct[*c]->sec;
-}
-
 static int diary_to_pad(struct ui *ui, struct ct **ct, char *path)
 {
 	FILE *fp;
@@ -399,6 +388,68 @@ static int diary_to_pad(struct ui *ui, struct ct **ct, char *path)
 	}
 	free(buf);
 	return c-1;
+}
+
+static int next_page(struct cdata *cdata, struct ui *ui, char *path, struct ct **ct, int *c, int *cm, int *y, int sign)
+{
+	char cp[MAXPATH];
+	char np[MAXPATH];
+	memcpy(cp, path, MAXPATH);
+	char *last = strrchr(cp, '/');
+	(*last)++;
+	int file = atoi(last) + sign;
+	*last = '\0';
+	snprintf(np, MAXPATH, "%s/%02d.md", cp, file);
+	if (access(np, R_OK) == 0)
+	{
+		werase(ui->pad);
+		memcpy(path, np, MAXPATH);
+		snprintf(cdata->chart_name, MAXBUF, "%02d.md", file);
+		*cm = diary_to_pad(ui, ct, path);
+		*c = 0;
+		*y = ct[0]->y;
+		ui->pad_y = 0;
+		return 1;
+	}
+	return 0;
+}
+
+static void next_entry(struct cdata *cdata, struct ui *ui, char *path, struct ct **ct, int *c, int *cm, int *y, int dif, int sign)
+{
+	int f = 0;
+	*c += sign;
+	if (*c > *cm)
+	{
+		*c = *cm;
+		f = next_page(cdata, ui, path, ct, c, cm, y, sign);
+	}
+	
+	else if (*c < 0)
+	{
+		*c = 0;
+		f = next_page(cdata, ui, path, ct, c, cm, y, sign);
+	}
+	
+	if (sign > 0 && f == 0)
+	{
+		*y = ct[*c]->y;
+		while(*y+dif > ui->bl)
+			down_pad(ui);
+	}
+	else if (sign < 0 && f == 0)
+	{
+		*y = ct[*c]->y;	
+		int tmp = *y;
+		tmp -= dif;
+		if (tmp < 0)
+			tmp = 0;
+		while(tmp < ui->tl)
+			up_pad(ui);
+	}
+		
+	cdata->hour = ct[*c]->hour;
+	cdata->min = ct[*c]->min;
+	cdata->sec = ct[*c]->sec;
 }
 
 static void free_ct(struct ct **ct, int n)
@@ -461,23 +512,11 @@ static void diary_read(struct cdata *cdata, struct pxx *pxx, struct ui *ui, doub
 				y-= ui->inc;
 				break;
 			case 'l':
-				next_entry(cdata, ct, &c, cm, 1);
-				
-				y = ct[c]->y;
-				while(y+dif > ui->bl)
-					down_pad(ui);
+				next_entry(cdata, ui, path, ct, &c, &cm, &y, dif, 1);
 				new_chart(cdata, pxx, ui, planet, zodiac);
-				break;
+			break;
 			case 'h':
-				next_entry(cdata, ct, &c, cm, -1);
-				
-				y = ct[c]->y;	
-				int tmp = y;
-				tmp -= dif;
-				if (tmp < 0)
-					tmp = 0;
-				while(tmp < ui->tl)
-					up_pad(ui);
+				next_entry(cdata, ui, path, ct, &c, &cm, &y, dif, -1);
 				new_chart(cdata, pxx, ui, planet, zodiac);
 				break;
 			case KEY_DOWN: case 'j':
