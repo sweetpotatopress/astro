@@ -235,8 +235,8 @@ void back_dir(char *filepath, char *cur_dir)
 	if(last)
 		*last = '\0';
 	last = strrchr(filepath, '/');
-		if(last)
-	memcpy(name, last, strlen(last) + 1);
+	if(last)
+		memcpy(name, last, strlen(last) + 1);
 	snprintf(cur_dir, MAXBUF, " %s", name);
 }
 
