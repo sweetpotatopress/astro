@@ -400,8 +400,15 @@ static int next_page(struct cdata *cdata, struct ui *ui, char *path, struct ct *
 	char *last = strrchr(cp, '/');
 	(*last)++;
 	int file = atoi(last) + sign;
-	*last = '\0';
-	snprintf(np, MAXPATH, "%s/%02d%s", cp, file, file_extension);
+	for (int i = 1; i < 32; ++i)
+	{
+		file = atoi(last) + (i * sign);
+		*last = '\0';
+		snprintf(np, MAXPATH, "%s/%02d%s", cp, file, file_extension);
+		if (access(np, R_OK) == 0)
+			break;
+	}
+		
 	if (access(np, R_OK) == 0)
 	{
 		werase(ui->pad);
