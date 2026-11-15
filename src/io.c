@@ -530,6 +530,100 @@ static void save_file_name(struct cdata *cdata, char *path)
 		delwin(subwin);
 		delwin(win);
 }
+	
+void load_chart_data(struct cdata *cdata, char *path)
+{
+	char buffer[MAXBUF] = {0};
+	char field[FMAX][MAXBUF] = {0};
+	
+	char *endptr = NULL;
+	long lret;
+	double dret;
+	errno = 0;
+	int count = 0;
+	
+	FILE *fp = fopen(path, "r");
+	if (fp == NULL)
+		ERR_EXIT("load_chart_data path fopen");
+				
+	if (fgets(buffer, MAXBUF, fp) != NULL)
+	{
+		char *it = xstrtok(buffer, ",");
+				
+		while(count < FMAX)
+		{
+			snprintf(field[count++], MAXBUF, "%s", it);
+			it = xstrtok(NULL, ",");
+		}
+	}
+				
+	memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
+	memcpy(cdata->state, field[FSTATE], strlen(field[FSTATE]) + 1);
+	memcpy(cdata->country, field[FCOUNTRY], strlen(field[FCOUNTRY]) + 1);
+					
+	lret = strtol(field[FYEAR], &endptr, 10);
+	if (errno != ERANGE)
+		cdata->year = (int)lret;
+	else
+		cdata->year = 1970;
+	errno = 0;
+							
+	lret = strtol(field[FMONTH], &endptr, 10);
+	if (errno != ERANGE && lret != -1)
+		cdata->mon = (int)lret;
+	else
+		cdata->mon = 1;
+	errno = 0;
+							
+	lret = strtol(field[FDAY], &endptr, 10);
+	if (errno != ERANGE && lret != -1)
+		cdata->mday = (int)lret;
+	else
+		cdata->mday = 1;
+	errno = 0;
+							
+	lret = strtol(field[FHOUR], &endptr, 10);
+	if (errno != ERANGE && lret != -1) 
+		cdata->hour = (int)lret;
+	else
+		cdata->hour = 1;
+	errno = 0;
+								
+	lret = strtol(field[FMIN], &endptr, 10);
+	if (errno != ERANGE && lret != -1)
+		cdata->min = (int)lret;
+	else
+		cdata->min = 1;
+	errno = 0;
+					
+	lret = strtol(field[FSEC], &endptr, 10);
+	if (errno != ERANGE && lret != -1)
+		cdata->sec = (int)lret;
+	else
+		cdata->sec = 0;
+	errno = 0;
+							
+	if (setenv("TZ", field[FTZ], 1) != 0)
+		ERR_EXIT("ERR: print_fb TZ setenv");
+	tzset();
+	memcpy(cdata->timezone, field[FTZ], strlen(field[FTZ]) + 1);
+						
+	dret = strtod(field[FLAT], &endptr);
+	if (errno != ERANGE)
+		cdata->dlat = dret;
+	else
+		cdata->dlat = 0.0;
+	errno = 0;
+						
+	dret = strtod(field[FLON], &endptr);
+	if (errno != ERANGE)
+		cdata->dlon = dret;
+	else
+		cdata->dlon = 0.0;
+	errno = 0;
+	
+	fclose(fp);
+}
 
 void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls)
 {
@@ -537,16 +631,10 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 	const char *selected = NULL;
 	ITEM *cur = NULL;
 	
-	char buffer[MAXBUF] = {0};
-	char field[FMAX][MAXBUF] = {0};
 	snprintf(ui->fb_cur_dir, MAXBUF, " %s", head);
 	
-	char *endptr = NULL;
-	long lret;
-	double dret;
-	errno = 0;
-	
-	int ch = 0, count = 0, menu_done = 0;
+
+	int ch = 0, menu_done = 0;
 	while (!menu_done && (ch = wgetch(ui->fb_win)))
 	{
 		cur = current_item(ui->fb_menu);
@@ -563,11 +651,11 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 			case 'l': case KEY_RIGHT: case '\n':
 				if ((int)ui->fb_c == 0)
 					break;
-				
+	
 				int n = snprintf(ui->fb_newpath, MAXPATH, "%s/%s", path, selected);
 				if (n >= MAXPATH)
-					ERR_EXIT("print_fb newpath too long");
-		
+					ERR_EXIT("load_chart_data newpath too long");
+
 				if (stat(ui->fb_newpath, &st) == 0 && S_ISDIR(st.st_mode))
 				{
 					memcpy(path, ui->fb_newpath, strlen(ui->fb_newpath) + 1);
@@ -576,88 +664,8 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 				}
 				
 				snprintf(cdata->chart_name, MAXBUF, "%s", selected);
-				
-				FILE *fp = fopen(ui->fb_newpath, "r");
-				if (fp == NULL)
-					ERR_EXIT("print_fb newpath fopen");
-				
-				if (fgets(buffer, MAXBUF, fp) != NULL)
-				{
-					char *it = xstrtok(buffer, ",");
-				
-					while(count < FMAX)
-					{
-						snprintf(field[count++], MAXBUF, "%s", it);
-						it = xstrtok(NULL, ",");
-					}
-				}
-				
-				memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
-				memcpy(cdata->state, field[FSTATE], strlen(field[FSTATE]) + 1);
-				memcpy(cdata->country, field[FCOUNTRY], strlen(field[FCOUNTRY]) + 1);
-					
-				lret = strtol(field[FYEAR], &endptr, 10);
-				if (errno != ERANGE)
-					cdata->year = (int)lret;
-				else
-					cdata->year = 1970;
-				errno = 0;
-							
-				lret = strtol(field[FMONTH], &endptr, 10);
-				if (errno != ERANGE && lret != -1)
-					cdata->mon = (int)lret;
-				else
-					cdata->mon = 1;
-				errno = 0;
-							
-				lret = strtol(field[FDAY], &endptr, 10);
-				if (errno != ERANGE && lret != -1)
-					cdata->mday = (int)lret;
-				else
-					cdata->mday = 1;
-				errno = 0;
-							
-				lret = strtol(field[FHOUR], &endptr, 10);
-				if (errno != ERANGE && lret != -1) 
-					cdata->hour = (int)lret;
-				else
-					cdata->hour = 1;
-				errno = 0;
-								
-				lret = strtol(field[FMIN], &endptr, 10);
-				if (errno != ERANGE && lret != -1)
-					cdata->min = (int)lret;
-				else
-					cdata->min = 1;
-				errno = 0;
-					
-				lret = strtol(field[FSEC], &endptr, 10);
-				if (errno != ERANGE && lret != -1)
-					cdata->sec = (int)lret;
-				else
-					cdata->sec = 0;
-				errno = 0;
-							
-				if (setenv("TZ", field[FTZ], 1) != 0)
-					ERR_EXIT("ERR: print_fb TZ setenv");
-				tzset();
-				memcpy(cdata->timezone, field[FTZ], strlen(field[FTZ]) + 1);
-						
-				dret = strtod(field[FLAT], &endptr);
-				if (errno != ERANGE)
-					cdata->dlat = dret;
-				else
-					cdata->dlat = 0.0;
-				errno = 0;
-						
-				dret = strtod(field[FLON], &endptr);
-				if (errno != ERANGE)
-					cdata->dlon = dret;
-				else
-					cdata->dlon = 0.0;
-				errno = 0;
-				
-				fclose(fp);
+			
+				load_chart_data(cdata, ui->fb_newpath);
 				
 				menu_done = 1;
 				break;
