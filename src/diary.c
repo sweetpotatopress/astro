@@ -424,6 +424,7 @@ static int next_page(struct cdata *cdata, struct ui *ui, char *path, struct ct *
 		*c = 0;
 		*y = ct[0]->y;
 		ui->pad_y = 0;
+		load_chart_data(cdata, path);
 		return TRUE;
 	}
 	return FALSE;
