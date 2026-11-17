@@ -200,28 +200,23 @@ static void button_toggle(FIELD **field, int idx, int *trig)
 
 void house_menu(char **buffer, struct cdata *cdata)
 {
-	int count = 24;
+	int count = 12;
+	
 	int hsys[] = {
-		'B', 'Y', 'X', 'H',
-		'C', 'F', 'A', 'D',
-		'N', 'G', 'I', 'i',
-		'K', 'U', 'M', 'P',
-		'T', 'O', 'L', 'Q',
-		'R', 'S', 'V', 'W' };
+		'W', 'A', 'O', 'P',
+		'C', 'K', 'R', 'M',
+		'B', 'F', 'T', 'N' };
 		
 	char *hname[] = {
-		"alcabitus", "APC", "zariel", "azimuthal",
-		"campanus", "carter", "equal", "equal MC",
-		"aries", "gauquelin", "sunshine 1", "sunshine 2",
-		"koch", "krusinski", "morinus", "placidus",
-		"polich", "porphyry", "pullen sd", "pullen sr",
-		"regiomontanus", "sripati", "vehlow", "whole" };
+	"whole", "equal", "porphyry", "placidus",
+	"campanus", "koch", "regiomontanus", "morinus",
+	"alcabitus", "carter", "polich", "aries" };
 		
 	char *head = "house system";
 		
 	int header = 4;
-	int width = 25;
-	int height = 16 + header;
+	int width = 20;
+	int height = 12 + header;
 	
 	int sy = (LINES - height) / 2;
 	int sx = (COLS - width) / 2;
