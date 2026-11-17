@@ -218,7 +218,7 @@ void house_menu(struct cdata *cdata, struct ui *ui)
 	
 	WINDOW *win = newwin(height, width, sy, sx);
 	WINDOW *subwin = derwin(win, height - header, width - 2, 3, 1);
-	ITEM **item = ecalloc(count, sizeof(ITEM *));
+	ITEM **item = ecalloc(count+1, sizeof(ITEM *));
 	
 	for (int i = 0; i < count; i++)
 		item[i] = new_item(ui->sym.hname[i], NULL);
@@ -274,6 +274,10 @@ void house_menu(struct cdata *cdata, struct ui *ui)
 	
 	unpost_menu(menu);
 	free_menu(menu);
+	
+	for (int i = 0; i < count+1; ++i)
+		free_item(item[i]);
+	free(item);
 	
 	werase(win);
 	wrefresh(win);
