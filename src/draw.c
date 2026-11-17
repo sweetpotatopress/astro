@@ -156,6 +156,8 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 			zo_sign = (int)(cdata->t_cusp / 30.0);
 		else
 			zo_sign = pxx->dasc[LONG];
+		if (cdata->hsys == 'W')
+			zo_sign = floor(cdata->sign_cusp[0] / 30.0) * 30;
 	
 		double zo_pos_radian = (adjusted_pos[i] - zo_sign) * M_PI / 180;
 		double cos_rad = cos(zo_pos_radian);
