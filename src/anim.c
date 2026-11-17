@@ -122,6 +122,9 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		sy += 1;
 		if (fabs(cdata->dlon) > 1e-6)
 			mvwprintw(win, sy, sx, "%f", cdata->dlon);
+		
+		sy += 1;
+		mvwprintw(win, sy, sx, "%s", ui->sym.hname[cdata->hidx]);
 	}
 }
 

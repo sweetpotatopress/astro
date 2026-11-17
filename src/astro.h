@@ -114,7 +114,8 @@ struct cdata {
 	bool lt; // LMT flag
 	bool dt; // dst reverse
 	int rt; // realtime flag
-	int hsys;
+	int hsys; // house system
+	int hidx; // house sys index
 	double cusp[12];
 	double sign_cusp[12];
 	double t_cusp; // transit cusp
@@ -176,4 +177,4 @@ size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc);
 void back_dir(char *filepath, char *cur_dir);
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch);
 void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
-void house_menu(struct cdata *cdata);
+void house_menu(struct cdata *cdata, struct ui *ui);

@@ -198,7 +198,7 @@ static void button_toggle(FIELD **field, int idx, int *trig)
 	}
 }
 
-void house_menu(struct cdata *cdata)
+void house_menu(struct cdata *cdata, struct ui *ui)
 {
 	int count = 12;
 	
@@ -206,11 +206,6 @@ void house_menu(struct cdata *cdata)
 		'W', 'A', 'O', 'P',
 		'C', 'K', 'R', 'M',
 		'B', 'F', 'T', 'N' };
-		
-	char *hname[] = {
-	"whole", "equal", "porphyry", "placidus",
-	"campanus", "koch", "regiomontanus", "morinus",
-	"alcabitus", "carter", "polich", "aries" };
 		
 	char *head = "house system";
 		
@@ -226,7 +221,7 @@ void house_menu(struct cdata *cdata)
 	ITEM **item = ecalloc(count, sizeof(ITEM *));
 	
 	for (int i = 0; i < count; i++)
-		item[i] = new_item(hname[i], NULL);
+		item[i] = new_item(ui->sym.hname[i], NULL);
 	item[count] = NULL;
 	
 	MENU *menu = new_menu(item);
@@ -266,6 +261,7 @@ void house_menu(struct cdata *cdata)
 				break;
 			case 'l': case KEY_RIGHT: case '\n':
 				cdata->hsys = hsys[item_index(cur)];
+				cdata->hidx = item_index(cur);
 				menu_done = 1;
 				break;
 			case 'q': case 27:
@@ -408,7 +404,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 			case '\\': case '[': case ']': case '\n':
 				if (current_field(form) == field[C_HSYS])
 				{
-					house_menu(cdata);
+					house_menu(cdata, ui);
 					snprintf(buffer[C_HSYS], MAXBUF, "%d", cdata->hsys);
 					set_field_buffer(field[C_HSYS], 0, buffer[C_HSYS]);
 				}

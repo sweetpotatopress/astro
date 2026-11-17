@@ -73,7 +73,12 @@ void ui_init(struct ui *ui)
 		.month = { "err", "jan", "feb", "mar", "apr", "may", "jun",
 		"jul", "aug", "sep", "oct", "nov", "dec" },
 		
-	 	.week = { "sun", "mon", "tue", "wed", "thu", "fri", "sat" }
+	 	.week = { "sun", "mon", "tue", "wed", "thu", "fri", "sat" },
+	 	
+		.hname = {
+		"whole", "equal", "porphyry", "placidus",
+		"campanus", "koch", "regiomontanus", "morinus",
+		"alcabitus", "carter", "polich", "aries" }
 	};
 	
 	ui->cc = 1;

@@ -113,6 +113,7 @@ struct zxx {
 #define SYNASTRY 12
 #define MONTH_MAX 13
 #define WEEK_MAX 7
+#define HNAME_MAX 12
 
 struct ui_sym {
 	const char *pl_sym[PL_SYM_MAX];
@@ -123,6 +124,7 @@ struct ui_sym {
 	const char *moon[MOON_MAX];
 	const char *month[MONTH_MAX];
 	const char *week[WEEK_MAX];
+	const char *hname[HNAME_MAX];
 };
 
 struct ui {
