@@ -219,9 +219,7 @@ void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, in
 	{
 		int sign = ((i + asc_sign) % 12);
 
-		int sign_inc = (asc_sign * 30) -15;
-		
-		double rad = (cdata->sign_cusp[i] - sign_inc) * M_PI / 180.0;
+		double rad = (cdata->sign_cusp[i] + 15 - cdata->cusp[0]) * M_PI / 180.0;
 		
 		int x = ui->cx - (int)(ui->zr * cos(rad));
 		int y = ui->cy + (int)(ui->zr * sin(rad) * 0.5);
@@ -234,13 +232,13 @@ void draw_zo_line(WINDOW *win, struct cdata * cdata, struct ui *ui, chtype ch)
 {
 	for (int i = ARI; i < ZMAX; ++i)
 	{
-		double rad = (cdata->sign_cusp[i]) * M_PI / 180.0;
+		double rad = (cdata->sign_cusp[i] - cdata->cusp[0]) * M_PI / 180.0;
 		
 		int edge_x = ui->cx - (int)(ui->or * cos(rad));
 		int edge_y = ui->cy + (int)(ui->or * sin(rad) * 0.5);
 		
-		int half_x = ui->cx - (int)((ui->zr-1) * cos(rad));
-		int half_y = ui->cy + (int)((ui->zr-1) * sin(rad) * 0.5);
+		int half_x = ui->cx - (int)((ui->zr-2) * cos(rad));
+		int half_y = ui->cy + (int)((ui->zr-2) * sin(rad) * 0.5);
 		
 		int dx = edge_x - half_x;
 		int dy = edge_y - half_y;
@@ -255,6 +253,36 @@ void draw_zo_line(WINDOW *win, struct cdata * cdata, struct ui *ui, chtype ch)
 			int y = half_y + (dy * j) / distance;
 			mvwaddch(win, y, x, ch);
 		}
+	}
+}
+
+void draw_zo_color(WINDOW *win, struct cdata *cdata, struct ui *ui, int radius, chtype ch)
+{
+	const double pi = acos(-1.0);
+	const int steps = 3600;
+	
+	static const int sign_ele[12] = { 
+	FIRE, EARTH, AIR, WATER,
+	FIRE, EARTH, AIR, WATER,
+	FIRE, EARTH, AIR, WATER };
+	
+	for (int i = 0; i < steps; i++)
+	{
+		double deg = 360.0 * i / steps;
+		double rad = deg * pi / 180.0;
+		
+		int x = ui->cx - (int)(radius * cos(rad));
+		int y = ui->cy + (int)(radius * sin(rad) * 0.5);
+		
+		double longitude = fmod(deg + cdata->cusp[0], 360.0);
+		if (longitude < 0.0)
+			longitude += 360.0;
+			
+		int sign = (int)(longitude / 30);
+		
+		wattron(win, COLOR_PAIR(sign_ele[sign]));
+		mvwaddch(win, y, x, ch);
+		wattroff(win, COLOR_PAIR(sign_ele[sign]));
 	}
 }
 
@@ -283,37 +311,6 @@ void draw_house(WINDOW *win, struct cdata *cdata, struct ui *ui, chtype ch)
 			int y = half_y + (dy * j) / distance;
 			mvwaddch(win, y, x, ch);
 		}
-	}
-	
-
-}
-
-void draw_circle(WINDOW *win, struct ui *ui, int radius, chtype ch)
-{
-	int x = 0;
-	int y = radius;
-	int d = 3 -2 * radius;
-	
-	while (x <= y)
-	{
-		mvwaddch(win, ui->cy + y / 2, ui->cx + x, ch);
-		mvwaddch(win, ui->cy + y / 2, ui->cx - x, ch);
-		mvwaddch(win, ui->cy - y / 2, ui->cx + x, ch);
-		mvwaddch(win, ui->cy - y / 2, ui->cx - x, ch);
-		
-		mvwaddch(win, ui->cy + x / 2, ui->cx + y, ch);
-		mvwaddch(win, ui->cy + x / 2, ui->cx - y, ch);
-		mvwaddch(win, ui->cy - x / 2, ui->cx + y, ch);
-		mvwaddch(win, ui->cy - x / 2, ui->cx - y, ch);
-	
-		if (d < 0)
-			d = d + 4 * x + 6;
-		else
-		{
-			d = d + 4 * (x - y) + 10;
-			y--;
-		}
-		x++;
 	}
 }
 
@@ -408,14 +405,14 @@ void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 	curs_set(0);
 	werase(win);
 	
-	draw_circle(win, ui, ui->or, '`');
-	draw_circle(win, ui, ui->radius, '`');
-	draw_circle(win, ui, ui->ir, '.');
+	draw_zo_color(win, cdata, ui, ui->or, '`');
+	draw_zo_color(win, cdata, ui, ui->radius, '`');
+	draw_zo_color(win, cdata, ui, ui->ir, '`');
 	
-	draw_house(win, cdata, ui, '`');
+	draw_house(win, cdata, ui, '.');
 	
 	zo_pos(win, cdata, pxx, ui, zodiac);
-	draw_zo_line(win, cdata, ui, '.');
+	draw_zo_line(win, cdata, ui, '`');
 	
 	planet_pos(win, cdata, ui, planet, zodiac);
 	
