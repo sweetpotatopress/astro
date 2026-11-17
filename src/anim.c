@@ -208,7 +208,7 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	
 	ui->bcc = ui->cc;
 	ui->cc = SYNASTRY;
-	planet_pos(ui->main_win, cdata[key], ui, planet, zodiac);
+	planet_pos(ui->main_win, cdata[key], pxx[key], ui, planet, zodiac);
 	cc_data(ui->main_win, cdata[key], ui);
 	ui->cc = ui->bcc;
 	
@@ -243,7 +243,7 @@ double **planet, int **zodiac, int sy, int sx, const char *label, int advance)
 	overwrite(ui->main_win, ui->transit_win);
 	pxx_init(cdata, pxx, planet);
 	wheel_init(ui->main_win, ui, 0, 9, 0);
-	planet_pos(ui->transit_win, cdata, ui, planet, zodiac);
+	planet_pos(ui->transit_win, cdata, pxx, ui, planet, zodiac);
 	cc_data(ui->transit_win, cdata, ui);
 					
 	top_panel(ui->main_panel);

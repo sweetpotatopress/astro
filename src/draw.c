@@ -89,7 +89,7 @@ void string_color(WINDOW *win, int y, int x, char *str, int color)
 	wattroff(win, COLOR_PAIR(color));
 }
 
-void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet, int **zodiac)
+void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	const int iter_count = 64;
 	const int max_distance = 11;
@@ -155,10 +155,9 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet
 		if (ui->cc == TRANSIT)
 			zo_sign = (int)(cdata->t_cusp / 30.0);
 		else
-			zo_sign = (int)(cdata->sign_cusp[0] / 30.0);
-		double as_sign = zo_sign * 30.0;
+			zo_sign = pxx->dasc[LONG];
 	
-		double zo_pos_radian = (adjusted_pos[i] - as_sign) * M_PI / 180;
+		double zo_pos_radian = (adjusted_pos[i] - zo_sign) * M_PI / 180;
 		double cos_rad = cos(zo_pos_radian);
 		double sin_rad = sin(zo_pos_radian);
 		
@@ -414,7 +413,7 @@ void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 	zo_pos(win, cdata, pxx, ui, zodiac);
 	draw_zo_line(win, cdata, ui, '`');
 	
-	planet_pos(win, cdata, ui, planet, zodiac);
+	planet_pos(win, cdata, pxx, ui, planet, zodiac);
 	
 	if (!ui->aspect_trig)
 		draw_aspect(win, planet);
