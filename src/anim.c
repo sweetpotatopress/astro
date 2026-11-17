@@ -177,12 +177,12 @@ void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pla
 	ui->transit_panel = new_panel(ui->transit_win);
 	
 	ui->bcc = ui->cc;
-	cdata[TRANSIT]->t_cusp = cdata[ui->bcc]->sign_cusp[0];
 	
 	wheel_init(ui->main_win, ui, 3, 0, 0);
 	new_chart(cdata[ui->bcc], pxx[ui->bcc], ui, planet, zodiac);
 	
 	ui->cc = TRANSIT;
+	cdata[ui->cc]->t_cusp = cdata[ui->bcc]->sign_cusp[0];
 	planet_init(planet, ui->cc, pxx);
 	pxx_init(cdata[ui->cc], pxx[ui->cc], planet);
 	

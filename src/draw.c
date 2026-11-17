@@ -151,13 +151,12 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 	
 	for (int i = 0; i < pcount; ++i)
 	{
-		int zo_sign;
-		if (ui->cc == TRANSIT)
-			zo_sign = (int)(cdata->t_cusp / 30.0);
-		else
-			zo_sign = pxx->dasc[LONG];
+		int zo_sign = pxx->dasc[LONG];
+		
 		if (cdata->hsys == 'W')
 			zo_sign = floor(cdata->sign_cusp[0] / 30.0) * 30;
+		if (ui->cc == TRANSIT)
+			zo_sign = cdata->t_cusp;
 	
 		double zo_pos_radian = (adjusted_pos[i] - zo_sign) * M_PI / 180;
 		double cos_rad = cos(zo_pos_radian);
