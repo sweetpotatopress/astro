@@ -290,17 +290,30 @@ void draw_house(WINDOW *win, struct cdata *cdata, struct ui *ui, chtype ch)
 
 void draw_circle(WINDOW *win, struct ui *ui, int radius, chtype ch)
 {
-	const double ys = 0.5;
-	const int step = ui->radius * 12;
+	int x = 0;
+	int y = radius;
+	int d = 3 -2 * radius;
 	
-	for (int i = 0; i < step; ++i)
+	while (x <= y)
 	{
-		double angle = 2.0 * M_PI * i / step;
+		mvwaddch(win, ui->cy + y / 2, ui->cx + x, ch);
+		mvwaddch(win, ui->cy + y / 2, ui->cx - x, ch);
+		mvwaddch(win, ui->cy - y / 2, ui->cx + x, ch);
+		mvwaddch(win, ui->cy - y / 2, ui->cx - x, ch);
 		
-		int x = ui->cx + (int)lround(radius * cos(angle));
-		int y = ui->cy + (int)lround(radius * sin(angle) * ys);
-		
-		mvwaddch(win, y, x, ch);
+		mvwaddch(win, ui->cy + x / 2, ui->cx + y, ch);
+		mvwaddch(win, ui->cy + x / 2, ui->cx - y, ch);
+		mvwaddch(win, ui->cy - x / 2, ui->cx + y, ch);
+		mvwaddch(win, ui->cy - x / 2, ui->cx - y, ch);
+	
+		if (d < 0)
+			d = d + 4 * x + 6;
+		else
+		{
+			d = d + 4 * (x - y) + 10;
+			y--;
+		}
+		x++;
 	}
 }
 
