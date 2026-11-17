@@ -400,6 +400,35 @@ void draw_aspect(WINDOW *win, double **planet)
 		}
 	}
 }
+
+void draw_circle(WINDOW *win, struct ui *ui, int radius, chtype ch)
+{
+	int x = 0;
+	int y = radius;
+	int d = 3 -2 * radius;
+	
+	while (x <= y)
+	{
+		mvwaddch(win, ui->cy + y / 2, ui->cx + x, ch);
+		mvwaddch(win, ui->cy + y / 2, ui->cx - x, ch);
+		mvwaddch(win, ui->cy - y / 2, ui->cx + x, ch);
+		mvwaddch(win, ui->cy - y / 2, ui->cx - x, ch);
+		
+		mvwaddch(win, ui->cy + x / 2, ui->cx + y, ch);
+		mvwaddch(win, ui->cy + x / 2, ui->cx - y, ch);
+		mvwaddch(win, ui->cy - x / 2, ui->cx + y, ch);
+		mvwaddch(win, ui->cy - x / 2, ui->cx - y, ch);
+	
+		if (d < 0)
+			d = d + 4 * x + 6;
+		else
+		{
+			d = d + 4 * (x - y) + 10;
+			y--;
+		}
+		x++;
+	}
+}
 		
 void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
@@ -408,7 +437,7 @@ void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 	
 	draw_zo_color(win, cdata, ui, ui->or, '`');
 	draw_zo_color(win, cdata, ui, ui->radius, '`');
-	draw_zo_color(win, cdata, ui, ui->ir, '`');
+	draw_circle(win, ui, ui->ir, '`');
 	
 	draw_house(win, cdata, ui, '.');
 	
