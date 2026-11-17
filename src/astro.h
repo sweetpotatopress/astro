@@ -176,3 +176,4 @@ size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc);
 void back_dir(char *filepath, char *cur_dir);
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch);
 void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void house_menu(struct cdata *cdata);

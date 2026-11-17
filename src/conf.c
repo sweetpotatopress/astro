@@ -198,7 +198,7 @@ static void button_toggle(FIELD **field, int idx, int *trig)
 	}
 }
 
-void house_menu(char **buffer, struct cdata *cdata)
+void house_menu(struct cdata *cdata)
 {
 	int count = 12;
 	
@@ -266,7 +266,6 @@ void house_menu(char **buffer, struct cdata *cdata)
 				break;
 			case 'l': case KEY_RIGHT: case '\n':
 				cdata->hsys = hsys[item_index(cur)];
-				snprintf(buffer[C_HSYS], MAXBUF, "%d", cdata->hsys);
 				menu_done = 1;
 				break;
 			case 'q': case 27:
@@ -409,7 +408,8 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 			case '\\': case '[': case ']': case '\n':
 				if (current_field(form) == field[C_HSYS])
 				{
-					house_menu(buffer, cdata);
+					house_menu(cdata);
+					snprintf(buffer[C_HSYS], MAXBUF, "%d", cdata->hsys);
 					set_field_buffer(field[C_HSYS], 0, buffer[C_HSYS]);
 				}
 				done = 1;
