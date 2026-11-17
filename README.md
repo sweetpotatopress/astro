@@ -33,6 +33,8 @@ s			solar return
 
 tab			live update  
 
+h			choose house system
+
 r			redraw chart  
 [R]			redraw config chart
 
