@@ -22,6 +22,8 @@ void string_color(WINDOW *win, int y, int x, char *str, int color);
 void planet_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet, int **zodiac);
 void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double **planet, int **zodiac);
 void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, int **zodiac);
+void draw_zo_line(WINDOW *win, struct cdata * cdata, struct ui *ui, chtype ch);
 void draw_house(WINDOW *win, struct cdata *cdata, struct ui *ui, chtype ch);
 void draw_circle(WINDOW *win, struct ui *ui, int radius, chtype ch);
 void draw_aspect(WINDOW *win, double **planet);
+void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);

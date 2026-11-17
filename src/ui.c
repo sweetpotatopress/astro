@@ -127,7 +127,7 @@ void wheel_init(WINDOW *win, struct ui *ui, int ro, int po, int ao)
 	ui->radius = (full_radius - 5) - ro;
 	ui->or = ui->radius + 4;
 	ui->ir = (ui->radius / 2) - 1;
-	ui->hr = ui->radius + 4;
+	ui->hr = ui->radius;
 	ui->zr = ui->radius + 3;
 	
 	ui->pr = ((full_radius - 10) + po) - ro;

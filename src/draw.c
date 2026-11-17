@@ -201,7 +201,7 @@ void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double *planet[]
 	int i = 12;
 	for (j = 0; i < 16; ++i, ++j)
 	{
-		double rad = (planet[i][LONG] - cdata->sign_cusp[0]) * M_PI / 180.0;
+		double rad = (planet[i][LONG] - cdata->cusp[0]) * M_PI / 180.0;
 		
 		int x = ui->cx - (int)(ui->ar * cos(rad));
 		int y = ui->cy + (int)(ui->ar * sin(rad) * 0.5);
@@ -219,7 +219,7 @@ void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, in
 	{
 		int sign = ((i + asc_sign) % 12);
 
-		int sign_inc = (asc_sign * 30) - 15;
+		int sign_inc = (asc_sign * 30) -15;
 		
 		double rad = (cdata->sign_cusp[i] - sign_inc) * M_PI / 180.0;
 		
@@ -230,11 +230,39 @@ void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, in
 	}
 }
 
+void draw_zo_line(WINDOW *win, struct cdata * cdata, struct ui *ui, chtype ch)
+{
+	for (int i = ARI; i < ZMAX; ++i)
+	{
+		double rad = (cdata->sign_cusp[i]) * M_PI / 180.0;
+		
+		int edge_x = ui->cx - (int)(ui->or * cos(rad));
+		int edge_y = ui->cy + (int)(ui->or * sin(rad) * 0.5);
+		
+		int half_x = ui->cx - (int)((ui->zr-1) * cos(rad));
+		int half_y = ui->cy + (int)((ui->zr-1) * sin(rad) * 0.5);
+		
+		int dx = edge_x - half_x;
+		int dy = edge_y - half_y;
+		
+		int distance = (int)sqrt(dx * dx + dy * dy);
+		if (distance == 0)
+			distance = 1;
+		
+		for(int j = 0; j <= distance; j++)
+		{
+			int x = half_x + (dx * j) / distance;
+			int y = half_y + (dy * j) / distance;
+			mvwaddch(win, y, x, ch);
+		}
+	}
+}
+
 void draw_house(WINDOW *win, struct cdata *cdata, struct ui *ui, chtype ch)
 {
 	for (int i = ARI; i < ZMAX; ++i)
 	{
-		double rad = cdata->cusp[i] * M_PI / 180.0;
+		double rad = (cdata->cusp[i] - cdata->cusp[0]) * M_PI / 180.0;
 		
 		int edge_x = ui->cx - (int)(ui->hr * cos(rad));
 		int edge_y = ui->cy + (int)(ui->hr * sin(rad) * 0.5);
@@ -256,6 +284,8 @@ void draw_house(WINDOW *win, struct cdata *cdata, struct ui *ui, chtype ch)
 			mvwaddch(win, y, x, ch);
 		}
 	}
+	
+
 }
 
 void draw_circle(WINDOW *win, struct ui *ui, int radius, chtype ch)
@@ -360,3 +390,38 @@ void draw_aspect(WINDOW *win, double **planet)
 	}
 }
 		
+void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+{
+	curs_set(0);
+	werase(win);
+	
+	draw_circle(win, ui, ui->or, '`');
+	draw_circle(win, ui, ui->radius, '`');
+	draw_circle(win, ui, ui->ir, '.');
+	
+	draw_house(win, cdata, ui, '`');
+	
+	zo_pos(win, cdata, pxx, ui, zodiac);
+	draw_zo_line(win, cdata, ui, '.');
+	
+	planet_pos(win, cdata, ui, planet, zodiac);
+	
+	if (!ui->aspect_trig)
+		draw_aspect(win, planet);
+	
+	if (fabs(cdata->dlat) > 1e-6)
+		ascmc_pos(win, cdata, ui, planet, zodiac);
+	
+	// status bar
+	const int bar_end = 20;
+	mvwhline(win, 1, ui->win_w - bar_end, '-', COLS);
+	mvwvline(win, 0, ui->win_w - bar_end, ':', 1);
+	
+	mvwprintw(win, 0, ui->win_w - (bar_end - 2), "%d :", ui->cc);
+	if (cdata->dt == TRUE)
+	{
+		wattron(win, COLOR_PAIR(WATER));
+		mvwprintw(win, 0, ui->win_w - (bar_end + 2), "d");
+		wattroff(win, COLOR_PAIR(WATER));
+	}
+}

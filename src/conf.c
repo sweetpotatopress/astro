@@ -24,9 +24,10 @@
 #define C_TIMEZONE 0
 #define C_LATITUDE 1
 #define C_LONGITUDE 2
-#define C_ASP 3
-#define C_SIZE 4
-#define C_NULL 5
+#define C_HSYS 3
+#define C_ASP 4
+#define C_SIZE 5
+#define C_NULL 6
 #define C_MAX C_NULL+1
 
 static void ftb(struct ui *ui, FIELD **field, char **buffer)
@@ -112,6 +113,13 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 	}
 	errno = 0;
 	
+	lret = strtol(buffer[C_HSYS], &endptr, 10);
+	if (errno != ERANGE)
+		cdata->hsys = (int)lret;
+	if (lret == 0)
+		cdata->hsys = 'W';
+	errno = 0;
+	
 	lret = strtol(buffer[C_ASP], &endptr, 10);
 	if (errno != ERANGE)
 		ui->aspect_trig = (int)lret;
@@ -121,7 +129,6 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 	if (errno != ERANGE)
 		ui->lht = (int)lret;
 	errno = 0;
-	
 }
 
 void config_init(struct cdata *cdata, struct ui *ui)
@@ -145,10 +152,11 @@ static void config_write(struct cdata *cdata, struct ui *ui)
 	if (!ifp)
 		ERR_EXIT("ERR: set_current ifp");
 		
-	fprintf(ifp, "%s\n%f\n%f\n%d\n%d\n",
+	fprintf(ifp, "%s\n%f\n%f\n%d\n%d\n%d\n",
 		cdata->timezone,
 		cdata->dlat,
 		cdata->dlon,
+		cdata->hsys,
 		ui->aspect_trig,
 		ui->lht);
 		
@@ -161,6 +169,7 @@ static void field_label(struct ui *ui)
 		"timezone",
 		"latitude",
 		"longitude",
+		"house sys",
 		"aspect",
 		"size",
 		NULL };
@@ -173,7 +182,6 @@ static void field_label(struct ui *ui)
 	x+= 17;
 	mvwprintw(ui->config_win, y, x, "%s", label[C_SIZE]);
 	x-= 17;
-		
 }
 
 static void button_toggle(FIELD **field, int idx, int *trig)
@@ -190,11 +198,104 @@ static void button_toggle(FIELD **field, int idx, int *trig)
 	}
 }
 
+void house_menu(char **buffer, struct cdata *cdata)
+{
+	int count = 24;
+	int hsys[] = {
+		'B', 'Y', 'X', 'H',
+		'C', 'F', 'A', 'D',
+		'N', 'G', 'I', 'i',
+		'K', 'U', 'M', 'P',
+		'T', 'O', 'L', 'Q',
+		'R', 'S', 'V', 'W' };
+		
+	char *hname[] = {
+		"alcabitus", "APC", "zariel", "azimuthal",
+		"campanus", "carter", "equal", "equal MC",
+		"aries", "gauquelin", "sunshine 1", "sunshine 2",
+		"koch", "krusinski", "morinus", "placidus",
+		"polich", "porphyry", "pullen sd", "pullen sr",
+		"regiomontanus", "sripati", "vehlow", "whole" };
+		
+	char *head = "house system";
+		
+	int header = 4;
+	int width = 25;
+	int height = 16 + header;
+	
+	int sy = (LINES - height) / 2;
+	int sx = (COLS - width) / 2;
+	
+	WINDOW *win = newwin(height, width, sy, sx);
+	WINDOW *subwin = derwin(win, height - header, width - 2, 3, 1);
+	ITEM **item = ecalloc(count, sizeof(ITEM *));
+	
+	for (int i = 0; i < count; i++)
+		item[i] = new_item(hname[i], NULL);
+	item[count] = NULL;
+	
+	MENU *menu = new_menu(item);
+	
+	box(win, 0, 0);
+	keypad(win, TRUE);
+	wbkgdset(win, COLOR_PAIR(M_COLOR));
+	
+	menu_opts_off(menu, O_NONCYCLIC);
+	menu_opts_off(menu, O_SHOWDESC);
+	set_menu_fore(menu, COLOR_PAIR(M_COLOR) | A_REVERSE);
+	set_menu_back(menu, COLOR_PAIR(M_COLOR));
+	set_menu_win(menu, win);
+	set_menu_sub(menu, subwin);
+	
+	mvwprintw(win, 1, 1, " %s", head);
+	mvwprintw(win, 1, width - 4, "{h}");
+	mvwhline(win, 2, 1, ACS_HLINE, width - 2);
+
+	post_menu(menu);
+	wrefresh(win);
+	
+	ITEM *cur = NULL;
+	
+	int ch = 0, menu_done = 0;
+	while (!menu_done && (ch = wgetch(win)))
+	{
+		cur = current_item(menu);
+		
+		switch(ch)
+		{
+			case 'j': case KEY_DOWN:
+				menu_driver(menu, REQ_DOWN_ITEM);
+				break;
+			case 'k': case KEY_UP:
+				menu_driver(menu, REQ_UP_ITEM);
+				break;
+			case 'l': case KEY_RIGHT: case '\n':
+				cdata->hsys = hsys[item_index(cur)];
+				snprintf(buffer[C_HSYS], MAXBUF, "%d", cdata->hsys);
+				menu_done = 1;
+				break;
+			case 'q': case 27:
+				menu_done = 1;
+				break;
+		}
+			
+		box(win, 0, 0);
+	}
+	
+	unpost_menu(menu);
+	free_menu(menu);
+	
+	werase(win);
+	wrefresh(win);
+	delwin(subwin);
+	delwin(win);
+}
+
 void config_menu(struct cdata *cdata, struct ui *ui)
 {
 	FIELD *field[C_MAX] = { NULL };
 	FORM *form = NULL;
-	int sy = 0, sx = 13;
+	int sy = 0, sx = 12;
 	
 	char **buffer = ecalloc(C_NULL, sizeof *buffer);
 	for (int i = C_TIMEZONE; i < C_NULL; ++i)
@@ -230,6 +331,11 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	set_field_back(field[C_LONGITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	set_field_type(field[C_LONGITUDE], TYPE_NUMERIC, 5, -180.0, 180.0);
 	field_opts_off(field[C_LONGITUDE], O_AUTOSKIP);
+	sy+= 2;
+	
+	field[C_HSYS] = new_field(1, 11, sy, sx, 0, 0);
+	set_field_back(field[C_HSYS], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[C_HSYS], O_AUTOSKIP);
 	sy+= 2;
 	
 	field[C_ASP] = new_field(1, 3, sy, sx, 0, 0);
@@ -306,6 +412,11 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 				break;
 			
 			case '\\': case '[': case ']': case '\n':
+				if (current_field(form) == field[C_HSYS])
+				{
+					house_menu(buffer, cdata);
+					set_field_buffer(field[C_HSYS], 0, buffer[C_HSYS]);
+				}
 				done = 1;
 				break;	
 				

@@ -114,6 +114,7 @@ struct cdata {
 	bool lt; // LMT flag
 	bool dt; // dst reverse
 	int rt; // realtime flag
+	int hsys;
 	double cusp[12];
 	double sign_cusp[12];
 	double t_cusp; // transit cusp

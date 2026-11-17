@@ -158,7 +158,6 @@ static void sep_deg_min(double **planet)
 static void cusp_init(struct cdata *cdata, struct pxx *pxx)
 {
 	double ascmc[10];
-	int ihsy = 'W';
 	int iret;
 	
 	iret = swe_houses_ex(cdata->jd_ut, 0, cdata->dlat, cdata->dlon,
@@ -167,7 +166,7 @@ static void cusp_init(struct cdata *cdata, struct pxx *pxx)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
 	iret = swe_houses_ex(cdata->jd_ut, 0, cdata->dlat, cdata->dlon,
-	ihsy, cdata->cusp, ascmc);
+	cdata->hsys, cdata->cusp, ascmc);
 	if (iret < 0)
 		ERR_EXIT("ERR: swe_houses_ex failure");
 		
@@ -241,41 +240,6 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	if (phase > 7)
 		phase = 7;
 	cdata->moonphase = phase;
-}
-
-static void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
-{
-	curs_set(0);
-	werase(win);
-	
-	draw_circle(win, ui, ui->or, '`');
-	draw_circle(win, ui, ui->radius, '.');
-	draw_circle(win, ui, ui->ir, '.');
-	
-	draw_house(win, cdata, ui, '`');
-	
-	zo_pos(win, cdata, pxx, ui, zodiac);
-	
-	planet_pos(win, cdata, ui, planet, zodiac);
-	
-	if (!ui->aspect_trig)
-		draw_aspect(win, planet);
-	
-	if (fabs(cdata->dlat) > 1e-6)
-		ascmc_pos(win, cdata, ui, planet, zodiac);
-	
-	// status bar
-	const int bar_end = 20;
-	mvwhline(win, 1, ui->win_w - bar_end, '-', COLS);
-	mvwvline(win, 0, ui->win_w - bar_end, ':', 1);
-	
-	mvwprintw(win, 0, ui->win_w - (bar_end - 2), "%d :", ui->cc);
-	if (cdata->dt == TRUE)
-	{
-		wattron(win, COLOR_PAIR(WATER));
-		mvwprintw(win, 0, ui->win_w - (bar_end + 2), "d");
-		wattroff(win, COLOR_PAIR(WATER));
-	}
 }
 
 void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)

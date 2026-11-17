@@ -633,7 +633,6 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 	
 	snprintf(ui->fb_cur_dir, MAXBUF, " %s", head);
 	
-
 	int ch = 0, menu_done = 0;
 	while (!menu_done && (ch = wgetch(ui->fb_win)))
 	{
@@ -690,7 +689,6 @@ void load_options(struct cdata *cdata, struct ui *ui, char *path, char *head, ch
 
 void print_fb(struct cdata *cdata, struct ui *ui, char *path, char *head, char ls, bool sl)
 {
-	
 	ui->fb_save = 0;
 	ui->fb_c = file_count(path, 1) + 1;
 	

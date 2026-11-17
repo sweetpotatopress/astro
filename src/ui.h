@@ -31,7 +31,7 @@
 #define IWIN_Y (LINES - IWINY) / 2
 #define IWIN_X (COLS - IWINX) / 2
 
-#define CWINY 12
+#define CWINY 15
 #define CWINX 50
 #define CWIN_Y (LINES - CWINY) / 2
 #define CWIN_X (COLS - CWINX) / 2
