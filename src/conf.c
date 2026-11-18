@@ -200,18 +200,18 @@ static void button_toggle(FIELD **field, int idx, int *trig)
 
 void house_menu(struct cdata *cdata, struct ui *ui)
 {
-	int count = 12;
+	int count = 11;
 	
 	int hsys[] = {
 		'W', 'A', 'O', 'P',
-		'C', 'K', 'R', 'M',
-		'B', 'F', 'T', 'N' };
+		'C', 'K', 'R', 'B',
+		'F', 'T', 'N' };
 		
 	char *head = "house system";
 		
 	int header = 4;
 	int width = 20;
-	int height = 12 + header;
+	int height = 11 + header;
 	
 	int sy = (LINES - height) / 2;
 	int sx = (COLS - width) / 2;

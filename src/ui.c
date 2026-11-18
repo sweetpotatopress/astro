@@ -75,8 +75,8 @@ void ui_init(struct ui *ui)
 	 	
 		.hname = {
 		"whole", "equal", "porphyry", "placidus",
-		"campanus", "koch", "regiomontanus", "morinus",
-		"alcabitus", "carter", "polich", "aries" }
+		"campanus", "koch", "regiomontanus", "alcabitus",
+		"carter", "polich", "aries" }
 	};
 	
 	ui->cc = 1;
