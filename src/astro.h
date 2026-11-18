@@ -178,3 +178,9 @@ void back_dir(char *filepath, char *cur_dir);
 void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch);
 void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
 void house_menu(struct cdata *cdata, struct ui *ui);
+// draw.c
+void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[]);
+void degree_color(WINDOW *win, int y, int x, int count, double *planet[], int *zodiac[]);
+void string_color(WINDOW *win, int y, int x, char *str, int color);
+void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);

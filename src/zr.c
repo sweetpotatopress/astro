@@ -21,7 +21,6 @@
 #include "swephexp.h"
 #include "astro.h"
 #include "ui.h"
-#include "draw.h"
 #include "chronos.h"
 #include "init.h"
 

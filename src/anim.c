@@ -20,7 +20,6 @@
 #include "ui.h"
 #include "chronos.h"
 #include "anim.h"
-#include "draw.h"
 #include "init.h"
 
 #define SECOND 6

@@ -20,7 +20,6 @@
 #include "init.h"
 #include "chronos.h"
 #include "anim.h"
-#include "draw.h"
 
 void cdata_clear(struct cdata *cdata)
 {

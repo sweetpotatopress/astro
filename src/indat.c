@@ -21,7 +21,6 @@
 #include "astro.h"
 #include "ui.h"
 #include "chronos.h"
-#include "draw.h"
 
 static void setfield_localtime(FIELD *cdata_field[], struct cdata *cdata)
 {

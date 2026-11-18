@@ -19,7 +19,6 @@
 #include "ui.h"
 #include "init.h"
 #include "chronos.h"
-#include "draw.h"
 
 #define SMALL 22
 #define LARGE 44
