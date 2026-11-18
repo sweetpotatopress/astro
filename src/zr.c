@@ -22,7 +22,6 @@
 #include "astro.h"
 #include "ui.h"
 #include "chronos.h"
-#include "init.h"
 
 #define FORTUNE 0
 #define DAIMON 1

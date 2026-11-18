@@ -15,12 +15,11 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdlib.h>
-#include <astro.h>
-#include <init.h>
-#include <ui.h>
-#include <swephexp.h>
-#include <chronos.h>
 #include <errno.h>
+#include "swephexp.h"
+#include "astro.h"
+#include "ui.h"
+#include "chronos.h"
 
 #define PLINE 2560
 #define OLINE (PLINE-1)

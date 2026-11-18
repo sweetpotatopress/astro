@@ -17,9 +17,7 @@
 #include "swephexp.h"
 #include "astro.h"
 #include "ui.h"
-#include "init.h"
 #include "chronos.h"
-#include "anim.h"
 
 void cdata_clear(struct cdata *cdata)
 {

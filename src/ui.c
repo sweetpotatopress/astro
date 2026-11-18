@@ -17,7 +17,6 @@
 #include "swephexp.h"
 #include "astro.h"
 #include "ui.h"
-#include "init.h"
 #include "chronos.h"
 
 #define SMALL 22

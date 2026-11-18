@@ -19,9 +19,7 @@
 #include "swephexp.h"
 #include "astro.h"
 #include "ui.h"
-#include "anim.h"
 #include "chronos.h"
-#include "init.h"
 
 void *ecalloc(size_t n, size_t size)
 {

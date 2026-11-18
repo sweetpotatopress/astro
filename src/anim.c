@@ -19,8 +19,6 @@
 #include "astro.h"
 #include "ui.h"
 #include "chronos.h"
-#include "anim.h"
-#include "init.h"
 
 #define SECOND 6
 #define MINUTE 5

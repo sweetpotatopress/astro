@@ -1,15 +1,15 @@
-// Copyright (C) 2026 yam lynn
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License
-// as published by the Free Software Foundation,
-// either version 3 of the License, or (at your option) any later version.
+// copyright (c) 2026 yam lynn
+// this program is free software: you can redistribute it and/or modify
+// it under the terms of the gnu affero general public license
+// as published by the free software foundation,
+// either version 3 of the license, or (at your option) any later version.
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty
-// of MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU Affero General Public License for more details.
+// this program is distributed in the hope that it will be useful,
+// but without any warranty; without even the implied warranty
+// of merchantibility or fitness for a particular purpose.
+// see the gnu affero general public license for more details.
 
-// You should have received a copy of the GNU Affero General Public License
+// you should have received a copy of the gnu affero general public license
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 #pragma once
 
@@ -184,3 +184,16 @@ void degree_color(WINDOW *win, int y, int x, int count, double *planet[], int *z
 void string_color(WINDOW *win, int y, int x, char *str, int color);
 void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
 void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+// anim.c
+void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui);
+void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac);
+void realtime_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac);
+void transit(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac);
+void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac, int key);
+// init.c
+void cdata_clear(struct cdata *cdata);
+void ecst_init(double *planet[], double *sol_eclipse);
+void planet_init(double *planet[], int cur_chart, struct pxx **pxx);
+void zxx_init(int *zodiac[]);
+void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet);
+void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
