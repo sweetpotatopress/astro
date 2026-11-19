@@ -274,6 +274,8 @@ static void draw_zo_color(WINDOW *win, struct cdata *cdata, struct ui *ui, int r
 		norm360(&longitude);
 			
 		int sign = (int)(longitude / 30);
+		if (sign > 11)
+			sign = 11;
 		
 		wattron(win, COLOR_PAIR(sign_ele[sign]));
 		mvwaddch(win, y, x, ch);
