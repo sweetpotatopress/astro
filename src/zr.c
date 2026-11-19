@@ -25,6 +25,11 @@
 
 #define FORTUNE 0
 #define DAIMON 1
+#define NECCESSITY 2
+#define EROS 3
+#define COURAGE 4
+#define VICTORY 5
+#define NEMESIS 6
 
 #define ROOT -1
 #define ZYEAR 0
@@ -215,7 +220,7 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui *ui, int sign_switch)
 {
 	char date[MAXBUF];
-	int sign;
+	int sign = -1;
 
 	if (sign_switch == DAIMON) 
 	{
@@ -224,8 +229,20 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 		if ((int)pxx->ddai[SIGN] == (int)pxx->dfor[SIGN])
 			sign++;
 	} 
-	else 
+	else if (sign_switch == FORTUNE)
 		sign = (int)pxx->dfor[SIGN];
+	else if (sign_switch == NECCESSITY)
+		sign = (int)pxx->dnec[SIGN];
+	else if (sign_switch == EROS)
+		sign = (int)pxx->deros[SIGN];
+	else if (sign_switch == COURAGE)
+		sign = (int)pxx->dcou[SIGN];
+	else if (sign_switch == VICTORY)
+		sign = (int)pxx->dvic[SIGN];
+	else if (sign_switch == NEMESIS)
+		sign = (int)pxx->dnem[SIGN];
+	if (sign == -1)
+		ERR_EXIT("ERR: zr create_root failed");
 
 	if (sign > 11)
 		sign -= 11;
@@ -359,8 +376,9 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		wattroff(win, COLOR_PAIR(current_layer+3));
 		mvwprintw(win, 1, 5+11, "}");
 		
-		const char *lot = sign_switch == DAIMON ? "daimon" : "fortune";
-		mvwprintw(win, 1, width - 17, "[tab] %s", lot);
+		char *ln[12] = { "fortune", "daimon", "neccessity", "eros", "courage", "victory", "nemesis" };
+		
+		mvwprintw(win, 1, width - 17, "[tab] %s", ln[sign_switch]);
 		
 		// highlight current layer
 		mvwhline(win, 2, 1, ACS_HLINE, width - 2);
@@ -414,7 +432,9 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 				break;
 
 			case '\t':
-				sign_switch = sign_switch == FORTUNE ? DAIMON : FORTUNE;
+				sign_switch++;
+				if (sign_switch > NEMESIS)
+					sign_switch = FORTUNE;
 
 				node_free(root);
 
