@@ -66,6 +66,14 @@ char *xstrtok(char *s, const char *delim)
 	return start;
 }
 
+void norm360(double *n)
+{
+	while (*n >= 360.0)
+		*n -= 360.0;
+	while (*n <= 0.0)
+		*n += 360.0;
+}
+
 static void iana_check(void)
 {
 	const char *iana_path[] = { 

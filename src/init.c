@@ -176,11 +176,9 @@ static void cusp_init(struct cdata *cdata, struct pxx *pxx)
 	// calculates ic/mc and fills struct members
 	double asc = ascmc[0];
 	double dsc = (ascmc[0] + 180);
-	if (dsc >= 360)
-		dsc -= 360;
+	norm360(&dsc);
 	double ic = (ascmc[1] + 180);
-	if (ic >= 360)
-		ic -= 360;
+	norm360(&ic);
 	double mc = ascmc[1];
 	
 	pxx->dasc[LONG] = asc;
@@ -218,8 +216,7 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	
 	// turn mean node into south node
 	planet[SE_MEAN_NODE][LONG] = (planet[SE_TRUE_NODE][LONG] + 180);
-	if (planet[SE_MEAN_NODE][LONG] >= 360)
-		planet[SE_MEAN_NODE][LONG] -= 360;
+	norm360(&planet[SE_MEAN_NODE][LONG]);
 
 	retro_station(cdata->jd_ut, planet);
 	
@@ -234,10 +231,7 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	// moonphase
 	double elongation = pxx->dmoon[LONG] - pxx->dsun[LONG];
 	
-	while (elongation < 0)
-		elongation += 360;
-	while (elongation >= 360)
-		elongation -= 360;
+	norm360(&elongation);
 		
 	int phase = (int)(elongation / 45);
 	if (phase > 7)

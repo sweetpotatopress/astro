@@ -77,20 +77,9 @@ int sect(struct pxx *pxx)
 	int sect = 0;
 	double dist = pxx->dsun[LONG] - pxx->dasc[LONG];
 	
-	while (dist < 0.0)
-		dist += 360.0;
-	while (dist >= 360.0)
-		dist -= 360.0;
+	norm360(&dist);
 	
 	return sect = (dist > 180.0) ? DAY_SECT : NIGHT_SECT;
-}
-
-void norm360(double *n)
-{
-	while (*n > 360.0)
-		*n -= 360.0;
-	while (*n < 0.0)
-		*n += 360.0;
 }
 
 double calc_lot(int chart_sect, double asc, double l0, double l1)

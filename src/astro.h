@@ -166,6 +166,7 @@ void *ecalloc(size_t n, size_t size);
 void *erealloc(void *p, size_t size);
 char *xstrdup(const char *s);
 char *xstrtok(char *s, const char *delim);
+void norm360(double *n);
 void config_init(struct cdata *cdata, struct ui *ui);
 void config_menu(struct cdata *cdata, struct ui *ui);
 void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);

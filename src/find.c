@@ -108,16 +108,14 @@ static void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
 static double wrap_deg(double angle)
 {
 	angle = fmod(angle+180.0, 360);
-	if (angle < 0.0)
-		angle += 360.0;
+	norm360(&angle);
 	return angle - 180.0;
 }
 
 static void meantosouth(double *xx)
 {
 	xx[LONG] = (xx[LONG] + 180);
-	if (xx[LONG] >= 360)
-		xx[LONG] -= 360;
+	norm360(&xx[LONG]);
 }
 
 static int find_conj(WINDOW *win, struct cdata *cdata, struct tmp **tmp,

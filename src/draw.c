@@ -134,10 +134,7 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 			}
 			double new_long = current + degree_offset;
 			
-			while (new_long < 0.0)
-				new_long += 360.0;
-			while (new_long >= 360.0)
-				new_long -= 360.0;
+			norm360(&new_long);
 				
 			double change = fabs(new_long - current);
 			max_change = (change > max_change) ? change : max_change;
@@ -274,8 +271,7 @@ static void draw_zo_color(WINDOW *win, struct cdata *cdata, struct ui *ui, int r
 		int y = ui->cy + (int)(radius * sin(rad) * 0.5);
 		
 		double longitude = fmod(deg + cdata->cusp[0], 360.0);
-		if (longitude < 0.0)
-			longitude += 360.0;
+		norm360(&longitude);
 			
 		int sign = (int)(longitude / 30);
 		
