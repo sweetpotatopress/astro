@@ -54,7 +54,7 @@
 #define PL_Y 21
 #define MAXPXX 22
 
-#define SPXXMAX 18 // struct member count
+#define SPXXMAX 23 // struct member count
 struct pxx {
 	double dsun[MAXPXX];
 	double dmoon[MAXPXX];
@@ -72,8 +72,14 @@ struct pxx {
 	double dmc[MAXPXX];
 	double ddsc[MAXPXX];
 	double dic[MAXPXX];
+	// lots
 	double dfor[MAXPXX];
 	double ddai[MAXPXX];
+	double dnec[MAXPXX];
+	double deros[MAXPXX];
+	double dcou[MAXPXX];
+	double dvic[MAXPXX];
+	double dnem[MAXPXX];
 };
 
 #define E_INIT 0

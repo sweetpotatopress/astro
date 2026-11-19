@@ -45,8 +45,10 @@ void planet_init(double *planet[], int cc, struct pxx **pxx)
 		pxx[cc]->dmnod, pxx[cc]->dtnod,
 		pxx[cc]->dasc, pxx[cc]->dmc,
 		pxx[cc]->ddsc, pxx[cc]->dic,
-		pxx[cc]->dfor, pxx[cc]->ddai};
-		
+		pxx[cc]->dfor, pxx[cc]->ddai,
+		pxx[cc]->dnec, pxx[cc]->deros,
+		pxx[cc]->dcou, pxx[cc]->dvic,
+		pxx[cc]->dnem };
 	memcpy(planet, new_planet, sizeof(new_planet));
 }
 
@@ -145,10 +147,14 @@ static void sep_deg_min(double **planet)
 		planet[ipl][DEGREE] = (int)planet[ipl][LONG] % 30;
 		planet[ipl][MIN] = (int)((planet[ipl][LONG] - (int)planet[ipl][LONG]) * 60);
 		
-		planet[ipl][DEGREE_S] = planet[ipl][LONG_S];
-		planet[ipl][MIN_S] = (fabs(planet[ipl][LONG_S] - (int)planet[ipl][LONG_S]) * 60);
-		if (planet[ipl][LONG_S] < 0)
-			planet[ipl][DEGREE_S] *= -1;
+		if (ipl <= SE_PLUTO)
+		{
+			planet[ipl][DEGREE_S] = planet[ipl][LONG_S];
+			planet[ipl][MIN_S] = (fabs(planet[ipl][LONG_S] - (int)planet[ipl][LONG_S]) * 60);
+			if (planet[ipl][LONG_S] < 0)
+				planet[ipl][DEGREE_S] *= -1;
+		}
+
 	}
 }
 

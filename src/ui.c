@@ -19,8 +19,8 @@
 #include "ui.h"
 #include "chronos.h"
 
-#define SMALL 22
-#define LARGE 44
+#define SMALL 27
+#define LARGE 48
 
 void ui_init(struct ui *ui)
 {
@@ -333,7 +333,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	if (ui->left_height == SMALL)
 		mvwprintw(ui->left_win, 0, 1, "page %d/2", ui->left_page+1);
 	
-	int p_count = 18;
+	int p_count = 23;
 	for (int i = 0; i < p_count; ++i)
 	{
 		int sign = (int)planet[i][SIGN];
@@ -377,7 +377,8 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 			}
 			
 			const char *points[] = {
-			"as", "mc", "ds", "ic", "fortune", "daimon"};
+			"as", "mc", "ds", "ic",
+			"fortune", "daimon", "neccessity", "eros", "courage", "victory", "nemesis"};
 			
 			char point_buff[MAXBUF];
 			

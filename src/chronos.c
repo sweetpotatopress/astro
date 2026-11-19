@@ -85,34 +85,37 @@ int sect(struct pxx *pxx)
 	return sect = (dist > 180.0) ? DAY_SECT : NIGHT_SECT;
 }
 
+void norm360(double *n)
+{
+	while (*n > 360.0)
+		*n -= 360.0;
+	while (*n < 0.0)
+		*n += 360.0;
+}
+
+double calc_lot(int chart_sect, double asc, double l0, double l1)
+{
+	double lot = (chart_sect == DAY_SECT) ? l0 - l1 : l1 - l0;
+	norm360(&lot);
+		
+	double calc = asc + lot;
+	norm360(&calc);
+	
+	return calc;
+}
+
+		
 void lots(struct pxx *pxx)
 {
 	int chart_sect = sect(pxx);
-	double offset = (360 - pxx->dsun[LONG]);
-	double diff = (offset + pxx->dmoon[LONG]);
-	while (diff > 360.0)
-		diff -= 360.0;
-	
-	if (chart_sect == DAY_SECT)
-	{
-		pxx->dfor[LONG] = pxx->dasc[LONG] + diff;
-		pxx->ddai[LONG] = pxx->dasc[LONG] - diff;
-	}
-	else // night
-	{
-		pxx->dfor[LONG] = pxx->dasc[LONG] - diff;
-		pxx->ddai[LONG] = pxx->dasc[LONG] + diff;
-	}
-	
-	while (pxx->dfor[LONG] < 0.0)
-		pxx->dfor[LONG] += 360.0;
-	while (pxx->dfor[LONG] > 360.0)
-		pxx->dfor[LONG] -= 360.0;
-		
-	while (pxx->ddai[LONG] < 0.0)
-		pxx->ddai[LONG] += 360.0;
-	while (pxx->ddai[LONG] > 360.0)
-		pxx->ddai[LONG] -= 360.0;
+
+	pxx->dfor[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dmoon[LONG], pxx->dsun[LONG]);
+	pxx->ddai[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dsun[LONG], pxx->dmoon[LONG]);
+	pxx->dnec[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dfor[LONG], pxx->dmerc[LONG]);
+	pxx->deros[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->ddai[LONG], pxx->dven[LONG]);
+	pxx->dcou[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dfor[LONG], pxx->dmars[LONG]);
+	pxx->dvic[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->ddai[LONG], pxx->djup[LONG]);
+	pxx->dnem[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dfor[LONG], pxx->dsat[LONG]);
 }
 
 static int lmt_check(const struct cdata *cdata, const struct lmt *rule)
