@@ -567,7 +567,7 @@ void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 	if (!ui->aspect_trig)
 		draw_aspect(win, planet);
 	
-	if (fabs(cdata->dlat) > 1e-6)
+	if (fabs(cdata->dlat) > 1e-6 && cdata->hsys != 'N')
 		ascmc_pos(win, cdata, ui, planet, zodiac);
 	
 	if (cdata->hsys != 'W' && cdata->hsys != 'N')
