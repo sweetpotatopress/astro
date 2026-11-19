@@ -93,7 +93,6 @@ double calc_lot(int chart_sect, double asc, double l0, double l1)
 	return calc;
 }
 
-		
 void lots(struct pxx *pxx)
 {
 	int chart_sect = sect(pxx);
