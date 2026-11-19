@@ -151,6 +151,8 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 		
 		if (cdata->hsys == 'W')
 			zo_sign = floor(cdata->sign_cusp[0] / 30.0) * 30;
+		if (cdata->hsys == 'N')
+			zo_sign = cdata->cusp[0];
 		if (ui->cc == TRANSIT)
 			zo_sign = cdata->t_cusp;
 	
