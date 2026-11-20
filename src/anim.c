@@ -84,6 +84,9 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		}
 		sy += 1;
 		
+		mvwprintw(win, sy, sx, "%s", cdata->gflag ? "gregorian" : "julian");
+		sy += 1;
+		
 		int local_min = cdata->hour * 60 + cdata->min + (int)lround(cdata->sec / 60.0);
 		int utc_min = (int)lround(cdata->utc_hour * 60.0);
 		int off_min = local_min - utc_min;
