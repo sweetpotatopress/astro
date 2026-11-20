@@ -218,4 +218,4 @@ void ui_resize(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 void status_bar(struct ui *ui, int c, char *str);
 int table_trigger(struct ui *ui, int ch);
 void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
-void right_table(struct cdata *cdata, struct ui *ui, double **planet, int **zodiac);
+void right_table(struct cdata *cdata, struct ui *ui, double **planet);

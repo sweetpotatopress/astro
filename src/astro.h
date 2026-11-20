@@ -191,11 +191,11 @@ size_t file_count(const char *path, const int r);
 size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc);
 void back_dir(char *filepath, char *cur_dir);
 // draw.c
-void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[]);
-void degree_color(WINDOW *win, int y, int x, int count, double *planet[], int *zodiac[]);
+void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign);
+void degree_color(WINDOW *win, struct ui *ui, int y, int x, int count, double *planet[]);
 void string_color(WINDOW *win, int y, int x, char *str, int color);
-void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
-void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet);
+void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet);
 int house_menu(struct ui *ui);
 // anim.c
 void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui);

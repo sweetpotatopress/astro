@@ -20,65 +20,21 @@
 #include "ui.h"
 #include "chronos.h"
 
-void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[])
+void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign)
 {
-	switch(zodiac[sign][ELEMENT])
-	{
-		case FIRE:
-			wattron(win, COLOR_PAIR(FIRE));
-			mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
-			wattroff(win, COLOR_PAIR(FIRE));
-			break;
-		case EARTH:
-			wattron(win, COLOR_PAIR(EARTH));
-			mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
-			wattroff(win, COLOR_PAIR(EARTH));
-			break;
-		case AIR:
-			wattron(win, COLOR_PAIR(AIR));
-			mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
-			wattroff(win, COLOR_PAIR(AIR));
-			break;
-		case WATER:
-			wattron(win, COLOR_PAIR(WATER));
-			mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
-			wattroff(win, COLOR_PAIR(WATER));
-			break;
-	}
+	wattron(win, COLOR_PAIR(ui->sign_elem[sign]));
+	mvwaddstr(win, y, x, ui->sym.zo_sym[sign]);
+	wattroff(win, COLOR_PAIR(ui->sign_elem[sign]));
 }
 
-void degree_color(WINDOW *win, int y, int x, int count,
-double *planet[], int *zodiac[])
+void degree_color(WINDOW *win, struct ui *ui, int y, int x, int count, double *planet[])
 {
 	int sign = (int)planet[count][SIGN];
 	
-	switch(zodiac[sign][ELEMENT])
-	{
-		case FIRE:
-			wattron(win, COLOR_PAIR(FIRE));
-			mvwprintw(win, y, x, "%.0f*%02.0f",
-			planet[count][DEGREE], planet[count][MIN]);
-			wattroff(win, COLOR_PAIR(FIRE));
-			break;
-		case EARTH:
-			wattron(win, COLOR_PAIR(EARTH));
-			mvwprintw(win, y, x, "%.0f*%02.0f",
-			planet[count][DEGREE], planet[count][MIN]);
-			wattroff(win, COLOR_PAIR(EARTH));
-			break;
-		case AIR:
-			wattron(win, COLOR_PAIR(AIR));
-			mvwprintw(win, y, x, "%.0f*%02.0f",
-			planet[count][DEGREE], planet[count][MIN]);
-			wattroff(win, COLOR_PAIR(AIR));
-			break;
-		case WATER:
-			wattron(win, COLOR_PAIR(WATER));
-			mvwprintw(win, y, x, "%.0f*%02.0f",
-			planet[count][DEGREE], planet[count][MIN]);
-			wattroff(win, COLOR_PAIR(WATER));
-			break;
-	}
+	wattron(win, COLOR_PAIR(ui->sign_elem[sign]));
+	mvwprintw(win, y, x, "%.0f*%02.0f",
+	planet[count][DEGREE], planet[count][MIN]);
+	wattroff(win, COLOR_PAIR(ui->sign_elem[sign]));
 }
 
 void string_color(WINDOW *win, int y, int x, char *str, int color)
@@ -88,7 +44,7 @@ void string_color(WINDOW *win, int y, int x, char *str, int color)
 	wattroff(win, COLOR_PAIR(color));
 }
 
-void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet)
 {
 	const int iter_count = 64;
 	const int max_distance = 11;
@@ -174,7 +130,7 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 		planet[i][PL_X] = x_in;
 		planet[i][PL_Y] = y_in;
 		
-		degree_color(win, y-1, x-2, i, planet, zodiac);
+		degree_color(win, ui, y-1, x-2, i, planet);
 		mvwaddstr(win, y, pl_x, ui->sym.pl_sym[i]);
 		
 		if (i <= SE_PLUTO && ui->cc != TRANSIT && ui->cc != SYNASTRY && !ui->aspect_trig)
@@ -191,7 +147,7 @@ void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 	}
 }
 
-static void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double *planet[], int *zodiac[])
+static void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double *planet[])
 {
 	const char *ascmc_sym[] = {"as", "mc", "ds", "ic"};
 	
@@ -206,11 +162,11 @@ static void ascmc_pos(WINDOW *win, struct cdata *cdata, struct ui *ui, double *p
 		
 		mvwaddstr(win, y, x, ascmc_sym[j]);
 		
-		degree_color(win, y-1, x-1, i, planet, zodiac);
+		degree_color(win, ui, y-1, x-1, i, planet);
 	}
 }
 
-static void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, int **zodiac)
+static void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui)
 {
 	int asc_sign = (int)pxx->dasc[SIGN];
 	for (int i = ARI; i < ZMAX; ++i)
@@ -222,7 +178,7 @@ static void zo_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui 
 		int x = ui->cx - (int)(ui->zr * cos(rad));
 		int y = ui->cy + (int)(ui->zr * sin(rad) * 0.5);
 		
-		zo_color(win, ui, y, x, sign, zodiac);
+		zo_color(win, ui, y, x, sign);
 	}
 }
 
@@ -536,7 +492,7 @@ static void draw_circle(WINDOW *win, struct ui *ui, int radius, chtype ch)
 	}
 }
 		
-void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
+void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet)
 {
 	curs_set(0);
 	werase(win);
@@ -551,16 +507,16 @@ void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 		
 	draw_house(win, cdata, ui, '.', hd);
 	
-	zo_pos(win, cdata, pxx, ui, zodiac);
+	zo_pos(win, cdata, pxx, ui);
 	draw_zo_line(win, cdata, ui, '.');
 	
-	planet_pos(win, cdata, pxx, ui, planet, zodiac);
+	planet_pos(win, cdata, pxx, ui, planet);
 	
 	if (!ui->aspect_trig)
 		draw_aspect(win, planet);
 	
 	if (fabs(cdata->dlat) > 1e-6 && cdata->hsys != 'N')
-		ascmc_pos(win, cdata, ui, planet, zodiac);
+		ascmc_pos(win, cdata, ui, planet);
 	
 	if (cdata->hsys != 'W' && cdata->hsys != 'N')
 		draw_hd(win, ui, hd);

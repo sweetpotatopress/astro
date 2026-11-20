@@ -374,7 +374,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 				string_color(ui->left_win, starty, startx+12, "sd", EARTH);
 			
 			int color_x = startx + (int)strlen(buff) + 1;
-			zo_color(ui->left_win, ui, starty, color_x, sign, zodiac);
+			zo_color(ui->left_win, ui, starty, color_x, sign);
 			
 			starty += 1;
 		}
@@ -401,7 +401,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 			mvwprintw(ui->left_win, starty, startx, "%s", point_buff);
 			
 			int color_x = startx + (int)strlen(point_buff) + 1;
-			zo_color(ui->left_win, ui, starty, color_x, sign, zodiac);
+			zo_color(ui->left_win, ui, starty, color_x, sign);
 	
 			starty += 1;
 			j++;
@@ -490,7 +490,7 @@ void left_table(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pl
 	"moon phase: %s", ui->sym.moon[cdata->moonphase]);
 }
 
-void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodiac[])
+void right_table(struct cdata *cdata, struct ui *ui, double *planet[])
 {
 	if (ui->cc >= TRANSIT)
 		return;
@@ -511,17 +511,17 @@ void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodi
 	werase(ui->right_win);
 	
 	mvwprintw(ui->right_win, 0, 1, "eclip:%s:", name[1]);
-	zo_color(ui->right_win, ui, 0, cx1, (int)cdata->le[EN_SIGN], zodiac);
+	zo_color(ui->right_win, ui, 0, cx1, (int)cdata->le[EN_SIGN]);
 	mvwprintw(ui->right_win, 0, cx2, "%-3.f:", cdata->le[EN_JUL]);
  
-	zo_color(ui->right_win, ui, 0, cx3, (int)cdata->le[EP_SIGN], zodiac);
+	zo_color(ui->right_win, ui, 0, cx3, (int)cdata->le[EP_SIGN]);
 	mvwprintw(ui->right_win, 0, cx4, "-%2.f", cdata->le[EP_JUL]);
 	
 	mvwprintw(ui->right_win, 1, 1, "-----:%s:", name[0]);
-	zo_color(ui->right_win, ui, 1, cx1, (int)cdata->se[EN_SIGN], zodiac);
+	zo_color(ui->right_win, ui, 1, cx1, (int)cdata->se[EN_SIGN]);
 	mvwprintw(ui->right_win, 1, cx2, "%-3.f:", cdata->se[EN_JUL]);
  
-	zo_color(ui->right_win, ui, 1, cx3, (int)cdata->se[EP_SIGN], zodiac);
+	zo_color(ui->right_win, ui, 1, cx3, (int)cdata->se[EP_SIGN]);
 	mvwprintw(ui->right_win, 1, cx4, "-%2.f", cdata->se[EP_JUL]);
 	
 	char *header = " speed:--:-next--:-prev--";
@@ -537,10 +537,10 @@ void right_table(struct cdata *cdata, struct ui *ui, double *planet[], int *zodi
 		mvwprintw(ui->right_win, i+1, 0, "%c%1.0f*%-2.02d':%-2s:",
 		dsign, planet[j][DEGREE_S], (int)planet[j][MIN_S], name[j]);
 		
-		zo_color(ui->right_win, ui, i+1, cx1, nsign, zodiac);
+		zo_color(ui->right_win, ui, i+1, cx1, nsign);
 		mvwprintw(ui->right_win, i+1, cx2, "%-3.0f:", planet[j][NEXT_S]);
 			
-		zo_color(ui->right_win, ui, i+1, cx3, psign, zodiac);
+		zo_color(ui->right_win, ui, i+1, cx3, psign);
 		mvwprintw(ui->right_win, i+1, cx4, "%-4.0f", planet[j][PREV_S]);
 	}
 	mvwprintw(ui->right_win, i+1, 0, " ------------------------");

@@ -259,7 +259,7 @@ void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 	
 	house_idx(cdata, ui, cdata->hsys);
 	pxx_init(cdata, pxx, planet);
-	draw_chart(ui->main_win, cdata, pxx, ui, planet, zodiac);
+	draw_chart(ui->main_win, cdata, pxx, ui, planet);
 	cc_data(ui->main_win, cdata, ui);
 	
 	if (ui->left_trig > 0)
@@ -269,7 +269,7 @@ void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 	}
 	if (ui->right_trig > 0)
 	{
-		right_table(cdata, ui, planet, zodiac);
+		right_table(cdata, ui, planet);
 		show_panel(ui->right_panel);
 	}	
 	update_panels();

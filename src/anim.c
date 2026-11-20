@@ -210,7 +210,7 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 	
 	ui->bcc = ui->cc;
 	ui->cc = SYNASTRY;
-	planet_pos(ui->main_win, cdata[key], pxx[key], ui, planet, zodiac);
+	planet_pos(ui->main_win, cdata[key], pxx[key], ui, planet);
 	cc_data(ui->main_win, cdata[key], ui);
 	ui->cc = ui->bcc;
 	
@@ -240,12 +240,12 @@ static void print_inc(WINDOW *win, int sy, int sx, const char *label, int advanc
 }
 
 static void arrange_panel(struct cdata *cdata, struct pxx *pxx, struct ui *ui,
-double **planet, int **zodiac, int sy, int sx, const char *label, int advance)
+double **planet, int sy, int sx, const char *label, int advance)
 {
 	overwrite(ui->main_win, ui->transit_win);
 	pxx_init(cdata, pxx, planet);
 	wheel_init(ui->main_win, ui, 0, 9, 0);
-	planet_pos(ui->transit_win, cdata, pxx, ui, planet, zodiac);
+	planet_pos(ui->transit_win, cdata, pxx, ui, planet);
 	cc_data(ui->transit_win, cdata, ui);
 					
 	top_panel(ui->main_panel);
@@ -297,7 +297,7 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 	print_inc(ui->main_win, sy, sx, label, advance);
 	if (ui->cc == TRANSIT)
 	{
-		arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
+		arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, sy, sx, label, advance);
 	}
 
 	int ch = 0, anim_done = 0;
@@ -388,7 +388,7 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 				cpt(cdata[ui->cc], &temp, &t, OUT);
 				
 				if (ui->cc == TRANSIT)
-					arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
+					arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, sy, sx, label, advance);
 				else
 					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				break;
@@ -435,7 +435,7 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 				cpt(cdata[ui->cc], &temp, &t, OUT);
 				
 				if (ui->cc == TRANSIT)
-					arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
+					arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, sy, sx, label, advance);
 				else
 					new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				break;
@@ -499,7 +499,7 @@ void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double
 			sy, sx + 5,
 			FALSE);
 			update_panels();
-			arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac, sy, sx, label, advance);
+			arrange_panel(cdata[ui->cc], pxx[ui->cc], ui, planet, sy, sx, label, advance);
 		}
 	}
 	wmove(ui->main_win, sy, sx);

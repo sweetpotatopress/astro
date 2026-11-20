@@ -257,7 +257,7 @@ static struct node *create_root(struct cdata *cdata, struct pxx *pxx, struct ui 
 	return root;
 }
 
-static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, int selected, int layer, int **zodiac)
+static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, int selected, int layer)
 {
 	const int width = 20;
 	const int height = 22;
@@ -280,7 +280,7 @@ static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, 
 		else
 			mvwprintw(win, y, x, "   ");
 			
-		zo_color(win, ui, y, x+3, child->sign, zodiac);
+		zo_color(win, ui, y, x+3, child->sign);
 		mvwprintw(win, y, x+6, "%s", part);
 	}
 }
@@ -368,7 +368,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 		werase(subwin);
 
 		for (int layer = ZYEAR; layer <= ZDAY; layer++)
-			print_column(subwin, ui, parents[layer], selected[layer], layer, zodiac);
+			print_column(subwin, ui, parents[layer], selected[layer], layer);
 
 		mvwprintw(win, 1, 5, "layer: { ");
 		wattron(win, COLOR_PAIR(current_layer+3));
