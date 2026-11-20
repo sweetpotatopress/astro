@@ -1,15 +1,15 @@
-// copyright (c) 2026 yam lynn
-// this program is free software: you can redistribute it and/or modify
-// it under the terms of the gnu affero general public license
-// as published by the free software foundation,
-// either version 3 of the license, or (at your option) any later version.
+// Copyright (C) 2026 yam lynn
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License
+// as published by the Free Software Foundation,
+// either version 3 of the License, or (at your option) any later version.
 
-// this program is distributed in the hope that it will be useful,
-// but without any warranty; without even the implied warranty
-// of merchantibility or fitness for a particular purpose.
-// see the gnu affero general public license for more details.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty
+// of MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Affero General Public License for more details.
 
-// you should have received a copy of the gnu affero general public license
+// You should have received a copy of the GNU Affero General Public License
 // along with this program. if not, see <https://www.gnu.org/licenses/>
 
 struct lmt {
