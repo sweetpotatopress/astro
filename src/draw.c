@@ -254,11 +254,6 @@ static void draw_zo_line(WINDOW *win, struct cdata * cdata, struct ui *ui, chtyp
 	}
 }
 
-static const int sign_ele[12] = { 
-	FIRE, EARTH, AIR, WATER,
-	FIRE, EARTH, AIR, WATER,
-	FIRE, EARTH, AIR, WATER };
-
 static void draw_zo_color(WINDOW *win, struct cdata *cdata, struct ui *ui, int radius, chtype ch)
 {
 	const double pi = acos(-1.0);
@@ -279,9 +274,9 @@ static void draw_zo_color(WINDOW *win, struct cdata *cdata, struct ui *ui, int r
 		if (sign > 11)
 			sign = 11;
 		
-		wattron(win, COLOR_PAIR(sign_ele[sign]));
+		wattron(win, COLOR_PAIR(ui->sign_elem[sign]));
 		mvwaddch(win, y, x, ch);
-		wattroff(win, COLOR_PAIR(sign_ele[sign]));
+		wattroff(win, COLOR_PAIR(ui->sign_elem[sign]));
 	}
 }
 
@@ -418,15 +413,15 @@ static void draw_house(WINDOW *win, struct cdata *cdata, struct ui *ui, chtype c
 	}
 }	
 
-static void draw_hd(WINDOW *win, struct house_deg **hd)
+static void draw_hd(WINDOW *win, struct ui *ui, struct house_deg **hd)
 {
 	for (int i = ARI; i < ZMAX; ++i)
 	{
 		if (i != 0 && i != 3 && i != 6 && i != 9)
 		{
-			wattron(win, COLOR_PAIR(sign_ele[hd[i]->sign]));
+			wattron(win, COLOR_PAIR(ui->sign_elem[hd[i]->sign]));
 			mvwprintw(win, hd[i]->y, hd[i]->x, "%d*%02d", hd[i]->deg, hd[i]->min);
-			wattroff(win, COLOR_PAIR(sign_ele[hd[i]->sign]));
+			wattroff(win, COLOR_PAIR(ui->sign_elem[hd[i]->sign]));
 		}
 	}
 }
@@ -573,7 +568,7 @@ void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui
 		ascmc_pos(win, cdata, ui, planet, zodiac);
 	
 	if (cdata->hsys != 'W' && cdata->hsys != 'N')
-		draw_hd(win, hd);
+		draw_hd(win, ui, hd);
 	
 	// status bar
 	const int bar_end = 20;

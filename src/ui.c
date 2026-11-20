@@ -79,6 +79,12 @@ void ui_init(struct ui *ui)
 		"carter", "polich", "aries" }
 	};
 	
+	int se[12] = { 
+	FIRE, EARTH, AIR, WATER,
+	FIRE, EARTH, AIR, WATER,
+	FIRE, EARTH, AIR, WATER };
+	memcpy(ui->sign_elem, se, sizeof se);
+	
 	ui->cc = 1;
 	
 	ui->main_win = newwin(LINES, COLS, 0, 0);
