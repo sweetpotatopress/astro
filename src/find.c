@@ -161,7 +161,7 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 		calculate_utc(cdata);
 	
 		double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
-		cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
+		cdata->utc_mday, cdata->utc_hour, cdata->gflag);
 	
 		swe_calc_ut(jd_ut, p0, iflag, xx0, serr);
 		swe_calc_ut(jd_ut, p1, iflag, xx1, serr);

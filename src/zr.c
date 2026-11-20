@@ -136,7 +136,7 @@ static double node_end(const struct node *node, const double *layer_inc, const i
 	return node->jd_ut + pl_period[node->sign] *layer_inc[node->level];
 }
 
-static void node_generate_children(struct node *parent, struct ui *ui, int child_level)
+static void node_generate_children(struct cdata *cdata, struct node *parent, struct ui *ui, int child_level)
 {
 	const double layer_inc[LAYER_MAX] = {
 		360.0,
@@ -182,7 +182,7 @@ static void node_generate_children(struct node *parent, struct ui *ui, int child
 
 	for (;;) 
 	{
-		child_jd = swe_julday(parent_date.year, parent_date.mon, parent_date.mday, parent_date.utc_hour, SE_GREG_CAL);
+		child_jd = swe_julday(parent_date.year, parent_date.mon, parent_date.mday, parent_date.utc_hour, cdata->gflag);
 
 		if (child_jd >= parent_end)
 			break;
@@ -285,7 +285,7 @@ static void print_column(WINDOW *win, struct ui *ui, const struct node *parent, 
 	}
 }
 
-static void rebuild_path(struct node **parents, int *selected, struct ui *ui)
+static void rebuild_path(struct cdata *cdata, struct node **parents, int *selected, struct ui *ui)
 {
 	int level;
 
@@ -293,7 +293,7 @@ static void rebuild_path(struct node **parents, int *selected, struct ui *ui)
 	{
 		struct node *parent = parents[level];
 
-		node_generate_children(parent, ui, level);
+		node_generate_children(cdata, parent, ui, level);
 
 		if (parent->count == 0)
 			break;
@@ -362,7 +362,7 @@ void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, dou
 	bool done = FALSE;
 	while (!done) 
 	{
-		rebuild_path(parents, selected, ui);
+		rebuild_path(cdata, parents, selected, ui);
 
 		werase(win);
 		werase(subwin);

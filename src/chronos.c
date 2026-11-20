@@ -347,7 +347,7 @@ static void calc_return(struct cdata *cdata, double base_degree)
 		calculate_utc(cdata);
 	
 		double jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
-		cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
+		cdata->utc_mday, cdata->utc_hour, cdata->gflag);
 	
 		swe_calc_ut(jd_ut, SE_SUN, iflag, xx, serr);
 			
