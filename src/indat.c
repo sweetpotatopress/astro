@@ -176,6 +176,9 @@ static void field_to_member (struct cdata *cdata, struct ui *ui, FORM *cdata_for
 		
 		case HOUSESYS:
 			break;
+		case CALENDAR:
+			cdata->gflag = (strcmp(buffer, "gregorian") == 0) ? SE_GREG_CAL : SE_JUL_CAL;
+			break;
 	}
 }
 
@@ -195,6 +198,7 @@ static void field_label(struct ui *ui)
 		"latitude:",
 		"longitude:",
 		"house sys:",
+		"greg/jul:",
 		NULL };
 		
 	int y = 1, x = 1;
@@ -299,6 +303,14 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 	cdata_field[HOUSESYS] = new_field(1, 11, starty, startx, 0, 0);
 	set_field_buffer(cdata_field[HOUSESYS], 0, "[ choose ]");
 	field_opts_off(cdata_field[HOUSESYS], O_EDIT);
+	starty+= 2;
+	
+	cdata_field[CALENDAR] = new_field(1, 9, starty, startx, 0, 0);
+	bool gj = TRUE;
+	char *gn[2] = { "julian", "gregorian" };
+	set_field_back(cdata_field[CALENDAR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	set_field_buffer(cdata_field[CALENDAR], 0, gn[gj]);
+	field_opts_off(cdata_field[CALENDAR], O_EDIT);
 
 	cdata_field[FIELDMAX] = NULL;
 
@@ -340,6 +352,12 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 				{
 					memset(cdata->chart_name, 0, MAXBUF);
 					cdata_entry = 1;
+					break;
+				}
+				if (index == CALENDAR)
+				{
+					gj = !gj;
+					set_field_buffer(cdata_field[CALENDAR], 0, gn[gj]);
 					break;
 				}
 	
@@ -409,21 +427,17 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 		index = field_index(current);
 		
 		if (index == DRAW)
-		{
-			wattron(ui->indat_win, A_REVERSE);
-			mvwprintw(ui->indat_win, 17, 14, "[ draw ]");
-			wattroff(ui->indat_win, A_REVERSE);
-		}
+			set_field_back(cdata_field[DRAW], COLOR_PAIR (M_COLOR) | A_REVERSE);
 		else
-			mvwprintw(ui->indat_subwin, 16, 13, "[ draw ]");
+			set_field_back(cdata_field[DRAW], COLOR_PAIR (M_COLOR));
 		if (index == HOUSESYS)
-		{
-			wattron(ui->indat_win, A_REVERSE);
-			mvwprintw(ui->indat_win, 25, 14, "[ choose ]");
-			wattroff(ui->indat_win, A_REVERSE);
-		}
+			set_field_back(cdata_field[HOUSESYS], COLOR_PAIR (M_COLOR) | A_REVERSE);
 		else
-			mvwprintw(ui->indat_subwin, 24, 13, "[ choose ]");
+			set_field_back(cdata_field[HOUSESYS], COLOR_PAIR (M_COLOR));
+		if (index == CALENDAR)
+			set_field_back(cdata_field[CALENDAR], COLOR_PAIR (M_COLOR) | A_REVERSE);
+		else
+			set_field_back(cdata_field[CALENDAR], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 			
 		pos_form_cursor(cdata_form);
 		box(ui->indat_win, 0, 0);
