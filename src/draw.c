@@ -290,9 +290,9 @@ void house_menu(struct cdata *cdata, struct ui *ui)
 	int count = 11;
 	
 	int hsys[] = {
-		'W', 'A', 'O', 'P',
-		'C', 'K', 'R', 'B',
-		'F', 'T', 'N' };
+	'W', 'A', 'O', 'P',
+	'C', 'K', 'R', 'B',
+	'F', 'T', 'N' };
 		
 	char *head = "house system";
 		
@@ -348,7 +348,6 @@ void house_menu(struct cdata *cdata, struct ui *ui)
 				break;
 			case 'l': case KEY_RIGHT: case '\n':
 				cdata->hsys = hsys[item_index(cur)];
-				cdata->hidx = item_index(cur);
 				menu_done = 1;
 				break;
 			case 'q': case 27:

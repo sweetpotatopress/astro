@@ -173,6 +173,9 @@ static void field_to_member (struct cdata *cdata, struct ui *ui, FORM *cdata_for
 			else
 				cdata->dlon = 0.0;
 			break;
+		
+		case HOUSESYS:
+			break;
 	}
 }
 
@@ -191,6 +194,7 @@ static void field_label(struct ui *ui)
 		"timezone:",
 		"latitude:",
 		"longitude:",
+		"house sys:",
 		NULL };
 		
 	int y = 1, x = 1;
@@ -290,6 +294,11 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 	set_field_back(cdata_field[LONGITUDE], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	set_field_type(cdata_field[LONGITUDE], TYPE_NUMERIC, 5, -180.0, 180.0);
 	field_opts_off(cdata_field[LONGITUDE], O_AUTOSKIP);
+	starty+= 2;
+	
+	cdata_field[HOUSESYS] = new_field(1, 11, starty, startx, 0, 0);
+	set_field_buffer(cdata_field[HOUSESYS], 0, "[ choose ]");
+	field_opts_off(cdata_field[HOUSESYS], O_EDIT);
 
 	cdata_field[FIELDMAX] = NULL;
 
@@ -304,7 +313,7 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 	field_label(ui);
 	wrefresh(ui->indat_win);
 	pos_form_cursor(cdata_form);
-
+	
 	FIELD *current = NULL;
 	int index = 0;
 	int cdata_entry = 0, ch = 0;
@@ -321,6 +330,8 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 					form_driver(cdata_form, REQ_VALIDATION);
 					field_to_member(cdata, ui, cdata_form, cdata_field);
 				}
+				if (index == HOUSESYS)
+					house_menu(cdata, ui);
 				if (index == DRAW)
 				{
 					memset(cdata->chart_name, 0, MAXBUF);
@@ -401,6 +412,14 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 		}
 		else
 			mvwprintw(ui->indat_subwin, 16, 13, "[ draw ]");
+		if (index == HOUSESYS)
+		{
+			wattron(ui->indat_win, A_REVERSE);
+			mvwprintw(ui->indat_win, 25, 14, "[ choose ]");
+			wattroff(ui->indat_win, A_REVERSE);
+		}
+		else
+			mvwprintw(ui->indat_subwin, 24, 13, "[ choose ]");
 			
 		pos_form_cursor(cdata_form);
 		box(ui->indat_win, 0, 0);

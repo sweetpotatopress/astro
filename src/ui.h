@@ -26,7 +26,7 @@
 #define RWIN_Y LINES - 9
 #define RWIN_X COLS - 24
 
-#define IWINY 26
+#define IWINY 28
 #define IWINX 47
 #define IWIN_Y (LINES - IWINY) / 2
 #define IWIN_X (COLS - IWINX) / 2
@@ -145,6 +145,7 @@ struct ui {
 	char *conf_timezone;
 	double conf_dlat;
 	double conf_dlon;
+	int conf_hsys;
 	int aspect_trig;
 	int left_trig;
 	int left_page;

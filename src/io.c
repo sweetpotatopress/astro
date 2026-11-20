@@ -503,7 +503,7 @@ static void save_file_name(struct cdata *cdata, char *path)
 	if (!ifp)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
-	fprintf(ifp, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f",
+	fprintf(ifp, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f,%d",
 		cdata->city,
 		cdata->state,
 		cdata->country,
@@ -515,7 +515,8 @@ static void save_file_name(struct cdata *cdata, char *path)
 		cdata->sec,
 		cdata->timezone,
 		cdata->dlat,
-		cdata->dlon);
+		cdata->dlon,
+		cdata->hsys);
 		
 		fclose(ifp);
 		unpost_form(save_form);
@@ -556,6 +557,8 @@ void load_chart_data(struct cdata *cdata, char *path)
 			it = xstrtok(NULL, ",");
 		}
 	}
+	if (strlen(field[FHSYS]) > 3)
+		snprintf(field[FHSYS], MAXBUF, "87");
 				
 	memcpy(cdata->city, field[FCITY], strlen(field[FCITY]) + 1);
 	memcpy(cdata->state, field[FSTATE], strlen(field[FSTATE]) + 1);
@@ -620,6 +623,13 @@ void load_chart_data(struct cdata *cdata, char *path)
 		cdata->dlon = dret;
 	else
 		cdata->dlon = 0.0;
+	errno = 0;
+	
+	lret = strtol(field[FHSYS], &endptr, 10);
+	if (errno != ERANGE && lret != -1)
+		cdata->hsys = (int)lret;
+	else
+		cdata->hsys = 'W';
 	errno = 0;
 	
 	fclose(fp);

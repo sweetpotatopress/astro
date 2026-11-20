@@ -143,7 +143,8 @@ struct ui;
 #define TIMEZONE 9
 #define LATITUDE 10
 #define LONGITUDE 11
-#define FIELDMAX 12
+#define HOUSESYS 12
+#define FIELDMAX 13
 
 #define FCITY 0
 #define FSTATE 1
@@ -157,7 +158,8 @@ struct ui;
 #define FTZ 9
 #define FLAT 10
 #define FLON 11
-#define FMAX 12
+#define FHSYS 12
+#define FMAX 13
 
 #define SAVE 1
 #define LOAD 0
@@ -172,6 +174,9 @@ void config_menu(struct cdata *cdata, struct ui *ui);
 void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
 void city_search(struct cdata *cdata,  struct ui *ui, FIELD *cdata_field[], FORM *cdata_form, char *search);
 void zodiacal_releasing(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch);
+// io.c
 void path_check(char *path, const char *s);
 void load_chart(struct cdata *cdata, struct ui *ui);
 void load_chart_data(struct cdata *cdata, char *path);
@@ -182,15 +187,13 @@ void datadir_check(void);
 size_t file_count(const char *path, const int r);
 size_t name_to_item(char *filepath, ITEM **item, char **name, char **desc);
 void back_dir(char *filepath, char *cur_dir);
-void diary(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac, int ch);
-void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
-void house_menu(struct cdata *cdata, struct ui *ui);
 // draw.c
 void zo_color(WINDOW *win, struct ui *ui, int y, int x, int sign, int *zodiac[]);
 void degree_color(WINDOW *win, int y, int x, int count, double *planet[], int *zodiac[]);
 void string_color(WINDOW *win, int y, int x, char *str, int color);
 void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
 void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
+void house_menu(struct cdata *cdata, struct ui *ui);
 // anim.c
 void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui);
 void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac);

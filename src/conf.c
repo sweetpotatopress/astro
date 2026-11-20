@@ -115,7 +115,10 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 	
 	lret = strtol(buffer[C_HSYS], &endptr, 10);
 	if (errno != ERANGE)
+	{
 		cdata->hsys = (int)lret;
+		ui->conf_hsys = (int)lret;
+	}
 	if (lret == 0)
 		cdata->hsys = 'W';
 	errno = 0;

@@ -93,11 +93,11 @@ static void save_diary(struct cdata *cdata, struct ui *ui, char *buf, int size)
 
 	char header[MAXBUF] = {0};
 	if (access(full_path, R_OK) == -1)
-		snprintf(header, MAXBUF, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f\n- - - - - - -\n%02d:%02d:%02d%s",
+		snprintf(header, MAXBUF, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f,%d\n- - - - - - -\n%02d:%02d:%02d%s",
 		cdata->city, cdata->state, cdata->country,
 		time.year, time.mon, time.mday,
 		time.hour, time.min, time.sec, 
-		ui->conf_timezone, ui->conf_dlat, ui->conf_dlon,
+		ui->conf_timezone, ui->conf_dlat, ui->conf_dlon, ui->conf_hsys,
 		th, time.min, time.sec, tod);
 	else
 		snprintf(header, MAXBUF, "%02d:%02d:%02d%s", th, time.min, time.sec, tod);
