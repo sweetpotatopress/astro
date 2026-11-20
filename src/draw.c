@@ -347,7 +347,7 @@ int house_menu(struct ui *ui)
 			case 'k': case KEY_UP:
 				menu_driver(menu, REQ_UP_ITEM);
 				break;
-			case 'l': case KEY_RIGHT: case '\n':
+			case 'l': case KEY_RIGHT: case '\n': case ' ':
 				ret = hsys[item_index(cur)];
 				menu_done = 1;
 				break;
