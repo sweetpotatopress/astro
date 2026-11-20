@@ -333,6 +333,7 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 				if (index == HOUSESYS)
 				{
 					cdata->hsys = house_menu(ui);
+					house_idx(cdata, cdata->hsys);
 					mvwprintw(ui->indat_subwin, 24, 24, ": %s", ui->sym.hname[cdata->hidx]);
 				}
 				if (index == DRAW)
