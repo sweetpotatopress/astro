@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 				doupdate();
 				break;
 			case 'h':
-				house_menu(cdata[ui->cc], ui);
+				cdata[ui->cc]->hsys = house_menu(ui);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;

@@ -44,12 +44,15 @@ static void ftb(struct ui *ui, FIELD **field, char **buffer)
 		while (len > 0 && (buffer[i][len-1] == ' ' || buffer[i][len-1] == '\n'))
 			buffer[i][--len] = '\0';
 	}
+	snprintf(buffer[C_HSYS], MAXBUF, "%d", ui->conf_hsys);
 }
 
 static void btf(FIELD **field, char **buffer)
 {
 	for (int i = C_TIMEZONE; i < C_ASP; ++i)
+	{
 		set_field_buffer(field[i], 0, buffer[i]);
+	}
 }
 		
 static void set_current(FIELD **field, struct cdata *cdata)
@@ -120,7 +123,7 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 		ui->conf_hsys = (int)lret;
 	}
 	if (lret == 0)
-		cdata->hsys = 'W';
+		ui->conf_hsys = 'W';
 	errno = 0;
 	
 	lret = strtol(buffer[C_ASP], &endptr, 10);
@@ -159,7 +162,7 @@ static void config_write(struct cdata *cdata, struct ui *ui)
 		cdata->timezone,
 		cdata->dlat,
 		cdata->dlon,
-		cdata->hsys,
+		ui->conf_hsys,
 		ui->aspect_trig,
 		ui->lht);
 		
@@ -244,8 +247,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	sy+= 2;
 	
 	field[C_HSYS] = new_field(1, 11, sy, sx, 0, 0);
-	set_field_back(field[C_HSYS], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
-	field_opts_off(field[C_HSYS], O_AUTOSKIP);
+	field_opts_off(field[C_HSYS], O_EDIT);
 	sy+= 2;
 	
 	field[C_ASP] = new_field(1, 3, sy, sx, 0, 0);
@@ -269,6 +271,11 @@ void config_menu(struct cdata *cdata, struct ui *ui)
     
 	config_parse(buffer);
 	btf(field, buffer);
+	set_field_buffer(field[C_HSYS], 0, "[ choose ]");
+	house_idx(cdata, ui->conf_hsys);
+	wattron(ui->config_win, A_UNDERLINE);
+	mvwprintw(ui->config_win, 9, 26, "%s", ui->sym.hname[cdata->hidx]);
+	wattroff(ui->config_win, A_UNDERLINE);
 	
 	set_current_field(form, field[C_ASP]);
 	pos_form_cursor(form);
@@ -324,9 +331,13 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 			case '\\': case '[': case ']': case '\n':
 				if (current_field(form) == field[C_HSYS])
 				{
-					house_menu(cdata, ui);
-					snprintf(buffer[C_HSYS], MAXBUF, "%d", cdata->hsys);
-					set_field_buffer(field[C_HSYS], 0, buffer[C_HSYS]);
+					ui->conf_hsys = house_menu(ui);
+					house_idx(cdata, ui->conf_hsys);
+					mvwprintw(ui->config_win, 9, 26, "              ");
+					wattron(ui->config_win, A_UNDERLINE);
+					mvwprintw(ui->config_win, 9, 26, "%s", ui->sym.hname[cdata->hidx]);
+					wattroff(ui->config_win, A_UNDERLINE);
+					break;
 				}
 				done = 1;
 				break;	
@@ -339,6 +350,15 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 				form_driver(form, ch);
 				break;
 		}
+		if (current_field(form) == field[C_HSYS])
+		{
+			wattron(ui->config_win, A_REVERSE);
+			mvwprintw(ui->config_win, 9, 13, "[ choose ]");
+			wattroff(ui->config_win, A_REVERSE);
+		}
+		else
+			mvwprintw(ui->config_win, 9, 13, "[ choose ]");
+	
 		pos_form_cursor(form);
 		box(ui->config_win, 0, 0);
 		wrefresh(ui->config_win);

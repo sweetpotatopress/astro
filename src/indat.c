@@ -331,7 +331,10 @@ void in_cdata(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **plan
 					field_to_member(cdata, ui, cdata_form, cdata_field);
 				}
 				if (index == HOUSESYS)
-					house_menu(cdata, ui);
+				{
+					cdata->hsys = house_menu(ui);
+					mvwprintw(ui->indat_subwin, 24, 24, ": %s", ui->sym.hname[cdata->hidx]);
+				}
 				if (index == DRAW)
 				{
 					memset(cdata->chart_name, 0, MAXBUF);

@@ -193,7 +193,7 @@ void degree_color(WINDOW *win, int y, int x, int count, double *planet[], int *z
 void string_color(WINDOW *win, int y, int x, char *str, int color);
 void planet_pos(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
 void draw_chart(WINDOW *win, struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac);
-void house_menu(struct cdata *cdata, struct ui *ui);
+int house_menu(struct ui *ui);
 // anim.c
 void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui);
 void animate_chart(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **planet, int **zodiac);
@@ -203,6 +203,7 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 // init.c
 void cdata_clear(struct cdata *cdata);
 void ecst_init(double *planet[], double *sol_eclipse);
+void house_idx(struct cdata *cdata, int h);
 void planet_init(double *planet[], int cur_chart, struct pxx **pxx);
 void zxx_init(int *zodiac[]);
 void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet);

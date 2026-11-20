@@ -285,9 +285,10 @@ static void draw_zo_color(WINDOW *win, struct cdata *cdata, struct ui *ui, int r
 	}
 }
 
-void house_menu(struct cdata *cdata, struct ui *ui)
+int house_menu(struct ui *ui)
 {
 	int count = 11;
+	int ret = 87;
 	
 	int hsys[] = {
 	'W', 'A', 'O', 'P',
@@ -347,7 +348,7 @@ void house_menu(struct cdata *cdata, struct ui *ui)
 				menu_driver(menu, REQ_UP_ITEM);
 				break;
 			case 'l': case KEY_RIGHT: case '\n':
-				cdata->hsys = hsys[item_index(cur)];
+				ret = hsys[item_index(cur)];
 				menu_done = 1;
 				break;
 			case 'q': case 27:
@@ -369,6 +370,8 @@ void house_menu(struct cdata *cdata, struct ui *ui)
 	wrefresh(win);
 	delwin(subwin);
 	delwin(win);
+	
+	return ret; 
 }
 
 struct house_deg {

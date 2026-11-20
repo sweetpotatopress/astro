@@ -34,7 +34,7 @@ void ecst_init(double *planet[], double *se)
 	se[E_INIT] = 0;
 }
 
-void house_idx(struct cdata *cdata)
+void house_idx(struct cdata *cdata, int h)
 {
 	int hsys[] = {
 	'W', 'A', 'O', 'P',
@@ -43,7 +43,7 @@ void house_idx(struct cdata *cdata)
 	
 	for (int i = 0; i < 11; ++i)
 	{
-		if (hsys[i] == cdata->hsys)
+		if (hsys[i] == h)
 		{
 			cdata->hidx = i;
 			break;
@@ -262,7 +262,7 @@ void new_chart(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **pla
 		ERR_EXIT("ERR: new_chart setenv");
 	tzset();
 	
-	house_idx(cdata);
+	house_idx(cdata, cdata->hsys);
 	pxx_init(cdata, pxx, planet);
 	draw_chart(ui->main_win, cdata, pxx, ui, planet, zodiac);
 	cc_data(ui->main_win, cdata, ui);
