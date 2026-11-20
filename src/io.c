@@ -503,7 +503,7 @@ static void save_file_name(struct cdata *cdata, char *path)
 	if (!ifp)
 		ERR_EXIT("ERR: save_chart ifp fopen");
 
-	fprintf(ifp, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f,%d",
+	fprintf(ifp, "%s,%s,%s,%d,%d,%d,%d,%d,%d,%s,%f,%f,%d,%d",
 		cdata->city,
 		cdata->state,
 		cdata->country,
@@ -516,7 +516,8 @@ static void save_file_name(struct cdata *cdata, char *path)
 		cdata->timezone,
 		cdata->dlat,
 		cdata->dlon,
-		cdata->hsys);
+		cdata->hsys,
+		cdata->gflag);
 		
 		fclose(ifp);
 		unpost_form(save_form);
@@ -531,6 +532,48 @@ static void save_file_name(struct cdata *cdata, char *path)
 		delwin(subwin);
 		delwin(win);
 }
+
+void add_hgj(char *buffer, char *path)
+{
+	FILE *fp = fopen(path, "r+b");
+	if (fp == NULL)
+		ERR_EXIT("load_chart_data path fopen");
+		
+	if (fgets(buffer, MAXBUF, fp) != NULL)
+	{
+		int comma_count = 0;
+		for(int i = 0; buffer[i] != '\0'; ++i)
+		{
+			if (buffer[i] == ',')
+				++comma_count;
+		}
+		
+		const char *extra = NULL;
+		if (comma_count == 11)
+			extra = ",87,1";
+		else if (comma_count == 12)
+			extra = ",1";
+			
+		if (extra)
+		{
+			char *nl = strchr(buffer, '\n');
+			
+			if (nl)
+			{
+				long nl_pos = (long)(nl - buffer);
+				fseek(fp, nl_pos, SEEK_SET);
+				fputs(extra, fp);
+				fputc('\n', fp);
+			}
+			else
+			{
+				fseek(fp, 0, SEEK_END);
+				fputs(extra, fp);
+			} 
+		}
+	}
+	fclose(fp);
+}
 	
 void load_chart_data(struct cdata *cdata, char *path)
 {
@@ -543,10 +586,12 @@ void load_chart_data(struct cdata *cdata, char *path)
 	errno = 0;
 	int count = 0;
 	
+	add_hgj(buffer, path);
+
 	FILE *fp = fopen(path, "r");
 	if (fp == NULL)
 		ERR_EXIT("load_chart_data path fopen");
-				
+		
 	if (fgets(buffer, MAXBUF, fp) != NULL)
 	{
 		char *it = xstrtok(buffer, ",");
@@ -630,6 +675,13 @@ void load_chart_data(struct cdata *cdata, char *path)
 		cdata->hsys = (int)lret;
 	else
 		cdata->hsys = 'W';
+	errno = 0;
+	
+	lret = strtol(field[FCALENDAR], &endptr, 10);
+	if (errno != ERANGE && lret != -1)
+		cdata->gflag = (int)lret;
+	else
+		cdata->gflag = SE_GREG_CAL;
 	errno = 0;
 	
 	fclose(fp);
