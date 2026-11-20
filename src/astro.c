@@ -227,6 +227,11 @@ int main(int argc, char *argv[])
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				doupdate();
 				break;
+			case 'g':
+				cdata[ui->cc]->gflag = !cdata[ui->cc]->gflag;
+				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
+				doupdate();
+				break;
 			case 'z':
 				zodiacal_releasing(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
 				new_chart(cdata[ui->cc], pxx[ui->cc], ui, planet, zodiac);
