@@ -168,6 +168,7 @@ struct ui {
 	int pr; // planet radius
 	int ar; // angle radius
 	int sign_elem[12];
+	int hsys[11];
 	struct ui_sym sym;
 	WINDOW *pad;
 	

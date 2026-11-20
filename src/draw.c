@@ -285,11 +285,6 @@ int house_menu(struct ui *ui)
 	int count = 11;
 	int ret = 87;
 	
-	int hsys[] = {
-	'W', 'A', 'O', 'P',
-	'C', 'K', 'R', 'B',
-	'F', 'T', 'N' };
-		
 	char *head = "house system";
 		
 	int header = 4;
@@ -343,7 +338,7 @@ int house_menu(struct ui *ui)
 				menu_driver(menu, REQ_UP_ITEM);
 				break;
 			case 'l': case KEY_RIGHT: case '\n': case ' ':
-				ret = hsys[item_index(cur)];
+				ret = ui->hsys[item_index(cur)];
 				menu_done = 1;
 				break;
 			case 'q': case 27:

@@ -85,6 +85,12 @@ void ui_init(struct ui *ui)
 	FIRE, EARTH, AIR, WATER };
 	memcpy(ui->sign_elem, se, sizeof se);
 	
+	int hsys[11] = {
+	'W', 'A', 'O', 'P',
+	'C', 'K', 'R', 'B',
+	'F', 'T', 'N' };
+	memcpy(ui->hsys, hsys, sizeof hsys);
+	
 	ui->cc = 1;
 	
 	ui->main_win = newwin(LINES, COLS, 0, 0);

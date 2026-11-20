@@ -203,7 +203,7 @@ void synastry(struct cdata **cdata, struct pxx **pxx, struct ui *ui, double **pl
 // init.c
 void cdata_clear(struct cdata *cdata);
 void ecst_init(double *planet[], double *sol_eclipse);
-void house_idx(struct cdata *cdata, int h);
+void house_idx(struct cdata *cdata, struct ui *ui, int h);
 void planet_init(double *planet[], int cur_chart, struct pxx **pxx);
 void zxx_init(int *zodiac[]);
 void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet);

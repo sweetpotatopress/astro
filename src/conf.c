@@ -272,7 +272,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 	config_parse(buffer);
 	btf(field, buffer);
 	set_field_buffer(field[C_HSYS], 0, "[ choose ]");
-	house_idx(cdata, ui->conf_hsys);
+	house_idx(cdata, ui, ui->conf_hsys);
 	wattron(ui->config_win, A_UNDERLINE);
 	mvwprintw(ui->config_win, 9, 26, "%s", ui->sym.hname[cdata->hidx]);
 	wattroff(ui->config_win, A_UNDERLINE);
@@ -303,7 +303,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 				else if (current_field(form) == field[C_HSYS])
 				{
 					ui->conf_hsys = house_menu(ui);
-					house_idx(cdata, ui->conf_hsys);
+					house_idx(cdata, ui, ui->conf_hsys);
 					mvwprintw(ui->config_win, 9, 26, "              ");
 					wattron(ui->config_win, A_UNDERLINE);
 					mvwprintw(ui->config_win, 9, 26, "%s", ui->sym.hname[cdata->hidx]);
