@@ -177,6 +177,7 @@ int main(int argc, char *argv[])
 		config_init(cdata[i], ui);
 		ecst_init(planet, cdata[i]->se);
 		cdata[i]->dt = FALSE;
+		cdata[i]->gflag = SE_GREG_CAL;
 	}
 	
 	wheel_init(ui->main_win, ui, 0, 0, 0);

@@ -210,7 +210,7 @@ void pxx_init(struct cdata *cdata, struct pxx *pxx, double **planet)
 	weekday_check(cdata);
 	
 	cdata->jd_ut = swe_julday(cdata->utc_year, cdata->utc_mon, 
-	cdata->utc_mday, cdata->utc_hour, SE_GREG_CAL);
+	cdata->utc_mday, cdata->utc_hour, cdata->gflag);
 	
 	for (ipl = SE_SUN; ipl <= SE_TRUE_NODE; ipl++)
 	{

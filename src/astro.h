@@ -117,6 +117,7 @@ struct cdata {
 	int utc_mon;
 	int utc_mday;
 	int moonphase;
+	int gflag; // greg or jul flag
 	bool lt; // LMT flag
 	bool dt; // dst reverse
 	int rt; // realtime flag
@@ -144,7 +145,8 @@ struct ui;
 #define LATITUDE 10
 #define LONGITUDE 11
 #define HOUSESYS 12
-#define FIELDMAX 13
+#define CALENDAR 13
+#define FIELDMAX 14
 
 #define FCITY 0
 #define FSTATE 1
@@ -159,7 +161,8 @@ struct ui;
 #define FLAT 10
 #define FLON 11
 #define FHSYS 12
-#define FMAX 13
+#define FCALENDAR 13
+#define FMAX 14
 
 #define SAVE 1
 #define LOAD 0
