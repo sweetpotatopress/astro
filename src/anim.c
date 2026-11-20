@@ -70,7 +70,6 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		}
 			
 		sy += 1;
-		
 		if(cdata->year && cdata->mon && cdata->mday)
 			mvwprintw(win, sy, sx, "%s.%02d.%02d, %s", 
 			ui->sym.month[cdata->mon], cdata->mday, cdata->year, ui->sym.week[cdata->wday]);
@@ -82,11 +81,8 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 			int th = time_format(cdata->hour);
 			mvwprintw(win, sy, sx, "%02d:%02d:%02d%s", th, cdata->min, cdata->sec, tod);
 		}
-		sy += 1;
 		
-		mvwprintw(win, sy, sx, "%s", cdata->gflag ? "gregorian" : "julian");
 		sy += 1;
-		
 		int local_min = cdata->hour * 60 + cdata->min + (int)lround(cdata->sec / 60.0);
 		int utc_min = (int)lround(cdata->utc_hour * 60.0);
 		int off_min = local_min - utc_min;
@@ -107,7 +103,7 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 		else
 			mvwprintw(win, sy, sx, "%sUTC%c%02d:%02d", cdata->isdst == 1 ? "DST " : "",
 			usign < 0 ? '-' : '+', off_hour, rem_min);
-			
+		
 		if (i > 0)
 			return;
 			
@@ -124,7 +120,10 @@ void cc_data(WINDOW *win, struct cdata *cdata, struct ui *ui)
 			mvwprintw(win, sy, sx, "%f", cdata->dlon);
 		
 		sy += 1;
+		mvwprintw(win, sy, sx, "%s", cdata->gflag ? "gregorian" : "julian");
+		sy += 1;
 		mvwprintw(win, sy, sx, "%s", ui->sym.hname[cdata->hidx]);
+		
 	}
 }
 
