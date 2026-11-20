@@ -302,7 +302,7 @@ int house_menu(struct ui *ui)
 	int height = 11 + header;
 	
 	int sy = (LINES - height) / 2;
-	int sx = (COLS - width) / 2;
+	int sx = (COLS - width);
 	
 	WINDOW *win = newwin(height, width, sy, sx);
 	WINDOW *subwin = derwin(win, height - header, width - 2, 3, 1);
