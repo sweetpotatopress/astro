@@ -71,6 +71,7 @@ c			config
 	esc		cancel
 	
 d			toggle DST
+g			toggle gregorian/julian calendar
 o 			toggle right table
 p			toggle left table
 	[P]		next page
