@@ -294,12 +294,21 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 					button_toggle(field, C_ASP, &ui->aspect_trig);
 				}
 				
-				if (current_field(form) == field[C_SIZE])
+				else if (current_field(form) == field[C_SIZE])
 				{
 					ui->lht = !ui->lht;
 					button_toggle(field, C_SIZE, &ui->lht);
 				}
-	
+				
+				else if (current_field(form) == field[C_HSYS])
+				{
+					ui->conf_hsys = house_menu(ui);
+					house_idx(cdata, ui->conf_hsys);
+					mvwprintw(ui->config_win, 9, 26, "              ");
+					wattron(ui->config_win, A_UNDERLINE);
+					mvwprintw(ui->config_win, 9, 26, "%s", ui->sym.hname[cdata->hidx]);
+					wattroff(ui->config_win, A_UNDERLINE);
+				}
 				break;
 			case 9:
 				set_current(field, cdata);
@@ -329,17 +338,7 @@ void config_menu(struct cdata *cdata, struct ui *ui)
 				break;
 			
 			case '\\': case '[': case ']': case '\n':
-				if (current_field(form) == field[C_HSYS])
-				{
-					ui->conf_hsys = house_menu(ui);
-					house_idx(cdata, ui->conf_hsys);
-					mvwprintw(ui->config_win, 9, 26, "              ");
-					wattron(ui->config_win, A_UNDERLINE);
-					mvwprintw(ui->config_win, 9, 26, "%s", ui->sym.hname[cdata->hidx]);
-					wattroff(ui->config_win, A_UNDERLINE);
-					break;
-				}
-				done = 1;
+			done = 1;
 				break;	
 				
 			case 27:
