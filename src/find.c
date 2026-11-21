@@ -38,6 +38,11 @@ static void sign_long(struct ui *ui, char *str, int *du)
 			du[1] = (i+1)*30;
 		}
 	}
+	if (strcmp(str, "all") == 0)
+	{
+		du[0] = 0.0;
+		du[1] = 360.0;
+	}
 }
 
 static void pl_name(struct ui *ui, char *p)
