@@ -26,17 +26,13 @@ enter		animate chart
 	k/j 	up/down  
 	0...9	increment count
 
+tab			live update animation
 0...9		chart number
 alt+0...9	synastry w/ chart
 t			transits
 s			solar return
 
-tab			live update  
-
 h			choose house system
-
-r			redraw chart  
-[R]			redraw config chart
 
 w			save chart  
 	m		make dir  
@@ -47,17 +43,7 @@ e		 	load chart
 	l/enter	choose  
 	esc		cancel  
 
-f			conjunction find
-
-j			write diary
-	esc		save entry
-	
-	
-[J]			read diary
-	j/k		down/up line
-	h/l		prev/next entry
-	ctrl+e	scroll down
-	ctrl+y	scroll up
+f			aspect find
 
 z			zodiacal releasing
 	k/j		up/down period
@@ -70,11 +56,23 @@ c			config
 	space	toggle buttons
 	esc		cancel
 	
+r			redraw chart  
+[R]			redraw config chart
+
 d			toggle DST
 g			toggle gregorian/julian calendar
 o 			toggle right table
 p			toggle left table
 	[P]		next page
+	
+j			write diary
+	esc		save entry
+	
+[J]			read diary
+	j/k		down/up line
+	h/l		prev/next entry
+	ctrl+e	scroll down
+	ctrl+y	scroll up
 
 q			exit astro  
 ```
