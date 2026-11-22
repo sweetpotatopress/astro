@@ -238,14 +238,14 @@ static void draw_zo_color(WINDOW *win, struct cdata *cdata, struct ui *ui, int r
 
 int house_menu(struct ui *ui)
 {
-	int count = 12;
+	int count = 11;
 	int ret = 87;
 	
 	char *head = "house system";
 		
 	int header = 4;
 	int width = 20;
-	int height = count + header;
+	int height = 11 + header;
 	
 	int sy = (LINES - height) / 2;
 	int sx = (COLS - width);
@@ -333,8 +333,6 @@ static void draw_house(WINDOW *win, struct cdata *cdata, struct ui *ui, chtype c
 	for (int i = ARI; i < ZMAX; ++i)
 	{
 		double rad = (cdata->cusp[i] - cdata->cusp[0]) * M_PI / 180.0;
-		if (cdata->hsys == 'M')
-			rad = (cdata->sign_cusp[i] - cdata->cusp[0]) * M_PI / 180.0;
 		
 		int edge_x = ui->cx - (int)(ui->hr * cos(rad));
 		int edge_y = ui->cy + (int)(ui->hr * sin(rad) * 0.5);

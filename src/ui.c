@@ -76,7 +76,7 @@ void ui_init(struct ui *ui)
 		.hname = {
 		"whole", "equal", "porphyry", "placidus",
 		"campanus", "koch", "regiomontanus", "alcabitus",
-		"carter", "polich", "morinus", "aries" }
+		"carter", "polich", "aries" }
 	};
 	
 	int se[12] = { 
@@ -85,10 +85,10 @@ void ui_init(struct ui *ui)
 	FIRE, EARTH, AIR, WATER };
 	memcpy(ui->sign_elem, se, sizeof se);
 	
-	int hsys[12] = {
+	int hsys[11] = {
 	'W', 'A', 'O', 'P',
 	'C', 'K', 'R', 'B',
-	'F', 'T', 'M', 'N' };
+	'F', 'T', 'N' };
 	memcpy(ui->hsys, hsys, sizeof hsys);
 	
 	ui->cc = 1;
