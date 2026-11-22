@@ -23,9 +23,10 @@
 #define F_PL1 2
 #define F_LR 3
 #define F_HR 4
-#define F_ORB 5
-#define F_FIND 6
-#define F_NULL 7
+#define F_ASPECT 5
+#define F_ORB 6
+#define F_FIND 7
+#define F_NULL 8
 #define F_MAX F_NULL+1
 
 static void sign_long(struct ui *ui, char *str, int *du)
@@ -113,21 +114,14 @@ static void progress_bar(WINDOW *win, struct cdata *cdata, int r0, int r1)
 	}
 }
 
-static double wrap_deg(double angle)
-{
-	angle = fmod(angle+180.0, 360);
-	norm360(&angle);
-	return angle - 180.0;
-}
-
 static void meantosouth(double *xx)
 {
 	xx[LONG] = (xx[LONG] + 180);
 	norm360(&xx[LONG]);
 }
 
-static int find_conj(WINDOW *win, struct cdata *cdata, struct tmp **tmp,
-double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
+static int find_aspect(WINDOW *win, struct cdata *cdata, struct tmp **tmp,
+double d, double u, int p0, int p1, int r0, int r1, int orb, int a, char **list)
 {
 	werase(win);
 	wrefresh(win);
@@ -144,7 +138,7 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 	time_t step;
 	int c = 0;
 	
-	const double arcsec = 1.0 / 3600.0;
+	const double tolerance = 0.1;
 	const double day_sec = 86400.0;
 	const double max_angle = 0.5;
 	const double max_step = day_sec * 24.0;
@@ -179,13 +173,14 @@ double d, double u, int p0, int p1, int r0, int r1, int orb, char **list)
 		if (sn1 == TRUE)
 			meantosouth(xx1);
 	
-		diff = wrap_deg(xx0[LONG] - xx1[LONG]);
+		diff = xx0[LONG] - xx1[LONG];
+		norm360(&diff);
 		diff_s = xx0[LONG_S] - xx1[LONG_S];
 		
 		if (cdata->year < r0 || cdata->year > r1)
 			return c;
 	
-		if (fabs(diff) <= arcsec+orb)
+		if (fabs(diff) <= (a + orb) + tolerance && fabs(diff) >= (a - orb) - tolerance)
 		{
 			if (llabs((long long)(t - last)) > max_step && 
 			xx0[LONG] < u && xx0[LONG] > d && xx1[LONG] < u && xx1[LONG] > d)
@@ -310,7 +305,7 @@ WINDOW *win, WINDOW *subwin, struct tmp **tmp, char **list, int idx)
 void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **planet, int **zodiac)
 {
 	char **list = ecalloc(MAXBUF, sizeof(*list));
-	int height = 22;
+	int height = 26;
 	int width = 16;
 	int sb = 1;
 	int fl = 12;
@@ -351,13 +346,20 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 	field_opts_off(field[F_HR], O_STATIC);
 	field_opts_off(field[F_HR], O_AUTOSKIP);
 	
-	field[F_ORB] = new_field(1, fl, 17, 2, 0, 0);
+	field[F_ASPECT] = new_field(1, fl, 17, 2, 0, 0);
+	set_field_back(field[F_ASPECT], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
+	field_opts_off(field[F_ASPECT], O_STATIC);
+	field_opts_off(field[F_ASPECT], O_AUTOSKIP);
+	set_field_buffer(field[F_ASPECT], 0, "0");
+	
+	field[F_ORB] = new_field(1, fl, 20, 2, 0, 0);
 	set_field_back(field[F_ORB], COLOR_PAIR (M_COLOR) | A_UNDERLINE);
 	field_opts_off(field[F_ORB], O_STATIC);
 	field_opts_off(field[F_ORB], O_AUTOSKIP);
-	set_field_buffer(field[F_ORB], 0, "0");
+	set_field_buffer(field[F_ORB], 0, "1");
 	
-	field[F_FIND] = new_field(1, 8, 19, sb, 0, 0);
+	field[F_FIND] = new_field(1, 8, 23, sb, 0, 0);
+	set_field_buffer(field[F_FIND], 0, "[ find ]");
 	field_opts_off(field[F_FIND], O_EDIT);
 	
 	field[F_NULL] = NULL;
@@ -373,8 +375,8 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 	mvwaddstr(win, 7, 1, "planet");
 	mvwaddstr(win, 10, 1, "low range");
 	mvwaddstr(win, 13, 1, "hi range");
-	mvwaddstr(win, 16, 1, "orb");
-	mvwprintw(win, 19, sb, "[ find ]");
+	mvwaddstr(win, 16, 1, "aspect");
+	mvwaddstr(win, 19, 1, "orb");
 	
 	box(win, 0, 0);
 	
@@ -440,13 +442,9 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 		index = field_index(current);
 		
 		if (index == F_FIND)
-		{
-			wattron(win, A_REVERSE);
-			mvwprintw(win, 19, sb, "[ find ]");
-			wattroff(win, A_REVERSE);
-		}
+			set_field_back(field[F_FIND], COLOR_PAIR (M_COLOR) | A_REVERSE);
 		else
-			mvwprintw(win, 19, sb, "[ find ]");
+			set_field_back(field[F_FIND], COLOR_PAIR (M_COLOR));
 			
 		pos_form_cursor(form);
 		box(win, 0, 0);
@@ -465,6 +463,7 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 		char *p1 = field_buffer(field[F_PL1], 0);
 		char *r0 = field_buffer(field[F_LR], 0);
 		char *r1 = field_buffer(field[F_HR], 0);
+		char *a = field_buffer(field[F_ASPECT], 0);
 		char *orb = field_buffer(field[F_ORB], 0);
 		
 		ftrim(field[F_SIGN], sign);
@@ -472,6 +471,7 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 		ftrim(field[F_PL1], p1);
 		ftrim(field[F_LR], r0);
 		ftrim(field[F_HR], r1);
+		ftrim(field[F_ASPECT], a);
 		ftrim(field[F_ORB], orb);
 		
 		int du[2] = {0};
@@ -480,7 +480,7 @@ void aspect_find(struct cdata *cdata, struct pxx *pxx, struct ui *ui, double **p
 		pl_name(ui, p1);
 		
 		cdata->year = atoi(r0);
-		idx = find_conj(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), list);
+		idx = find_aspect(win, cdata, tmp, du[0], du[1], atoi(p0), atoi(p1), atoi(r0), atoi(r1), atoi(orb), atoi(a), list);
 	}
 			
 	unpost_form(form);
