@@ -173,6 +173,7 @@ int main(int argc, char *argv[])
 	
 	for (int i = 1; i < CHARTMAX; ++i)
 	{
+		cdata[i]->hsys = 'W';
 		set_localtime(cdata[i]);
 		config_init(cdata[i], ui);
 		ecst_init(planet, cdata[i]->se);

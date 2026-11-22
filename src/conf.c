@@ -119,11 +119,11 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 	lret = strtol(buffer[C_HSYS], &endptr, 10);
 	if (errno != ERANGE)
 	{
+		if (lret == 0)
+			lret = 87;
 		cdata->hsys = (int)lret;
 		ui->conf_hsys = (int)lret;
 	}
-	if (lret == 0)
-		ui->conf_hsys = 'W';
 	errno = 0;
 	
 	lret = strtol(buffer[C_ASP], &endptr, 10);
@@ -139,6 +139,11 @@ static void config_set(struct cdata *cdata, struct ui *ui, char **buffer)
 
 void config_init(struct cdata *cdata, struct ui *ui)
 {
+	char path[MAXPATH] = {0};
+	path_check(path, "config");
+	if (access(path, F_OK) == -1)
+		return;
+	
 	char **buffer = ecalloc(C_NULL, sizeof *buffer);
 	for (int i = C_TIMEZONE; i < C_NULL; ++i)
 		buffer[i] = ecalloc(MAXBUF ,sizeof *buffer[i]);

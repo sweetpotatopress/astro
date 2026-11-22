@@ -30,18 +30,21 @@
 
 static void sign_long(struct ui *ui, char *str, int *du)
 {
-	for (int i = 0; i < 12; ++i)
-	{
-		if (strcmp(str, ui->sym.zo_sym[i]) == 0 || strcmp(str, ui->sym.zo_fname[i]) == 0)
-		{
-			du[0] = i*30;
-			du[1] = (i+1)*30;
-		}
-	}
 	if (strcmp(str, "all") == 0)
 	{
 		du[0] = 0.0;
 		du[1] = 360.0;
+	}
+	else
+	{
+		for (int i = 0; i < 12; ++i)
+		{
+			if (strcmp(str, ui->sym.zo_sym[i]) == 0 || strcmp(str, ui->sym.zo_fname[i]) == 0)
+			{
+				du[0] = i*30;
+				du[1] = (i+1)*30;
+			}
+		}
 	}
 }
 
