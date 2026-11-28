@@ -100,9 +100,9 @@ void lots(struct pxx *pxx)
 	pxx->dfor[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dmoon[LONG], pxx->dsun[LONG]);
 	pxx->ddai[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dsun[LONG], pxx->dmoon[LONG]);
 	pxx->dnec[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dfor[LONG], pxx->dmerc[LONG]);
-	pxx->deros[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->ddai[LONG], pxx->dven[LONG]);
+	pxx->deros[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dven[LONG], pxx->ddai[LONG]);
 	pxx->dcou[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dfor[LONG], pxx->dmars[LONG]);
-	pxx->dvic[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->ddai[LONG], pxx->djup[LONG]);
+	pxx->dvic[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->djup[LONG], pxx->ddai[LONG]);
 	pxx->dnem[LONG] = calc_lot(chart_sect, pxx->dasc[LONG], pxx->dfor[LONG], pxx->dsat[LONG]);
 }
 
